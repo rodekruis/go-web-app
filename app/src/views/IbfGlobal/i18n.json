@@ -1,0 +1,9 @@
+{
+    "namespace": "ibf",
+    "strings": {
+        "ibfTitle": "IFRC GO - PINGU",
+        "ibfHeading": "Preparedness & Impact National Graphic Userinterface",
+        "ibfDescription": "Map for stuff."
+
+    }
+}

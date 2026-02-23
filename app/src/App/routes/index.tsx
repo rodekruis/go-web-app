@@ -502,6 +502,52 @@ const threeWActivityEdit = customWrapRoute({
     },
 });
 
+type DefaultIbfChild = 'global';
+const ibfLayout = customWrapRoute({
+    parent: rootLayout,
+    path: 'ibf',
+    forwardPath: 'global' satisfies DefaultIbfChild,
+    component: {
+        render: () => import('#views/IbfGlobal'),
+        props: {},
+    },
+    wrapperComponent: Auth,
+    context: {
+        title: 'IBF',
+        visibility: 'anything',
+    },
+});
+
+const ibfIndex = customWrapRoute({
+    parent: ibfLayout,
+    index: true,
+    component: {
+        eagerLoad: true,
+        render: Navigate,
+        props: {
+            to: 'global' satisfies DefaultIbfChild,
+            replace: true,
+        },
+    },
+    context: {
+        title: 'IBF',
+        visibility: 'anything',
+    },
+});
+
+const ibfGlobal = customWrapRoute({
+    parent: ibfLayout,
+    path: 'global' satisfies DefaultIbfChild,
+    component: {
+        render: () => import('#views/IbfGlobal'),
+        props: {},
+    },
+    context: {
+        title: 'IBF Global',
+        visibility: 'anything',
+    },
+});
+
 type DefaultRiskWatchChild = 'seasonal';
 const riskWatchLayout = customWrapRoute({
     parent: rootLayout,
@@ -1339,6 +1385,9 @@ const wrappedRoutes = {
     flashUpdateFormNew,
     flashUpdateFormDetails,
     flashUpdateFormEdit,
+    ibfIndex,
+    ibfLayout,
+    ibfGlobal,
     riskWatchLayout,
     riskWatchIndex,
     riskWatchImminent,
