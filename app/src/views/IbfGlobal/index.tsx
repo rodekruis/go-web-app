@@ -34,7 +34,7 @@ export function Component() {
     const { center, zoom } = useMemo(() => {
         if (initialCountry) {
             return {
-                center: fromLonLat([initialCountry.latlong[1], initialCountry.latlong[0]]),
+                center: fromLonLat([initialCountry.latlon[1], initialCountry.latlon[0]]),
                 zoom: initialCountry.initialZoom,
             };
         }
@@ -129,7 +129,7 @@ export function Component() {
 
                     const countryInfo = CountryData.get(clickedCountry);
                     if (countryInfo) {
-                        const [lat, lon] = countryInfo.latlong;
+                        const [lat, lon] = countryInfo.latlon;
                         mapInstanceRef.current!.getView().animate({
                             center: fromLonLat([lon, lat]),
                             zoom: countryInfo.initialZoom,
