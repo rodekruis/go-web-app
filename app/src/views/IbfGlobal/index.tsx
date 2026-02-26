@@ -20,18 +20,76 @@ const countryVectors2 = `https://api.maptiler.com/tiles/countries/{z}/{x}/{y}.pb
 
 /** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
+
+export type MapLayer = 'admin0' | 'admin1';
+
+interface OlMapProps {
+    activeLayer: MapLayer;
+    selectedCountry: string;
+    onLayerChange: (layer: MapLayer, country: string) => void;
+}
+
+// Component is the route entry point
 export function Component() {
+    return <IbfMapContainer />;
+}
+
+Component.displayName = 'IbfGlobal';
+
+export function IbfMapContainer() {
     const [searchParams, setSearchParams] = useSearchParams();
+    const [activeLayer, setActiveLayer] = useState<MapLayer>('admin0');
+    const [selectedCountry, setSelectedCountry] = useState<string>('None');
+
+    // Initialize from URL on mount
+    useEffect(() => {
+        const countryCode = searchParams.get('c');
+        if (countryCode) {
+            setSelectedCountry(countryCode.toUpperCase());w
+            setActiveLayer('admin1');
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleLayerChange = useCallback((layer: MapLayer, country: string) => {
+        setActiveLayer(layer);
+        setSelectedCountry(country);
+
+        if (layer === 'admin1' && country !== 'Unknown') {
+            setSearchParams({ c: country });
+        } else {
+            setSearchParams({});
+        }
+    }, [setSearchParams]);
+
+    return (
+        <div>
+            <OlMap
+                activeLayer={activeLayer}
+                selectedCountry={selectedCountry}
+                onLayerChange={handleLayerChange}
+            />
+        </div>
+    );
+}
+
+export function IbfDataPanel() {
+    return null;
+}
+
+export function IbfControlPanel() {
+    return null;
+}
+
+
+
+export function OlMap({ activeLayer, selectedCountry, onLayerChange }: OlMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<Map | null>(null);
     const vAdmin0Ref = useRef<VectorTileLayer | null>(null);
     const vAdmin1Ref = useRef<VectorTileLayer | null>(null);
 
-    const countryCode = searchParams.get('c');
-    // Capture initial country code on mount only (don't react to URL changes after mount)
-    const initialCountryCodeRef = useRef(countryCode?.toUpperCase());
-    const initialCountry = initialCountryCodeRef.current ? CountryData.get(initialCountryCodeRef.current) : undefined;
-    const [selectedCountry, setSelectedCountry] = useState<string>(initialCountryCodeRef.current ?? 'None');
+    const initialCountry = selectedCountry !== 'None' ? CountryData.get(selectedCountry) : undefined;
 
     const { center, zoom } = useMemo(() => {
         if (initialCountry) {
@@ -125,18 +183,6 @@ export function Component() {
                     const properties = feature.getProperties();
                     const clickedCountry = properties['iso_a2'] || 'Unknown';
 
-                    setSelectedCountry(clickedCountry);
-
-                    const countryInfo = CountryData.get(clickedCountry);
-                    if (countryInfo) {
-                        const [lat, lon] = countryInfo.latlon;
-                        mapInstanceRef.current!.getView().animate({
-                            center: fromLonLat([lon, lat]),
-                            zoom: countryInfo.initialZoom,
-                            duration: 500,
-                        });
-                    }
-
                     // Toggle layers
                     if (vAdmin0Ref.current && vAdmin1Ref.current) {
                         const admin0Visible = vAdmin0Ref.current.getVisible();
@@ -145,11 +191,21 @@ export function Component() {
                         vAdmin0Ref.current.setVisible(!admin0Visible);
                         vAdmin1Ref.current.setVisible(admin0Visible);
 
-                        // Update URL: add country code when zooming in, remove when zooming out
-                        if (goingToAdmin1 && clickedCountry !== 'Unknown') {
-                            setSearchParams({ c: clickedCountry });
+                        if (goingToAdmin1) {
+                            // Zooming into country
+                            onLayerChange('admin1', clickedCountry);
+                            const countryInfo = CountryData.get(clickedCountry);
+                            if (countryInfo) {
+                                const [lat, lon] = countryInfo.latlon;
+                                mapInstanceRef.current!.getView().animate({
+                                    center: fromLonLat([lon, lat]),
+                                    zoom: countryInfo.initialZoom,
+                                    duration: 500,
+                                });
+                            }
                         } else {
-                            setSearchParams({});
+                            // Zooming out to global
+                            onLayerChange('admin0', 'None');
                         }
                     }
 
@@ -177,11 +233,20 @@ export function Component() {
         }
     }, [selectedCountry, getAdmin0Style, getAdmin1Style]);
 
+    // Sync layer visibility with activeLayer prop
+    useEffect(() => {
+        if (vAdmin0Ref.current && vAdmin1Ref.current) {
+            vAdmin0Ref.current.setVisible(activeLayer === 'admin0');
+            vAdmin1Ref.current.setVisible(activeLayer === 'admin1');
+        }
+    }, [activeLayer]);
+
     return (
         <div
             style={{
                 justifyContent: 'center',
                 display: 'flex',
+                marginTop: '20px',
             }}
         >
             <div
@@ -194,6 +259,3 @@ export function Component() {
         </div>
     );
 }
-
-Component.displayName = 'IBF';
-
