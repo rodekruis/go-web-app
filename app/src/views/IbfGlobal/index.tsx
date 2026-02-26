@@ -20,7 +20,6 @@ import { CountryData } from '#utils/ibfMap';
 import { globalGreyStyle, zoomedGreyStyle, testStyle } from '#utils/ibfMapStyles';
 import { Style } from 'ol/style';
 import { apply } from 'ol-mapbox-style';
-import Static from 'ol/source/ImageStatic';
 
 const key = maptilerApiKey;
 const countryVectors2 = `https://api.maptiler.com/tiles/countries/{z}/{x}/{y}.pbf?key=${key}`;
@@ -69,7 +68,7 @@ const getMvtLayer = (selectedCountry: string,
 const getStaticImageLayerFromName = async (name: string) => {
     const extents = await getTestImageExtents(name);
     return new ImageLayer({
-        source: new Static({
+        source: new ImageStatic({
             url: getTestImagePng(name),
                 projection: 'EPSG:3857',
                 interpolate: false,
@@ -134,6 +133,10 @@ interface IbfControlPanelProps {
     isLoading: boolean;
     isLayerLoaded: boolean;
     isLayerVisible: boolean;
+}
+
+interface IbfDataPanelProps {
+    selectedCountry: string;
 }
 
 // Component is the route entry point
@@ -223,7 +226,7 @@ export function IbfMapContainer() {
                 isLayerLoaded={isImageLayerLoaded}
                 isLayerVisible={isImageLayerVisible}
             />
-            <IbfDataPanel />
+            <IbfDataPanel selectedCountry={selectedCountry} />
             <OlMap
                 activeLayer={activeLayer}
                 selectedCountry={selectedCountry}
@@ -233,8 +236,31 @@ export function IbfMapContainer() {
     );
 }
 
-export function IbfDataPanel() {
-    return null;
+export function IbfDataPanel({ selectedCountry }: IbfDataPanelProps) {
+    if (selectedCountry === 'None') {
+        return (
+            <div style={{ padding: '10px' }}>
+                <p><strong>None selected</strong></p>
+            </div>
+        );
+    }
+
+    const countryInfo = CountryData.get(selectedCountry);
+    if (!countryInfo) {
+        return (
+        <div style={{ padding: '10px' }}>
+            <p><strong>{selectedCountry}</strong></p>
+            <p>Error. Name not found.</p>
+        </div>
+        );
+    }
+
+    return (
+        <div style={{ padding: '10px' }}>
+            <p><strong>{countryInfo.name_en}</strong></p>
+            <p>IBF Supported: {countryInfo.ibfSupported ? 'Yes' : 'No'}</p>
+        </div>
+    );
 }
 
 export function IbfControlPanel({ onToggleImageLayer, isLoading, isLayerLoaded, isLayerVisible }: IbfControlPanelProps) {
