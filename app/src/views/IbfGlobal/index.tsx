@@ -1,14 +1,12 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useTranslation } from '@ifrc-go/ui/hooks';
+//import { useTranslation } from '@ifrc-go/ui/hooks';
+//import i18n from './i18n.json';
+
 import OSM from 'ol/source/OSM';
 import TileLayer from 'ol/layer/Tile.js';
-
 import { maptilerApiKey } from '#config';
 import { CountryData } from '#utils/ibfMap';
-
-import i18n from './i18n.json';
-
 import VectorTile from 'ol/source/VectorTile';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import { View } from 'ol';
@@ -18,8 +16,6 @@ import Attribution from 'ol/control/Attribution.js';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
 import 'ol/ol.css';
 import { Fill, Stroke, Style } from 'ol/style';
-import Overlay from 'ol/Overlay.js';
-import WebGLTileLayer from 'ol/layer/WebGLTile';
 import MVT from 'ol/format/MVT';
 
 const key = maptilerApiKey;
