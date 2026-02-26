@@ -6,17 +6,67 @@ import { View } from 'ol';
 import { fromLonLat } from 'ol/proj';
 import VectorTile from 'ol/source/VectorTile';
 import VectorTileLayer from 'ol/layer/VectorTile';
+import BaseLayer from 'ol/layer/Base';
 import Attribution from 'ol/control/Attribution.js';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
-import { Fill, Stroke, Style } from 'ol/style';
 import MVT from 'ol/format/MVT';
 import 'ol/ol.css';
 
 import { maptilerApiKey } from '#config';
 import { CountryData } from '#utils/ibfMap';
+import { globalGreyStyle, zoomedGreyStyle, testStyle } from '#utils/ibfMapStyles';
+import { Style } from 'ol/style';
+import { apply } from 'ol-mapbox-style';
 
 const key = maptilerApiKey;
 const countryVectors2 = `https://api.maptiler.com/tiles/countries/{z}/{x}/{y}.pbf?key=${key}`;
+const baseMapSimpleVectorStyle = `https://api.maptiler.com/maps/019c41d2-17c7-7e5e-9a47-d3b3f9515a5b/style.json?key=${key}`;
+
+// Create layer for OlDataMap
+const getMvtLayer = (selectedCountry: string, 
+    mapStyle : (feature: any, selected: string) => Style) => {
+    return new VectorTileLayer({
+        source: new VectorTile({
+            url: countryVectors2,
+            format: new MVT(),
+            maxZoom: 2,
+        }),
+        style: (feature) => mapStyle(feature, selectedCountry),
+    });
+}
+
+const getBaseStyleJson = (styleJsonUrl: string, targetMap : Map) => {
+    
+            // Fetch and customize the style
+        fetch(styleJsonUrl)
+            .then(response => response.json())
+            .then(style => {
+                console.log('Style sources:', Object.keys(style.sources || {}));
+                console.log('Available layers:', style.layers.map((l: any) => ({
+                    id: l.id,
+                    sourceLayer: l['source-layer'],
+                    type: l.type,
+                    source: l.source
+                })));
+                
+                // Does this really work for perf? 
+                style.layers.forEach((layer: any) => {
+                    if (layer.type === 'line') {
+                        layer.paint = layer.paint || {};
+                        layer.layout = layer.layout || {};
+                        layer.layout['line-cap'] = 'butt'; // Faster than 'round'
+                        layer.layout['line-join'] = 'miter'; // Faster than 'round'
+                    }
+                });
+                
+                // Apply the modified style
+                // 'as any' needed due to library mismatch making eslint complain
+                apply(targetMap as any, style);
+            })
+            .catch(error => {
+                console.error('Error loading style:', error);
+            });
+}
 
 /** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
@@ -29,6 +79,12 @@ interface OlMapProps {
     onLayerChange: (layer: MapLayer, country: string) => void;
 }
 
+interface OlDataMapProps {
+    selectedCountry: string;
+    layer?: BaseLayer;
+    mapStyleJsonUri?: string;
+}
+
 // Component is the route entry point
 export function Component() {
     return <IbfMapContainer />;
@@ -38,18 +94,11 @@ Component.displayName = 'IbfGlobal';
 
 export function IbfMapContainer() {
     const [searchParams, setSearchParams] = useSearchParams();
-    const [activeLayer, setActiveLayer] = useState<MapLayer>('admin0');
-    const [selectedCountry, setSelectedCountry] = useState<string>('None');
 
-    // Initialize from URL on mount
-    useEffect(() => {
-        const countryCode = searchParams.get('c');
-        if (countryCode) {
-            setSelectedCountry(countryCode.toUpperCase());w
-            setActiveLayer('admin1');
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    // Initialize state directly from URL to avoid race condition
+    const initialCountryCode = searchParams.get('c')?.toUpperCase() || 'None';
+    const [activeLayer, setActiveLayer] = useState<MapLayer>(initialCountryCode !== 'None' ? 'admin1' : 'admin0');
+    const [selectedCountry, setSelectedCountry] = useState<string>(initialCountryCode);
 
     const handleLayerChange = useCallback((layer: MapLayer, country: string) => {
         setActiveLayer(layer);
@@ -62,8 +111,15 @@ export function IbfMapContainer() {
         }
     }, [setSearchParams]);
 
+
+
     return (
         <div>
+            <OlDataMap
+                selectedCountry={selectedCountry}
+                layer={getMvtLayer(selectedCountry, testStyle)}
+                mapStyleJsonUri={baseMapSimpleVectorStyle}
+            />
             <OlMap
                 activeLayer={activeLayer}
                 selectedCountry={selectedCountry}
@@ -82,15 +138,14 @@ export function IbfControlPanel() {
 }
 
 
-
 export function OlMap({ activeLayer, selectedCountry, onLayerChange }: OlMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<Map | null>(null);
     const vAdmin0Ref = useRef<VectorTileLayer | null>(null);
     const vAdmin1Ref = useRef<VectorTileLayer | null>(null);
 
+    // Set initial zoom/focus of map
     const initialCountry = selectedCountry !== 'None' ? CountryData.get(selectedCountry) : undefined;
-
     const { center, zoom } = useMemo(() => {
         if (initialCountry) {
             return {
@@ -99,40 +154,9 @@ export function OlMap({ activeLayer, selectedCountry, onLayerChange }: OlMapProp
             };
         }
         return { center: [0, 0], zoom: 2 };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Style function for admin0 layer
-    const getAdmin0Style = useCallback((feature: any, selected: string) => {
-        const iso_a2 = feature.get('iso_a2');
-        const isSelected = iso_a2 === selected;
-        const countryInfo = CountryData.get(iso_a2);
-        const isIbfSupported = countryInfo?.ibfSupported ?? false;
 
-        let fillColor: string;
-        if (isIbfSupported) {
-            fillColor = isSelected ? "#d63384" : "#f8bbd9";
-        } else {
-            fillColor = isSelected ? "#b3b3b3" : "#e0e0e0";
-        }
-
-        return new Style({
-            fill: new Fill({ color: fillColor }),
-            stroke: new Stroke({ color: "#a4a4a4", width: 1 }),
-        });
-    }, []);
-
-    // Style function for admin1 layer
-    const getAdmin1Style = useCallback((feature: any, selected: string) => {
-        const iso_a2 = feature.get('iso_a2');
-        const isSelected = iso_a2 === selected;
-        const fillColor = isSelected ? "#e0e0e0" :"#b3b3b3";
-
-        return new Style({
-            fill: new Fill({ color: fillColor }),
-            stroke: new Stroke({ color: "#a4a4a4", width: 1 }),
-        });
-    }, []);
 
     useEffect(() => {
         if (mapRef.current && !mapInstanceRef.current) {
@@ -145,7 +169,7 @@ export function OlMap({ activeLayer, selectedCountry, onLayerChange }: OlMapProp
                     format: new MVT(),
                     maxZoom: 1,
                 }),
-                style: (feature) => getAdmin0Style(feature, selectedCountry),
+                style: (feature) => globalGreyStyle(feature, selectedCountry),
             });
 
             vAdmin1Ref.current = new VectorTileLayer({
@@ -155,8 +179,10 @@ export function OlMap({ activeLayer, selectedCountry, onLayerChange }: OlMapProp
                     maxZoom: 2,
                 }),
                 visible: false,
-                style: (feature) => getAdmin1Style(feature, selectedCountry),
+                style: (feature) => zoomedGreyStyle(feature, selectedCountry),
             });
+
+            //const hasCountry = selectedCountry !== 'None';
 
             mapInstanceRef.current = new Map({
                 target: mapRef.current,
@@ -167,6 +193,8 @@ export function OlMap({ activeLayer, selectedCountry, onLayerChange }: OlMapProp
                     center,
                     zoom,
                     maxZoom: 6,
+                    //extent: [-572513.341856, 5211017.966314, 916327.095083, 6636950.728974],
+
                 }),
             });
 
@@ -220,18 +248,18 @@ export function OlMap({ activeLayer, selectedCountry, onLayerChange }: OlMapProp
                 mapInstanceRef.current = null;
             }
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [center, zoom]);
 
     // Update layer styles when selectedCountry changes
     useEffect(() => {
         if (vAdmin0Ref.current) {
-            vAdmin0Ref.current.setStyle((feature) => getAdmin0Style(feature, selectedCountry));
+            vAdmin0Ref.current.setStyle((feature) => globalGreyStyle(feature, selectedCountry));
         }
         if (vAdmin1Ref.current) {
-            vAdmin1Ref.current.setStyle((feature) => getAdmin1Style(feature, selectedCountry));
+            vAdmin1Ref.current.setStyle((feature) => zoomedGreyStyle(feature, selectedCountry));
         }
-    }, [selectedCountry, getAdmin0Style, getAdmin1Style]);
+    }, [selectedCountry, globalGreyStyle, zoomedGreyStyle]);
 
     // Sync layer visibility with activeLayer prop
     useEffect(() => {
@@ -254,6 +282,83 @@ export function OlMap({ activeLayer, selectedCountry, onLayerChange }: OlMapProp
                 style={{
                     width: '95%',
                     height: '800px',
+                }}
+            />
+        </div>
+    );
+}
+
+export function OlDataMap({ selectedCountry, layer, mapStyleJsonUri }: OlDataMapProps) {
+    const mapRef = useRef<HTMLDivElement>(null);
+    const mapInstanceRef = useRef<Map | null>(null);
+
+    const countryInfo = selectedCountry !== 'None' ? CountryData.get(selectedCountry) : undefined;
+
+    console.log('Rendering OlDataMap with selectedCountry:', selectedCountry);
+
+    const { center, zoom } = useMemo(() => {
+        if (countryInfo) {
+            return {
+                center: fromLonLat([countryInfo.latlon[1], countryInfo.latlon[0]]),
+                zoom: countryInfo.initialZoom,
+            };
+        }
+        return { center: [0, 0], zoom: 2 };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        if (mapRef.current && !mapInstanceRef.current) {
+            mapInstanceRef.current = new Map({
+                target: mapRef.current,
+                controls: defaultControls({ attribution: false }),
+                //layers: [layer],
+
+                view: countryInfo ? new View({
+                    //constrainResolution: true, // disallow fractional zoom. This might be good ot use later for perf. Check
+                    center,
+                    zoom,
+                    extent: countryInfo.safeExtents,
+                    constrainOnlyCenter: true,
+                }) : new View({
+                    center,
+                    zoom,
+
+                }),
+            });
+
+        
+            if (mapStyleJsonUri) {
+                // 'as any' needed due to library mismatch making eslint complain
+                getBaseStyleJson(mapStyleJsonUri,mapInstanceRef.current as any);
+            }
+            if (layer) {
+                mapInstanceRef.current.addLayer(layer);
+            }
+        }
+
+        return () => {
+            if (mapInstanceRef.current) {
+                mapInstanceRef.current.setTarget(undefined);
+                mapInstanceRef.current = null;
+            }
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [center, zoom]);
+
+    return (
+        <div
+            style={{
+                justifyContent: 'center',
+                display: 'flex',
+                marginTop: '20px',
+            }}
+        >
+            <div
+                ref={mapRef}
+                style={{
+                    width: '95%',
+                    height: '600px',
                 }}
             />
         </div>
