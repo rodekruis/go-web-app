@@ -11,20 +11,50 @@ import Attribution from 'ol/control/Attribution.js';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
 import MVT from 'ol/format/MVT';
 import 'ol/ol.css';
+import ImageLayer from 'ol/layer/Image';
+import ImageStatic from 'ol/source/ImageStatic';
 
-import { maptilerApiKey } from '#config';
+
+import { maptilerApiKey, rasterImageDir } from '#config';
 import { CountryData } from '#utils/ibfMap';
 import { globalGreyStyle, zoomedGreyStyle, testStyle } from '#utils/ibfMapStyles';
 import { Style } from 'ol/style';
 import { apply } from 'ol-mapbox-style';
+import Static from 'ol/source/ImageStatic';
 
 const key = maptilerApiKey;
 const countryVectors2 = `https://api.maptiler.com/tiles/countries/{z}/{x}/{y}.pbf?key=${key}`;
 const baseMapSimpleVectorStyle = `https://api.maptiler.com/maps/019c41d2-17c7-7e5e-9a47-d3b3f9515a5b/style.json?key=${key}`;
 
+const testImageName = `flood_map_ZMB_RP20_c0_b3857`;
+
+const getTestImagePng = (name : string) => {
+    return `${rasterImageDir}${name}.png`;
+}
+
+const getTestImageExtents = (name : string) => {
+    const jsonData = `${rasterImageDir}${name}.json`;
+    // fetch json and get the extents from it
+    return fetch(jsonData)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.bounds) {
+                const { left, bottom, right, top } = data.bounds;
+                return [left, bottom, right, top];
+            } else {
+                throw new Error('Invalid JSON structure: missing "bounds" property');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading image extents:', error);
+            // Return default extents or handle as needed
+            return [0, 0, 0, 0];
+        });
+}
+
 // Create layer for OlDataMap
-const getMvtLayer = (selectedCountry: string, 
-    mapStyle : (feature: any, selected: string) => Style) => {
+const getMvtLayer = (selectedCountry: string,
+    mapStyle: (feature: any, selected: string) => Style) => {
     return new VectorTileLayer({
         source: new VectorTile({
             url: countryVectors2,
@@ -35,37 +65,50 @@ const getMvtLayer = (selectedCountry: string,
     });
 }
 
-const getBaseStyleJson = (styleJsonUrl: string, targetMap : Map) => {
-    
-            // Fetch and customize the style
-        fetch(styleJsonUrl)
-            .then(response => response.json())
-            .then(style => {
-                console.log('Style sources:', Object.keys(style.sources || {}));
-                console.log('Available layers:', style.layers.map((l: any) => ({
-                    id: l.id,
-                    sourceLayer: l['source-layer'],
-                    type: l.type,
-                    source: l.source
-                })));
-                
-                // Does this really work for perf? 
-                style.layers.forEach((layer: any) => {
-                    if (layer.type === 'line') {
-                        layer.paint = layer.paint || {};
-                        layer.layout = layer.layout || {};
-                        layer.layout['line-cap'] = 'butt'; // Faster than 'round'
-                        layer.layout['line-join'] = 'miter'; // Faster than 'round'
-                    }
-                });
-                
-                // Apply the modified style
-                // 'as any' needed due to library mismatch making eslint complain
-                apply(targetMap as any, style);
-            })
-            .catch(error => {
-                console.error('Error loading style:', error);
+
+const getStaticImageLayerFromName = async (name: string) => {
+    const extents = await getTestImageExtents(name);
+    return new ImageLayer({
+        source: new Static({
+            url: getTestImagePng(name),
+                projection: 'EPSG:3857',
+                interpolate: false,
+            imageExtent: extents,
+        }),
+    });
+}
+
+const getBaseStyleJson = (styleJsonUrl: string, targetMap: Map) => {
+
+    // Fetch and customize the style
+    fetch(styleJsonUrl)
+        .then(response => response.json())
+        .then(style => {
+            console.log('Style sources:', Object.keys(style.sources || {}));
+            console.log('Available layers:', style.layers.map((l: any) => ({
+                id: l.id,
+                sourceLayer: l['source-layer'],
+                type: l.type,
+                source: l.source
+            })));
+
+            // Does this really work for perf? 
+            style.layers.forEach((layer: any) => {
+                if (layer.type === 'line') {
+                    layer.paint = layer.paint || {};
+                    layer.layout = layer.layout || {};
+                    layer.layout['line-cap'] = 'butt'; // Faster than 'round'
+                    layer.layout['line-join'] = 'miter'; // Faster than 'round'
+                }
             });
+
+            // Apply the modified style
+            // 'as any' needed due to library mismatch making eslint complain
+            apply(targetMap as any, style);
+        })
+        .catch(error => {
+            console.error('Error loading style:', error);
+        });
 }
 
 /** @knipignore */
@@ -83,6 +126,14 @@ interface OlDataMapProps {
     selectedCountry: string;
     layer?: BaseLayer;
     mapStyleJsonUri?: string;
+    onMapReady?: (addLayer: (layer: BaseLayer) => void) => void;
+}
+
+interface IbfControlPanelProps {
+    onToggleImageLayer: () => void;
+    isLoading: boolean;
+    isLayerLoaded: boolean;
+    isLayerVisible: boolean;
 }
 
 // Component is the route entry point
@@ -92,6 +143,10 @@ export function Component() {
 
 Component.displayName = 'IbfGlobal';
 
+/////////////////////////////
+////////////////////////////
+//////////////////////////////
+
 export function IbfMapContainer() {
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -99,6 +154,49 @@ export function IbfMapContainer() {
     const initialCountryCode = searchParams.get('c')?.toUpperCase() || 'None';
     const [activeLayer, setActiveLayer] = useState<MapLayer>(initialCountryCode !== 'None' ? 'admin1' : 'admin0');
     const [selectedCountry, setSelectedCountry] = useState<string>(initialCountryCode);
+    const [isImageLayerLoading, setIsImageLayerLoading] = useState(false);
+    const [isImageLayerLoaded, setIsImageLayerLoaded] = useState(false);
+    const [isImageLayerVisible, setIsImageLayerVisible] = useState(false);
+
+    // Store addLayer function from OlDataMap
+    const addLayerRef = useRef<((layer: BaseLayer) => void) | null>(null);
+    // Cache the loaded image layer
+    const imageLayerRef = useRef<BaseLayer | null>(null);
+
+    const handleMapReady = useCallback((addLayer: (layer: BaseLayer) => void) => {
+        addLayerRef.current = addLayer;
+    }, []);
+
+    const handleToggleImageLayer = useCallback(() => {
+        // If layer is already loaded, just toggle visibility
+        if (imageLayerRef.current) {
+            const newVisibility = !isImageLayerVisible;
+            imageLayerRef.current.setVisible(newVisibility);
+            setIsImageLayerVisible(newVisibility);
+            return;
+        }
+
+        // First time: load the layer
+        if (!addLayerRef.current) {
+            console.error('Map not ready yet');
+            return;
+        }
+        setIsImageLayerLoading(true);
+        getStaticImageLayerFromName(testImageName)
+            .then(imageLayer => {
+                imageLayerRef.current = imageLayer;
+                addLayerRef.current?.(imageLayer);
+                setIsImageLayerLoaded(true);
+                setIsImageLayerVisible(true);
+                console.log('Added static image layer to map');
+            })
+            .catch(error => {
+                console.error('Error loading static image layer:', error);
+            })
+            .finally(() => {
+                setIsImageLayerLoading(false);
+            });
+    }, [isImageLayerVisible]);
 
     const handleLayerChange = useCallback((layer: MapLayer, country: string) => {
         setActiveLayer(layer);
@@ -111,15 +209,21 @@ export function IbfMapContainer() {
         }
     }, [setSearchParams]);
 
-
-
     return (
         <div>
             <OlDataMap
                 selectedCountry={selectedCountry}
                 layer={getMvtLayer(selectedCountry, testStyle)}
                 mapStyleJsonUri={baseMapSimpleVectorStyle}
+                onMapReady={handleMapReady}
             />
+            <IbfControlPanel
+                onToggleImageLayer={handleToggleImageLayer}
+                isLoading={isImageLayerLoading}
+                isLayerLoaded={isImageLayerLoaded}
+                isLayerVisible={isImageLayerVisible}
+            />
+            <IbfDataPanel />
             <OlMap
                 activeLayer={activeLayer}
                 selectedCountry={selectedCountry}
@@ -133,8 +237,31 @@ export function IbfDataPanel() {
     return null;
 }
 
-export function IbfControlPanel() {
-    return null;
+export function IbfControlPanel({ onToggleImageLayer, isLoading, isLayerLoaded, isLayerVisible }: IbfControlPanelProps) {
+    let buttonText = 'Load Flood Map Layer';
+    if (isLoading) {
+        buttonText = 'Loading...';
+    } else if (isLayerLoaded && isLayerVisible) {
+        buttonText = 'Hide Flood Map Layer';
+    } else if (isLayerLoaded && !isLayerVisible) {
+        buttonText = 'Show Flood Map Layer';
+    }
+
+    return (
+        <div style={{ padding: '10px', marginTop: '10px' }}>
+            <button
+                type="button"
+                onClick={onToggleImageLayer}
+                disabled={isLoading}
+                style={{
+                    padding: '8px 16px',
+                    cursor: isLoading ? 'wait' : 'pointer',
+                }}
+            >
+                {buttonText}
+            </button>
+        </div>
+    );
 }
 
 
@@ -288,7 +415,7 @@ export function OlMap({ activeLayer, selectedCountry, onLayerChange }: OlMapProp
     );
 }
 
-export function OlDataMap({ selectedCountry, layer, mapStyleJsonUri }: OlDataMapProps) {
+export function OlDataMap({ selectedCountry, layer, mapStyleJsonUri, onMapReady }: OlDataMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<Map | null>(null);
 
@@ -327,13 +454,20 @@ export function OlDataMap({ selectedCountry, layer, mapStyleJsonUri }: OlDataMap
                 }),
             });
 
-        
+
             if (mapStyleJsonUri) {
                 // 'as any' needed due to library mismatch making eslint complain
-                getBaseStyleJson(mapStyleJsonUri,mapInstanceRef.current as any);
+                getBaseStyleJson(mapStyleJsonUri, mapInstanceRef.current as any);
             }
             if (layer) {
                 mapInstanceRef.current.addLayer(layer);
+            }
+
+            // Expose addLayer function to parent
+            if (onMapReady) {
+                onMapReady((newLayer: BaseLayer) => {
+                    mapInstanceRef.current?.addLayer(newLayer);
+                });
             }
         }
 

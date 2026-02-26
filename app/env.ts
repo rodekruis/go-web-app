@@ -30,4 +30,5 @@ export default defineConfig({
 
     // FIXME this should be number
     APP_HOTJAR_ID: Schema.string.optional(),
+    APP_RASTER_IMAGE_DIR: Schema.string.optional(),
 });
