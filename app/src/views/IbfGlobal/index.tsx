@@ -28,8 +28,10 @@ export function Component() {
     const vAdmin1Ref = useRef<VectorTileLayer | null>(null);
 
     const countryCode = searchParams.get('c');
-    const initialCountry = countryCode ? CountryData.get(countryCode.toUpperCase()) : undefined;
-    const [selectedCountry, setSelectedCountry] = useState<string>(countryCode?.toUpperCase() ?? 'None');
+    // Capture initial country code on mount only (don't react to URL changes after mount)
+    const initialCountryCodeRef = useRef(countryCode?.toUpperCase());
+    const initialCountry = initialCountryCodeRef.current ? CountryData.get(initialCountryCodeRef.current) : undefined;
+    const [selectedCountry, setSelectedCountry] = useState<string>(initialCountryCodeRef.current ?? 'None');
 
     const { center, zoom } = useMemo(() => {
         if (initialCountry) {
@@ -39,7 +41,8 @@ export function Component() {
             };
         }
         return { center: [0, 0], zoom: 2 };
-    }, [initialCountry]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Style function for admin0 layer
     const getAdmin0Style = useCallback((feature: any, selected: string) => {
