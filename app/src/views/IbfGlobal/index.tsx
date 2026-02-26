@@ -65,14 +65,11 @@ export function Component() {
     const getAdmin1Style = useCallback((feature: any, selected: string) => {
         const iso_a2 = feature.get('iso_a2');
         const isSelected = iso_a2 === selected;
+        const fillColor = isSelected ? "#b3b3b3" : "#e0e0e0";
+
         return new Style({
-            fill: new Fill({
-                color: isSelected ? "rgb(251, 186, 89)" : "rgb(243, 255, 17)",
-            }),
-            stroke: new Stroke({
-                color: isSelected ? "rgb(0, 255, 38)" : "rgb(131, 225, 156)",
-                width: 2,
-            }),
+            fill: new Fill({ color: fillColor }),
+            stroke: new Stroke({ color: "#a4a4a4", width: 1 }),
         });
     }, []);
 
