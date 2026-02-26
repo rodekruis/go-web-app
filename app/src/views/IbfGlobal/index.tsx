@@ -21,7 +21,7 @@ const countryVectors2 = `https://api.maptiler.com/tiles/countries/{z}/{x}/{y}.pb
 /** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<Map | null>(null);
     const vAdmin0Ref = useRef<VectorTileLayer | null>(null);
@@ -65,7 +65,7 @@ export function Component() {
     const getAdmin1Style = useCallback((feature: any, selected: string) => {
         const iso_a2 = feature.get('iso_a2');
         const isSelected = iso_a2 === selected;
-        const fillColor = isSelected ? "#b3b3b3" : "#e0e0e0";
+        const fillColor = isSelected ? "#e0e0e0" :"#b3b3b3";
 
         return new Style({
             fill: new Fill({ color: fillColor }),
@@ -137,8 +137,17 @@ export function Component() {
                     // Toggle layers
                     if (vAdmin0Ref.current && vAdmin1Ref.current) {
                         const admin0Visible = vAdmin0Ref.current.getVisible();
+                        const goingToAdmin1 = admin0Visible;
+
                         vAdmin0Ref.current.setVisible(!admin0Visible);
                         vAdmin1Ref.current.setVisible(admin0Visible);
+
+                        // Update URL: add country code when zooming in, remove when zooming out
+                        if (goingToAdmin1 && clickedCountry !== 'Unknown') {
+                            setSearchParams({ c: clickedCountry });
+                        } else {
+                            setSearchParams({});
+                        }
                     }
 
                     return true;
