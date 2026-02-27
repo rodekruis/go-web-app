@@ -21,7 +21,8 @@ import { OlGlobalMap } from './OlGlobalMap';
 
 const key = maptilerApiKey;
 const countryVectors2 = `https://api.maptiler.com/tiles/countries/{z}/{x}/{y}.pbf?key=${key}`;
-const baseMapSimpleVectorStyle = `https://api.maptiler.com/maps/019c41d2-17c7-7e5e-9a47-d3b3f9515a5b/style.json?key=${key}`;
+//const baseMapSimpleVectorStyle = `https://api.maptiler.com/maps/019c41d2-17c7-7e5e-9a47-d3b3f9515a5b/style.json?key=${key}`;
+const baseMapSimpleVectorStyle = `https://api.maptiler.com/maps/outdoor-v2/style.json?key=${key}`;
 
 const testImageName = `flood_map_ZMB_RP20_c0_b3857`;
 

@@ -1,9 +1,10 @@
-.link {
-    display: contents;
+.container {
+    justify-content: center;
+    display: flex;
+    margin-top: 20px;
+}
 
-    .layout {
-        &.with-underline {
-            text-decoration: underline;
-        }
-    }
+.map {
+    width: 95%;
+    height: 800px;
 }
