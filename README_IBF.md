@@ -34,5 +34,5 @@ Note, if youre not running the backend, you can just run this from the app/ dir.
 
 4. Setup .env file.
 
-Copy the `example.env` file and rename the copy to `.env`.
+In the `app/` dir, copy the `example.env` file and rename the copy to `.env`.
 Adjust settings as needed, as per the comments in the file.
