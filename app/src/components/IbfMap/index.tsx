@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-
 import VectorTile from 'ol/source/VectorTile';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import BaseLayer from 'ol/layer/Base';
@@ -8,8 +7,6 @@ import MVT from 'ol/format/MVT';
 import 'ol/ol.css';
 import ImageLayer from 'ol/layer/Image';
 import ImageStatic from 'ol/source/ImageStatic';
-
-
 import { maptilerApiKey, rasterImageDir } from '#config';
 import { testStyle } from '#utils/ibfMapStyles';
 import { Style } from 'ol/style';
@@ -21,8 +18,7 @@ import { OlGlobalMap } from './OlGlobalMap';
 
 const key = maptilerApiKey;
 const countryVectors2 = `https://api.maptiler.com/tiles/countries/{z}/{x}/{y}.pbf?key=${key}`;
-//const baseMapSimpleVectorStyle = `https://api.maptiler.com/maps/019c41d2-17c7-7e5e-9a47-d3b3f9515a5b/style.json?key=${key}`;
-const baseMapSimpleVectorStyle = `https://api.maptiler.com/maps/outdoor-v2/style.json?key=${key}`;
+const baseMapSimpleVectorStyle = `https://api.maptiler.com/maps/019c41d2-17c7-7e5e-9a47-d3b3f9515a5b/style.json?key=${key}`;
 
 const testImageName = `flood_map_ZMB_RP20_c0_b3857`;
 
