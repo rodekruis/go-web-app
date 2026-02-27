@@ -1,46 +1,53 @@
 import { CountryData } from "./ibfMap";
 import { Fill, Stroke, Style } from 'ol/style';
 
-    export const globalGreyStyle = (feature: any, selected: string) => {
-        const iso_a2 = feature.get('iso_a2');
-        const isSelected = iso_a2 === selected;
-        const countryInfo = CountryData.get(iso_a2);
-        const isIbfSupported = countryInfo?.ibfSupported ?? false;
+export const globalGreyStyle = (feature: any, selected: string) => {
+    const iso_a2 = feature.get('iso_a2');
+    const isSelected = iso_a2 === selected;
+    const countryInfo = CountryData.get(iso_a2);
+    const isIbfSupported = countryInfo?.ibfSupported ?? false;
 
-        let fillColor = isIbfSupported  ? "#f8bbd9": "#e0e0e0";
-        fillColor = isSelected ? "#7489ff" : fillColor;
-        return new Style({
-            fill: new Fill({ color: fillColor }),
-            stroke: new Stroke({ color: "#a4a4a4", width: 1 }),
-        });
+    let fillColor = "#000000";
+
+    if (isIbfSupported) {
+        fillColor = isSelected ? "#f98cc2" : "#f8bbd9" ;
+    }
+    else {
+        fillColor = isSelected ? "#ababab" : "#e0e0e0";
     }
 
-    // Style function for admin1 layer
-    export const zoomedGreyStyle = (feature: any, selected: string) => {
-        const iso_a2 = feature.get('iso_a2');
-        const isSelected = iso_a2 === selected;
-        const countryInfo = CountryData.get(iso_a2);
-        const isIbfSupported = countryInfo?.ibfSupported ?? false;
-        let fillColor = isSelected ? "#bac5e8" : isIbfSupported  ? "#f8bbd9": "#e0e0e0";
+    return new Style({
+        fill: new Fill({ color: fillColor }),
+        stroke: new Stroke({ color: "#a4a4a4", width: 1 }),
+    });
+}
+
+// Style function for admin1 layer
+export const zoomedGreyStyle = (feature: any, selected: string) => {
+    const iso_a2 = feature.get('iso_a2');
+    const isSelected = iso_a2 === selected;
+    const countryInfo = CountryData.get(iso_a2);
+    const isIbfSupported = countryInfo?.ibfSupported ?? false;
+    let fillColor = isSelected ? "#bac5e8" : isIbfSupported ? "#f8bbd9" : "#e0e0e0";
 
 
-        return new Style({
-            fill: new Fill({ color: fillColor }),
-            stroke: new Stroke({ color: "#a4a4a4", width: 1 }),
-        });
-    }
+    return new Style({
+        fill: new Fill({ color: fillColor }),
+        stroke: new Stroke({ color: "#a4a4a4", width: 1 }),
+    });
+}
 
 
-    export const testStyle = (feature: any, selected: string) => {
-        const iso_a2 = feature.get('iso_a2');
-        const isSelected = iso_a2 === selected;
-        const countryInfo = CountryData.get(iso_a2);
-        const isIbfSupported = countryInfo?.ibfSupported ?? false;
+export const testStyle = (feature: any, selected: string) => {
+    const iso_a2 = feature.get('iso_a2');
+    const isSelected = iso_a2 === selected;
+    const countryInfo = CountryData.get(iso_a2);
+    const isIbfSupported = countryInfo?.ibfSupported ?? false;
 
-        let fillColor = isIbfSupported  ? "#708ed2": "#c2c2c2";
-        fillColor = isSelected ? "#85c1c1" : fillColor;
-        return new Style({
-            fill: new Fill({ color: fillColor }),
-            stroke: new Stroke({ color: "#a4a4a4", width: 1 }),
-        });
-    }
+    let fillColor = isIbfSupported ? "#708ed2" : "#c2c2c2";
+    fillColor = isSelected ? "#85c1c1" : fillColor;
+    return new Style({
+        fill: new Fill({ color: fillColor }),
+        stroke: new Stroke({ color: "#a4a4a4", width: 1 }),
+    });
+}

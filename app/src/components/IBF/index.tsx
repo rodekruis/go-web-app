@@ -1,1 +1,0 @@
-// OpenLayers map component
