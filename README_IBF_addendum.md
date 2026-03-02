@@ -1,6 +1,7 @@
-# Readme addenendum for IBF
+# Readme addendum for IBF
 
-Some of the readme instructions don't work or are incomplete. Rather than writing over the original readme and risk PRs getting held up over comments on strings, use this as the troubleshooting addendum
+Some of the readme instructions don't work or are incomplete. Rather than writing over the original readme and risk PRs getting held up over comments on strings, use this as the troubleshooting addendum.
+
 ### Local Development
 
 2. Initialize submodules
@@ -34,5 +35,5 @@ Note, if youre not running the backend, you can just run this from the app/ dir.
 
 4. Setup .env file.
 
-In the `app/` dir, copy the `example.env` file and rename the copy to `.env`.
+In the `app/` dir, copy the `sample.env` file and rename the copy to `.env`.
 Adjust settings as needed, as per the comments in the file.
