@@ -41,5 +41,6 @@ storybook-static/
 
 # Helm
 .helm-charts/
-app/public/debug_raster/flood_map_ZMB_RP20_c0_b3857.json
-app/public/debug_raster/flood_map_ZMB_RP20_c0_b3857.png
+
+# IBF
+app/public/debug_raster/
