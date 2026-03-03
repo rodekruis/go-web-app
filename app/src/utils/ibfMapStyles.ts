@@ -32,16 +32,11 @@ export const styleMvtGreyWorldMap : MvtStyleCreator = (feature: any, selected: s
 // Fix later
 //
 // Style for vector tile (MVT) maps
-export const testStyle : MvtStyleCreator = (feature: any, selected: string) => {
+export const styleSelectedCountryOverlay : MvtStyleCreator = (feature: any, selected: string) => {
     const iso_a2 = feature.get(isoA2CountryNameProperty);
     const isSelected = iso_a2 === selected;
-    const countryInfo = CountryData.get(iso_a2);
-    const isIbfSupported = countryInfo?.ibfSupported ?? false;
-
-    let fillColor = isIbfSupported ? "#708ed2" : "#c2c2c2";
-    fillColor = isSelected ? "#85c1c1" : fillColor;
+    const fillColor = isSelected ? "#00ffff11" : "#00000000";
     return new Style({
-        fill: new Fill({ color: fillColor }),
-        stroke: new Stroke({ color: "#a4a4a4", width: 1 }),
+        fill: new Fill({ color: fillColor })
     });
 }

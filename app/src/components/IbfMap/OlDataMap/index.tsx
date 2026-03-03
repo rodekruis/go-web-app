@@ -12,11 +12,11 @@ interface OlDataMapProps {
     // ISO_A2 code of the selected country
     selectedCountry: string;
 
-    // Optional base map layer
-    layer?: BaseLayer;
-
-    // Optional url for styling the map 
+    // StyleJson format vector tile map url
     mapStyleJsonUrl?: string;
+
+    // Optional base map layer
+    additionalVectorLayer?: BaseLayer;
 
     // Optional arg to expose adding a layer
     // It is a function that takes the add-layer function as an argument.
@@ -27,7 +27,7 @@ interface OlDataMapProps {
  * OpenLayers map component for IBF data maps *
  * @returns A component that can be either standalone, or nested in a IbfMapContainer.
  */
-export function OlDataMap({ selectedCountry, layer, mapStyleJsonUrl, addLayerFunction }: OlDataMapProps) {
+export function OlDataMap({ selectedCountry, additionalVectorLayer, mapStyleJsonUrl, addLayerFunction }: OlDataMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<Map | null>(null);
     const countryInfo = selectedCountry !== 'None' ? CountryData.get(selectedCountry) : undefined;
@@ -63,6 +63,12 @@ export function OlDataMap({ selectedCountry, layer, mapStyleJsonUrl, addLayerFun
                 }),
             });
 
+            if (additionalVectorLayer) {
+                // Ensure this layer is on top of the other map layers
+                additionalVectorLayer.setZIndex(1000);
+                mapInstanceRef.current.addLayer(additionalVectorLayer);
+            }
+
             if (mapStyleJsonUrl) {
                 apply(mapInstanceRef.current, mapStyleJsonUrl)
                     .then(() => {
@@ -71,10 +77,6 @@ export function OlDataMap({ selectedCountry, layer, mapStyleJsonUrl, addLayerFun
                     .catch((error: any) => {
                         console.error('Style apply error:', error);
                     });
-            }
-
-            if (layer) {
-                mapInstanceRef.current.addLayer(layer);
             }
 
             // Expose addLayer function to parent

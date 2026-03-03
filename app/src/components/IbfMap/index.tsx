@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import BaseLayer from 'ol/layer/Base';
 import 'ol/ol.css';
-import { testStyle } from '#utils/ibfMapStyles';
+import { styleSelectedCountryOverlay } from '#utils/ibfMapStyles';
 import { OlDataMap } from './OlDataMap';
 import { IbfControlPanel } from './IbfControlPanel';
 import { IbfDataPanel } from './IbfDataPanel';
@@ -25,8 +25,6 @@ export function IbfMapContainer() {
     // Initialize state directly from URL to avoid race condition
     const initialCountryCode = searchParams.get(countrySearchParamsKey)?.toUpperCase() || 'None';
     const [selectedCountry, setSelectedCountry] = useState<string>(initialCountryCode);
-    const [isImageLayerLoading, setIsImageLayerLoading] = useState(false);
-    const [isImageLayerLoaded, setIsImageLayerLoaded] = useState(false);
     const [isImageLayerVisible, setIsImageLayerVisible] = useState(false);
 
     // Stored add-layer function from OlDataMap
@@ -55,21 +53,15 @@ export function IbfMapContainer() {
             return;
         }
 
-        setIsImageLayerLoading(true);
         makeStaticImageLayer(debug_testImageName)
             .then(imageLayer => {
                 imageLayerRef.current = imageLayer;
                 addLayerRef.current?.(imageLayer);
-                setIsImageLayerLoaded(true);
                 setIsImageLayerVisible(true);
-                console.log('Added static image layer to map');
             })
             .catch(error => {
                 console.error('Error loading static image layer:', error);
             })
-            .finally(() => {
-                setIsImageLayerLoading(false);
-            });
     }, [isImageLayerVisible]);
 
     const handleCountrySelect = useCallback((country: string) => {
@@ -87,8 +79,8 @@ export function IbfMapContainer() {
         <div className={styles.container}>
             <OlDataMap
                 selectedCountry={selectedCountry}
-                layer={makeMvtLayerAsync(selectedCountry, mapUrlCountryVectorTiles, testStyle)}
                 mapStyleJsonUrl={mapUrlSimpleStyleJson}
+                additionalVectorLayer={makeMvtLayerAsync(selectedCountry, mapUrlCountryVectorTiles, styleSelectedCountryOverlay)}
                 addLayerFunction={addDataLayer}
             />
             <IbfControlPanel

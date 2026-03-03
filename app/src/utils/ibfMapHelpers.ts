@@ -10,7 +10,52 @@ import VectorTile from 'ol/source/VectorTile';
 // This will be removed once the dev test flow is set up.
 export const debug_testImageName = `flood_map_ZMB_RP20_c0_b3857`;
 
-export const getRasterDataPng = (name : string) => {
+/**
+ * Create a vector tile layer for the map.
+ * @param selectedCountry The ISO_A2 code of the selected country, or and empty string for none.
+ * @param mapVectorTileUrl The URL template for the vector tiles
+ * @param getMapStyle A function for an MVT tile style creator
+ * @returns A VectorTileLayer
+ */
+export const makeMvtLayerAsync = (
+    selectedCountry: string,
+    mapVectorTileUrl: string,
+    getMapStyle: MvtStyleCreator
+) => {
+    return new VectorTileLayer({
+        source: new VectorTile({
+            url: mapVectorTileUrl,
+            format: new MVT(),
+            maxZoom: 2,
+        }),
+        style: (feature) => getMapStyle(feature, selectedCountry),
+    });
+}
+
+/**
+ * Creates a static layer from a png and json file with the extents. *
+ * @param name name of the image (no extension)
+ * @returns ImageLayer to add to a map
+ */
+export const makeStaticImageLayer = async (name: string) => {
+    const extents = await getImageExtentsAsync(name);
+    const rasterData = await getRasterDataPng(name);
+    return new ImageLayer({
+        source: new ImageStatic({
+            url: rasterData,
+            projection: 'EPSG:3857',
+            interpolate: false,
+            imageExtent: extents,
+        }),
+    });
+}
+
+/**
+ * Get the png raster data from the server (or debug folder when testing). *
+ * @param name filename (no extension)
+ * @returns the png image
+ */
+const getRasterDataPng = (name : string) => {
     // Currently this only supports the debug dev flow.
     // The logic will be added to later to support the actual meta data flow.
     
@@ -18,8 +63,12 @@ export const getRasterDataPng = (name : string) => {
     return `${rasterImageDir}${name}.png`;
 }
 
-// Fetch the image extents from the meta data for a raster image.
-export const getImageExtentsAsync = (name : string) => {
+/**
+ * Returns the extents from the png meta data. *
+ * @param name the same name as the image
+ * @returns the extents in EPSG:3857, ordered [left, bottom, right, top]
+ */
+const getImageExtentsAsync = (name : string) => {
     // Currently this only supports the debug dev flow.
     // The logic will be added to later to support the actual meta data flow.
 
@@ -40,33 +89,4 @@ export const getImageExtentsAsync = (name : string) => {
             // Return default extents or handle as needed
             return [0, 0, 0, 0];
         });
-}
-
-// Create layer for OlDataMap
-export const makeMvtLayerAsync = (
-    selectedCountry: string,
-    mapVectorTileUrl: string,
-    getMapStyle: MvtStyleCreator
-) => {
-    return new VectorTileLayer({
-        source: new VectorTile({
-            url: mapVectorTileUrl,
-            format: new MVT(),
-            maxZoom: 2,
-        }),
-        style: (feature) => getMapStyle(feature, selectedCountry),
-    });
-}
-
-export const makeStaticImageLayer = async (name: string) => {
-    const extents = await getImageExtentsAsync(name);
-    const rasterData = await getRasterDataPng(name);
-    return new ImageLayer({
-        source: new ImageStatic({
-            url: rasterData,
-            projection: 'EPSG:3857',
-            interpolate: false,
-            imageExtent: extents,
-        }),
-    });
 }
