@@ -2,6 +2,10 @@ import { maptilerApiKey } from '#config';
 
 // Map property strings
 export const isoA2CountryNameProperty = 'iso_a2';
+export const noCountrySelectedValue = 'None';
+
+// URL search parameter keys
+export const countrySearchParamsKey = 'c';
 
 // Map URLs
 const maptilerBaseUrl = `https://api.maptiler.com`

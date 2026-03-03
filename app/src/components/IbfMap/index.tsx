@@ -8,11 +8,8 @@ import { IbfControlPanel } from './IbfControlPanel';
 import { IbfDataPanel } from './IbfDataPanel';
 import { OlGlobalMap } from './OlGlobalMap';
 import styles from './styles.module.css';
-import { mapUrlCountryVectorTiles, mapUrlSimpleStyleJson } from '#utils/ibfMap';
+import { countrySearchParamsKey, mapUrlCountryVectorTiles, mapUrlSimpleStyleJson, noCountrySelectedValue } from '#utils/ibfMap';
 import { debug_testImageName, makeMvtLayerAsync, makeStaticImageLayer } from '#utils/ibfMapHelpers';
-
-// Search (query) parameter keys
-const countrySearchParamsKey = 'c';
 
 /**
  * Base map component for IBF data maps * 
@@ -23,7 +20,7 @@ export function IbfMapContainer() {
     const [searchParams, setSearchParams] = useSearchParams();
 
     // Initialize state directly from URL to avoid race condition
-    const initialCountryCode = searchParams.get(countrySearchParamsKey)?.toUpperCase() || 'None';
+    const initialCountryCode = searchParams.get(countrySearchParamsKey)?.toUpperCase() || noCountrySelectedValue;
     const [selectedCountry, setSelectedCountry] = useState<string>(initialCountryCode);
     const [isImageLayerVisible, setIsImageLayerVisible] = useState(false);
 

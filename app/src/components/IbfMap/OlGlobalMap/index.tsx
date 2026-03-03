@@ -9,7 +9,7 @@ import Attribution from 'ol/control/Attribution.js';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
 import MVT from 'ol/format/MVT';
 import 'ol/ol.css';
-import { CountryData, isoA2CountryNameProperty, mapUrlCountryVectorTiles } from '#utils/ibfMap';
+import { CountryData, isoA2CountryNameProperty, mapUrlCountryVectorTiles, noCountrySelectedValue } from '#utils/ibfMap';
 import { styleMvtGreyWorldMap } from '#utils/ibfMapStyles';
 
 // Initial zoom/focus of map
@@ -78,7 +78,7 @@ export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapP
             mapInstanceRef.current.on('click', (evt) => {
                 mapInstanceRef.current!.forEachFeatureAtPixel(evt.pixel, (feature) => {
                     const properties = feature.getProperties();
-                    const newSelectedCountry = properties[isoA2CountryNameProperty] || '';
+                    const newSelectedCountry = properties[isoA2CountryNameProperty] || noCountrySelectedValue;
 
                     if (selectedCountry != newSelectedCountry) {
                         onSelect(newSelectedCountry);
@@ -95,7 +95,9 @@ export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapP
                         }
                     } else {
                         // deselect country
-                        onSelect('');
+                        // This is only hit if you click on the same country twice
+                        // This is debug behavior though and will be changed.
+                        onSelect(noCountrySelectedValue);
                     }
 
                     selectedCountry = newSelectedCountry;

@@ -1,13 +1,14 @@
+import { FeatureLike } from "ol/Feature";
 import { CountryData, isoA2CountryNameProperty } from "./ibfMap";
 import { Fill, Stroke, Style } from 'ol/style';
 
-export type MvtStyleCreator = (feature: any, selected: string) => Style;
+export type MvtStyleCreator = (feature: FeatureLike, selected: string) => Style;
 
 // Debug style
 // Fix later
 //
 // Style for vector tile (MVT) maps
-export const styleMvtGreyWorldMap : MvtStyleCreator = (feature: any, selected: string) => {
+export const styleMvtGreyWorldMap : MvtStyleCreator = (feature: FeatureLike, selected: string) => {
     const iso_a2 = feature.get(isoA2CountryNameProperty);
     const isSelected = iso_a2 === selected;
     const countryInfo = CountryData.get(iso_a2);
@@ -32,7 +33,7 @@ export const styleMvtGreyWorldMap : MvtStyleCreator = (feature: any, selected: s
 // Fix later
 //
 // Style for vector tile (MVT) maps
-export const styleSelectedCountryOverlay : MvtStyleCreator = (feature: any, selected: string) => {
+export const styleSelectedCountryOverlay : MvtStyleCreator = (feature: FeatureLike, selected: string) => {
     const iso_a2 = feature.get(isoA2CountryNameProperty);
     const isSelected = iso_a2 === selected;
     const fillColor = isSelected ? "#00ffff11" : "#00000000";

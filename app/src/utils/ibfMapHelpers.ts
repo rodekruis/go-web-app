@@ -12,7 +12,7 @@ export const debug_testImageName = `flood_map_ZMB_RP20_c0_b3857`;
 
 /**
  * Create a vector tile layer for the map.
- * @param selectedCountry The ISO_A2 code of the selected country, or and empty string for none.
+ * @param selectedCountry The ISO_A2 code of the selected country, or noCountrySelectedValue for none.
  * @param mapVectorTileUrl The URL template for the vector tiles
  * @param getMapStyle A function for an MVT tile style creator
  * @returns A VectorTileLayer

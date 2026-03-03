@@ -4,7 +4,7 @@ import { View } from 'ol';
 import { fromLonLat } from 'ol/proj';
 import BaseLayer from 'ol/layer/Base';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
-import { CountryData } from '#utils/ibfMap';
+import { CountryData, noCountrySelectedValue } from '#utils/ibfMap';
 import { apply } from 'ol-mapbox-style';
 import styles from './styles.module.css';
 
@@ -30,7 +30,7 @@ interface OlDataMapProps {
 export function OlDataMap({ selectedCountry, additionalVectorLayer, mapStyleJsonUrl, addLayerFunction }: OlDataMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<Map | null>(null);
-    const countryInfo = selectedCountry !== 'None' ? CountryData.get(selectedCountry) : undefined;
+    const countryInfo = selectedCountry === noCountrySelectedValue ?  undefined : CountryData.get(selectedCountry);
 
     // Default center/zoom which is overridden if a country is selected.
     let center = [0, 0];
@@ -39,7 +39,7 @@ export function OlDataMap({ selectedCountry, additionalVectorLayer, mapStyleJson
     useEffect(() => {
         if (mapRef.current && !mapInstanceRef.current) {
 
-            // If a country is selection, center/zoom in on it.
+            // If a country is selected, center/zoom in on it.
             if (countryInfo) {
                 center = fromLonLat([countryInfo.latlon[1], countryInfo.latlon[0]]);
                 zoom = countryInfo.initialZoom;
