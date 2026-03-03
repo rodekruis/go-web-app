@@ -1,4 +1,4 @@
-import { CountryData } from "./ibfMap";
+import { CountryData, isoA2CountryNameProperty } from "./ibfMap";
 import { Fill, Stroke, Style } from 'ol/style';
 
 export type MvtStyleCreator = (feature: any, selected: string) => Style;
@@ -8,7 +8,7 @@ export type MvtStyleCreator = (feature: any, selected: string) => Style;
 //
 // Style for vector tile (MVT) maps
 export const styleMvtGreyWorldMap : MvtStyleCreator = (feature: any, selected: string) => {
-    const iso_a2 = feature.get('iso_a2');
+    const iso_a2 = feature.get(isoA2CountryNameProperty);
     const isSelected = iso_a2 === selected;
     const countryInfo = CountryData.get(iso_a2);
     const isIbfSupported = countryInfo?.ibfSupported ?? false;
@@ -32,26 +32,8 @@ export const styleMvtGreyWorldMap : MvtStyleCreator = (feature: any, selected: s
 // Fix later
 //
 // Style for vector tile (MVT) maps
-export const styleMvtZoomedGrey : MvtStyleCreator = (feature: any, selected: string) => {
-    const iso_a2 = feature.get('iso_a2');
-    const isSelected = iso_a2 === selected;
-    const countryInfo = CountryData.get(iso_a2);
-    const isIbfSupported = countryInfo?.ibfSupported ?? false;
-    let fillColor = isSelected ? "#bac5e8" : isIbfSupported ? "#f8bbd9" : "#e0e0e0";
-
-
-    return new Style({
-        fill: new Fill({ color: fillColor }),
-        stroke: new Stroke({ color: "#a4a4a4", width: 1 }),
-    });
-}
-
-// Debug style
-// Fix later
-//
-// Style for vector tile (MVT) maps
 export const testStyle : MvtStyleCreator = (feature: any, selected: string) => {
-    const iso_a2 = feature.get('iso_a2');
+    const iso_a2 = feature.get(isoA2CountryNameProperty);
     const isSelected = iso_a2 === selected;
     const countryInfo = CountryData.get(iso_a2);
     const isIbfSupported = countryInfo?.ibfSupported ?? false;

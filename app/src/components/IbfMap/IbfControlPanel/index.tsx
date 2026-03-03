@@ -1,13 +1,10 @@
 import styles from './styles.module.css';
-
 import {
     Button,
 } from '@ifrc-go/ui';
 
 interface IbfControlPanelProps {
     onToggleImageLayer: () => void;
-    isLoading: boolean;
-    isLayerLoaded: boolean;
     isLayerVisible: boolean;
 }
 
@@ -17,15 +14,14 @@ interface IbfControlPanelProps {
  * The available controls here will depend on the event and available data. *
  * @returns A component that is intended to be nested within a IbfMapContainer.
  */
-export function IbfControlPanel({ onToggleImageLayer, isLayerLoaded, isLayerVisible }: IbfControlPanelProps) {
-    let buttonText = 'Load Flood Map Layer';
-
+export function IbfControlPanel({ onToggleImageLayer, isLayerVisible }: IbfControlPanelProps) {
     // TODO: pass the fetching function to the control panel so that the control panel can more easily
     // track the loading/loaded state.
-    if (isLayerLoaded && isLayerVisible) {
-        buttonText = 'Hide Flood Map Layer';
-    } else if (isLayerLoaded && !isLayerVisible) {
-        buttonText = 'Show Flood Map Layer';
+
+    let buttonText = 'wwww Show Flood Map Layer';
+
+    if (isLayerVisible) {
+        buttonText = 'wwww Hide Flood Map Layer';
     }
 
     return (

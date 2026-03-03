@@ -18,7 +18,8 @@ interface OlDataMapProps {
     // Optional url for styling the map 
     mapStyleJsonUrl?: string;
 
-    // Optional function to expose adding a layer
+    // Optional arg to expose adding a layer
+    // It is a function that takes the add-layer function as an argument.
     addLayerFunction?: (addLayer: (layer: BaseLayer) => void) => void;
 }
 
@@ -26,18 +27,19 @@ interface OlDataMapProps {
  * OpenLayers map component for IBF data maps *
  * @returns A component that can be either standalone, or nested in a IbfMapContainer.
  */
-export function OlDataMap({ selectedCountry, layer, mapStyleJsonUrl: mapStyleJsonUri, addLayerFunction }: OlDataMapProps) {
+export function OlDataMap({ selectedCountry, layer, mapStyleJsonUrl, addLayerFunction }: OlDataMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<Map | null>(null);
     const countryInfo = selectedCountry !== 'None' ? CountryData.get(selectedCountry) : undefined;
 
-    // default zoom and focus
+    // Default center/zoom which is overridden if a country is selected.
     let center = [0, 0];
     let zoom = 2;
 
     useEffect(() => {
         if (mapRef.current && !mapInstanceRef.current) {
 
+            // If a country is selection, center/zoom in on it.
             if (countryInfo) {
                 center = fromLonLat([countryInfo.latlon[1], countryInfo.latlon[0]]);
                 zoom = countryInfo.initialZoom;
@@ -61,9 +63,8 @@ export function OlDataMap({ selectedCountry, layer, mapStyleJsonUrl: mapStyleJso
                 }),
             });
 
-
-            if (mapStyleJsonUri) {
-                apply(mapInstanceRef.current, mapStyleJsonUri)
+            if (mapStyleJsonUrl) {
+                apply(mapInstanceRef.current, mapStyleJsonUrl)
                     .then(() => {
                         console.log('Style applied successfully');
                     })

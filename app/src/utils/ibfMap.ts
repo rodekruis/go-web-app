@@ -1,5 +1,8 @@
 import { maptilerApiKey } from '#config';
 
+// Map property strings
+export const isoA2CountryNameProperty = 'iso_a2';
+
 // Map URLs
 const maptilerBaseUrl = `https://api.maptiler.com`
 // Vector map with Admin0 and Admin1 boundaries for all countries

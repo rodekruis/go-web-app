@@ -7,6 +7,7 @@ import { OlDataMap } from './OlDataMap';
 import { IbfControlPanel } from './IbfControlPanel';
 import { IbfDataPanel } from './IbfDataPanel';
 import { OlGlobalMap } from './OlGlobalMap';
+import styles from './styles.module.css';
 import { mapUrlCountryVectorTiles, mapUrlSimpleStyleJson } from '#utils/ibfMap';
 import { debug_testImageName, makeMvtLayerAsync, makeStaticImageLayer } from '#utils/ibfMapHelpers';
 
@@ -28,12 +29,14 @@ export function IbfMapContainer() {
     const [isImageLayerLoaded, setIsImageLayerLoaded] = useState(false);
     const [isImageLayerVisible, setIsImageLayerVisible] = useState(false);
 
-    // Store addLayer function from OlDataMap
+    // Stored add-layer function from OlDataMap
     const addLayerRef = useRef<((layer: BaseLayer) => void) | null>(null);
+
     // Cache the loaded image layer
+    // When we support more data layers, we'll need one for each data layer we want to toggle.
     const imageLayerRef = useRef<BaseLayer | null>(null);
 
-    const handleMapReady = useCallback((addLayer: (layer: BaseLayer) => void) => {
+    const addDataLayer = useCallback((addLayer: (layer: BaseLayer) => void) => {
         addLayerRef.current = addLayer;
     }, []);
 
@@ -51,6 +54,7 @@ export function IbfMapContainer() {
             console.error('Map not ready yet');
             return;
         }
+
         setIsImageLayerLoading(true);
         makeStaticImageLayer(debug_testImageName)
             .then(imageLayer => {
@@ -80,17 +84,15 @@ export function IbfMapContainer() {
     }, [setSearchParams]);
 
     return (
-        <div>
+        <div className={styles.container}>
             <OlDataMap
                 selectedCountry={selectedCountry}
                 layer={makeMvtLayerAsync(selectedCountry, mapUrlCountryVectorTiles, testStyle)}
                 mapStyleJsonUrl={mapUrlSimpleStyleJson}
-                addLayerFunction={handleMapReady}
+                addLayerFunction={addDataLayer}
             />
             <IbfControlPanel
                 onToggleImageLayer={handleToggleImageLayer}
-                isLoading={isImageLayerLoading}
-                isLayerLoaded={isImageLayerLoaded}
                 isLayerVisible={isImageLayerVisible}
             />
             <IbfDataPanel selectedCountry={selectedCountry} />

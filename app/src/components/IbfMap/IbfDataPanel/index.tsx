@@ -18,13 +18,13 @@ export function IbfDataPanel({ selectedCountry }: IbfDataPanelProps) {
         <div className={styles.dataContainer}>
             { countryInfo ? (
                 <div>
-                    <p><strong>{countryInfo.name_en}</strong></p>
-                    <p>IBF Supported: {countryInfo.ibfSupported ? 'Yes' : 'No'}</p>
+                    <p><strong>wwww: {countryInfo.name_en}</strong></p>
+                    <p>wwww: IBF Supported: {countryInfo.ibfSupported ? 'Yes' : 'No'}</p>
                 </div>
             ) :
                 <div>
-                    <p><strong>---</strong></p>
-                    <p>No country selected</p>
+                    <p><strong>wwww: ---</strong></p>
+                    <p>wwww: No country selected</p>
                 </div>
             }
         </div>

@@ -9,7 +9,7 @@ import Attribution from 'ol/control/Attribution.js';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
 import MVT from 'ol/format/MVT';
 import 'ol/ol.css';
-import { CountryData, mapUrlCountryVectorTiles } from '#utils/ibfMap';
+import { CountryData, isoA2CountryNameProperty, mapUrlCountryVectorTiles } from '#utils/ibfMap';
 import { styleMvtGreyWorldMap } from '#utils/ibfMapStyles';
 
 // Initial zoom/focus of map
@@ -17,14 +17,21 @@ const center = [0, 0];
 const zoom = 2;
 
 interface OlGlobalMapProps {
+    // What admin levels are visible. 0: country. 1: country and admin level 1.
     adminLevels: 0 | 1;
+
+    // Callback for when a country is selected.
     onSelect: (country: string) => void;
 }
 
+/**
+ * Map designed for a global view with country selection. *
+ * @returns A standalone component.
+ */
 export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<Map | null>(null);
-    const vAdmin0Ref = useRef<VectorTileLayer | null>(null);
+    const adminLayersRef = useRef<VectorTileLayer | null>(null);
 
     let selectedCountry = '';
 
@@ -37,8 +44,8 @@ export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapP
         if (mapRef.current && !mapInstanceRef.current) {
             const attribution = new Attribution({ collapsible: false });
 
-            // Create layers with current selectedCountry in closure
-            vAdmin0Ref.current = new VectorTileLayer({
+            // Create vector tile layer for admin boundaries
+            adminLayersRef.current = new VectorTileLayer({
                 source: new VectorTile({
                     url: mapUrlCountryVectorTiles,
                     format: new MVT(),
@@ -47,10 +54,11 @@ export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapP
                 style: (feature) => styleMvtGreyWorldMap(feature, selectedCountry),
             });
 
+            // Create map and add the boundaries
             mapInstanceRef.current = new Map({
                 target: mapRef.current,
                 controls: defaultControls({ attribution: false }).extend([attribution]),
-                layers: [vAdmin0Ref.current],
+                layers: [adminLayersRef.current],
                 view: new View({
                     constrainResolution: true,
                     center,
@@ -59,7 +67,7 @@ export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapP
                 }),
             });
 
-            // Cursor change on hover
+            // Change cursor on hover
             mapInstanceRef.current.on('pointermove', (evt) => {
                 const pixel = mapInstanceRef.current!.getEventPixel(evt.originalEvent);
                 const hit = mapInstanceRef.current!.hasFeatureAtPixel(pixel);
@@ -70,7 +78,7 @@ export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapP
             mapInstanceRef.current.on('click', (evt) => {
                 mapInstanceRef.current!.forEachFeatureAtPixel(evt.pixel, (feature) => {
                     const properties = feature.getProperties();
-                    const newSelectedCountry = properties['iso_a2'] || '';
+                    const newSelectedCountry = properties[isoA2CountryNameProperty] || '';
 
                     if (selectedCountry != newSelectedCountry) {
                         onSelect(newSelectedCountry);
@@ -82,24 +90,24 @@ export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapP
                             mapInstanceRef.current!.getView().animate({
                                 center: fromLonLat([lon, lat]),
                                 zoom: countryInfo.initialZoom,
-                                duration: 500, // animation in ms
+                                duration: 500, // pan/zoom animation in ms
                             });
                         }
                     } else {
+                        // deselect country
                         onSelect('');
                     }
 
-                    console.log('Clicked country:', newSelectedCountry);
                     selectedCountry = newSelectedCountry;
-                    vAdmin0Ref.current!.setStyle((feature) => styleMvtGreyWorldMap(feature, selectedCountry));
+                    adminLayersRef.current!.setStyle((feature) => styleMvtGreyWorldMap(feature, selectedCountry));
 
                     return true;
                 });
             });
         }
 
-        // Clean up
         return () => {
+            // Clean up map ref
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.setTarget(undefined);
                 mapInstanceRef.current = null;
