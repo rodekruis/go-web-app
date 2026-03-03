@@ -71,9 +71,6 @@ export function OlDataMap({ selectedCountry, additionalVectorLayer, mapStyleJson
 
             if (mapStyleJsonUrl) {
                 apply(mapInstanceRef.current, mapStyleJsonUrl)
-                    .then(() => {
-                        console.log('Style applied successfully');
-                    })
                     .catch((error: any) => {
                         console.error('Style apply error:', error);
                     });

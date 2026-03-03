@@ -502,11 +502,9 @@ const threeWActivityEdit = customWrapRoute({
     },
 });
 
-type DefaultIbfChild = 'global';
-const ibfLayout = customWrapRoute({
+const ibfIndex = customWrapRoute({
     parent: rootLayout,
     path: 'ibf',
-    forwardPath: 'global' satisfies DefaultIbfChild,
     component: {
         render: () => import('#views/IbfGlobal'),
         props: {},
@@ -514,36 +512,6 @@ const ibfLayout = customWrapRoute({
     wrapperComponent: Auth,
     context: {
         title: 'IBF',
-        visibility: 'anything',
-    },
-});
-
-const ibfIndex = customWrapRoute({
-    parent: ibfLayout,
-    index: true,
-    component: {
-        eagerLoad: true,
-        render: Navigate,
-        props: {
-            to: 'global' satisfies DefaultIbfChild,
-            replace: true,
-        },
-    },
-    context: {
-        title: 'IBF',
-        visibility: 'anything',
-    },
-});
-
-const ibfGlobal = customWrapRoute({
-    parent: ibfLayout,
-    path: 'global' satisfies DefaultIbfChild,
-    component: {
-        render: () => import('#views/IbfGlobal'),
-        props: {},
-    },
-    context: {
-        title: 'IBF Global',
         visibility: 'anything',
     },
 });
@@ -1386,8 +1354,6 @@ const wrappedRoutes = {
     flashUpdateFormDetails,
     flashUpdateFormEdit,
     ibfIndex,
-    ibfLayout,
-    ibfGlobal,
     riskWatchLayout,
     riskWatchIndex,
     riskWatchImminent,

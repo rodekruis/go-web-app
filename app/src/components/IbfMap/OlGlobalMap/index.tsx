@@ -33,7 +33,7 @@ export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapP
     const mapInstanceRef = useRef<Map | null>(null);
     const adminLayersRef = useRef<VectorTileLayer | null>(null);
 
-    let selectedCountry = '';
+    let selectedCountry = noCountrySelectedValue;
 
     // By setting the max zoom of the vector tiles layer, we can control what vectors are drawn.
     // It supports all countries at admin0 (at zoom 1) and admin1 (at zoom 2+).
@@ -80,7 +80,7 @@ export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapP
                     const properties = feature.getProperties();
                     const newSelectedCountry = properties[isoA2CountryNameProperty] || noCountrySelectedValue;
 
-                    if (selectedCountry != newSelectedCountry) {
+                    if (selectedCountry !== newSelectedCountry) {
                         onSelect(newSelectedCountry);
 
                         // Zoom to country
