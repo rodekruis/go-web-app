@@ -5,7 +5,12 @@ interface IbfDataPanelProps {
     selectedCountry: string;
 }
 
-
+/**
+ * Debug component for showing country data. *
+ * This will change once we have a design. *
+ * @param selectedCountry - ISO_A2 code of the selected country
+ * @returns A component that is intended to be nested within a IbfMapContainer.
+ */
 export function IbfDataPanel({ selectedCountry }: IbfDataPanelProps) {
     const countryInfo = selectedCountry ? CountryData.get(selectedCountry) : null;
 
@@ -17,7 +22,10 @@ export function IbfDataPanel({ selectedCountry }: IbfDataPanelProps) {
                     <p>IBF Supported: {countryInfo.ibfSupported ? 'Yes' : 'No'}</p>
                 </div>
             ) :
-                <p>No country selected.</p>
+                <div>
+                    <p><strong>---</strong></p>
+                    <p>No country selected</p>
+                </div>
             }
         </div>
     );

@@ -1,7 +1,13 @@
 import { CountryData } from "./ibfMap";
 import { Fill, Stroke, Style } from 'ol/style';
 
-export const globalGreyStyle = (feature: any, selected: string) => {
+export type MvtStyleCreator = (feature: any, selected: string) => Style;
+
+// Debug style
+// Fix later
+//
+// Style for vector tile (MVT) maps
+export const styleMvtGreyWorldMap : MvtStyleCreator = (feature: any, selected: string) => {
     const iso_a2 = feature.get('iso_a2');
     const isSelected = iso_a2 === selected;
     const countryInfo = CountryData.get(iso_a2);
@@ -22,8 +28,11 @@ export const globalGreyStyle = (feature: any, selected: string) => {
     });
 }
 
-// Style function for admin1 layer
-export const zoomedGreyStyle = (feature: any, selected: string) => {
+// Debug style
+// Fix later
+//
+// Style for vector tile (MVT) maps
+export const styleMvtZoomedGrey : MvtStyleCreator = (feature: any, selected: string) => {
     const iso_a2 = feature.get('iso_a2');
     const isSelected = iso_a2 === selected;
     const countryInfo = CountryData.get(iso_a2);
@@ -37,8 +46,11 @@ export const zoomedGreyStyle = (feature: any, selected: string) => {
     });
 }
 
-
-export const testStyle = (feature: any, selected: string) => {
+// Debug style
+// Fix later
+//
+// Style for vector tile (MVT) maps
+export const testStyle : MvtStyleCreator = (feature: any, selected: string) => {
     const iso_a2 = feature.get('iso_a2');
     const isSelected = iso_a2 === selected;
     const countryInfo = CountryData.get(iso_a2);

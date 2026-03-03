@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useRef } from 'react';
-
+import { useEffect, useRef } from 'react';
 import Map from 'ol/Map.js';
-
 import styles from './styles.module.css';
 import { View } from 'ol';
 import { fromLonLat } from 'ol/proj';
@@ -11,13 +9,8 @@ import Attribution from 'ol/control/Attribution.js';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
 import MVT from 'ol/format/MVT';
 import 'ol/ol.css';
-
-import { maptilerApiKey } from '#config';
-import { CountryData } from '#utils/ibfMap';
-import { globalGreyStyle } from '#utils/ibfMapStyles';
-
-// Move
-const countryVectors2 = `https://api.maptiler.com/tiles/countries/{z}/{x}/{y}.pbf?key=${maptilerApiKey}`;
+import { CountryData, mapUrlCountryVectorTiles } from '#utils/ibfMap';
+import { styleMvtGreyWorldMap } from '#utils/ibfMapStyles';
 
 // Initial zoom/focus of map
 const center = [0, 0];
@@ -47,11 +40,11 @@ export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapP
             // Create layers with current selectedCountry in closure
             vAdmin0Ref.current = new VectorTileLayer({
                 source: new VectorTile({
-                    url: countryVectors2,
+                    url: mapUrlCountryVectorTiles,
                     format: new MVT(),
                     maxZoom: countryLayerMaxZoom,
                 }),
-                style: (feature) => globalGreyStyle(feature, selectedCountry),
+                style: (feature) => styleMvtGreyWorldMap(feature, selectedCountry),
             });
 
             mapInstanceRef.current = new Map({
@@ -98,7 +91,7 @@ export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapP
 
                     console.log('Clicked country:', newSelectedCountry);
                     selectedCountry = newSelectedCountry;
-                    vAdmin0Ref.current!.setStyle((feature) => globalGreyStyle(feature, selectedCountry));
+                    vAdmin0Ref.current!.setStyle((feature) => styleMvtGreyWorldMap(feature, selectedCountry));
 
                     return true;
                 });

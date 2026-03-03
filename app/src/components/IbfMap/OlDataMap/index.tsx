@@ -9,21 +9,29 @@ import { apply } from 'ol-mapbox-style';
 import styles from './styles.module.css';
 
 interface OlDataMapProps {
+    // ISO_A2 code of the selected country
     selectedCountry: string;
+
+    // Optional base map layer
     layer?: BaseLayer;
-    mapStyleJsonUri?: string;
-    onMapReady?: (addLayer: (layer: BaseLayer) => void) => void;
+
+    // Optional url for styling the map 
+    mapStyleJsonUrl?: string;
+
+    // Optional function to expose adding a layer
+    addLayerFunction?: (addLayer: (layer: BaseLayer) => void) => void;
 }
 
-export function OlDataMap({ selectedCountry, layer, mapStyleJsonUri, onMapReady }: OlDataMapProps) {
+/**
+ * OpenLayers map component for IBF data maps *
+ * @returns A component that can be either standalone, or nested in a IbfMapContainer.
+ */
+export function OlDataMap({ selectedCountry, layer, mapStyleJsonUrl: mapStyleJsonUri, addLayerFunction }: OlDataMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<Map | null>(null);
-
     const countryInfo = selectedCountry !== 'None' ? CountryData.get(selectedCountry) : undefined;
 
-    console.log('Rendering OlDataMap with selectedCountry:', selectedCountry);
-
-    // defaul zoom and focus
+    // default zoom and focus
     let center = [0, 0];
     let zoom = 2;
 
@@ -44,7 +52,8 @@ export function OlDataMap({ selectedCountry, layer, mapStyleJsonUri, onMapReady 
                     zoom,
                     // Constrain where the user can pan to
                     extent: countryInfo.safeExtents,
-                    // The center of the country can't be panned off the view, rather than the edge
+                    // The center of the country can't be panned off the view
+                    // Not using this can make it hard to get the edge of the map to the screen center
                     constrainOnlyCenter: true,
                 }) : new View({
                     center,
@@ -68,8 +77,8 @@ export function OlDataMap({ selectedCountry, layer, mapStyleJsonUri, onMapReady 
             }
 
             // Expose addLayer function to parent
-            if (onMapReady) {
-                onMapReady((newLayer: BaseLayer) => {
+            if (addLayerFunction) {
+                addLayerFunction((newLayer: BaseLayer) => {
                     mapInstanceRef.current?.addLayer(newLayer);
                 });
             }

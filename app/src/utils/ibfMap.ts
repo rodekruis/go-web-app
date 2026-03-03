@@ -1,22 +1,38 @@
+import { maptilerApiKey } from '#config';
+
+// Map URLs
+const maptilerBaseUrl = `https://api.maptiler.com`
+// Vector map with Admin0 and Admin1 boundaries for all countries
+export const mapUrlCountryVectorTiles = `${maptilerBaseUrl}/tiles/countries/{z}/{x}/{y}.pbf?key=${maptilerApiKey}`;
+// Simple, default IBF data map
+export const mapUrlSimpleStyleJson = `${maptilerBaseUrl}/maps/019c41d2-17c7-7e5e-9a47-d3b3f9515a5b/style.json?key=${maptilerApiKey}`;
+
+
+
+// CountryData has the minimal data needed to display countries on the map.
+// Additional data can be pulled from IBF, Montando, or other sources.
 export interface CountryData {
     name_en: string;
     iso_a3: string;
     ibfSupported: boolean;
+
+    // Initial zoom range is based on north/south extent of the country
+    // 3000km or more = zoom 4
+    // 2000km = zoom 5
+    // 1000km = zoom 6
+    // 600km or less= zoom 7
     initialZoom: number;
+
+    // Center of country, for the map to focus on.
     latlon: [number, number];
     
     // Extents in Web Mercator (EPSG:3857) since this is the native projection for the map
     extents3857: [number, number, number, number];
+
+    // Safe extents have several hundred km added to them so that the country fits
+    // well within the map view when using these extents.
     safeExtents: [number, number, number, number];
 }
-
-// Default zoom range is based on north/south extent of the country
-// 3000km or more = zoom 4
-// 2000km = zoom 5
-// 1000km = zoom 6
-// 600km or less= zoom 7
-
-// Safe extents have 600km added to them so that the country fits well within the map
 
 export const CountryData: Map<string, CountryData> = new Map([
     ["AF", { name_en: "Afghanistan", iso_a3: "AFG", ibfSupported: false, initialZoom: 6, latlon: [33.94, 67.71], extents3857: [6612067, 3385918, 8294920, 4559121], safeExtents: [6012067, 2785918, 8894920, 5159121] }],

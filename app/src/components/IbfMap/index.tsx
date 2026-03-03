@@ -1,83 +1,28 @@
 import { useCallback, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import VectorTile from 'ol/source/VectorTile';
-import VectorTileLayer from 'ol/layer/VectorTile';
 import BaseLayer from 'ol/layer/Base';
-import MVT from 'ol/format/MVT';
 import 'ol/ol.css';
-import ImageLayer from 'ol/layer/Image';
-import ImageStatic from 'ol/source/ImageStatic';
-import { maptilerApiKey, rasterImageDir } from '#config';
 import { testStyle } from '#utils/ibfMapStyles';
-import { Style } from 'ol/style';
 import { OlDataMap } from './OlDataMap';
 import { IbfControlPanel } from './IbfControlPanel';
 import { IbfDataPanel } from './IbfDataPanel';
 import { OlGlobalMap } from './OlGlobalMap';
+import { mapUrlCountryVectorTiles, mapUrlSimpleStyleJson } from '#utils/ibfMap';
+import { debug_testImageName, makeMvtLayerAsync, makeStaticImageLayer } from '#utils/ibfMapHelpers';
 
+// Search (query) parameter keys
+const countrySearchParamsKey = 'c';
 
-const key = maptilerApiKey;
-const countryVectors2 = `https://api.maptiler.com/tiles/countries/{z}/{x}/{y}.pbf?key=${key}`;
-const baseMapSimpleVectorStyle = `https://api.maptiler.com/maps/019c41d2-17c7-7e5e-9a47-d3b3f9515a5b/style.json?key=${key}`;
-
-const testImageName = `flood_map_ZMB_RP20_c0_b3857`;
-
-const getTestImagePng = (name : string) => {
-    return `${rasterImageDir}${name}.png`;
-}
-
-const getTestImageExtents = (name : string) => {
-    const jsonData = `${rasterImageDir}${name}.json`;
-    // fetch json and get the extents from it
-    return fetch(jsonData)
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.bounds) {
-                const { left, bottom, right, top } = data.bounds;
-                return [left, bottom, right, top];
-            } else {
-                throw new Error('Invalid JSON structure: missing "bounds" property');
-            }
-        })
-        .catch(error => {
-            console.error('Error loading image extents:', error);
-            // Return default extents or handle as needed
-            return [0, 0, 0, 0];
-        });
-}
-
-// Create layer for OlDataMap
-const getMvtLayer = (selectedCountry: string,
-    mapStyle: (feature: any, selected: string) => Style) => {
-    return new VectorTileLayer({
-        source: new VectorTile({
-            url: countryVectors2,
-            format: new MVT(),
-            maxZoom: 2,
-        }),
-        style: (feature) => mapStyle(feature, selectedCountry),
-    });
-}
-
-const getStaticImageLayerFromName = async (name: string) => {
-    const extents = await getTestImageExtents(name);
-    return new ImageLayer({
-        source: new ImageStatic({
-            url: getTestImagePng(name),
-                projection: 'EPSG:3857',
-                interpolate: false,
-            imageExtent: extents,
-        }),
-    });
-}
-
-
-
+/**
+ * Base map component for IBF data maps * 
+ * This component manages multiple nested components including for map data fetching, display, and control. * 
+ * @returns A standalone component
+ */
 export function IbfMapContainer() {
     const [searchParams, setSearchParams] = useSearchParams();
 
     // Initialize state directly from URL to avoid race condition
-    const initialCountryCode = searchParams.get('c')?.toUpperCase() || 'None';
+    const initialCountryCode = searchParams.get(countrySearchParamsKey)?.toUpperCase() || 'None';
     const [selectedCountry, setSelectedCountry] = useState<string>(initialCountryCode);
     const [isImageLayerLoading, setIsImageLayerLoading] = useState(false);
     const [isImageLayerLoaded, setIsImageLayerLoaded] = useState(false);
@@ -107,7 +52,7 @@ export function IbfMapContainer() {
             return;
         }
         setIsImageLayerLoading(true);
-        getStaticImageLayerFromName(testImageName)
+        makeStaticImageLayer(debug_testImageName)
             .then(imageLayer => {
                 imageLayerRef.current = imageLayer;
                 addLayerRef.current?.(imageLayer);
@@ -123,11 +68,11 @@ export function IbfMapContainer() {
             });
     }, [isImageLayerVisible]);
 
-    const handleLayerChange = useCallback((country: string) => {
+    const handleCountrySelect = useCallback((country: string) => {
         setSelectedCountry(country);
 
         if (country) {
-            setSearchParams({ c: country });
+            setSearchParams({ [countrySearchParamsKey]: country });
         } else {
             setSearchParams({});
         }
@@ -138,9 +83,9 @@ export function IbfMapContainer() {
         <div>
             <OlDataMap
                 selectedCountry={selectedCountry}
-                layer={getMvtLayer(selectedCountry, testStyle)}
-                mapStyleJsonUri={baseMapSimpleVectorStyle}
-                onMapReady={handleMapReady}
+                layer={makeMvtLayerAsync(selectedCountry, mapUrlCountryVectorTiles, testStyle)}
+                mapStyleJsonUrl={mapUrlSimpleStyleJson}
+                addLayerFunction={handleMapReady}
             />
             <IbfControlPanel
                 onToggleImageLayer={handleToggleImageLayer}
@@ -150,7 +95,7 @@ export function IbfMapContainer() {
             />
             <IbfDataPanel selectedCountry={selectedCountry} />
 
-            <OlGlobalMap adminLevels={0} onSelect={handleLayerChange} />
+            <OlGlobalMap adminLevels={0} onSelect={handleCountrySelect} />
         </div>
     );
 }
