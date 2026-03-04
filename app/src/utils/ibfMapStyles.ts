@@ -36,7 +36,7 @@ export const styleMvtGreyWorldMap : MvtStyleCreator = (feature: FeatureLike, sel
 export const styleSelectedCountryOverlay : MvtStyleCreator = (feature: FeatureLike, selected: string) => {
     const iso_a2 = feature.get(isoA2CountryNameProperty);
     const isSelected = iso_a2 === selected;
-    const fillColor = isSelected ? "#00ffff11" : "#00000000";
+    const fillColor = isSelected ? "#ff00ee0a" : "#00000000";
     return new Style({
         fill: new Fill({ color: fillColor })
     });
