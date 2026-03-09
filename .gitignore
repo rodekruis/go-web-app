@@ -41,6 +41,3 @@ storybook-static/
 
 # Helm
 .helm-charts/
-
-# IBF
-app/public/debug_raster/
