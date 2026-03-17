@@ -26,6 +26,7 @@ interface OlGlobalMapProps {
 
 /**
  * Map designed for a global view with country selection. *
+ * Example use: <OlGlobalMap adminLevels={0} onSelect={handleCountrySelect} /> *
  * @returns A standalone component.
  */
 export function OlGlobalMap({ adminLevels: adminLayers, onSelect }: OlGlobalMapProps) {
