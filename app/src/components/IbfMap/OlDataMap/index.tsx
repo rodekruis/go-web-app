@@ -84,6 +84,7 @@ export function OlDataMap({
   let zoom = 2;
 
   let adminLevel = 1;
+  let selectedCode: string | null = null;
   
   let bordersLayer: VectorLayer | null = null;
 
@@ -99,15 +100,27 @@ export function OlDataMap({
             url: borderUri,
             format: new GeoJSON(),
           }),
-          style: new Style({
-            fill: new Fill({
-              color: "rgba(87, 152, 227, 0.84)",
-            }),
-            stroke: new Stroke({
-              color: "#fc1de6",
-              width: 1,
-            }),
-          }),
+          style: (feature) => {
+            const code = feature.get(COL_CODE);
+            // Don't fill the selected region
+            if (code === selectedCode) {
+              return new Style({
+                stroke: new Stroke({
+                  color: "#fc1de6",
+                  width: 1,
+                }),
+              });
+            }
+            return new Style({
+              fill: new Fill({
+                color: "rgba(87, 152, 227, 0.84)",
+              }),
+              stroke: new Stroke({
+                color: "#fc1de6",
+                width: 1,
+              }),
+            });
+          },
         });
 
         // Ensure borders render above base map tiles
@@ -202,6 +215,10 @@ export function OlDataMap({
               newAdminLevel,
               newSelectedRegionCode,
             );
+
+            // Update selected code and refresh styles
+            selectedCode = newSelectedRegionCode;
+            bordersLayer?.changed();
 
             // Change layer to show the next admin level down
             // Set zoom and extents
