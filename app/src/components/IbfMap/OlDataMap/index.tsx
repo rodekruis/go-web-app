@@ -38,6 +38,8 @@ const COL_ADMIN_LEVEL = "admin_level";
 const COL_NAME_EN = "name_en";
 const COL_CODE = "code";
 
+let animComplete = true;
+
 // example of results:
 // max size: 300kb
 // .0005 = 279kb
@@ -196,7 +198,7 @@ const glofasMapAdmin3 = new Map([
           style: (feature) => {
             const code = feature.get(COL_CODE);
             // Don't fill the selected region
-            if (code === selectedCode) {
+            if (code === selectedCode && animComplete) {
               return new Style({
                 stroke: new Stroke({
                   color: "#fc1de6",
@@ -330,10 +332,13 @@ const glofasMapAdmin3 = new Map([
             const stationLon = properties.lon;
             if (stationLat && stationLon) {
               const stationCoords = fromLonLat([stationLon, stationLat]);
+              animComplete = false;
               mapInstanceRef.current?.getView().animate({
                 center: stationCoords,
                 zoom: 10,
                 duration: 500,
+              }, () => {
+                animComplete = true;
               });
             }
             
@@ -374,10 +379,13 @@ const glofasMapAdmin3 = new Map([
               const extent = geometry.getExtent();
               if (extent[0] !== undefined && extent[1] !== undefined && extent[2] !== undefined && extent[3] !== undefined) {
                 const center: [number, number] = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+                animComplete = false;
                 mapInstanceRef.current?.getView().animate({
                   center,
                   zoom: 12,
                   duration: 500,
+                }, () => {
+                  animComplete = true;
                 });
               }
             }
@@ -396,19 +404,6 @@ const glofasMapAdmin3 = new Map([
             selectedCode = newSelectedRegionCode;
             bordersLayer?.changed();
 
-            // Zoom to admin2 region
-            const geometry = feature.getGeometry();
-            if (geometry) {
-              const extent = geometry.getExtent();
-              if (extent[0] !== undefined && extent[1] !== undefined && extent[2] !== undefined && extent[3] !== undefined) {
-                const center: [number, number] = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
-                mapInstanceRef.current?.getView().animate({
-                  center,
-                  zoom: 9,
-                  duration: 500,
-                });
-              }
-            }
 
             // Show child admin regions (next level down)
             showChildAdminRegions(
@@ -416,6 +411,23 @@ const glofasMapAdmin3 = new Map([
               newSelectedRegionCode,
               newAdminLevel
             );
+
+            // Zoom to admin2 region
+            const geometry = feature.getGeometry();
+            if (geometry) {
+              const extent = geometry.getExtent();
+              if (extent[0] !== undefined && extent[1] !== undefined && extent[2] !== undefined && extent[3] !== undefined) {
+                const center: [number, number] = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+                animComplete = false;
+                mapInstanceRef.current?.getView().animate({
+                  center,
+                  zoom: 9,
+                  duration: 500,
+                }, () => {
+                  animComplete = true;
+                });
+              }
+            }
 
             adminLevel = newAdminLevel;
           } else {
