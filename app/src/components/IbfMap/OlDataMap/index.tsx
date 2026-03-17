@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import Map from "ol/Map.js";
+import MapOl from "ol/Map.js";
 import { View } from "ol";
 import { fromLonLat } from "ol/proj";
 import BaseLayer from "ol/layer/Base";
@@ -12,6 +12,7 @@ import VectorLayer from "ol/layer/Vector";
 import Style from "ol/style/Style";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
+import Circle from "ol/style/Circle";
 import GeoJSON from "ol/format/GeoJSON";
 
 interface OlDataMapProps {
@@ -43,7 +44,7 @@ const COL_CODE = "code";
 // .001 = 188kb
 // .05 = 53kb
 // .01 = 30kb
-let factor = 0.01;
+let factor = 0.003;
 
 const admin0Factor = 0.01;
 const admin1Factor = 0.01;
@@ -53,7 +54,7 @@ const admin3Factor = 0.004;
 const glofasUriAll =
   "http://localhost:9000/collections/public.glofas_stations/items?limit=10000";
 const glofasUriFilter =
-  "http://localhost:9000/collections/public.glofas_stations/items?filter=country%3D%27ETH%27";
+  "http://localhost:9000/collections/public.glofas_stations/items?filter=country%3D%27MWI%27";
 
   let admLevel = 2;
   let cntry = "MW";
@@ -73,7 +74,7 @@ export function OlDataMap({
   onSelect,
 }: OlDataMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<Map | null>(null);
+  const mapInstanceRef = useRef<MapOl | null>(null);
   const legacy_countryInfo =
     selectedAdminRegion === noCountrySelectedValue
       ? undefined
@@ -85,10 +86,102 @@ export function OlDataMap({
 
   let adminLevel = 1;
   let selectedCode: string | null = null;
+  let selectedChildCode: string | null = null;
   
   let bordersLayer: VectorLayer | null = null;
+  let childBordersLayer: VectorLayer | null = null;
+  let glofasLayer: VectorLayer | null = null;
+
+  /*
+  ```
+Clicked feature properties:
+▸ {geometry: _Point, country: 'MWI', fid: 'G5670', id: 217, lat: -16.223, …}
+Clicked GLOFAS station:
+▸ {geometry: _Point, country: 'MWI', fid: 'G5670', id: 217, lat: -16.223, …}
+Clicked feature properties:
+▸ {geometry: _MultiPolygon, admin_level: 2, code: 'MW307', country: 'MW', id: 25948, …}
+Clicked feature properties:
+▸ {geometry: _Point, country: 'MWI', fid: 'G1724', id: 215, lat: -16.525, …}
+Clicked GLOFAS station:
+▸ {geometry: _Point, country: 'MWI', fid: 'G1724', id: 215, lat: -16.525, …}
+Clicked feature properties:
+▸ {geometry: _MultiPolygon, admin_level: 2, code: 'MW311', country: 'MW', id: 25942, …}
+Clicked feature properties:
+▸ {geometry: _Point, country: 'MWI', fid: 'G2001', id: 216, lat: -16.225, …}
+Clicked GLOFAS station:
+▸ {geometry: _Point, country: 'MWI', fid: 'G2001', id: 216, lat: -16.225, …}
+Clicked feature properties:
+▸ {geometry: _Point, country: 'MWI', fid: 'G5694', id: 218, lat: -16.025, …}
+Clicked GLOFAS station:
+▸ {geometry: _Point, country: 'MWI', fid: 'G5694', id: 218, lat: -16.025, …}
+Clicked feature properties:
+▸ {geometry: _MultiPolygon, admin_level: 2, code: 'MW310', country: 'MW', id: 25922, …}
+```
+  */
+
+const glofasMapAdmin2 = new Map([
+  ["G5670", "MW307"],
+  ["G1724", "MW311"],
+  ["G2001", "MW310"],
+  ["G5694", "MW310"],
+]);
+
+const glofasMapAdmin3 = new Map([
+  ["G5670", "MW30703"],
+  ["G1724", "MW31104"],
+  ["G2001", "MW31007"],
+  ["G5694", "MW31011"],
+]);
 
   useEffect(() => {
+    function showChildAdminRegions(country: string, parentCode: string, parentAdminLevel: number): void {
+      // Remove previous child layer if exists
+      if (childBordersLayer) {
+        mapInstanceRef.current?.removeLayer(childBordersLayer);
+      }
+
+      const childAdminLevel = parentAdminLevel + 1;
+      const childBorderUri = `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${country}%27%20AND%20admin_level=%27${childAdminLevel}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
+
+      // Reset selected child when showing new child regions
+      selectedChildCode = null;
+
+      childBordersLayer = new VectorLayer({
+        source: new VectorSource({
+          url: childBorderUri,
+          format: new GeoJSON(),
+        }),
+        style: (feature) => {
+          const code = feature.get(COL_CODE);
+          // Highlight selected child region in orange
+          if (code === selectedChildCode) {
+            return new Style({
+              fill: new Fill({
+                color: "rgba(255, 152, 0, 0.7)",
+              }),
+              stroke: new Stroke({
+                color: "#e65100",
+                width: 2,
+              }),
+            });
+          }
+          return new Style({
+            fill: new Fill({
+              color: "rgba(76, 175, 80, 0.6)",
+            }),
+            stroke: new Stroke({
+              color: "#2e7d32",
+              width: 1,
+            }),
+          });
+        },
+      });
+
+      // Ensure child borders render above parent borders
+      childBordersLayer.setZIndex(150);
+      mapInstanceRef.current?.addLayer(childBordersLayer);
+    }
+
     function showAdminRegions(): void {
       if (adminLevel === 1) {
         // Remove previous layer if exists
@@ -145,7 +238,7 @@ export function OlDataMap({
         zoom = legacy_countryInfo.initialZoom;
       }
 
-      mapInstanceRef.current = new Map({
+      mapInstanceRef.current = new MapOl({
         target: mapRef.current,
         controls: defaultControls({ attribution: false }),
 
@@ -186,29 +279,112 @@ export function OlDataMap({
 
       showAdminRegions();
 
-      // Change cursor on hover (borders layer only)
+      // Add GLOFAS stations layer
+      glofasLayer = new VectorLayer({
+        source: new VectorSource({
+          url: glofasUriFilter,
+          format: new GeoJSON(),
+        }),
+        style: new Style({
+          image: new Circle({
+            radius: 6,
+            fill: new Fill({
+              color: "rgba(255, 0, 0, 0.8)",
+            }),
+            stroke: new Stroke({
+              color: "#8b0000",
+              width: 1,
+            }),
+          }),
+        }),
+      });
+      glofasLayer.setZIndex(200);
+      mapInstanceRef.current.addLayer(glofasLayer);
+
+      // Change cursor on hover
       mapInstanceRef.current.on("pointermove", (evt) => {
         const pixel = mapInstanceRef.current!.getEventPixel(evt.originalEvent);
         const hit = mapInstanceRef.current!.hasFeatureAtPixel(pixel, {
-          layerFilter: (layer) => layer === bordersLayer,
+          layerFilter: (layer) => layer === bordersLayer || layer === childBordersLayer || layer === glofasLayer,
         });
         mapInstanceRef.current!.getTargetElement().style.cursor = hit
           ? "pointer"
           : "";
       });
 
-      // Click handler (borders layer only)
+      // Click handler
       mapInstanceRef.current.on("click", (evt) => {
-        mapInstanceRef.current!.forEachFeatureAtPixel(evt.pixel, (feature) => {
+        mapInstanceRef.current!.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
           const properties = feature.getProperties();
 
           // debug: print all the properties of the clicked feature
           console.log("Clicked feature properties:", properties);
 
+          // Check if clicked on GLOFAS station
+          if (layer === glofasLayer) {
+            console.log("glofas clicked:", properties);
+            const fid = properties.fid;
+            
+            // Zoom to station location
+            const stationLat = properties.lat;
+            const stationLon = properties.lon;
+            if (stationLat && stationLon) {
+              const stationCoords = fromLonLat([stationLon, stationLat]);
+              mapInstanceRef.current?.getView().animate({
+                center: stationCoords,
+                zoom: 10,
+                duration: 500,
+              });
+            }
+            
+            // Set admin2 as selected
+            const admin2Code = glofasMapAdmin2.get(fid);
+            if (admin2Code) {
+              selectedCode = admin2Code;
+              bordersLayer?.changed();
+              
+              // Show child admin regions (admin3) for the admin2 region
+              showChildAdminRegions(cntry, admin2Code, 2);
+              
+              // Set admin3 as selected child
+              const admin3Code = glofasMapAdmin3.get(fid);
+              if (admin3Code) {
+                selectedChildCode = admin3Code;
+                // Need to wait for child layer to load before calling changed()
+                setTimeout(() => {
+                  childBordersLayer?.changed();
+                }, 500);
+              }
+            }
+            return true;
+          }
+
           const newSelectedRegionCode =
             properties[COL_CODE] || noCountrySelectedValue;
           const newAdminLevel = properties[COL_ADMIN_LEVEL] || 0;
 
+          // Check if clicked on child layer (admin3)
+          if (layer === childBordersLayer) {
+            selectedChildCode = newSelectedRegionCode;
+            childBordersLayer?.changed();
+            
+            // Zoom to admin3 region
+            const geometry = feature.getGeometry();
+            if (geometry) {
+              const extent = geometry.getExtent();
+              if (extent[0] !== undefined && extent[1] !== undefined && extent[2] !== undefined && extent[3] !== undefined) {
+                const center: [number, number] = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+                mapInstanceRef.current?.getView().animate({
+                  center,
+                  zoom: 12,
+                  duration: 500,
+                });
+              }
+            }
+            return true;
+          }
+
+          // Clicked on parent layer (admin2)
           if (selectedAdminRegion !== newSelectedRegionCode) {
             onSelect(
               properties[COL_COUNTRY] || "",
@@ -220,9 +396,26 @@ export function OlDataMap({
             selectedCode = newSelectedRegionCode;
             bordersLayer?.changed();
 
-            // Change layer to show the next admin level down
-            // Set zoom and extents
-            // TODO
+            // Zoom to admin2 region
+            const geometry = feature.getGeometry();
+            if (geometry) {
+              const extent = geometry.getExtent();
+              if (extent[0] !== undefined && extent[1] !== undefined && extent[2] !== undefined && extent[3] !== undefined) {
+                const center: [number, number] = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+                mapInstanceRef.current?.getView().animate({
+                  center,
+                  zoom: 9,
+                  duration: 500,
+                });
+              }
+            }
+
+            // Show child admin regions (next level down)
+            showChildAdminRegions(
+              properties[COL_COUNTRY] || cntry,
+              newSelectedRegionCode,
+              newAdminLevel
+            );
 
             adminLevel = newAdminLevel;
           } else {
@@ -235,12 +428,16 @@ export function OlDataMap({
 
           return true;
         }, {
-          layerFilter: (layer) => layer === bordersLayer,
+          layerFilter: (layer) => layer === bordersLayer || layer === childBordersLayer || layer === glofasLayer,
         });
       });
     }
 
     return () => {
+      if (childBordersLayer) {
+        mapInstanceRef.current?.removeLayer(childBordersLayer);
+        childBordersLayer = null;
+      }
       if (mapInstanceRef.current) {
         mapInstanceRef.current.setTarget(undefined);
         mapInstanceRef.current = null;

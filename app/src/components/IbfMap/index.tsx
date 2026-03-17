@@ -99,11 +99,6 @@ export function IbfMapContainer() {
       <OlDataMap
         selectedCountry={selectedCountry}
         mapStyleJsonUrl={mapUrlSimpleStyleJson}
-        additionalVectorLayer={makeMvtLayerAsync(
-          selectedCountry,
-          mapUrlCountryVectorTiles,
-          styleSelectedCountryOverlay,
-        )}
         addLayerFunction={addDataLayer}
         onSelect={handleMapItemSelected}
       />
