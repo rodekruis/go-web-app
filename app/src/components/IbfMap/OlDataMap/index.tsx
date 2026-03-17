@@ -58,7 +58,7 @@ const glofasUriFilter =
   let admLevel = 2;
   let cntry = "MW";
   let code = "MW2";
-const borderUri_code = `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${cntry}%27%20AND%20code=%27${code}%27&limit=10000&transform=simplify,${factor}`;
+const borderUri_selected = `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${cntry}%27%20AND%20admin_level=%27${admLevel}%27%20AND%20code%20LIKE%20%27${code}%25%27&limit=10000&transform=simplify,${factor}`;
 const borderUri = `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${cntry}%27%20AND%20admin_level=%27${admLevel}%27&limit=10000&transform=simplify,${factor}`;
 // _2
 /**
