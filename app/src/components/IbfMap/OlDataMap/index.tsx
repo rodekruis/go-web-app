@@ -55,8 +55,12 @@ const glofasUriAll =
 const glofasUriFilter =
   "http://localhost:9000/collections/public.glofas_stations/items?filter=country%3D%27ETH%27";
 
-const borderUri = `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27UGA%27%20AND%20admin_level=%27adm3%27&limit=10000&transform=simplify,${factor}`;
-
+  let admLevel = 2;
+  let cntry = "MW";
+  let code = "MW2";
+const borderUri_code = `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${cntry}%27%20AND%20code=%27${code}%27&limit=10000&transform=simplify,${factor}`;
+const borderUri = `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${cntry}%27%20AND%20admin_level=%27${admLevel}%27&limit=10000&transform=simplify,${factor}`;
+// _2
 /**
  * OpenLayers map component for IBF data maps *
  * @returns A component that can be either standalone, or nested in a IbfMapContainer.
@@ -79,14 +83,13 @@ export function OlDataMap({
   let center = [0, 0];
   let zoom = 2;
 
-  let adminLevel = 0;
-  let showBorders = false;
+  let adminLevel = 1;
+  
   let bordersLayer: VectorLayer | null = null;
 
   useEffect(() => {
-    function toggleBorders(): void {
-      showBorders = !showBorders;
-      if (showBorders) {
+    function showAdminRegions(): void {
+      if (adminLevel === 1) {
         // Remove previous layer if exists
         if (bordersLayer) {
           mapInstanceRef.current?.removeLayer(bordersLayer);
@@ -107,6 +110,8 @@ export function OlDataMap({
           }),
         });
 
+        // Ensure borders render above base map tiles
+        bordersLayer.setZIndex(100);
         mapInstanceRef.current?.addLayer(bordersLayer);
       } else {
         // Remove borders layer
@@ -166,16 +171,20 @@ export function OlDataMap({
         });
       }
 
-      // Change cursor on hover
+      showAdminRegions();
+
+      // Change cursor on hover (borders layer only)
       mapInstanceRef.current.on("pointermove", (evt) => {
         const pixel = mapInstanceRef.current!.getEventPixel(evt.originalEvent);
-        const hit = mapInstanceRef.current!.hasFeatureAtPixel(pixel);
+        const hit = mapInstanceRef.current!.hasFeatureAtPixel(pixel, {
+          layerFilter: (layer) => layer === bordersLayer,
+        });
         mapInstanceRef.current!.getTargetElement().style.cursor = hit
           ? "pointer"
           : "";
       });
 
-      // Click handler
+      // Click handler (borders layer only)
       mapInstanceRef.current.on("click", (evt) => {
         mapInstanceRef.current!.forEachFeatureAtPixel(evt.pixel, (feature) => {
           const properties = feature.getProperties();
@@ -208,6 +217,8 @@ export function OlDataMap({
           selectedAdminRegion = newSelectedRegionCode;
 
           return true;
+        }, {
+          layerFilter: (layer) => layer === bordersLayer,
         });
       });
     }
