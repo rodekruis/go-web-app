@@ -41,3 +41,5 @@ export const styleSelectedCountryOverlay : MvtStyleCreator = (feature: FeatureLi
         fill: new Fill({ color: fillColor })
     });
 }
+
+// Move styles here from  the OlDataMap component

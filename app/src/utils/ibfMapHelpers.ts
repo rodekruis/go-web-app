@@ -8,7 +8,7 @@ import VectorTile from 'ol/source/VectorTile';
 
 // Debug file for raster testing.
 // This will be removed once the dev test flow is set up.
-export const debug_testImageName = `flood_map_ZMB_RP20_c0_b3857`;
+export const debug_testImageName = `flood_extent_7-hour_MWI`;
 
 /**
  * Create a vector tile layer for the map.
@@ -72,7 +72,8 @@ const getImageExtentsAsync = (name : string) => {
     // Currently this only supports the debug dev flow.
     // The logic will be added to later to support the actual meta data flow.
 
-    const jsonData = `${rasterImageDir}${name}.json`;
+    const jsonData = `${rasterImageDir}${name}_metadata.json`;
+    console.log(`Fetching image extents from ${jsonData}`);
     // fetch json and get the extents from it
     return fetch(jsonData)
         .then(response => response.json())

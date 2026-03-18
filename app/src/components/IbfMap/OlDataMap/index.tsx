@@ -275,6 +275,8 @@ const glofasMapAdmin3 = new Map([
       // Expose addLayer function to parent
       if (addLayerFunction) {
         addLayerFunction((newLayer: BaseLayer) => {
+          // Ensure layer appears above other layers
+          newLayer.setZIndex(2000);
           mapInstanceRef.current?.addLayer(newLayer);
         });
       }
