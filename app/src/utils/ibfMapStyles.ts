@@ -1,6 +1,7 @@
 import { FeatureLike } from "ol/Feature";
 import { CountryData, isoA2CountryNameProperty } from "./ibfMap";
 import { Fill, Stroke, Style } from 'ol/style';
+import Circle from 'ol/style/Circle';
 
 export type MvtStyleCreator = (feature: FeatureLike, selected: string) => Style;
 
@@ -42,4 +43,63 @@ export const styleSelectedCountryOverlay : MvtStyleCreator = (feature: FeatureLi
     });
 }
 
-// Move styles here from  the OlDataMap component
+// Admin child borders style (e.g., admin3 regions)
+export const styleChildBorder = (code: string, selectedChildCode: string | null): Style => {
+    // Highlight selected child region in orange
+    if (code === selectedChildCode) {
+        return new Style({
+            fill: new Fill({
+                color: "rgba(255, 152, 0, 0.7)",
+            }),
+            stroke: new Stroke({
+                color: "#e65100",
+                width: 2,
+            }),
+        });
+    }
+    return new Style({
+        fill: new Fill({
+            color: "rgba(76, 175, 80, 0.6)",
+        }),
+        stroke: new Stroke({
+            color: "#2e7d32",
+            width: 1,
+        }),
+    });
+};
+
+// Admin border style (e.g., admin2 regions)
+export const styleAdminBorder = (code: string, selectedCode: string | null, animComplete: boolean): Style => {
+    // Don't fill the selected region
+    if (code === selectedCode && animComplete) {
+        return new Style({
+            stroke: new Stroke({
+                color: "#fc1de6",
+                width: 1,
+            }),
+        });
+    }
+    return new Style({
+        fill: new Fill({
+            color: "rgba(87, 152, 227, 0.84)",
+        }),
+        stroke: new Stroke({
+            color: "#fc1de6",
+            width: 1,
+        }),
+    });
+};
+
+// GLOFAS stations point style
+export const styleGlofasStation = new Style({
+    image: new Circle({
+        radius: 6,
+        fill: new Fill({
+            color: "rgba(255, 0, 0, 0.8)",
+        }),
+        stroke: new Stroke({
+            color: "#8b0000",
+            width: 1,
+        }),
+    }),
+});

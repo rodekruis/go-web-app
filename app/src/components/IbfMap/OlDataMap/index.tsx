@@ -5,14 +5,11 @@ import { fromLonLat } from "ol/proj";
 import BaseLayer from "ol/layer/Base";
 import { defaults as defaultControls } from "ol/control/defaults.js";
 import { CountryData, noCountrySelectedValue } from "#utils/ibfMap";
+import { styleChildBorder, styleAdminBorder, styleGlofasStation } from "#utils/ibfMapStyles";
 import { apply } from "ol-mapbox-style";
 import styles from "./styles.module.css";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
-import Style from "ol/style/Style";
-import Fill from "ol/style/Fill";
-import Stroke from "ol/style/Stroke";
-import Circle from "ol/style/Circle";
 import GeoJSON from "ol/format/GeoJSON";
 
 interface OlDataMapProps {
@@ -155,27 +152,7 @@ const glofasMapAdmin3 = new Map([
         }),
         style: (feature) => {
           const code = feature.get(COL_CODE);
-          // Highlight selected child region in orange
-          if (code === selectedChildCode) {
-            return new Style({
-              fill: new Fill({
-                color: "rgba(255, 152, 0, 0.7)",
-              }),
-              stroke: new Stroke({
-                color: "#e65100",
-                width: 2,
-              }),
-            });
-          }
-          return new Style({
-            fill: new Fill({
-              color: "rgba(76, 175, 80, 0.6)",
-            }),
-            stroke: new Stroke({
-              color: "#2e7d32",
-              width: 1,
-            }),
-          });
+          return styleChildBorder(code, selectedChildCode);
         },
       });
 
@@ -197,24 +174,7 @@ const glofasMapAdmin3 = new Map([
           }),
           style: (feature) => {
             const code = feature.get(COL_CODE);
-            // Don't fill the selected region
-            if (code === selectedCode && animComplete) {
-              return new Style({
-                stroke: new Stroke({
-                  color: "#fc1de6",
-                  width: 1,
-                }),
-              });
-            }
-            return new Style({
-              fill: new Fill({
-                color: "rgba(87, 152, 227, 0.84)",
-              }),
-              stroke: new Stroke({
-                color: "#fc1de6",
-                width: 1,
-              }),
-            });
+            return styleAdminBorder(code, selectedCode, animComplete);
           },
         });
 
@@ -289,18 +249,7 @@ const glofasMapAdmin3 = new Map([
           url: glofasUriFilter,
           format: new GeoJSON(),
         }),
-        style: new Style({
-          image: new Circle({
-            radius: 6,
-            fill: new Fill({
-              color: "rgba(255, 0, 0, 0.8)",
-            }),
-            stroke: new Stroke({
-              color: "#8b0000",
-              width: 1,
-            }),
-          }),
-        }),
+        style: styleGlofasStation,
       });
       glofasLayer.setZIndex(200);
       mapInstanceRef.current.addLayer(glofasLayer);
