@@ -5,13 +5,12 @@ import { fromLonLat } from "ol/proj";
 import BaseLayer from "ol/layer/Base";
 import { defaults as defaultControls } from "ol/control/defaults.js";
 import { CountryData, noCountrySelectedValue } from "#utils/ibfMap";
-import { styleAdmin3Region, styleAdmin2region, styleGlofasStation } from "#utils/ibfMapStyles";
+import { styleAdmin1region, styleAdmin2region, styleAdmin3Region, styleGlofasStation } from "#utils/ibfMapStyles";
 import { apply } from "ol-mapbox-style";
 import styles from "./styles.module.css";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import GeoJSON from "ol/format/GeoJSON";
-import { get } from "http";
 
 interface OlDataMapProps {
   // ISO_A2 code of the selected country
@@ -92,12 +91,13 @@ export function OlDataMap({
   let center = [0, 0];
   let zoom = 2;
 
-  let adminLevel = 2;
-  let selectedCode: string | null = null;
-  let selectedChildCode: string | null = null;
+  let selectedAdmin1Code: string | null = null;
+  let selectedAdmin2Code: string | null = null;
+  let selectedAdmin3Code: string | null = null;
   
-  let bordersLayer: VectorLayer | null = null;
-  let childBordersLayer: VectorLayer | null = null;
+  let admin1Layer: VectorLayer | null = null;
+  let admin2Layer: VectorLayer | null = null;
+  let admin3Layer: VectorLayer | null = null;
   let glofasLayer: VectorLayer | null = null;
 
   /*
@@ -142,59 +142,83 @@ const glofasMapAdmin3 = new Map([
 ]);
 
   useEffect(() => {
-    function showChildAdminRegions(country: string, parentCode: string, parentAdminLevel: number): void {
-      // Remove previous child layer if exists
-      if (childBordersLayer) {
-        mapInstanceRef.current?.removeLayer(childBordersLayer);
+    // Show admin3 regions within a selected admin2 parent
+    function showAdmin3Regions(country: string, parentCode: string): void {
+      // Remove previous admin3 layer if exists
+      if (admin3Layer) {
+        mapInstanceRef.current?.removeLayer(admin3Layer);
       }
 
+      // Reset selected admin3 when showing new admin3 regions
+      selectedAdmin3Code = null;
 
-      // Reset selected child when showing new child regions
-      selectedChildCode = null;
-
-      childBordersLayer = new VectorLayer({
+      admin3Layer = new VectorLayer({
         source: new VectorSource({
-          url: getNestedAdminUrl(country, parentCode, parentAdminLevel + 1),
+          url: getNestedAdminUrl(country, parentCode, 3),
           format: new GeoJSON(),
         }),
         style: (feature) => {
           const code = feature.get(COL_CODE);
-          return styleAdmin3Region(code, selectedChildCode);
+          return styleAdmin3Region(code, selectedAdmin3Code);
         },
       });
 
-      // Ensure child borders render above parent borders
-      childBordersLayer.setZIndex(150);
-      mapInstanceRef.current?.addLayer(childBordersLayer);
+      // Ensure admin3 renders above admin2
+      admin3Layer.setZIndex(150);
+      mapInstanceRef.current?.addLayer(admin3Layer);
     }
 
-    function showAdminRegions(): void {
-      if (adminLevel === 2) {
-        // Remove previous layer if exists
-        if (bordersLayer) {
-          mapInstanceRef.current?.removeLayer(bordersLayer);
-        }
-        bordersLayer = new VectorLayer({
-          source: new VectorSource({
-            url: getAdminRegionUrl(selectedAdminRegion, adminLevel),
-            format: new GeoJSON(),
-          }),
-          style: (feature) => {
-            const code = feature.get(COL_CODE);
-            return styleAdmin2region(code, selectedCode, animComplete);
-          },
-        });
-
-        // Ensure borders render above base map tiles
-        bordersLayer.setZIndex(100);
-        mapInstanceRef.current?.addLayer(bordersLayer);
-      } else {
-        // Remove borders layer
-        if (bordersLayer) {
-          mapInstanceRef.current?.removeLayer(bordersLayer);
-          bordersLayer = null;
-        }
+    // Show admin2 regions within a selected admin1 parent
+    function showAdmin2Regions(country: string, parentCode: string): void {
+      // Remove previous admin2 and admin3 layers if they exist
+      if (admin2Layer) {
+        mapInstanceRef.current?.removeLayer(admin2Layer);
       }
+      if (admin3Layer) {
+        mapInstanceRef.current?.removeLayer(admin3Layer);
+        admin3Layer = null;
+      }
+
+      // Reset selected admin2 and admin3 when showing new admin2 regions
+      selectedAdmin2Code = null;
+      selectedAdmin3Code = null;
+
+      admin2Layer = new VectorLayer({
+        source: new VectorSource({
+          url: getNestedAdminUrl(country, parentCode, 2),
+          format: new GeoJSON(),
+        }),
+        style: (feature) => {
+          const code = feature.get(COL_CODE);
+          return styleAdmin2region(code, selectedAdmin2Code, animComplete);
+        },
+      });
+
+      // Ensure admin2 renders above admin1
+      admin2Layer.setZIndex(120);
+      mapInstanceRef.current?.addLayer(admin2Layer);
+    }
+
+    // Show admin1 regions (top level)
+    function showAdmin1Regions(): void {
+      // Remove previous admin1 layer if exists
+      if (admin1Layer) {
+        mapInstanceRef.current?.removeLayer(admin1Layer);
+      }
+      admin1Layer = new VectorLayer({
+        source: new VectorSource({
+          url: getAdminRegionUrl(selectedAdminRegion, 1),
+          format: new GeoJSON(),
+        }),
+        style: (feature) => {
+          const code = feature.get(COL_CODE);
+          return styleAdmin1region(code, selectedAdmin1Code, animComplete);
+        },
+      });
+
+      // Ensure admin1 renders above base map tiles
+      admin1Layer.setZIndex(100);
+      mapInstanceRef.current?.addLayer(admin1Layer);
     }
 
     if (mapRef.current && !mapInstanceRef.current) {
@@ -248,7 +272,7 @@ const glofasMapAdmin3 = new Map([
         });
       }
 
-      showAdminRegions();
+      showAdmin1Regions();
 
       // Add GLOFAS stations layer
       glofasLayer = new VectorLayer({
@@ -265,7 +289,7 @@ const glofasMapAdmin3 = new Map([
       mapInstanceRef.current.on("pointermove", (evt) => {
         const pixel = mapInstanceRef.current!.getEventPixel(evt.originalEvent);
         const hit = mapInstanceRef.current!.hasFeatureAtPixel(pixel, {
-          layerFilter: (layer) => layer === bordersLayer || layer === childBordersLayer || layer === glofasLayer,
+          layerFilter: (layer) => layer === admin1Layer || layer === admin2Layer || layer === admin3Layer || layer === glofasLayer,
         });
         mapInstanceRef.current!.getTargetElement().style.cursor = hit
           ? "pointer"
@@ -303,21 +327,29 @@ const glofasMapAdmin3 = new Map([
             // Set admin2 as selected
             const admin2Code = glofasMapAdmin2.get(fid);
             if (admin2Code) {
-              selectedCode = admin2Code;
-              bordersLayer?.changed();
+              // Derive admin1 code (first 3 chars, e.g., MW3 from MW307)
+              const admin1Code = admin2Code.substring(0, 3);
+              selectedAdmin1Code = admin1Code;
+              admin1Layer?.changed();
               
-              // Show child admin regions (admin3) for the admin2 region
-              showChildAdminRegions(selectedCountry, admin2Code, 2);
+              // Show admin2 regions for the admin1 parent
+              showAdmin2Regions(selectedCountry, admin1Code);
               
-              // Set admin3 as selected child
-              const admin3Code = glofasMapAdmin3.get(fid);
-              if (admin3Code) {
-                selectedChildCode = admin3Code;
-                // Need to wait for child layer to load before calling changed()
-                setTimeout(() => {
-                  childBordersLayer?.changed();
-                }, 500);
-              }
+              // Set admin2 as selected and show admin3
+              selectedAdmin2Code = admin2Code;
+              setTimeout(() => {
+                admin2Layer?.changed();
+                showAdmin3Regions(selectedCountry, admin2Code);
+                
+                // Set admin3 as selected
+                const admin3Code = glofasMapAdmin3.get(fid);
+                if (admin3Code) {
+                  selectedAdmin3Code = admin3Code;
+                  setTimeout(() => {
+                    admin3Layer?.changed();
+                  }, 500);
+                }
+              }, 500);
             }
             return true;
           }
@@ -326,10 +358,10 @@ const glofasMapAdmin3 = new Map([
             properties[COL_CODE] || noCountrySelectedValue;
           const newAdminLevel = properties[COL_ADMIN_LEVEL] || 0;
 
-          // Check if clicked on child layer (admin3)
-          if (layer === childBordersLayer) {
-            selectedChildCode = newSelectedRegionCode;
-            childBordersLayer?.changed();
+          // Check if clicked on admin3 layer
+          if (layer === admin3Layer) {
+            selectedAdmin3Code = newSelectedRegionCode;
+            admin3Layer?.changed();
             
             // Zoom to admin3 region
             const geometry = feature.getGeometry();
@@ -350,24 +382,22 @@ const glofasMapAdmin3 = new Map([
             return true;
           }
 
-          // Clicked on parent layer (admin2)
-          if (selectedAdminRegion !== newSelectedRegionCode) {
+          // Check if clicked on admin2 layer
+          if (layer === admin2Layer) {
             onSelect(
               properties[COL_COUNTRY] || "",
               newAdminLevel,
               newSelectedRegionCode,
             );
 
-            // Update selected code and refresh styles
-            selectedCode = newSelectedRegionCode;
-            bordersLayer?.changed();
+            // Update selected admin2 code and refresh styles
+            selectedAdmin2Code = newSelectedRegionCode;
+            admin2Layer?.changed();
 
-
-            // Show child admin regions (next level down)
-            showChildAdminRegions(
+            // Show admin3 regions for the selected admin2
+            showAdmin3Regions(
               properties[COL_COUNTRY] || selectedCountry,
-              newSelectedRegionCode,
-              newAdminLevel
+              newSelectedRegionCode
             );
 
             // Zoom to admin2 region
@@ -379,34 +409,73 @@ const glofasMapAdmin3 = new Map([
                 animComplete = false;
                 mapInstanceRef.current?.getView().animate({
                   center,
-                  zoom: 9,
+                  zoom: 10,
                   duration: 500,
                 }, () => {
                   animComplete = true;
                 });
               }
             }
+            return true;
+          }
 
-            adminLevel = newAdminLevel;
-          } else {
-            // deselect
-            // how will this be hit?
-            onSelect(noCountrySelectedValue, 0, "");
+          // Clicked on admin1 layer
+          if (layer === admin1Layer) {
+            onSelect(
+              properties[COL_COUNTRY] || "",
+              newAdminLevel,
+              newSelectedRegionCode,
+            );
+
+            // Update selected admin1 code and refresh styles
+            selectedAdmin1Code = newSelectedRegionCode;
+            admin1Layer?.changed();
+
+            // Show admin2 regions for the selected admin1
+            showAdmin2Regions(
+              properties[COL_COUNTRY] || selectedCountry,
+              newSelectedRegionCode
+            );
+
+            // Zoom to admin1 region
+            const geometry = feature.getGeometry();
+            if (geometry) {
+              const extent = geometry.getExtent();
+              if (extent[0] !== undefined && extent[1] !== undefined && extent[2] !== undefined && extent[3] !== undefined) {
+                const center: [number, number] = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+                animComplete = false;
+                mapInstanceRef.current?.getView().animate({
+                  center,
+                  zoom: 8,
+                  duration: 500,
+                }, () => {
+                  animComplete = true;
+                });
+              }
+            }
           }
 
           selectedAdminRegion = newSelectedRegionCode;
 
           return true;
         }, {
-          layerFilter: (layer) => layer === bordersLayer || layer === childBordersLayer || layer === glofasLayer,
+          layerFilter: (layer) => layer === admin1Layer || layer === admin2Layer || layer === admin3Layer || layer === glofasLayer,
         });
       });
     }
 
     return () => {
-      if (childBordersLayer) {
-        mapInstanceRef.current?.removeLayer(childBordersLayer);
-        childBordersLayer = null;
+      if (admin3Layer) {
+        mapInstanceRef.current?.removeLayer(admin3Layer);
+        admin3Layer = null;
+      }
+      if (admin2Layer) {
+        mapInstanceRef.current?.removeLayer(admin2Layer);
+        admin2Layer = null;
+      }
+      if (admin1Layer) {
+        mapInstanceRef.current?.removeLayer(admin1Layer);
+        admin1Layer = null;
       }
       if (mapInstanceRef.current) {
         mapInstanceRef.current.setTarget(undefined);
