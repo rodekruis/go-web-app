@@ -5,12 +5,13 @@ import { fromLonLat } from "ol/proj";
 import BaseLayer from "ol/layer/Base";
 import { defaults as defaultControls } from "ol/control/defaults.js";
 import { CountryData, noCountrySelectedValue } from "#utils/ibfMap";
-import { styleChildBorder, styleAdminBorder, styleGlofasStation } from "#utils/ibfMapStyles";
+import { styleAdmin3Region, styleAdmin2region, styleGlofasStation } from "#utils/ibfMapStyles";
 import { apply } from "ol-mapbox-style";
 import styles from "./styles.module.css";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import GeoJSON from "ol/format/GeoJSON";
+import { get } from "http";
 
 interface OlDataMapProps {
   // ISO_A2 code of the selected country
@@ -50,40 +51,48 @@ const admin1Factor = 0.01;
 const admin2Factor = 0.005;
 const admin3Factor = 0.004;
 
-const glofasUriAll =
-  "http://localhost:9000/collections/public.glofas_stations/items?limit=10000";
+// const glofasUriAll =  "http://localhost:9000/collections/public.glofas_stations/items?limit=10000";
 const glofasUriFilter =
   "http://localhost:9000/collections/public.glofas_stations/items?filter=country%3D%27MWI%27";
 
-  let admLevel = 2;
-  let cntry = "MW";
-  let code = "MW2";
-const borderUri_selected = `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${cntry}%27%20AND%20admin_level=%27${admLevel}%27%20AND%20code%20LIKE%20%27${code}%25%27&limit=10000&transform=simplify,${factor}`;
-const borderUri = `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${cntry}%27%20AND%20admin_level=%27${admLevel}%27&limit=10000&transform=simplify,${factor}`;
-// _2
+
+
+//const borderUri_selected = `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${cntry}%27%20AND%20admin_level=%27${admLevel}%27%20AND%20code%20LIKE%20%27${code}%25%27&limit=10000&transform=simplify,${factor}`;
+const getAdminRegionUrl = (country: string, adm: number): string => {
+  return `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27&limit=10000&transform=simplify,${factor}`;
+
+}
+
+const getNestedAdminUrl = (country: string, parentCode: string, adm: number): string => {
+    
+     return `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
+}
+
+
 /**
  * OpenLayers map component for IBF data maps *
  * @returns A component that can be either standalone, or nested in a IbfMapContainer.
  */
 export function OlDataMap({
-  selectedCountry: selectedAdminRegion,
+  selectedCountry,
   additionalVectorLayer,
   mapStyleJsonUrl,
   addLayerFunction,
   onSelect,
 }: OlDataMapProps) {
+  let selectedAdminRegion = selectedCountry;
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<MapOl | null>(null);
   const legacy_countryInfo =
-    selectedAdminRegion === noCountrySelectedValue
+    selectedCountry === noCountrySelectedValue
       ? undefined
-      : CountryData.get(selectedAdminRegion);
+      : CountryData.get(selectedCountry);
 
   // Default center/zoom which is overridden if a country is selected.
   let center = [0, 0];
   let zoom = 2;
 
-  let adminLevel = 1;
+  let adminLevel = 2;
   let selectedCode: string | null = null;
   let selectedChildCode: string | null = null;
   
@@ -139,20 +148,18 @@ const glofasMapAdmin3 = new Map([
         mapInstanceRef.current?.removeLayer(childBordersLayer);
       }
 
-      const childAdminLevel = parentAdminLevel + 1;
-      const childBorderUri = `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${country}%27%20AND%20admin_level=%27${childAdminLevel}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
 
       // Reset selected child when showing new child regions
       selectedChildCode = null;
 
       childBordersLayer = new VectorLayer({
         source: new VectorSource({
-          url: childBorderUri,
+          url: getNestedAdminUrl(country, parentCode, parentAdminLevel + 1),
           format: new GeoJSON(),
         }),
         style: (feature) => {
           const code = feature.get(COL_CODE);
-          return styleChildBorder(code, selectedChildCode);
+          return styleAdmin3Region(code, selectedChildCode);
         },
       });
 
@@ -162,19 +169,19 @@ const glofasMapAdmin3 = new Map([
     }
 
     function showAdminRegions(): void {
-      if (adminLevel === 1) {
+      if (adminLevel === 2) {
         // Remove previous layer if exists
         if (bordersLayer) {
           mapInstanceRef.current?.removeLayer(bordersLayer);
         }
         bordersLayer = new VectorLayer({
           source: new VectorSource({
-            url: borderUri,
+            url: getAdminRegionUrl(selectedAdminRegion, adminLevel),
             format: new GeoJSON(),
           }),
           style: (feature) => {
             const code = feature.get(COL_CODE);
-            return styleAdminBorder(code, selectedCode, animComplete);
+            return styleAdmin2region(code, selectedCode, animComplete);
           },
         });
 
@@ -300,7 +307,7 @@ const glofasMapAdmin3 = new Map([
               bordersLayer?.changed();
               
               // Show child admin regions (admin3) for the admin2 region
-              showChildAdminRegions(cntry, admin2Code, 2);
+              showChildAdminRegions(selectedCountry, admin2Code, 2);
               
               // Set admin3 as selected child
               const admin3Code = glofasMapAdmin3.get(fid);
@@ -358,7 +365,7 @@ const glofasMapAdmin3 = new Map([
 
             // Show child admin regions (next level down)
             showChildAdminRegions(
-              properties[COL_COUNTRY] || cntry,
+              properties[COL_COUNTRY] || selectedCountry,
               newSelectedRegionCode,
               newAdminLevel
             );

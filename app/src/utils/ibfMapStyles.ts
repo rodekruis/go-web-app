@@ -44,7 +44,7 @@ export const styleSelectedCountryOverlay : MvtStyleCreator = (feature: FeatureLi
 }
 
 // Admin child borders style (e.g., admin3 regions)
-export const styleChildBorder = (code: string, selectedChildCode: string | null): Style => {
+export const styleAdmin3Region = (code: string, selectedChildCode: string | null): Style => {
     // Highlight selected child region in orange
     if (code === selectedChildCode) {
         return new Style({
@@ -68,10 +68,9 @@ export const styleChildBorder = (code: string, selectedChildCode: string | null)
     });
 };
 
-// Admin border style (e.g., admin2 regions)
-export const styleAdminBorder = (code: string, selectedCode: string | null, animComplete: boolean): Style => {
-    // Don't fill the selected region
-    if (code === selectedCode && animComplete) {
+export const styleAdmin2region = (code: string, selectedCode: string | null, animComplete: boolean): Style => {
+    // Don't fill the selected region if the selected code starts with code
+    if (selectedCode && selectedCode.startsWith(code) && animComplete) {
         return new Style({
             stroke: new Stroke({
                 color: "#fc1de6",
@@ -85,6 +84,28 @@ export const styleAdminBorder = (code: string, selectedCode: string | null, anim
         }),
         stroke: new Stroke({
             color: "#fc1de6",
+            width: 1,
+        }),
+    });
+};
+
+
+export const styleAdmin1region = (code: string, selectedCode: string | null, animComplete: boolean): Style => {
+    // Don't fill the selected region
+    if (selectedCode && selectedCode.startsWith(code) && animComplete) {
+        return new Style({
+            stroke: new Stroke({
+                color: "#fcfc1d",
+                width: 1,
+            }),
+        });
+    }
+    return new Style({
+        fill: new Fill({
+            color: "rgba(112, 119, 93, 0.38)",
+        }),
+        stroke: new Stroke({
+            color: "#fcde1d",
             width: 1,
         }),
     });
