@@ -451,7 +451,7 @@ Clicked feature properties:
                   mapInstanceRef.current?.getView().animate(
                     {
                       center,
-                      zoom: 12,
+                      zoom: 11,
                       duration: 500,
                     },
                     () => {

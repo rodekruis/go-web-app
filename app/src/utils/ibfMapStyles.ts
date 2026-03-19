@@ -177,9 +177,9 @@ export const styleAdmin1region = (
 // GLOFAS stations point style
 export const styleGlofasStation = new Style({
   image: new Circle({
-    radius: 6,
+    radius: 10,
     fill: new Fill({
-      color: "rgba(255, 0, 0, 0.8)",
+      color: "rgba(235, 96, 96, 0.8)",
     }),
     stroke: new Stroke({
       color: "#8b0000",
