@@ -110,10 +110,7 @@ export const styleAdmin2region = (
   // Don't fill the selected region if the selected code starts with code
   if (selectedCode && selectedCode.startsWith(code) && animComplete) {
     return new Style({
-      stroke: new Stroke({
-        color: "#fc1de6",
-        width: 2,
-      }),
+
     });
   }
   // If an event is selected, return white at 50% alpha
@@ -133,7 +130,7 @@ export const styleAdmin2region = (
       color: "rgba(87, 152, 227, 0.84)",
     }),
     stroke: new Stroke({
-      color: "#fc1de6",
+      color: "rgba(35, 113, 203, 0.84)",
       width: 2,
     }),
   });
@@ -161,8 +158,8 @@ export const styleAdmin1region = (
         color: "rgba(255, 255, 255, 0.5)",
       }),
       stroke: new Stroke({
-        color: "#fcde1d",
-        width: 1,
+        color: "rgba(255, 255, 255, 0.5)",
+        width: 2,
       }),
     });
   }
@@ -171,8 +168,8 @@ export const styleAdmin1region = (
       color: "rgba(112, 119, 93, 0.38)",
     }),
     stroke: new Stroke({
-      color: "#fcde1d",
-      width: 1,
+      color: "#595959",
+      width: 2,
     }),
   });
 };

@@ -122,9 +122,9 @@ export function OlZoomMap({
     // Update layer visibility based on zoom level
     function updateLayerVisibility(currentZoom: number): void {
       if (admin1Layer && admin2Layer && admin3Layer) {
-        admin1Layer.setVisible(currentZoom < 8);
-        admin2Layer.setVisible(currentZoom >= 8 && currentZoom < 9);
-        admin3Layer.setVisible(currentZoom > 9);
+        admin1Layer.setVisible(currentZoom < 7 && !isEventSelected);
+        admin2Layer.setVisible(currentZoom >= 7 && currentZoom < 9 && !isEventSelected);
+        admin3Layer.setVisible(currentZoom >= 9 || isEventSelected);
       }
     }
 
