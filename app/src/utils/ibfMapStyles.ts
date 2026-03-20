@@ -4,7 +4,7 @@ import { Fill, Stroke, Style } from "ol/style";
 import Circle from "ol/style/Circle";
 
 export type MvtStyleCreator = (feature: FeatureLike, selected: string) => Style;
-const deselectedColor = "rgba(255, 255, 255, 0.62)";
+const deselectedColor = "rgba(0, 0, 0, 0.07)";
 // Debug style
 // Fix later
 //
@@ -48,6 +48,72 @@ export const styleSelectedCountryOverlay: MvtStyleCreator = (
   });
 };
 
+
+// Admin child borders style (e.g., admin3 regions)
+export const styleAdmin3Region_clear = (
+  code: string,
+  selectedChildCode: string | null,
+  affectedRegions: string[] | null,
+  isEventSelected: boolean,
+): Style => {
+  if (isEventSelected && affectedRegions && affectedRegions.includes(code)) {
+    if (selectedChildCode === null) {
+      return new Style({
+        fill: new Fill({
+          color: "rgba(255, 123, 0, 0.2)",
+        }),
+        stroke: new Stroke({
+          color: "#ff990091",
+          width: 2,
+        }),
+      });
+    }
+    if (code === selectedChildCode) {
+      return new Style({
+        fill: new Fill({
+          color: "rgba(255, 106, 0, 0)",
+        }),
+        stroke: new Stroke({
+          color: "#e65100",
+          width: 2,
+        }),
+      });
+    }
+    else {
+      return new Style({
+        fill: new Fill({
+          color: "rgba(0, 0, 0, 0.06)",
+        }),
+        stroke: new Stroke({
+          color: "#e65100",
+          width: 2,
+        }),
+      });
+    }
+  }
+  if (!isEventSelected) {
+    return new Style({
+      fill: new Fill({
+        color: "rgba(32, 194, 29, 0.72)",
+      }),
+      stroke: new Stroke({
+        color: "#169b248e",
+        width: 2,
+      }),
+    });
+  }
+  return new Style({
+    fill: new Fill({
+      color: deselectedColor,
+    }),
+    stroke: new Stroke({
+      color: deselectedColor,
+      width: 2,
+    }),
+  });
+};
+
+
 // Admin child borders style (e.g., admin3 regions)
 export const styleAdmin3Region = (
   code: string,
@@ -59,7 +125,7 @@ export const styleAdmin3Region = (
   if (code === selectedChildCode) {
     return new Style({
       fill: new Fill({
-        color: "rgba(255, 106, 0, 0.7)",
+        color: "rgba(255, 106, 0, 0)",
       }),
       stroke: new Stroke({
         color: "#e65100",

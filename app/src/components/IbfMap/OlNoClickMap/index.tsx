@@ -8,7 +8,7 @@ import { CountryData, noCountrySelectedValue } from "#utils/ibfMap";
 import {
   styleAdmin1region,
   styleAdmin2region,
-  styleAdmin3Region,
+  styleAdmin3Region_clear,
   styleGlofasStation,
 } from "#utils/ibfMapStyles";
 import { apply } from "ol-mapbox-style";
@@ -189,7 +189,7 @@ Clicked feature properties:
           const code = feature.get(COL_CODE);
           const affectedRegion =
             glofasMapRegionCodes.get(selectedGlofasId) || null;
-          return styleAdmin3Region(
+          return styleAdmin3Region_clear(
             code,
             selectedAdmin3Code,
             affectedRegion,
@@ -355,6 +355,31 @@ Clicked feature properties:
             // debug: print all the properties of the clicked feature
             console.log("Clicked feature properties222:", properties);
 
+            // Block clicking if admin 3 is selected. Clicking on the same admin 3 area though will
+            // delect it and put user at admin 2 view with the zoom set to the admin 2 level.
+            if (selectedAdmin3Code) {
+              const clickedCode =
+                properties[COL_CODE] || noCountrySelectedValue;
+              if (layer === admin3Layer && clickedCode === selectedAdmin3Code) {
+                selectedAdmin3Code = null;
+                admin3Layer?.changed();
+
+                // Zoom out to admin2 level
+                mapInstanceRef.current?.getView().animate(
+                  {
+                    zoom: 10,
+                    duration: 500,
+                  },
+                  () => {
+                    animComplete = true;
+                  },
+                );
+                return true;
+              } else {
+                return true;
+              }
+            }
+
             // Check if clicked on GLOFAS station
             if (layer === glofasLayer) {
               console.log("glofas clicked:", properties);
@@ -399,7 +424,7 @@ Clicked feature properties:
                   // Set admin3 as selected
                   const admin3Code = glofasMapAdmin3.get(selectedGlofasId);
                   if (admin3Code) {
-                    selectedAdmin3Code = admin3Code;
+                    //selectedAdmin3Code = admin3Code;
                     setTimeout(() => {
                       admin3Layer?.changed();
                     }, 500);
@@ -410,12 +435,11 @@ Clicked feature properties:
             }
 
             // only process more if an event is selected
-            if (!isEventSelected){
+            if (!isEventSelected) {
               return false;
             }
             const newSelectedRegionCode =
               properties[COL_CODE] || noCountrySelectedValue;
-            const newAdminLevel = properties[COL_ADMIN_LEVEL] || 0;
 
             console.log(`>>>>2 ${isEventSelected}`);
             let processAdmin3Clicks = layer === admin3Layer;
@@ -430,7 +454,7 @@ Clicked feature properties:
 
             // Check if clicked on admin3 layer
             if (processAdmin3Clicks) {
-            console.log(`>>>>processAdmin3Clicks ${isEventSelected}`);
+              console.log(`>>>>processAdmin3Clicks ${isEventSelected}`);
               selectedAdmin3Code = newSelectedRegionCode;
               admin3Layer?.changed();
               admin2Layer?.changed();
@@ -454,7 +478,7 @@ Clicked feature properties:
                   mapInstanceRef.current?.getView().animate(
                     {
                       center,
-                      zoom: 11,
+                      zoom: 12,
                       duration: 500,
                     },
                     () => {
@@ -465,8 +489,6 @@ Clicked feature properties:
               }
               return true;
             }
-
-
 
             // this is not hit
             selectedAdminRegion = newSelectedRegionCode;
