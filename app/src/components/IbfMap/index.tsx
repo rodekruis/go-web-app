@@ -9,12 +9,11 @@ import { IbfDataPanel } from "./IbfDataPanel";
 import { OlGlobalMap } from "./OlGlobalMap";
 import styles from "./styles.module.css";
 import {
-  adminLevelSearchParamsKey,
-  countrySearchParamsKey,
+  countryParamsKey,
   mapUrlCountryVectorTiles,
   mapUrlSimpleStyleJson,
   noCountrySelectedValue,
-  regionCodeSearchParamsKey,
+  eventIdParamsKey,
 } from "#utils/ibfMap";
 import {
   debug_testImageName,
@@ -32,7 +31,7 @@ export function IbfMapContainer() {
 
   // Initialize state directly from URL to avoid race condition
   const initialCountryCode =
-    searchParams.get(countrySearchParamsKey)?.toUpperCase() ||
+    searchParams.get(countryParamsKey)?.toUpperCase() ||
     noCountrySelectedValue;
   const [selectedCountry, setSelectedCountry] =
     useState<string>(initialCountryCode);
@@ -76,14 +75,13 @@ export function IbfMapContainer() {
   }, [isImageLayerVisible]);
 
   const handleMapItemSelected = useCallback(
-    (country: string, adminLevel: number, regionCode: string) => {
+    (country: string, eventId: string) => {
       setSelectedCountry(country);
 
       if (country) {
         setSearchParams({
-          [countrySearchParamsKey]: country,
-          [adminLevelSearchParamsKey]: adminLevel.toString(),
-          [regionCodeSearchParamsKey]: regionCode,
+          [countryParamsKey]: country,
+          [eventIdParamsKey]: eventId,
         });
       } else {
         setSearchParams({});

@@ -127,23 +127,3 @@ export const getNestedAdminUrl = (
 ): string => {
   return `http://localhost:9000/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
 };
-/*
-export const getAdmin3Layer = (country: string, parentCode: string) => {
-    new VectorLayer({
-        source: new VectorSource({
-          url: getNestedAdminUrl(country, parentCode, 3),
-          format: new GeoJSON(),
-        }),
-        style: (feature) => {
-          const code = feature.get(COL_CODE);
-          const affectedRegion =
-            EventFFFFMapRegionCodes.get(selectedEventId) || null;
-          return styleAdmin3Region(
-            code,
-            selectedAdmin3Code,
-            affectedRegion,
-            isEventSelected,
-          );
-        },
-      });
-}*/

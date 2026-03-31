@@ -6,7 +6,7 @@ import BaseLayer from "ol/layer/Base";
 import { defaults as defaultControls } from "ol/control/defaults.js";
 import { CountryData, noCountrySelectedValue } from "#utils/ibfMap";
 import {
-  showAdmin1Regions,
+  createAdminLayer,
   handleFeatureClick,
   type AdminLayerState,
 } from "#utils/ibfMapHandlers";
@@ -29,7 +29,7 @@ interface OlDataMapProps {
   addLayerFunction?: (addLayer: (layer: BaseLayer) => void) => void;
 
   // Callback for when a map item is selected.
-  onSelect: (country: string, adminLevel: number, regionCode: string) => void;
+  onSelect: (country: string, eventId: string) => void;
 }
 
 /**
@@ -56,42 +56,47 @@ export function OlDataMap({
 
   let TODO_eventLayer: VectorLayer | null = null;
 
-  const AffectedRegions = new Map([
-    [
-      "G5670",
-      ["MW30703", "MW30707", "MW30708", "MW30704", "MW30706", "MW30705"],
-    ],
-    [
-      "G1724",
-      [
-        "MW31104",
-        "MW31106",
-        "MW31105",
-        "MW31107",
-        "MW31120",
-        "MW31108",
-        "MW31109",
-      ],
-    ],
-    ["G2001", ["MW31007", "MW31002", "MW31008", "MW31001"]],
-    ["G5694", ["MW31011", "MW31004", "MW31005", "MW31020", "MW31006"]],
-  ]);
-
   useEffect(() => {
     const state: AdminLayerState = {
       mapInstance: null,
-      admin1Layer: null,
-      admin2Layer: null,
-      admin3Layer: null,
       selectedAdmin1Code: null,
       selectedAdmin2Code: null,
       selectedAdmin3Code: null,
       selectedAdminRegion: selectedCountry,
       selectedEventId: "",
       isEventSelected: false,
-      animComplete: true,
-      affectedRegions: AffectedRegions,
+      animComplete: true
     };
+
+    let admin1Layer: VectorLayer | null = null;
+    let admin2Layer: VectorLayer | null = null;
+    let admin3Layer: VectorLayer | null = null;
+
+    function addAdminLayer(level: 1 | 2 | 3, country?: string, parentCode?: string) {
+      // Remove layers at this level and below
+      if (level <= 3 && admin3Layer) {
+        mapInstanceRef.current?.removeLayer(admin3Layer);
+        admin3Layer = null;
+        state.selectedAdmin3Code = null;
+      }
+      if (level <= 2 && admin2Layer) {
+        mapInstanceRef.current?.removeLayer(admin2Layer);
+        admin2Layer = null;
+        state.selectedAdmin2Code = null;
+      }
+      if (level <= 1 && admin1Layer) {
+        mapInstanceRef.current?.removeLayer(admin1Layer);
+        admin1Layer = null;
+        state.selectedAdmin1Code = null;
+      }
+
+      const newLayer = createAdminLayer(state, level, country, parentCode);
+      mapInstanceRef.current?.addLayer(newLayer);
+
+      if (level === 1) admin1Layer = newLayer;
+      else if (level === 2) admin2Layer = newLayer;
+      else admin3Layer = newLayer;
+    }
     if (mapRef.current && !mapInstanceRef.current) {
       // If a country is selected, center/zoom in on it.
       if (legacy_countryInfo) {
@@ -144,17 +149,16 @@ export function OlDataMap({
       }
 
       state.mapInstance = mapInstanceRef.current;
-      showAdmin1Regions(state);
-
+      addAdminLayer(1);
 
       // Change cursor on hover
       mapInstanceRef.current.on("pointermove", (evt) => {
         const pixel = mapInstanceRef.current!.getEventPixel(evt.originalEvent);
         const hit = mapInstanceRef.current!.hasFeatureAtPixel(pixel, {
           layerFilter: (layer) =>
-            layer === state.admin1Layer ||
-            layer === state.admin2Layer ||
-            layer === state.admin3Layer ||
+            layer === admin1Layer ||
+            layer === admin2Layer ||
+            layer === admin3Layer ||
             layer === TODO_eventLayer,
         });
         mapInstanceRef.current!.getTargetElement().style.cursor = hit
@@ -167,20 +171,24 @@ export function OlDataMap({
         mapInstanceRef.current!.forEachFeatureAtPixel(
           evt.pixel,
           (feature, layer) => {
-            return handleFeatureClick(
+            const result = handleFeatureClick(
               state,
               feature,
               layer,
-              TODO_eventLayer,
+              { admin1: admin1Layer, admin2: admin2Layer, admin3: admin3Layer, event: TODO_eventLayer },
               selectedCountry,
               onSelect,
             );
+            if (result.showLevel) {
+              addAdminLayer(result.showLevel, result.country, result.parentCode);
+            }
+            return result.handled;
           },
           {
             layerFilter: (layer) =>
-              layer === state.admin1Layer ||
-              layer === state.admin2Layer ||
-              layer === state.admin3Layer ||
+              layer === admin1Layer ||
+              layer === admin2Layer ||
+              layer === admin3Layer ||
               layer === TODO_eventLayer,
           },
         );
@@ -188,17 +196,17 @@ export function OlDataMap({
     }
 
     return () => {
-      if (state.admin3Layer) {
-        mapInstanceRef.current?.removeLayer(state.admin3Layer);
-        state.admin3Layer = null;
+      if (admin3Layer) {
+        mapInstanceRef.current?.removeLayer(admin3Layer);
+        admin3Layer = null;
       }
-      if (state.admin2Layer) {
-        mapInstanceRef.current?.removeLayer(state.admin2Layer);
-        state.admin2Layer = null;
+      if (admin2Layer) {
+        mapInstanceRef.current?.removeLayer(admin2Layer);
+        admin2Layer = null;
       }
-      if (state.admin1Layer) {
-        mapInstanceRef.current?.removeLayer(state.admin1Layer);
-        state.admin1Layer = null;
+      if (admin1Layer) {
+        mapInstanceRef.current?.removeLayer(admin1Layer);
+        admin1Layer = null;
       }
       if (mapInstanceRef.current) {
         mapInstanceRef.current.setTarget(undefined);

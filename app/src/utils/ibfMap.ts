@@ -5,9 +5,8 @@ export const isoA2CountryNameProperty = 'iso_a2';
 export const noCountrySelectedValue = 'None';
 
 // URL search parameter keys
-export const countrySearchParamsKey = 'c';
-export const adminLevelSearchParamsKey = 'a';
-export const regionCodeSearchParamsKey = 'r';
+export const countryParamsKey = 'c';
+export const eventIdParamsKey = 'e';
 
 // Map URLs
 const maptilerBaseUrl = `https://api.maptiler.com`
