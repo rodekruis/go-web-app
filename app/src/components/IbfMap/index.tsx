@@ -21,8 +21,6 @@ import {
   makeMvtLayerAsync,
   makeStaticImageLayer,
 } from "#utils/ibfMapHelpers";
-import { OlZoomMap } from "./OlZoomMap";
-import { OlNoClickMap } from "./OlNoClickMap";
 
 /**
  * Base map component for IBF data maps *
@@ -102,23 +100,10 @@ export function IbfMapContainer() {
         onToggleImageLayer={handleToggleImageLayer}
         isLayerVisible={isImageLayerVisible}
       />
-      <h1>Regular</h1>
       <OlDataMap
         selectedCountry={selectedCountry}
         mapStyleJsonUrl={mapUrlSimpleStyleJson}
         addLayerFunction={addDataLayer}
-        onSelect={handleMapItemSelected}
-      />
-      <h1>No click</h1>
-      <OlNoClickMap
-        selectedCountry={selectedCountry}
-        mapStyleJsonUrl={mapUrlSimpleStyleJson}
-        onSelect={handleMapItemSelected}
-      />
-      <h1>Zoom</h1>
-      <OlZoomMap
-        selectedCountry={selectedCountry}
-        mapStyleJsonUrl={mapUrlSimpleStyleJson}
         onSelect={handleMapItemSelected}
       />
       <IbfDataPanel selectedCountry={selectedCountry} />
