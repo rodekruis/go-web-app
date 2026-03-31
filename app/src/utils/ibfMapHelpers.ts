@@ -72,7 +72,8 @@ const getImageExtentsAsync = (name : string) => {
     // Currently this only supports the debug dev flow.
     // The logic will be added to later to support the actual meta data flow.
 
-    const jsonData = `${rasterImageDir}${name}.json`;
+    const jsonData = `${rasterImageDir}${name}_metadata.json`;
+    console.log(`Fetching image extents from ${jsonData}`);
     // fetch json and get the extents from it
     return fetch(jsonData)
         .then(response => response.json())

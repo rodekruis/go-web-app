@@ -6,6 +6,8 @@ export const noCountrySelectedValue = 'None';
 
 // URL search parameter keys
 export const countrySearchParamsKey = 'c';
+export const adminLevelSearchParamsKey = 'a';
+export const regionCodeSearchParamsKey = 'r';
 
 // Map URLs
 const maptilerBaseUrl = `https://api.maptiler.com`
