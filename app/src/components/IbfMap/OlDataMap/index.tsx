@@ -14,6 +14,18 @@ import { apply } from "ol-mapbox-style";
 import styles from "./styles.module.css";
 import VectorLayer from "ol/layer/Vector";
 
+function createView(countryInfo?: CountryData) {
+  if (!countryInfo) {
+    return new View({ center: [0, 0], zoom: 2 });
+  }
+  return new View({
+    center: fromLonLat([countryInfo.latlon[1], countryInfo.latlon[0]]),
+    zoom: countryInfo.initialZoom,
+    extent: countryInfo.safeExtents,
+    constrainOnlyCenter: true,
+  });
+}
+
 interface OlDataMapProps {
   // ISO_A2 code of the selected country
   selectedCountry: string;
@@ -50,81 +62,47 @@ export function OlDataMap({
       ? undefined
       : CountryData.get(selectedCountry);
 
-  // Default center/zoom which is overridden if a country is selected.
-  let center = [0, 0];
-  let zoom = 2;
-
   let TODO_eventLayer: VectorLayer | null = null;
 
   useEffect(() => {
     const state: AdminLayerState = {
       mapInstance: null,
-      selectedAdmin1Code: null,
-      selectedAdmin2Code: null,
-      selectedAdmin3Code: null,
+      selectedAdminCodes: new Map([[1, null], [2, null], [3, null]]),
       selectedAdminRegion: selectedCountry,
       selectedEventId: "",
       isEventSelected: false,
       animComplete: true
     };
 
-    let admin1Layer: VectorLayer | null = null;
-    let admin2Layer: VectorLayer | null = null;
-    let admin3Layer: VectorLayer | null = null;
+    const adminLayers = new Map<number, VectorLayer>();
+
+    function isInteractiveLayer(layer: BaseLayer) {
+      return layer === TODO_eventLayer
+        || adminLayers.get(1) === layer
+        || adminLayers.get(2) === layer
+        || adminLayers.get(3) === layer;
+    }
 
     function addAdminLayer(level: 1 | 2 | 3, country?: string, parentCode?: string) {
       // Remove layers at this level and below
-      if (level <= 3 && admin3Layer) {
-        mapInstanceRef.current?.removeLayer(admin3Layer);
-        admin3Layer = null;
-        state.selectedAdmin3Code = null;
-      }
-      if (level <= 2 && admin2Layer) {
-        mapInstanceRef.current?.removeLayer(admin2Layer);
-        admin2Layer = null;
-        state.selectedAdmin2Code = null;
-      }
-      if (level <= 1 && admin1Layer) {
-        mapInstanceRef.current?.removeLayer(admin1Layer);
-        admin1Layer = null;
-        state.selectedAdmin1Code = null;
+      for (let l = 3; l >= level; l--) {
+        const existing = adminLayers.get(l);
+        if (existing) {
+          mapInstanceRef.current?.removeLayer(existing);
+          adminLayers.delete(l);
+          state.selectedAdminCodes.set(l, null);
+        }
       }
 
       const newLayer = createAdminLayer(state, level, country, parentCode);
       mapInstanceRef.current?.addLayer(newLayer);
-
-      if (level === 1) admin1Layer = newLayer;
-      else if (level === 2) admin2Layer = newLayer;
-      else admin3Layer = newLayer;
+      adminLayers.set(level, newLayer);
     }
     if (mapRef.current && !mapInstanceRef.current) {
-      // If a country is selected, center/zoom in on it.
-      if (legacy_countryInfo) {
-        center = fromLonLat([
-          legacy_countryInfo.latlon[1],
-          legacy_countryInfo.latlon[0],
-        ]);
-        zoom = legacy_countryInfo.initialZoom;
-      }
-
       mapInstanceRef.current = new MapOl({
         target: mapRef.current,
         controls: defaultControls({ attribution: false }),
-
-        view: legacy_countryInfo
-          ? new View({
-              center,
-              zoom,
-              // Constrain where the user can pan to
-              extent: legacy_countryInfo.safeExtents,
-              // The center of the country can't be panned off the view
-              // Not using this can make it hard to get the edge of the map to the screen center
-              constrainOnlyCenter: true,
-            })
-          : new View({
-              center,
-              zoom,
-            }),
+        view: createView(legacy_countryInfo),
       });
 
       if (additionalVectorLayer) {
@@ -155,11 +133,7 @@ export function OlDataMap({
       mapInstanceRef.current.on("pointermove", (evt) => {
         const pixel = mapInstanceRef.current!.getEventPixel(evt.originalEvent);
         const hit = mapInstanceRef.current!.hasFeatureAtPixel(pixel, {
-          layerFilter: (layer) =>
-            layer === admin1Layer ||
-            layer === admin2Layer ||
-            layer === admin3Layer ||
-            layer === TODO_eventLayer,
+          layerFilter: isInteractiveLayer,
         });
         mapInstanceRef.current!.getTargetElement().style.cursor = hit
           ? "pointer"
@@ -175,7 +149,8 @@ export function OlDataMap({
               state,
               feature,
               layer,
-              { admin1: admin1Layer, admin2: admin2Layer, admin3: admin3Layer, event: TODO_eventLayer },
+              adminLayers,
+              TODO_eventLayer,
               selectedCountry,
               onSelect,
             );
@@ -185,29 +160,17 @@ export function OlDataMap({
             return result.handled;
           },
           {
-            layerFilter: (layer) =>
-              layer === admin1Layer ||
-              layer === admin2Layer ||
-              layer === admin3Layer ||
-              layer === TODO_eventLayer,
+            layerFilter: isInteractiveLayer,
           },
         );
       });
     }
 
     return () => {
-      if (admin3Layer) {
-        mapInstanceRef.current?.removeLayer(admin3Layer);
-        admin3Layer = null;
+      for (const [, layer] of adminLayers) {
+        mapInstanceRef.current?.removeLayer(layer);
       }
-      if (admin2Layer) {
-        mapInstanceRef.current?.removeLayer(admin2Layer);
-        admin2Layer = null;
-      }
-      if (admin1Layer) {
-        mapInstanceRef.current?.removeLayer(admin1Layer);
-        admin1Layer = null;
-      }
+      adminLayers.clear();
       if (mapInstanceRef.current) {
         mapInstanceRef.current.setTarget(undefined);
         mapInstanceRef.current = null;

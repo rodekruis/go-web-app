@@ -8,6 +8,7 @@ import { noCountrySelectedValue } from "./ibfMap";
 import {
   getAdminRegionUrl,
   getNestedAdminUrl,
+  getAffectedRegionsForEvent,
   COL_CODE,
   COL_COUNTRY,
 } from "./ibfMapHelpers";
@@ -17,24 +18,25 @@ import {
   styleAdmin3Region,
 } from "./ibfMapStyles";
 
+// Fit the map view to a feature's geometry with animation
+function fitToFeature(state: AdminLayerState, feature: FeatureLike) {
+  const geometry = feature.getGeometry?.();
+  if (!geometry) return;
+  state.animComplete = false;
+  state.mapInstance?.getView().fit(geometry.getExtent(), {
+    duration: 500,
+    padding: [50, 50, 50, 50],
+    callback: () => { state.animComplete = true; },
+  });
+}
+
 export interface AdminLayerState {
   mapInstance: MapOl | null;
-  selectedAdmin1Code: string | null;
-  selectedAdmin2Code: string | null;
-  selectedAdmin3Code: string | null;
+  selectedAdminCodes: Map<number, string | null>;
   selectedAdminRegion: string;
   selectedEventId: string;
   isEventSelected: boolean;
   animComplete: boolean;
-}
-
-function getAffectedRegionsForEvent(eventId: string): string[] {
-  // TODO: debug code
-  // Replace with actual event data
-  if (eventId == "event1") {
-    return ["MW31104", "MW31106", "MW31105", "MW31108", "MW31109"];
-  }
-  return ["MW30703", "MW30707", "MW30708", "MW30704", "MW30706", "MW30705"];
 }
 
 const zIndexMap = { 1: 100, 2: 120, 3: 150 } as const;
@@ -66,7 +68,7 @@ export function createAdminLayer(
         );
         return styleAdmin3Region(
           code,
-          state.selectedAdmin3Code,
+          state.selectedAdminCodes.get(3) ?? null,
           affectedRegions,
           state.isEventSelected,
         );
@@ -74,14 +76,14 @@ export function createAdminLayer(
       if (adminLevel === 2) {
         return styleAdmin2region(
           code,
-          state.selectedAdmin2Code,
+          state.selectedAdminCodes.get(2) ?? null,
           state.animComplete,
           state.isEventSelected,
         );
       }
       return styleAdmin1region(
         code,
-        state.selectedAdmin1Code,
+        state.selectedAdminCodes.get(1) ?? null,
         state.animComplete,
         state.isEventSelected,
       );
@@ -99,25 +101,21 @@ export function handleFeatureClick(
   state: AdminLayerState,
   feature: FeatureLike,
   layer: BaseLayer,
-  layers: {
-    admin1: VectorLayer | null;
-    admin2: VectorLayer | null;
-    admin3: VectorLayer | null;
-    event: VectorLayer | null;
-  },
+  adminLayers: Map<number, VectorLayer>,
+  eventLayer: VectorLayer | null,
   selectedCountry: string,
   onSelect: (country: string, eventId: string) => void,
 ): { handled: boolean; showLevel?: 2 | 3; country?: string; parentCode?: string } {
   const properties = feature.getProperties();
   console.log("Clicked feature properties222:", properties);
 
-  if (layer === layers.event) {
+  if (layer === eventLayer) {
   }
 
   const newSelectedRegionCode = properties[COL_CODE] || noCountrySelectedValue;
 
   console.log(`>>>>2 ${state.isEventSelected}`);
-  let processAdmin3Clicks = layer === layers.admin3;
+  let processAdmin3Clicks = layer === adminLayers.get(3);
   if (processAdmin3Clicks && state.isEventSelected) {
     const affectedRegions = getAffectedRegionsForEvent(state.selectedEventId);
     if (!affectedRegions.includes(newSelectedRegionCode)) {
@@ -128,70 +126,44 @@ export function handleFeatureClick(
   // Clicked on admin3 layer
   if (processAdmin3Clicks) {
     console.log(`>>>>processAdmin3Clicks ${state.isEventSelected}`);
-    state.selectedAdmin3Code = newSelectedRegionCode;
-    layers.admin3?.changed();
-    layers.admin2?.changed();
-    layers.admin1?.changed();
+    state.selectedAdminCodes.set(3, newSelectedRegionCode);
+    for (const l of adminLayers.values()) l.changed();
 
-    const geometry = feature.getGeometry?.();
-    if (geometry) {
-      state.animComplete = false;
-      state.mapInstance?.getView().fit(geometry.getExtent(), {
-        duration: 500,
-        padding: [50, 50, 50, 50],
-        callback: () => { state.animComplete = true; },
-      });
-    }
+    fitToFeature(state, feature);
     return { handled: true };
   }
 
   console.log(`>>>>admin2 ${state.isEventSelected}`);
   // Clicked on admin2 layer
-  if (layer === layers.admin2 && state.isEventSelected === false) {
+  if (layer === adminLayers.get(2) && state.isEventSelected === false) {
     onSelect(
       properties[COL_COUNTRY] || "",
       state.selectedEventId,
     );
 
-    state.selectedAdmin2Code = newSelectedRegionCode;
-    layers.admin2?.changed();
+    state.selectedAdminCodes.set(2, newSelectedRegionCode);
+    adminLayers.get(2)?.changed();
 
     const country = properties[COL_COUNTRY] || selectedCountry;
 
-    const geometry = feature.getGeometry?.();
-    if (geometry) {
-      state.animComplete = false;
-      state.mapInstance?.getView().fit(geometry.getExtent(), {
-        duration: 500,
-        padding: [50, 50, 50, 50],
-        callback: () => { state.animComplete = true; },
-      });
-    }
+    fitToFeature(state, feature);
     return { handled: true, showLevel: 3, country, parentCode: newSelectedRegionCode };
   }
 
   console.log(`>>>>admin1 ${state.isEventSelected}`);
   // Clicked on admin1 layer
-  if (layer === layers.admin1 && state.isEventSelected === false) {
+  if (layer === adminLayers.get(1) && state.isEventSelected === false) {
     onSelect(
       properties[COL_COUNTRY] || "",
       state.selectedEventId,
     );
 
-    state.selectedAdmin1Code = newSelectedRegionCode;
-    layers.admin1?.changed();
+    state.selectedAdminCodes.set(1, newSelectedRegionCode);
+    adminLayers.get(1)?.changed();
 
     const country = properties[COL_COUNTRY] || selectedCountry;
 
-    const geometry = feature.getGeometry?.();
-    if (geometry) {
-      state.animComplete = false;
-      state.mapInstance?.getView().fit(geometry.getExtent(), {
-        duration: 500,
-        padding: [50, 50, 50, 50],
-        callback: () => { state.animComplete = true; },
-      });
-    }
+    fitToFeature(state, feature);
     return { handled: true, showLevel: 2, country, parentCode: newSelectedRegionCode };
   }
 
