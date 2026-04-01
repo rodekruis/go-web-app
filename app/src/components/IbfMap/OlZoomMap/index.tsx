@@ -42,12 +42,12 @@ let animComplete = true;
 // Simplification factor for admin boundaries
 const factor = 0.003;
 
-// const glofasUriAll =  "http://localhost:9000/collections/public.glofas_stations/items?limit=10000";
+// const glofasUriAll =  "http://localhost:9000/collections/debug.glofas_stations/items?limit=10000";
 const glofasUriFilter =
-  "http://localhost:9000/collections/public.glofas_stations/items?filter=country%3D%27MWI%27";
+  "http://localhost:9000/collections/debug.glofas_stations/items?filter=country%3D%27MWI%27";
 
 const getAdminRegionUrl = (country: string, adm: number): string => {
-  return `http://localhost:9000/collections/public.admin_boundaries/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27&limit=10000&transform=simplify,${factor}`;
+  return `http://localhost:9000/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27&limit=10000&transform=simplify,${factor}`;
 };
 
 /**
