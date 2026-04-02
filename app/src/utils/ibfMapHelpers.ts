@@ -51,6 +51,7 @@ export interface EventOverviewData {
   dataSources: Record<string, number>;
 
   alertCreatedDate: string; // ISO date string
+  alertLastUpdatedDate: string; // ISO date string
 }
 
 export interface EventAdminDetail {
@@ -203,6 +204,7 @@ export const mockAllEventsData_MW: AllEventsData = {
     ],
     dataSources: { Glofas: 85, WorldPop: 90, OtherSource: 72 },
     alertCreatedDate: "2026-04-01T08:30:00Z",
+    alertLastUpdatedDate: "2026-04-02T00:00:00Z",
   },
   event2: {
     eventType: "Flood",
@@ -327,6 +329,7 @@ export const mockAllEventsData_MW: AllEventsData = {
     ],
     dataSources: { Glofas: 78, WorldPop: 90, OtherSource: 88 },
     alertCreatedDate: "2026-04-01T14:15:00Z",
+    alertLastUpdatedDate: "2026-04-02T00:00:00Z",
   },
   event3: {
     eventType: "Flood",
@@ -479,6 +482,7 @@ export const mockAllEventsData_MW: AllEventsData = {
     ],
     dataSources: { Glofas: 70, WorldPop: 90, OtherSource: 65 },
     alertCreatedDate: "2026-04-01T19:45:00Z",
+    alertLastUpdatedDate: "2026-04-02T00:00:00Z",
   },
 };
 
@@ -579,6 +583,7 @@ export const mockAllEventsData_ZM: AllEventsData = {
     ],
     dataSources: { Glofas: 82, WorldPop: 90, OtherSource: 91 },
     alertCreatedDate: "2026-04-01T10:00:00Z",
+    alertLastUpdatedDate: "2026-04-02T00:00:00Z",
   },
   event2: {
     eventType: "Flood",
@@ -675,6 +680,7 @@ export const mockAllEventsData_ZM: AllEventsData = {
     ],
     dataSources: { Glofas: 90, WorldPop: 90, OtherSource: 78 },
     alertCreatedDate: "2026-04-01T16:30:00Z",
+    alertLastUpdatedDate: "2026-04-02T00:00:00Z",
   },
 };
 
