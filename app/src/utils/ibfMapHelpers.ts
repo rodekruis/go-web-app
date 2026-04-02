@@ -10,11 +10,9 @@ import type { AllEventsData, EventOverviewData, EventAdminDetail, Infrastructure
 // Re-export types for consumers
 export type { AllEventsData, EventOverviewData, EventAdminDetail, InfrastructureExposure };
 
-// Debug file for raster testing.
-// This will be removed once the dev test flow is set up.
-export const debug_testImageName = `flood_map_ZMB_RP20_c0_b3857`;
-
-export function getUpcomingEventData(country: string): AllEventsData {
+// Fetch upcoming or live event data for a country
+export function getEventData(country: string): AllEventsData {
+    // TODO: Use the API for fetching this for any country.
   if (country === "MW") {
     return mockAllEventsData_MW;
   } else if (country === "ZM") {
@@ -23,11 +21,24 @@ export function getUpcomingEventData(country: string): AllEventsData {
 }
 
 // Raw GitHub URLs for direct file access
+// TODO: move to where uris will be stored (env and other config file)
 const seedRepoEventDataUrl =
   "https://raw.githubusercontent.com/rodekruis/IBF-seed-data/main/raster-data/mock-events/rgba/";
 const seedRepoPopDataUrl =
   "https://raw.githubusercontent.com/rodekruis/IBF-seed-data/main/raster-data/population/rgba/";
 
+  // TODO: rework where this goes
+export const COL_COUNTRY = "country";
+export const COL_ADMIN_LEVEL = "admin_level";
+export const COL_CODE = "code";
+
+// example of factor numbers on vector object size:
+// full size: 300kb
+// .0005 = 279kb
+// .001 = 188kb
+// .05 = 53kb
+// .01 = 30kb
+const adminZoomToFactor : number[] = [0.01, 0.01, 0.005, 0.004];
 
 /**
  * Create a vector tile layer for the map.
@@ -51,12 +62,14 @@ export const makeMvtLayerAsync = (
   });
 };
 
+// TODO: can we just switch to ISO3 if we don't use that admin map from where we click on countries?
 export const getISO3FromISO2 = (iso2: string): string => {
   const iso2ToIso3Map: Record<string, string> = {
     MW: "MWI",
     ZM: "ZMB",
     // to do
   };
+
   const output = iso2ToIso3Map[iso2];
   if (!output) {
     console.warn(
@@ -67,6 +80,7 @@ export const getISO3FromISO2 = (iso2: string): string => {
   return output;
 };
 
+// Raster layer functions
 export const makeEventImageLayer = async (name: string) => {
   const baseUri = seedRepoEventDataUrl;
   return makeStaticImageLayer(baseUri, name);
@@ -133,17 +147,6 @@ const getImageExtentsAsync = async (
   }
 };
 
-export const COL_COUNTRY = "country";
-export const COL_ADMIN_LEVEL = "admin_level";
-export const COL_CODE = "code";
-
-// example of factor numbers on vector object size:
-// full size: 300kb
-// .0005 = 279kb
-// .001 = 188kb
-// .05 = 53kb
-// .01 = 30kb
-const adminZoomToFactor : number[] = [0.01, 0.01, 0.005, 0.004];
 
 export const getAdminRegionUrl = (country: string, adm: number): string => {
   let factor = adminZoomToFactor[adm];
@@ -167,6 +170,7 @@ export const getNestedAdminUrl = (
   return `http://localhost:9000/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
 };
 
+// TODO RM this
 export function getAffectedRegionsForEvent(eventId: string): string[] {
   // TODO: debug code
   // Replace with actual event data

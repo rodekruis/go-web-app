@@ -12,7 +12,7 @@ import {
   noCountrySelectedValue,
   eventIdParamsKey,
 } from "#utils/ibfMap";
-import { getUpcomingEventData, makeEventImageLayer, makePopulationImageLayer, type AllEventsData } from "#utils/ibfMapHelpers";
+import { getEventData, makeEventImageLayer, makePopulationImageLayer, type AllEventsData } from "#utils/ibfMapHelpers";
 
 /**
  * Base map component for IBF data maps *
@@ -29,7 +29,7 @@ export function IbfMapContainer() {
 
   // Load event data once on page load (memoized by country)
   const eventData: AllEventsData = useMemo(
-    () => getUpcomingEventData(selectedCountry),
+    () => getEventData(selectedCountry),
     [selectedCountry]
   );
 
