@@ -104,7 +104,7 @@ export function handleFeatureClick(
   adminLayers: Map<number, VectorLayer>,
   eventLayer: VectorLayer | null,
   selectedCountry: string,
-  onSelect: (country: string, eventId: string) => void,
+  onSelect: (eventId: string) => void,
 ): { handled: boolean; showLevel?: 2 | 3; country?: string; parentCode?: string } {
   const properties = feature.getProperties();
   console.log("Clicked feature properties222:", properties);
@@ -136,10 +136,7 @@ export function handleFeatureClick(
   console.log(`>>>>admin2 ${state.isEventSelected}`);
   // Clicked on admin2 layer
   if (layer === adminLayers.get(2) && state.isEventSelected === false) {
-    onSelect(
-      properties[COL_COUNTRY] || "",
-      state.selectedEventId,
-    );
+    onSelect(state.selectedEventId);
 
     state.selectedAdminCodes.set(2, newSelectedRegionCode);
     adminLayers.get(2)?.changed();
@@ -153,10 +150,7 @@ export function handleFeatureClick(
   console.log(`>>>>admin1 ${state.isEventSelected}`);
   // Clicked on admin1 layer
   if (layer === adminLayers.get(1) && state.isEventSelected === false) {
-    onSelect(
-      properties[COL_COUNTRY] || "",
-      state.selectedEventId,
-    );
+    onSelect(state.selectedEventId);
 
     state.selectedAdminCodes.set(1, newSelectedRegionCode);
     adminLayers.get(1)?.changed();

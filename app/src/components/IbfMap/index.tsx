@@ -1,25 +1,18 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import BaseLayer from "ol/layer/Base";
 import "ol/ol.css";
-import { styleSelectedCountryOverlay } from "#utils/ibfMapStyles";
 import { OlDataMap } from "./OlDataMap";
 import { IbfControlPanel } from "./IbfControlPanel";
 import { IbfDataPanel } from "./IbfDataPanel";
-import { OlGlobalMap } from "./OlGlobalMap";
 import styles from "./styles.module.css";
 import {
   countryParamsKey,
-  mapUrlCountryVectorTiles,
   mapUrlSimpleStyleJson,
   noCountrySelectedValue,
   eventIdParamsKey,
 } from "#utils/ibfMap";
-import {
-  debug_testImageName,
-  makeMvtLayerAsync,
-  makeStaticImageLayer,
-} from "#utils/ibfMapHelpers";
+import { getUpcomingEventData, makeEventImageLayer, makePopulationImageLayer, type AllEventsData } from "#utils/ibfMapHelpers";
 
 /**
  * Base map component for IBF data maps *
@@ -27,84 +20,117 @@ import {
  * @returns A standalone component
  */
 export function IbfMapContainer() {
-  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Initialize state directly from URL to avoid race condition
-  const initialCountryCode =
+  // Load the country from the search params
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCountry =
     searchParams.get(countryParamsKey)?.toUpperCase() ||
     noCountrySelectedValue;
-  const [selectedCountry, setSelectedCountry] =
-    useState<string>(initialCountryCode);
-  const [isImageLayerVisible, setIsImageLayerVisible] = useState(false);
 
-  // Stored add-layer function from OlDataMap
-  const addLayerRef = useRef<((layer: BaseLayer) => void) | null>(null);
+  // Load event data once on page load (memoized by country)
+  const eventData: AllEventsData = useMemo(
+    () => getUpcomingEventData(selectedCountry),
+    [selectedCountry]
+  );
 
-  // Cache the loaded image layer
-  // When we support more data layers, we'll need one for each data layer we want to toggle.
-  const imageLayerRef = useRef<BaseLayer | null>(null);
-
-  const addDataLayer = useCallback((addLayer: (layer: BaseLayer) => void) => {
-    addLayerRef.current = addLayer;
+  // Handle event selection from control panel
+  const handleEventClick = useCallback((eventId: string) => {
+    console.debug(`[IbfMap] Event selected: ${eventId}`);
   }, []);
 
-  const handleToggleImageLayer = useCallback(() => {
-    // If layer is already loaded, just toggle visibility
-    if (imageLayerRef.current) {
-      const newVisibility = !isImageLayerVisible;
-      imageLayerRef.current.setVisible(newVisibility);
-      setIsImageLayerVisible(newVisibility);
-      return;
-    }
-
-    // First time: load the layer
-    if (!addLayerRef.current) {
-      console.error("Map not ready yet");
-      return;
-    }
-
-    makeStaticImageLayer(debug_testImageName)
-      .then((imageLayer) => {
-        imageLayerRef.current = imageLayer;
-        addLayerRef.current?.(imageLayer);
-        setIsImageLayerVisible(true);
-      })
-      .catch((error) => {
-        console.error("Error loading static image layer:", error);
-      });
-  }, [isImageLayerVisible]);
-
+  // Callback to update search params based on user interactions.
   const handleMapItemSelected = useCallback(
-    (country: string, eventId: string) => {
-      setSelectedCountry(country);
-
-      if (country) {
+    (eventId: string) => {
+      if (eventId) {
         setSearchParams({
-          [countryParamsKey]: country,
+          [countryParamsKey]: selectedCountry,
           [eventIdParamsKey]: eventId,
         });
       } else {
         setSearchParams({});
       }
     },
-    [setSearchParams],
+    [],
   );
+
+
+
+  // Shared data state for map layers and cached data
+  const dataStateRef = useRef({
+    // Function to add a layer to the map (set by OlDataMap when ready)
+    addLayerFunction: null as ((layer: BaseLayer) => void) | null,
+    // Cache of loaded image layers by key
+    imageLayers: new Map<string, BaseLayer>(),
+  });
+
+  const addDataLayer = useCallback((addLayer: (layer: BaseLayer) => void) => {
+    dataStateRef.current.addLayerFunction = addLayer;
+  }, []);
+
+  // Toggle a layer by key - loads if not cached, toggles visibility if cached
+  const toggleLayer = useCallback(async (
+    key: string,
+    loadLayer: () => Promise<BaseLayer>
+  ) => {
+    if (!dataStateRef.current.addLayerFunction) {
+      console.error("Map not ready yet");
+      return;
+    }
+
+    const cachedLayer = dataStateRef.current.imageLayers.get(key);
+    if (cachedLayer) {
+      cachedLayer.setVisible(!cachedLayer.getVisible());
+      return;
+    }
+
+    try {
+      const layer = await loadLayer();
+      dataStateRef.current.imageLayers.set(key, layer);
+      dataStateRef.current.addLayerFunction(layer);
+    } catch (error) {
+      console.error(`Error loading layer ${key}:`, error);
+    }
+  }, []);
+
+  const handleToggleFloodExtents = useCallback((rasterImageId: string) => {
+    toggleLayer(`flood_${rasterImageId}`, () => makeEventImageLayer(rasterImageId));
+  }, [toggleLayer]);
+
+  const handleTogglePopulation = useCallback(() => {
+    toggleLayer(`population_${selectedCountry}`, () => makePopulationImageLayer(selectedCountry));
+  }, [toggleLayer, selectedCountry]);
+
+  const hideAllLayers = useCallback(() => {
+    for (const layer of dataStateRef.current.imageLayers.values()) {
+      layer.setVisible(false);
+    }
+  }, []);
 
 
 
   return (
     <div className={styles.container}>
-      <IbfControlPanel
-        onToggleImageLayer={handleToggleImageLayer}
-        isLayerVisible={isImageLayerVisible}
-      />
-      <OlDataMap
-        selectedCountry={selectedCountry}
-        mapStyleJsonUrl={mapUrlSimpleStyleJson}
-        addLayerFunction={addDataLayer}
-        onSelect={handleMapItemSelected}
-      />
       <IbfDataPanel selectedCountry={selectedCountry} />
+      <div className={styles.mainContent}>
+        <div className={styles.controlPanelColumn}>
+          <IbfControlPanel
+            eventData={eventData}
+            onEventClick={handleEventClick}
+            onToggleFloodExtents={handleToggleFloodExtents}
+            onTogglePopulation={handleTogglePopulation}
+            onHideAllLayers={hideAllLayers}
+            countryCode={selectedCountry}
+          />
+        </div>
+        <div className={styles.mapColumn}>
+          <OlDataMap
+            selectedCountry={selectedCountry}
+            mapStyleJsonUrl={mapUrlSimpleStyleJson}
+            addLayerFunction={addDataLayer}
+            onSelect={handleMapItemSelected}
+          />
+        </div>
+      </div>
     </div>
   );
 }

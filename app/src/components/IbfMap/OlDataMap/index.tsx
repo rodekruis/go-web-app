@@ -41,7 +41,7 @@ interface OlDataMapProps {
   addLayerFunction?: (addLayer: (layer: BaseLayer) => void) => void;
 
   // Callback for when a map item is selected.
-  onSelect: (country: string, eventId: string) => void;
+  onSelect: (eventId: string) => void;
 }
 
 /**
