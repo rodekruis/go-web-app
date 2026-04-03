@@ -2,6 +2,8 @@
 
 Some of the [readme](./README.md) instructions don't work or are incomplete. Rather than writing over the original readme and risk PRs getting held up over comments on strings, use this as the troubleshooting addendum.
 
+## Getting Started
+
 ### Local Development
 
 2. Initialize submodules
@@ -54,3 +56,9 @@ For now, the raster data image name is hardcoded, and is placed in the
 `APP_RASTER_IMAGE_DIR=/debug_raster/` dir as specified in the .env file with a meta data json file.
 
 See /app/src/utils/ibfMapHelpers.ts for the file name.
+
+## Contributing
+
+We follow the [Contribution Guide as defined in our IBF-repo](https://github.com/rodekruis/IBF/blob/main/docs/CONTRIBUTING.md#pull-request-guidelines)
+* [Contribution Guide →](./CONTRIBUTING.md)
+* [Collaboration Guide →](./COLLABORATING.md)
