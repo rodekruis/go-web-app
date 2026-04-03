@@ -1,10 +1,10 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import BaseLayer from "ol/layer/Base";
 import "ol/ol.css";
 import { OlDataMap } from "./OlDataMap";
 import { IbfControlPanel } from "./IbfControlPanel";
 import { IbfDataPanel } from "./IbfDataPanel";
+import { useIbfDataLoader } from "./useIbfDataLoader";
 import styles from "./styles.module.css";
 import {
   countryParamsKey,
@@ -12,7 +12,7 @@ import {
   noCountrySelectedValue,
   eventIdParamsKey,
 } from "#utils/ibfMap";
-import { getEventData, makeEventImageLayer, makePopulationImageLayer, type AllEventsData } from "#utils/ibfMapHelpers";
+import { getEventData, type AllEventsData } from "#utils/ibfMapHelpers";
 
 /**
  * Base map component for IBF data maps *
@@ -53,58 +53,13 @@ export function IbfMapContainer() {
     [],
   );
 
-
-
-  // Shared data state for map layers and cached data
-  const dataStateRef = useRef({
-    // Function to add a layer to the map (set by OlDataMap when ready)
-    addLayerFunction: null as ((layer: BaseLayer) => void) | null,
-    // Cache of loaded image layers by key
-    imageLayers: new Map<string, BaseLayer>(),
-  });
-
-  const addDataLayer = useCallback((addLayer: (layer: BaseLayer) => void) => {
-    dataStateRef.current.addLayerFunction = addLayer;
-  }, []);
-
-  // Toggle a layer by key - loads if not cached, toggles visibility if cached
-  const toggleLayer = useCallback(async (
-    key: string,
-    loadLayer: () => Promise<BaseLayer>
-  ) => {
-    if (!dataStateRef.current.addLayerFunction) {
-      console.error("Map not ready yet");
-      return;
-    }
-
-    const cachedLayer = dataStateRef.current.imageLayers.get(key);
-    if (cachedLayer) {
-      cachedLayer.setVisible(!cachedLayer.getVisible());
-      return;
-    }
-
-    try {
-      const layer = await loadLayer();
-      dataStateRef.current.imageLayers.set(key, layer);
-      dataStateRef.current.addLayerFunction(layer);
-    } catch (error) {
-      console.error(`Error loading layer ${key}:`, error);
-    }
-  }, []);
-
-  const handleToggleFloodExtents = useCallback((rasterImageId: string) => {
-    toggleLayer(`flood_${rasterImageId}`, () => makeEventImageLayer(rasterImageId));
-  }, [toggleLayer]);
-
-  const handleTogglePopulation = useCallback(() => {
-    toggleLayer(`population_${selectedCountry}`, () => makePopulationImageLayer(selectedCountry));
-  }, [toggleLayer, selectedCountry]);
-
-  const hideAllLayers = useCallback(() => {
-    for (const layer of dataStateRef.current.imageLayers.values()) {
-      layer.setVisible(false);
-    }
-  }, []);
+  // Data loader hook - manages layer loading and caching
+  const {
+    registerMapAddLayer,
+    toggleFloodExtents,
+    togglePopulation,
+    hideAllLayers,
+  } = useIbfDataLoader(selectedCountry);
 
 
 
@@ -116,8 +71,8 @@ export function IbfMapContainer() {
           <IbfControlPanel
             eventData={eventData}
             onEventClick={handleEventClick}
-            onToggleFloodExtents={handleToggleFloodExtents}
-            onTogglePopulation={handleTogglePopulation}
+            onToggleFloodExtents={toggleFloodExtents}
+            onTogglePopulation={togglePopulation}
             onHideAllLayers={hideAllLayers}
             countryCode={selectedCountry}
           />
@@ -126,7 +81,7 @@ export function IbfMapContainer() {
           <OlDataMap
             selectedCountry={selectedCountry}
             mapStyleJsonUrl={mapUrlSimpleStyleJson}
-            addLayerFunction={addDataLayer}
+            addLayerFunction={registerMapAddLayer}
             onSelect={handleMapItemSelected}
           />
         </div>

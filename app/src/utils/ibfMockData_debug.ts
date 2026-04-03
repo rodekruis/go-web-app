@@ -8,7 +8,7 @@ export const mockAllEventsData_MW: AllEventsData = {
     eventType: "Flood",
     eventName: "Flood - Malawi",
     eventId: "event1",
-    alertLevel: "warning",
+    alertLevel: "low",
     centroid: [33.78, -13.98], // Lilongwe City center
     startDate: "2026-04-01T06:00:00Z",
     endDate: "2026-04-12T18:00:00Z",
@@ -140,14 +140,14 @@ export const mockAllEventsData_MW: AllEventsData = {
       ],
     ],
     dataSources: { Glofas: 85, WorldPop: 90, OtherSource: 72 },
-    alertCreatedDate: "2026-04-01T08:30:00Z",
-    alertLastUpdatedDate: "2026-04-02T00:00:00Z",
+    eventCreatedDate: "2026-04-01T08:30:00Z",
+    eventLastUpdatedDate: "2026-04-02T00:00:00Z",
   },
   event2: {
     eventType: "Flood",
     eventName: "Flood - Malawi",
     eventId: "event2",
-    alertLevel: "alert",
+    alertLevel: "trigger",
     centroid: [35.32, -15.38], // Zomba center
     startDate: "2026-04-06T12:00:00Z",
     endDate: "2026-04-11T09:00:00Z",
@@ -265,8 +265,8 @@ export const mockAllEventsData_MW: AllEventsData = {
       ],
     ],
     dataSources: { Glofas: 78, WorldPop: 90, OtherSource: 88 },
-    alertCreatedDate: "2026-04-01T14:15:00Z",
-    alertLastUpdatedDate: "2026-04-02T00:00:00Z",
+    eventCreatedDate: "2026-04-01T14:15:00Z",
+    eventLastUpdatedDate: "2026-04-02T00:00:00Z",
   },
   event3: {
     eventType: "Flood",
@@ -418,8 +418,8 @@ export const mockAllEventsData_MW: AllEventsData = {
       ],
     ],
     dataSources: { Glofas: 70, WorldPop: 90, OtherSource: 65 },
-    alertCreatedDate: "2026-04-01T19:45:00Z",
-    alertLastUpdatedDate: "2026-04-02T00:00:00Z",
+    eventCreatedDate: "2026-04-01T19:45:00Z",
+    eventLastUpdatedDate: "2026-04-02T00:00:00Z",
   },
 };
 
@@ -429,7 +429,7 @@ export const mockAllEventsData_ZM: AllEventsData = {
     eventType: "Flood",
     eventName: "Flood - Zambia",
     eventId: "event1",
-    alertLevel: "warning",
+    alertLevel: "low",
     centroid: [24.8, -13.68], // Mufumbwe center
     startDate: "2026-04-05T08:00:00Z",
     endDate: "2026-04-10T14:00:00Z",
@@ -519,14 +519,14 @@ export const mockAllEventsData_ZM: AllEventsData = {
       ],
     ],
     dataSources: { Glofas: 82, WorldPop: 90, OtherSource: 91 },
-    alertCreatedDate: "2026-04-01T10:00:00Z",
-    alertLastUpdatedDate: "2026-04-02T00:00:00Z",
+    eventCreatedDate: "2026-04-01T10:00:00Z",
+    eventLastUpdatedDate: "2026-04-02T00:00:00Z",
   },
   event2: {
     eventType: "Flood",
     eventName: "Flood - Zambia",
     eventId: "event2",
-    alertLevel: "alert",
+    alertLevel: "trigger",
     centroid: [24.8, -13.68], // Mufumbwe center
     startDate: "2026-04-07T10:00:00Z",
     endDate: "2026-04-13T16:00:00Z",
@@ -616,7 +616,7 @@ export const mockAllEventsData_ZM: AllEventsData = {
       ],
     ],
     dataSources: { Glofas: 90, WorldPop: 90, OtherSource: 78 },
-    alertCreatedDate: "2026-04-01T16:30:00Z",
-    alertLastUpdatedDate: "2026-04-02T00:00:00Z",
+    eventCreatedDate: "2026-04-01T16:30:00Z",
+    eventLastUpdatedDate: "2026-04-02T00:00:00Z",
   },
 };

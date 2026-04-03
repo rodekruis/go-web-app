@@ -231,8 +231,8 @@ function EventDetailView({
 
       {/* Footer */}
       <div className={styles.footer}>
-        Event created on: {formatFooterDate(event.alertCreatedDate)}. Last
-        updated on: {formatFooterDate(event.alertLastUpdatedDate)}
+        Event created on: {formatFooterDate(event.eventCreatedDate)}. Last
+        updated on: {formatFooterDate(event.eventLastUpdatedDate)}
       </div>
     </div>
   );
