@@ -1,3 +1,14 @@
+// Other endpoints needed:
+//  - Get population raster + metadata (There is only one per country)
+//  - Get event raster + metadata (may be more than one per event)
+
+// Data handled through map server endpoints:
+//  - admin areas
+//  - point data (glofas, hospitals, etc.)
+//  - Roads (served as MVT vector tiles)
+//  - Buildings (also MVT) 
+
+
 export interface InfrastructureExposure {
   // counts of exposed infrastructure, by type
   // The numbers are [0] exposed, [1] total for affected regions.
