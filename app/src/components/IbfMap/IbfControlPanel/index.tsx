@@ -1,7 +1,6 @@
+import { Button } from '@ifrc-go/ui';
+
 import styles from './styles.module.css';
-import {
-    Button,
-} from '@ifrc-go/ui';
 
 interface IbfControlPanelProps {
     onToggleImageLayer: () => void;
@@ -27,7 +26,7 @@ export function IbfControlPanel({ onToggleImageLayer, isLayerVisible }: IbfContr
     return (
         <div className={styles.dataContainer}>
             <Button
-                name={"test_button_ID"}
+                name="test_button_ID"
                 onClick={onToggleImageLayer}
             >
                 {buttonText}

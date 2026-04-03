@@ -1,19 +1,36 @@
-import { useCallback, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import BaseLayer from 'ol/layer/Base';
 import 'ol/ol.css';
+
+import {
+    useCallback,
+    useRef,
+    useState,
+} from 'react';
+import { useSearchParams } from 'react-router-dom';
+import type BaseLayer from 'ol/layer/Base';
+
+import {
+    countrySearchParamsKey,
+    mapUrlCountryVectorTiles,
+    mapUrlSimpleStyleJson,
+    noCountrySelectedValue,
+} from '#utils/ibfMap';
+import {
+    debug_testImageName,
+    makeMvtLayerAsync,
+    makeStaticImageLayer,
+} from '#utils/ibfMapHelpers';
 import { styleSelectedCountryOverlay } from '#utils/ibfMapStyles';
-import { OlDataMap } from './OlDataMap';
+
 import { IbfControlPanel } from './IbfControlPanel';
 import { IbfDataPanel } from './IbfDataPanel';
+import { OlDataMap } from './OlDataMap';
 import { OlGlobalMap } from './OlGlobalMap';
+
 import styles from './styles.module.css';
-import { countrySearchParamsKey, mapUrlCountryVectorTiles, mapUrlSimpleStyleJson, noCountrySelectedValue } from '#utils/ibfMap';
-import { debug_testImageName, makeMvtLayerAsync, makeStaticImageLayer } from '#utils/ibfMapHelpers';
 
 /**
- * Base map component for IBF data maps * 
- * This component manages multiple nested components including for map data fetching, display, and control. * 
+ * Base map component for IBF data maps *
+ * This component manages multiple nested components including for map data fetching, display, and control. *
  * @returns A standalone component
  */
 export function IbfMapContainer() {
@@ -51,14 +68,14 @@ export function IbfMapContainer() {
         }
 
         makeStaticImageLayer(debug_testImageName)
-            .then(imageLayer => {
+            .then((imageLayer) => {
                 imageLayerRef.current = imageLayer;
                 addLayerRef.current?.(imageLayer);
                 setIsImageLayerVisible(true);
             })
-            .catch(error => {
+            .catch((error) => {
                 console.error('Error loading static image layer:', error);
-            })
+            });
     }, [isImageLayerVisible]);
 
     const handleCountrySelect = useCallback((country: string) => {
@@ -69,7 +86,6 @@ export function IbfMapContainer() {
         } else {
             setSearchParams({});
         }
-
     }, [setSearchParams]);
 
     return (
