@@ -21,8 +21,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW",
           adminLevel: 0,
           name: "Malawi",
-          exposedPopulation: 48400,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 48400, total: 48400 },
             { unit: "km", label: "Roads", key: "roads", exposed: 3200, total: 12000 },
             { unit: "", label: "Schools", key: "schools", exposed: 8, total: 32 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 3, total: 15 },
@@ -35,8 +35,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW2",
           adminLevel: 1,
           name: "Central",
-          exposedPopulation: 48400,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 48400, total: 48400 },
             { unit: "km", label: "Roads", key: "roads", exposed: 3200, total: 12000 },
             { unit: "", label: "Schools", key: "schools", exposed: 8, total: 32 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 3, total: 15 },
@@ -49,8 +49,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW210",
           adminLevel: 2,
           name: "Lilongwe City",
-          exposedPopulation: 48400,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 48400, total: 48400 },
             { unit: "km", label: "Roads", key: "roads", exposed: 3200, total: 12000 },
             { unit: "", label: "Schools", key: "schools", exposed: 8, total: 32 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 3, total: 15 },
@@ -63,8 +63,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW21046",
           adminLevel: 3,
           name: "Area 16",
-          exposedPopulation: 3200,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 3200, total: 3200 },
             { unit: "km", label: "Roads", key: "roads", exposed: 400, total: 2000 },
             { unit: "", label: "Schools", key: "schools", exposed: 1, total: 5 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 0, total: 2 },
@@ -74,8 +74,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW21043",
           adminLevel: 3,
           name: "Area 13",
-          exposedPopulation: 8500,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 8500, total: 8500 },
             { unit: "km", label: "Roads", key: "roads", exposed: 800, total: 3000 },
             { unit: "", label: "Schools", key: "schools", exposed: 2, total: 8 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 4 },
@@ -85,8 +85,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW21042",
           adminLevel: 3,
           name: "Area 12",
-          exposedPopulation: 12400,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 12400, total: 12400 },
             { unit: "km", label: "Roads", key: "roads", exposed: 1000, total: 3500 },
             { unit: "", label: "Schools", key: "schools", exposed: 2, total: 8 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 4 },
@@ -96,8 +96,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW21040",
           adminLevel: 3,
           name: "Area 10",
-          exposedPopulation: 18700,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 18700, total: 18700 },
             { unit: "km", label: "Roads", key: "roads", exposed: 700, total: 2500 },
             { unit: "", label: "Schools", key: "schools", exposed: 2, total: 7 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 3 },
@@ -107,8 +107,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW21031",
           adminLevel: 3,
           name: "Area 1",
-          exposedPopulation: 5600,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 5600, total: 5600 },
             { unit: "km", label: "Roads", key: "roads", exposed: 300, total: 1000 },
             { unit: "", label: "Schools", key: "schools", exposed: 1, total: 4 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 0, total: 2 },
@@ -137,8 +137,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW",
           adminLevel: 0,
           name: "Malawi",
-          exposedPopulation: 44600,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 44600, total: 44600 },
             { unit: "km", label: "Roads", key: "roads", exposed: 5600, total: 15000 },
             { unit: "", label: "Schools", key: "schools", exposed: 15, total: 48 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 6, total: 22 },
@@ -151,8 +151,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW3",
           adminLevel: 1,
           name: "Southern",
-          exposedPopulation: 44600,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 44600, total: 44600 },
             { unit: "km", label: "Roads", key: "roads", exposed: 5600, total: 15000 },
             { unit: "", label: "Schools", key: "schools", exposed: 15, total: 48 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 6, total: 22 },
@@ -165,8 +165,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW303",
           adminLevel: 2,
           name: "Zomba",
-          exposedPopulation: 44600,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 44600, total: 44600 },
             { unit: "km", label: "Roads", key: "roads", exposed: 5600, total: 15000 },
             { unit: "", label: "Schools", key: "schools", exposed: 15, total: 48 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 6, total: 22 },
@@ -179,8 +179,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW30303",
           adminLevel: 3,
           name: "SC Mkumbira",
-          exposedPopulation: 2100,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 2100, total: 2100 },
             { unit: "km", label: "Roads", key: "roads", exposed: 700, total: 2500 },
             { unit: "", label: "Schools", key: "schools", exposed: 2, total: 8 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 4 },
@@ -190,8 +190,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW30302",
           adminLevel: 3,
           name: "TA Mwambo",
-          exposedPopulation: 15800,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 15800, total: 15800 },
             { unit: "km", label: "Roads", key: "roads", exposed: 2000, total: 5000 },
             { unit: "", label: "Schools", key: "schools", exposed: 5, total: 15 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 2, total: 7 },
@@ -201,8 +201,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW30306",
           adminLevel: 3,
           name: "TA Mlumbe",
-          exposedPopulation: 19500,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 19500, total: 19500 },
             { unit: "km", label: "Roads", key: "roads", exposed: 2100, total: 5500 },
             { unit: "", label: "Schools", key: "schools", exposed: 6, total: 17 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 2, total: 8 },
@@ -212,8 +212,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW30301",
           adminLevel: 3,
           name: "TA Kuntumanji",
-          exposedPopulation: 7200,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 7200, total: 7200 },
             { unit: "km", label: "Roads", key: "roads", exposed: 800, total: 2000 },
             { unit: "", label: "Schools", key: "schools", exposed: 2, total: 8 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 3 },
@@ -242,8 +242,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW",
           adminLevel: 0,
           name: "Malawi",
-          exposedPopulation: 29600,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 29600, total: 29600 },
             { unit: "km", label: "Roads", key: "roads", exposed: 2100, total: 10500 },
             { unit: "", label: "Schools", key: "schools", exposed: 5, total: 28 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 2, total: 12 },
@@ -256,8 +256,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW2",
           adminLevel: 1,
           name: "Central",
-          exposedPopulation: 11700,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 11700, total: 11700 },
             { unit: "km", label: "Roads", key: "roads", exposed: 1000, total: 5500 },
             { unit: "", label: "Schools", key: "schools", exposed: 2, total: 14 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 6 },
@@ -267,8 +267,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW3",
           adminLevel: 1,
           name: "Southern",
-          exposedPopulation: 17900,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 17900, total: 17900 },
             { unit: "km", label: "Roads", key: "roads", exposed: 1100, total: 5000 },
             { unit: "", label: "Schools", key: "schools", exposed: 3, total: 14 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 6 },
@@ -281,8 +281,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW210",
           adminLevel: 2,
           name: "Lilongwe City",
-          exposedPopulation: 11700,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 11700, total: 11700 },
             { unit: "km", label: "Roads", key: "roads", exposed: 1000, total: 5500 },
             { unit: "", label: "Schools", key: "schools", exposed: 2, total: 14 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 6 },
@@ -292,8 +292,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW303",
           adminLevel: 2,
           name: "Zomba",
-          exposedPopulation: 17900,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 17900, total: 17900 },
             { unit: "km", label: "Roads", key: "roads", exposed: 1100, total: 5000 },
             { unit: "", label: "Schools", key: "schools", exposed: 3, total: 14 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 6 },
@@ -306,8 +306,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW21046",
           adminLevel: 3,
           name: "Area 16",
-          exposedPopulation: 3200,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 3200, total: 3200 },
             { unit: "km", label: "Roads", key: "roads", exposed: 400, total: 2500 },
             { unit: "", label: "Schools", key: "schools", exposed: 1, total: 6 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 0, total: 3 },
@@ -317,8 +317,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW21043",
           adminLevel: 3,
           name: "Area 13",
-          exposedPopulation: 8500,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 8500, total: 8500 },
             { unit: "km", label: "Roads", key: "roads", exposed: 600, total: 3000 },
             { unit: "", label: "Schools", key: "schools", exposed: 1, total: 8 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 3 },
@@ -328,8 +328,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW30303",
           adminLevel: 3,
           name: "SC Mkumbira",
-          exposedPopulation: 2100,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 2100, total: 2100 },
             { unit: "km", label: "Roads", key: "roads", exposed: 300, total: 1500 },
             { unit: "", label: "Schools", key: "schools", exposed: 1, total: 4 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 0, total: 2 },
@@ -339,8 +339,8 @@ export const mockAllEventsData_MW: AllEventsData = {
           placeCode: "MW30302",
           adminLevel: 3,
           name: "TA Mwambo",
-          exposedPopulation: 15800,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 15800, total: 15800 },
             { unit: "km", label: "Roads", key: "roads", exposed: 800, total: 3500 },
             { unit: "", label: "Schools", key: "schools", exposed: 2, total: 10 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 4 },
@@ -373,8 +373,8 @@ export const mockAllEventsData_ZM: AllEventsData = {
           placeCode: "ZM",
           adminLevel: 0,
           name: "Zambia",
-          exposedPopulation: 13100,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 13100, total: 13100 },
             { unit: "km", label: "Roads", key: "roads", exposed: 1800, total: 11000 },
             { unit: "", label: "Schools", key: "schools", exposed: 3, total: 18 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 8 },
@@ -387,8 +387,8 @@ export const mockAllEventsData_ZM: AllEventsData = {
           placeCode: "ZM70",
           adminLevel: 1,
           name: "Northwestern",
-          exposedPopulation: 13100,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 13100, total: 13100 },
             { unit: "km", label: "Roads", key: "roads", exposed: 1800, total: 11000 },
             { unit: "", label: "Schools", key: "schools", exposed: 3, total: 18 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 8 },
@@ -401,8 +401,8 @@ export const mockAllEventsData_ZM: AllEventsData = {
           placeCode: "ZM7004",
           adminLevel: 2,
           name: "Mufumbwe",
-          exposedPopulation: 13100,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 13100, total: 13100 },
             { unit: "km", label: "Roads", key: "roads", exposed: 1800, total: 11000 },
             { unit: "", label: "Schools", key: "schools", exposed: 3, total: 18 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 8 },
@@ -415,8 +415,8 @@ export const mockAllEventsData_ZM: AllEventsData = {
           placeCode: "080510707",
           adminLevel: 3,
           name: "Shukwe",
-          exposedPopulation: 4200,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 4200, total: 4200 },
             { unit: "km", label: "Roads", key: "roads", exposed: 700, total: 5000 },
             { unit: "", label: "Schools", key: "schools", exposed: 1, total: 8 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 0, total: 4 },
@@ -426,8 +426,8 @@ export const mockAllEventsData_ZM: AllEventsData = {
           placeCode: "080510705",
           adminLevel: 3,
           name: "Kalambu",
-          exposedPopulation: 8900,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 8900, total: 8900 },
             { unit: "km", label: "Roads", key: "roads", exposed: 1100, total: 6000 },
             { unit: "", label: "Schools", key: "schools", exposed: 2, total: 10 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 4 },
@@ -456,8 +456,8 @@ export const mockAllEventsData_ZM: AllEventsData = {
           placeCode: "ZM",
           adminLevel: 0,
           name: "Zambia",
-          exposedPopulation: 18800,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 18800, total: 18800 },
             { unit: "km", label: "Roads", key: "roads", exposed: 4500, total: 18000 },
             { unit: "", label: "Schools", key: "schools", exposed: 7, total: 25 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 4, total: 14 },
@@ -470,8 +470,8 @@ export const mockAllEventsData_ZM: AllEventsData = {
           placeCode: "ZM70",
           adminLevel: 1,
           name: "Northwestern",
-          exposedPopulation: 18800,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 18800, total: 18800 },
             { unit: "km", label: "Roads", key: "roads", exposed: 4500, total: 18000 },
             { unit: "", label: "Schools", key: "schools", exposed: 7, total: 25 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 4, total: 14 },
@@ -484,8 +484,8 @@ export const mockAllEventsData_ZM: AllEventsData = {
           placeCode: "ZM7004",
           adminLevel: 2,
           name: "Mufumbwe",
-          exposedPopulation: 18800,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 18800, total: 18800 },
             { unit: "km", label: "Roads", key: "roads", exposed: 4500, total: 18000 },
             { unit: "", label: "Schools", key: "schools", exposed: 7, total: 25 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 4, total: 14 },
@@ -498,8 +498,8 @@ export const mockAllEventsData_ZM: AllEventsData = {
           placeCode: "080510701",
           adminLevel: 3,
           name: "Kashima West",
-          exposedPopulation: 12500,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 12500, total: 12500 },
             { unit: "km", label: "Roads", key: "roads", exposed: 3000, total: 12000 },
             { unit: "", label: "Schools", key: "schools", exposed: 5, total: 16 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 3, total: 9 },
@@ -509,8 +509,8 @@ export const mockAllEventsData_ZM: AllEventsData = {
           placeCode: "080510702",
           adminLevel: 3,
           name: "Kashima East",
-          exposedPopulation: 6300,
-          exposedInfrastructure: [
+          exposure: [
+            { unit: "", label: "Population", key: "population", exposed: 6300, total: 6300 },
             { unit: "km", label: "Roads", key: "roads", exposed: 1500, total: 6000 },
             { unit: "", label: "Schools", key: "schools", exposed: 2, total: 9 },
             { unit: "", label: "Clinics", key: "clinics", exposed: 1, total: 5 },

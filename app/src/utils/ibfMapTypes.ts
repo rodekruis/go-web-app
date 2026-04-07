@@ -42,6 +42,7 @@ export interface EventOverviewData {
   // Event time range
   startTime: string; // ISO date string with hours
   endTime: string; // ISO date string with hours
+  peakTime: string; // ISO date string with hours
 
   // Event creation/update times
   firstIssuedAt: string; // ISO date string
@@ -66,8 +67,7 @@ export interface EventAdminAreaData {
   placeCode: string;
   adminLevel: number;
   name: string;
-  exposedPopulation: number;
-  exposedInfrastructure: ExposedItem[];
+  exposure: ExposedItem[];
 }
 
 // This would be a list of all upcoming events
@@ -88,4 +88,11 @@ export interface CountryMapData {
   // We need some way to know if IBF supports this or not,
   // and if so what kind of support (IBF, MRW, etc.)
   nrwSupport: string;
+}
+
+
+export interface MapLayerDetails {
+  id: string;
+  label: string;
+  displayType: string; //  e.g. "raster", "vector", "point", "mvt", etc.
 }
