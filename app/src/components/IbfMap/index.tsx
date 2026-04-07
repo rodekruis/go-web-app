@@ -1,4 +1,3 @@
-import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import "ol/ol.css";
 import { OlDataMap } from "./OlDataMap";
@@ -20,38 +19,39 @@ import { getEventData, type AllEventsData } from "#utils/ibfMapHelpers";
  * @returns A standalone component
  */
 export function IbfMapContainer() {
-
   // Load the country from the search params
+  // This is only done once at page load
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCountry =
-    searchParams.get(countryParamsKey)?.toUpperCase() ||
-    noCountrySelectedValue;
+    searchParams.get(countryParamsKey)?.toUpperCase() || noCountrySelectedValue;
 
-  // Load event data once on page load (memoized by country)
-  const eventData: AllEventsData = useMemo(
-    () => getEventData(selectedCountry),
-    [selectedCountry]
-  );
+  // Fetch the current latest event data once at first page load
+  const eventData: AllEventsData = getEventData(selectedCountry);
 
   // Handle event selection from control panel
-  const handleEventClick = useCallback((eventId: string) => {
+  const handleEventClick = (eventId: string) => {
+    // TODO: this will change map zoom, focus, etc.
     console.debug(`[IbfMap] Event selected: ${eventId}`);
-  }, []);
+  };
 
   // Callback to update search params based on user interactions.
-  const handleMapItemSelected = useCallback(
-    (eventId: string) => {
-      if (eventId) {
-        setSearchParams({
-          [countryParamsKey]: selectedCountry,
-          [eventIdParamsKey]: eventId,
-        });
-      } else {
-        setSearchParams({});
-      }
-    },
-    [],
-  );
+  const handleMapItemSelected = (eventId: string) => {
+    // TODO: pass what is clicked on to the data panel and UI panel.
+
+    // Set search params.
+    // TODO: set more values in the search params
+    if (eventId) {
+      setSearchParams({
+        [countryParamsKey]: selectedCountry,
+        [eventIdParamsKey]: eventId,
+      });
+    } else {
+      setSearchParams({
+        [countryParamsKey]: selectedCountry,
+        [eventIdParamsKey]: "",
+      });
+    }
+  };
 
   // Data loader hook - manages layer loading and caching
   const {
@@ -60,8 +60,6 @@ export function IbfMapContainer() {
     togglePopulation,
     hideAllLayers,
   } = useIbfDataLoader(selectedCountry);
-
-
 
   return (
     <div className={styles.container}>
