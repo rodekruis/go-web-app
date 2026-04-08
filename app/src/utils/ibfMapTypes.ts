@@ -1,6 +1,6 @@
 // Data types and structures for the IBF map backend and NRW frontend.
 // The enums are shared values between the backend and frontend.
-// Do not change any values without out first checking with the IBF backend team.
+// Do not change any values without first checking with the IBF backend team.
 
 export enum HazardType {
   Flood = "flood",
@@ -67,7 +67,7 @@ export interface MapLayerDetails {
   displayType: MapLayerDisplayType;
 }
 
-// Data for the an overview of an event
+// Data for an overview of an event
 export interface EventOverviewData {
   hazardType: HazardType[];
 
@@ -123,8 +123,8 @@ export interface EventAdminAreaData {
 // Data for all events, keyed by event ID
 export type AllEventsData = Record<string, EventOverviewData>;
 
-// Country-level non-event data.
-// This is a work in progress still, and will be mocked on the backend until we can know more what can be used.
+// Country-level non-event data
+// This is a work in progress still and will either have more data added to it, or merged into some other source.
 export interface CountryMapData {
   // Available map layers for the country that can be added
   availableLayers: MapLayerDetails[];
@@ -137,7 +137,7 @@ export interface CountryMapData {
 
 // Supported event data sources for a country.
 export enum EventDataSources {
-  IbfFLood = "ibf_flood",
+  IbfFlood = "ibf_flood",
   IbfDrought = "ibf_drought",
   MrwFlood = "mrw_flood",
 }
