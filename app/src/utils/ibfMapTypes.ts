@@ -1,68 +1,118 @@
-// Other endpoints needed:
-//  - Get population raster + metadata (There is only one per country)
-//  - Get event raster + metadata (may be more than one per event)
+// Data types and structures for the IBF map backend and NRW frontend.
+// The enums are shared values between the backend and frontend.
+// Do not change any values without out first checking with the IBF backend team.
 
-// Data handled through map server endpoints:
-//  - admin areas
-//  - point data (glofas, hospitals, etc.)
-//  - Roads (served as MVT vector tiles)
-//  - Buildings (also MVT) 
-
-
-export interface ExposedItem {
-  unit: string;
-  label: string;
-  key: string;
-  exposed: number;
-  total: number
+export enum HazardType {
+  Flood = "flood",
+  Drought = "drought",
 }
+
+export enum AlertClassType {
+  Trigger = "trigger",
+  High = "high",
+  Medium = "medium",  
+  Low = "low",
+}
+
+// Units for labelling values in the UI
+export enum MeasurementUnits {
+  Km = "km",
+  Buildings = "buildings",
+  People = "people",
+  Locations = "locations",
+  None = "",
+}
+
+// The types of items with exposure data
+export enum ExposedItemType {
+  Population = "population",
+  Buildings = "buildings",
+  Roads = "roads",
+  Schools = "schools",
+  Clinics = "clinics",
+}
+
+export enum MapLayerDataType {
+  Population = "population",
+  EventExtent = "event_extent",
+  RcLocs = "rc_locs",
+  Clinics = "clinics",
+}
+
+export enum MapLayerDisplayType {
+  Raster = "raster",
+  Vector = "vector",
+  Point = "point",
+  MVT = "mvt"
+}
+
+// Data for showing exposure of a given ExposedItemType
+export interface ExposedItem {
+  type: ExposedItemType;
+  exposed: number;
+  total: number;
+  unit: MeasurementUnits;
+}
+
+// Details for a data layer that can be added to a map
+export interface MapLayerDetails {
+  // ID that can be used to fetch the actual map layer data
+  resourceId: string;
+
+  // The type of data on this layer
+  // This can be used to label the layer in the UI, style it, etc.
+  dataType: MapLayerDataType;
   
+  // The way this data will be displayed
+  displayType: MapLayerDisplayType;
+}
 
-// Most general information about an event.
-// I don't foresee the payload being that large, but we need to check against real data.
-// Data layers and more detailed info would be queried through separate API calls
+// Data for the an overview of an event
 export interface EventOverviewData {
-  // Hazard types for this event in a list
-  // e.g. flood, drought, etc.
-  hazardType: string[];
+  hazardType: HazardType[];
 
-  eventName: string; // Human readable name
+  // Translated, user-facing name for the event
+  eventName: string;
+
+  // ID to later reference the event, as well as for making other API calls for related resources
   eventId: string;
 
-  // For alert level, we'll need to map this on the FE for coloring.
-  // The value here is more like an enum val, that we map to a string/color on the FE 
-  alertClass: string;
+  alertClass: AlertClassType;
 
   // Whether this is a triggering event or not.
   trigger: boolean;
 
   // affects where we zoom to, and where we place the icon on the map
-  centroid: [number, number]; // [lon, lat]
+  // [lon, lat]
+  centroid: [number, number];
 
-  // Event time range
-  startTime: string; // ISO date string with hours
-  endTime: string; // ISO date string with hours
-  peakTime: string; // ISO date string with hours
+  // Event time range, as ISO date strings with hours
+  startTime: string; 
+  endTime: string;
+  peakTime: string;
 
-  // Event creation/update times
-  firstIssuedAt: string; // ISO date string
-  lastUpdatedAt: string; // ISO date string
+  // Event creation/update times, as ISO date strings
+  firstIssuedAt: string;
+  lastUpdatedAt: string;
 
   // Lists of details for each exposed admin region, grouped by admin level (0, 1, 2...)
-  // Note: I added admin0 here, although we only went up to admin 1 in the pipelines.
-  // Should we just add admin0 to the pipelines? It makes it much easier for the FE 
   exposedAdminRegions: EventAdminAreaData[][];
 
-  // ID for the raster image layer, or null if none
-  // TODO: we need more layers. Should this be a list of layers? Or just more vals like this?
-  rasterImageId: string | null;
+  // Other data layers that can be added to the map for this event
+  availableLayers: MapLayerDetails[];
 
   // sources used for the data (Glofas, etc.)
-  dataSources: string[];
+  dataSources: DataSourceType[];
 
 }
 
-// Each admin area has this info
+// Sources for the data used in events, map layers, etc.
+export enum DataSourceType {
+  Glofas = "glofas",
+  Other = "other",
+}
+
+// Event data specific to an admin area. Each admin area with exposure has one of these.
 export interface EventAdminAreaData {
   placeCode: string;
   adminLevel: number;
@@ -70,29 +120,24 @@ export interface EventAdminAreaData {
   exposure: ExposedItem[];
 }
 
-// This would be a list of all upcoming events
-// I think the API would return this, since we normally only have 1 active event, and I don't
-// think this data would get too big. It needs to be checked against actual data.
+// Data for all events, keyed by event ID
 export type AllEventsData = Record<string, EventOverviewData>;
 
-// This is the TBD data you'd first get when loading a country.
-// It will be merged with other data
-// For now, it will be collecting items we know are shared at the country level,
-// but don't have another place for now.
-// We may also add an admin 0 layer to the admin boundaries DB, which could house some of this info
+// Country-level non-event data.
+// This is a work in progress still, and will be mocked on the backend until we can know more what can be used.
 export interface CountryMapData {
-  // ids of layers we have for this country
-  // i.e. population, water_points, etc.
-  availableLayers: string[];
+  // Available map layers for the country that can be added
+  availableLayers: MapLayerDetails[];
 
-  // We need some way to know if IBF supports this or not,
-  // and if so what kind of support (IBF, MRW, etc.)
-  nrwSupport: string;
+  // The event data sources for forecasted events.
+  // This can differentiate between supported event types as well as MRW/IBF data sources.
+  // If this is empty, then the country is not supported for NRW.
+  supportedEventDataSources: EventDataSources[];
 }
 
-
-export interface MapLayerDetails {
-  id: string;
-  label: string;
-  displayType: string; //  e.g. "raster", "vector", "point", "mvt", etc.
+// Supported event data sources for a country.
+export enum EventDataSources {
+  IbfFLood = "ibf_flood",
+  IbfDrought = "ibf_drought",
+  MrwFlood = "mrw_flood",
 }
