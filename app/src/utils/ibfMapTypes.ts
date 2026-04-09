@@ -97,7 +97,7 @@ export interface EventOverviewData {
   // Event time range, as ISO date strings with hours
   startTime: string; 
   endTime: string;
-  peakTime: string;
+  reachesPeakAlertClassTime: string;
 
   // Event creation/update times, as ISO date strings
   firstIssuedAt: string;

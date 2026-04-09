@@ -12,7 +12,7 @@ export const mockAllEventsData_MW: AllEventsData = {
     trigger: false,
     centroid: [33.78, -13.98], // Lilongwe City center
     startTime: "2026-04-01T06:00:00Z",
-    peakTime: "2026-04-07T12:00:00Z",
+    reachesPeakAlertClassTime: "2026-04-07T12:00:00Z",
     endTime: "2026-04-12T18:00:00Z",
     availableLayers: [{ resourceId: 'flood_extent_7-hour_MWI', dataType: MapLayerInfoType.EventExtent, displayType: MapLayerDisplayType.Raster }],
     exposedAdminAreas: [
@@ -129,7 +129,7 @@ export const mockAllEventsData_MW: AllEventsData = {
     trigger: true,
     centroid: [35.32, -15.38], // Zomba center
     startTime: "2026-04-06T12:00:00Z",
-    peakTime: "2026-04-08T18:00:00Z",
+    reachesPeakAlertClassTime: "2026-04-08T18:00:00Z",
     endTime: "2026-04-11T09:00:00Z",
     availableLayers: [{ resourceId: 'flood_extent_7-hour_MWI', dataType: MapLayerInfoType.EventExtent, displayType: MapLayerDisplayType.Raster }],
     exposedAdminAreas: [
@@ -235,7 +235,7 @@ export const mockAllEventsData_MW: AllEventsData = {
     trigger: false,
     centroid: [34.5, -14.5], // Between Lilongwe and Zomba
     startTime: "2026-04-08T15:00:00Z",
-    peakTime: "2026-04-10T06:00:00Z",
+    reachesPeakAlertClassTime: "2026-04-10T06:00:00Z",
     endTime: "2026-04-11T21:00:00Z",
     availableLayers: [],
     exposedAdminAreas: [
@@ -367,7 +367,7 @@ export const mockAllEventsData_ZM: AllEventsData = {
     trigger: false,
     centroid: [24.8, -13.68], // Mufumbwe center
     startTime: "2026-04-05T08:00:00Z",
-    peakTime: "2026-04-07T20:00:00Z",
+    reachesPeakAlertClassTime: "2026-04-07T20:00:00Z",
     endTime: "2026-04-10T14:00:00Z",
     availableLayers: [{ resourceId: 'flood_map_ZMB_RP20_c0_b3857', dataType: MapLayerInfoType.EventExtent, displayType: MapLayerDisplayType.Raster }],
     exposedAdminAreas: [
@@ -451,7 +451,7 @@ export const mockAllEventsData_ZM: AllEventsData = {
     trigger: true,
     centroid: [24.8, -13.68], // Mufumbwe center
     startTime: "2026-04-07T10:00:00Z",
-    peakTime: "2026-04-10T08:00:00Z",
+    reachesPeakAlertClassTime: "2026-04-10T08:00:00Z",
     endTime: "2026-04-13T16:00:00Z",
     availableLayers: [{ resourceId: 'flood_map_ZMB_RP20_c0_b3857', dataType: MapLayerInfoType.EventExtent, displayType: MapLayerDisplayType.Raster }],
     exposedAdminAreas: [
