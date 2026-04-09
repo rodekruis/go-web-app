@@ -4,11 +4,12 @@ import ImageLayer from "ol/layer/Image";
 import ImageStatic from "ol/source/ImageStatic";
 import { MvtStyleCreator } from "./ibfMapStyles";
 import VectorTile from "ol/source/VectorTile";
-import { mockAllEventsData_MW, mockAllEventsData_ZM } from "./ibfMockData_debug_old";
-import type { AllEventsData, EventOverviewData, EventAdminDetail, InfrastructureExposure } from "./ibfMapTypes_old";
+import { mockAllEventsData_MW, mockAllEventsData_ZM } from "./ibfMockData_debug";
+import type { AllEventsData, EventOverviewData, EventAdminAreaData, ExposureCategory, MapLayerDetails } from "./ibfMapTypes";
 
 // Re-export types for consumers
-export type { AllEventsData, EventOverviewData, EventAdminDetail, InfrastructureExposure };
+export type { AllEventsData, EventOverviewData, EventAdminAreaData, ExposureCategory, MapLayerDetails };
+export { ExposedItemType } from "./ibfMapTypes";
 
 // Fetch upcoming or live event data for a country
 export function getCurrentCountryEventData(country: string): AllEventsData {

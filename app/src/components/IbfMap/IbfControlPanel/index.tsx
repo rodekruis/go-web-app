@@ -2,10 +2,48 @@ import { useState } from "react";
 import {
   type AllEventsData,
   type EventOverviewData,
+  type EventAdminAreaData,
+  type ExposureCategory,
+  ExposedItemType,
 } from "#utils/ibfMapHelpers";
+import { MapLayerDisplayType } from "#utils/ibfMapTypes";
 import styles from "./styles.module.css";
 import { Button } from "@ifrc-go/ui";
 import { ChevronDownLineIcon, ChevronUpLineIcon } from "@ifrc-go/icons";
+
+// Helper to get exposure value by type from the exposure array
+function getExposureByType(
+  exposure: ExposureCategory[] | undefined,
+  type: ExposedItemType
+): ExposureCategory | undefined {
+  return exposure?.find((e) => e.type === type);
+}
+
+// Helper to get population exposure from admin area
+function getPopulation(adminArea: EventAdminAreaData | undefined): number {
+  const popExposure = getExposureByType(adminArea?.exposure, ExposedItemType.Population);
+  return popExposure?.exposed ?? 0;
+}
+
+// Get the first raster layer resourceId from availableLayers, or null if none
+function getRasterLayerId(event: EventOverviewData): string | null {
+  const rasterLayer = event.availableLayers.find(
+    (layer) => layer.displayType === MapLayerDisplayType.Raster
+  );
+  return rasterLayer?.resourceId ?? null;
+}
+
+// Format label for exposure type - uses type value with _ID appended if no user-friendly label
+function getExposureLabel(type: ExposedItemType): string {
+  const labels: Record<ExposedItemType, string> = {
+    [ExposedItemType.Population]: "Population",
+    [ExposedItemType.Buildings]: "Buildings",
+    [ExposedItemType.Roads]: "Roads",
+    [ExposedItemType.Schools]: "Schools",
+    [ExposedItemType.Clinics]: "Health Clinics",
+  };
+  return labels[type] ?? `${type}_ID`;
+}
 
 interface EventButtonProps {
   event: EventOverviewData;
@@ -20,10 +58,10 @@ interface EventDetailViewProps {
 }
 
 /**
- * Formats event start date for display.
+ * Formats event start time for display.
  */
-function formatStartDate(startDate: string): string {
-  const start = new Date(startDate);
+function formatStartDate(startTime: string): string {
+  const start = new Date(startTime);
   return start.toLocaleDateString("en-US", {
     year: "numeric",
     month: "2-digit",
@@ -84,14 +122,18 @@ function EventDetailView({
   onTogglePopulation,
 }: EventDetailViewProps) {
   // Get admin data at different levels
-  const admin0 = event.affectedAdminRegions[0]?.[0];
-  const admin1Regions = event.affectedAdminRegions[1] ?? [];
-  const admin3Regions = event.affectedAdminRegions[3] ?? [];
+  const admin0 = event.exposedAdminAreas[0]?.[0];
+  const admin1Regions = event.exposedAdminAreas[1] ?? [];
+  const admin3Regions = event.exposedAdminAreas[3] ?? [];
 
-  const totalPopulation = admin0?.impactedPopulation ?? 0;
-  const totalHouseholds = admin0?.impactedHouseholds ?? 0;
+  const totalPopulation = getPopulation(admin0);
   const exposedDistrictsCount = admin3Regions.length;
-  const infraExposure = admin0?.infrastructureExposure;
+  const rasterLayerId = getRasterLayerId(event);
+  
+  // Get exposure categories for infrastructure (exclude population)
+  const infraExposure = admin0?.exposure.filter(
+    (e) => e.type !== ExposedItemType.Population
+  ) ?? [];
 
   return (
     <div className={styles.eventDetailView}>
@@ -105,27 +147,27 @@ function EventDetailView({
         <div className={styles.headerLeft}>
           <span className={styles.headerTitle}>{event.eventName}</span>
         </div>
-        <span className={styles.severityBadge}>{event.alertLevel}</span>
+        <span className={styles.severityBadge}>{event.alertClass}</span>
       </div>
 
       {/* Event Info */}
       <div className={styles.eventInfo}>
         <div className={styles.infoRow}>
-          <span>Started on: {formatStartDate(event.startDate)}</span>
+          <span>Started on: {formatStartDate(event.startTime)}</span>
         </div>
         <div className={styles.infoRow}>
           <span>
-            {admin1Regions.map((r) => r.adminName).join(", ") || "N/A"}
+            {admin1Regions.map((r) => r.name).join(", ") || "N/A"}
           </span>
         </div>
       </div>
 
       {/* Raster Layer Buttons */}
       <div className={styles.buttonGroup}>
-        {event.rasterImageId && (
+        {rasterLayerId && (
           <Button
             name="toggleFlood"
-            onClick={() => onToggleFloodExtents(event.rasterImageId!)}
+            onClick={() => onToggleFloodExtents(rasterLayerId)}
           >
             Toggle flood extents
           </Button>
@@ -150,12 +192,6 @@ function EventDetailView({
             </span>
           </div>
         </div>
-        <div className={styles.statItemFull}>
-          <span className={styles.statLabel}>Total Households Exposed</span>
-          <span className={styles.statValue}>
-            {totalHouseholds.toLocaleString()}
-          </span>
-        </div>
 
         {/* District Table */}
         <div className={styles.districtTable}>
@@ -164,75 +200,50 @@ function EventDetailView({
             <span>Exposed Population</span>
           </div>
           {admin3Regions.map((district) => (
-            <div key={district.adminCode} className={styles.districtTableRow}>
-              <span>{district.adminName}</span>
-              <span>{district.impactedPopulation.toLocaleString()}</span>
+            <div key={district.placeCode} className={styles.districtTableRow}>
+              <span>{district.name}</span>
+              <span>{getPopulation(district).toLocaleString()}</span>
             </div>
           ))}
         </div>
       </CollapsibleSection>
 
       {/* Infrastructure Exposure Section */}
-      {infraExposure && (
+      {infraExposure.length > 0 && (
         <CollapsibleSection title="Infrastructure Exposure">
-          <div className={styles.infraItem}>
-            <span className={styles.infraLabel}>Available Shelters</span>
-            <span className={styles.infraValue}>
-              {infraExposure.shelters[0]} / {infraExposure.shelters[1]}
-            </span>
-          </div>
           <div className={styles.infraGrid}>
-            <div className={styles.infraItem}>
-              <span className={styles.infraLabel}>Exposed Roads</span>
-              <span className={styles.infraValue}>
-                {infraExposure.roads[0].toLocaleString()}km /{" "}
-                {infraExposure.roads[1].toLocaleString()}km
-              </span>
-            </div>
-            <div className={styles.infraItem}>
-              <span className={styles.infraLabel}>Exposed Water Points</span>
-              <span className={styles.infraValue}>
-                {infraExposure.waterPoints[0]} / {infraExposure.waterPoints[1]}
-              </span>
-            </div>
-          </div>
-          <div className={styles.infraGrid}>
-            <div className={styles.infraItem}>
-              <span className={styles.infraLabel}>Exposed Schools</span>
-              <span className={styles.infraValue}>
-                {infraExposure.schools[0]} / {infraExposure.schools[1]}
-              </span>
-            </div>
-            <div className={styles.infraItem}>
-              <span className={styles.infraLabel}>Exposed Health Clinics</span>
-              <span className={styles.infraValue}>
-                {infraExposure.clinics[0]} / {infraExposure.clinics[1]}
-              </span>
-            </div>
+            {infraExposure.map((item) => (
+              <div key={item.type} className={styles.infraItem}>
+                <span className={styles.infraLabel}>
+                  Exposed {getExposureLabel(item.type)}
+                </span>
+                <span className={styles.infraValue}>
+                  {item.exposed.toLocaleString()}
+                  {item.unit ? ` ${item.unit}` : ""} /{" "}
+                  {item.total.toLocaleString()}
+                  {item.unit ? ` ${item.unit}` : ""}
+                </span>
+              </div>
+            ))}
           </div>
         </CollapsibleSection>
       )}
 
       {/* Data Sources Section */}
-      <CollapsibleSection title="Data sources Source">
-        {Object.entries(event.dataSources).map(
-          ([source, confidence], index) => (
-            <div key={source} className={styles.sourceItem}>
-              <span className={styles.sourceLabel}>
-                {index === 0 ? "Forecast Source" : "Data Source"}: {source}
-              </span>
-              <span className={styles.confidenceBadge}>
-                {confidence}% confidence
-              </span>
-            </div>
-          ),
-        )}
+      <CollapsibleSection title="Data Sources">
+        {event.dataSources.map((source, index) => (
+          <div key={source} className={styles.sourceItem}>
+            <span className={styles.sourceLabel}>
+              {index === 0 ? "Forecast Source" : "Data Source"}: {source}
+            </span>
+          </div>
+        ))}
       </CollapsibleSection>
 
       {/* Footer */}
       <div className={styles.footer}>
-        Event created on: {formatFooterDate(event.eventCreatedDate)}. Last
-        updated on: {formatFooterDate(event.eventLastUpdatedDate)}
+        Event created on: {formatFooterDate(event.firstIssuedAt)}. Last
+        updated on: {formatFooterDate(event.lastUpdatedAt)}
       </div>
     </div>
   );
@@ -241,9 +252,9 @@ function EventDetailView({
 /**
  * Formats the start time relative to now.
  */
-function formatStartTime(startDate: string): string {
+function formatStartTime(startTime: string): string {
   const now = new Date();
-  const start = new Date(startDate);
+  const start = new Date(startTime);
   const diffMs = start.getTime() - now.getTime();
 
   if (diffMs <= 0) {
@@ -264,22 +275,22 @@ function formatStartTime(startDate: string): string {
  */
 function EventButton({ event, onEventClick }: EventButtonProps) {
   // Get admin0 (country level) for total population
-  const admin0 = event.affectedAdminRegions[0]?.[0];
-  const totalPopulation = admin0?.impactedPopulation ?? 0;
+  const admin0 = event.exposedAdminAreas[0]?.[0];
+  const totalPopulation = getPopulation(admin0);
 
   // Get admin1 regions for affected areas
-  const admin1Regions = event.affectedAdminRegions[1] ?? [];
+  const admin1Regions = event.exposedAdminAreas[1] ?? [];
 
   // Get admin3 count for exposed districts
-  const admin3Regions = event.affectedAdminRegions[3] ?? [];
+  const admin3Regions = event.exposedAdminAreas[3] ?? [];
   const exposedDistrictsCount = admin3Regions.length;
 
-  const startTimeLabel = formatStartTime(event.startDate);
+  const startTimeLabel = formatStartTime(event.startTime);
 
   return (
     <div className={styles.eventCard}>
       <div className={styles.eventTitle}>{event.eventName}</div>
-      <div className={styles.eventAlert}>{event.alertLevel}</div>
+      <div className={styles.eventAlert}>{event.alertClass}</div>
       <div className={styles.eventDetails}>
         <div>{startTimeLabel}</div>
         <div>Population: {totalPopulation.toLocaleString()}</div>
@@ -288,7 +299,7 @@ function EventButton({ event, onEventClick }: EventButtonProps) {
           Affected regions:
           <ul className={styles.regionList}>
             {admin1Regions.map((region) => (
-              <li key={region.adminCode}>{region.adminName}</li>
+              <li key={region.placeCode}>{region.name}</li>
             ))}
           </ul>
         </div>
