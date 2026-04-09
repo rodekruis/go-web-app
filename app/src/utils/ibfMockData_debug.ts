@@ -1,11 +1,11 @@
 // NOTE: debug file to be moved to seed data repo.
 
-import { AlertClassType, DataSourceType, ExposedItemType, HazardType, MapLayerDataType, MapLayerDisplayType, MeasurementUnits, type AllEventsData } from './ibfMapTypes';
+import { AlertClassType, DataSourceType, ExposedItemType, HazardType, MapLayerInfoType, MapLayerDisplayType, MeasurementUnits, type AllEventsData } from './ibfMapTypes';
 
 // Mock data for testing - populations are made up, summed up the hierarchy
 export const mockAllEventsData_MW: AllEventsData = {
   event1: {
-    hazardType: [HazardType.Flood],
+    hazardTypes: [HazardType.Flood],
     eventName: "Flood - Malawi",
     eventId: "event1",
     alertClass: AlertClassType.Low,
@@ -14,8 +14,8 @@ export const mockAllEventsData_MW: AllEventsData = {
     startTime: "2026-04-01T06:00:00Z",
     peakTime: "2026-04-07T12:00:00Z",
     endTime: "2026-04-12T18:00:00Z",
-    availableLayers: [{ resourceId: 'flood_extent_7-hour_MWI', dataType: MapLayerDataType.EventExtent, displayType: MapLayerDisplayType.Raster }],
-    exposedAdminRegions: [
+    availableLayers: [{ resourceId: 'flood_extent_7-hour_MWI', dataType: MapLayerInfoType.EventExtent, displayType: MapLayerDisplayType.Raster }],
+    exposedAdminAreas: [
       // ADM0 - Country (sum of all ADM3)
       [
         {
@@ -122,17 +122,17 @@ export const mockAllEventsData_MW: AllEventsData = {
     lastUpdatedAt: "2026-04-02T00:00:00Z",
   },
   event2: {
-    hazardType: [HazardType.Flood],
+    hazardTypes: [HazardType.Flood],
     eventName: "Flood - Malawi",
     eventId: "event2",
-    alertClass: AlertClassType.Trigger,
+    alertClass: AlertClassType.High,
     trigger: true,
     centroid: [35.32, -15.38], // Zomba center
     startTime: "2026-04-06T12:00:00Z",
     peakTime: "2026-04-08T18:00:00Z",
     endTime: "2026-04-11T09:00:00Z",
-    availableLayers: [{ resourceId: 'flood_extent_7-hour_MWI', dataType: MapLayerDataType.EventExtent, displayType: MapLayerDisplayType.Raster }],
-    exposedAdminRegions: [
+    availableLayers: [{ resourceId: 'flood_extent_7-hour_MWI', dataType: MapLayerInfoType.EventExtent, displayType: MapLayerDisplayType.Raster }],
+    exposedAdminAreas: [
       // ADM0 - Country (sum of all ADM3)
       [
         {
@@ -228,7 +228,7 @@ export const mockAllEventsData_MW: AllEventsData = {
     lastUpdatedAt: "2026-04-02T00:00:00Z",
   },
   event3: {
-    hazardType: [HazardType.Flood],
+    hazardTypes: [HazardType.Flood],
     eventName: "Flood - Malawi",
     eventId: "event3",
     alertClass: AlertClassType.Medium,
@@ -238,7 +238,7 @@ export const mockAllEventsData_MW: AllEventsData = {
     peakTime: "2026-04-10T06:00:00Z",
     endTime: "2026-04-11T21:00:00Z",
     availableLayers: [],
-    exposedAdminRegions: [
+    exposedAdminAreas: [
       // ADM0 - Country (sum of all ADM3)
       [
         {
@@ -360,7 +360,7 @@ export const mockAllEventsData_MW: AllEventsData = {
 // Mock data for Zambia testing
 export const mockAllEventsData_ZM: AllEventsData = {
   event1: {
-    hazardType: [HazardType.Flood],
+    hazardTypes: [HazardType.Flood],
     eventName: "Flood - Zambia",
     eventId: "event1",
     alertClass: AlertClassType.Low,
@@ -369,8 +369,8 @@ export const mockAllEventsData_ZM: AllEventsData = {
     startTime: "2026-04-05T08:00:00Z",
     peakTime: "2026-04-07T20:00:00Z",
     endTime: "2026-04-10T14:00:00Z",
-    availableLayers: [{ resourceId: 'flood_map_ZMB_RP20_c0_b3857', dataType: MapLayerDataType.EventExtent, displayType: MapLayerDisplayType.Raster }],
-    exposedAdminRegions: [
+    availableLayers: [{ resourceId: 'flood_map_ZMB_RP20_c0_b3857', dataType: MapLayerInfoType.EventExtent, displayType: MapLayerDisplayType.Raster }],
+    exposedAdminAreas: [
       // ADM0 - Country (sum of all ADM3)
       [
         {
@@ -444,17 +444,17 @@ export const mockAllEventsData_ZM: AllEventsData = {
     lastUpdatedAt: "2026-04-02T00:00:00Z",
   },
   event2: {
-    hazardType: [HazardType.Flood],
+    hazardTypes: [HazardType.Flood],
     eventName: "Flood - Zambia",
     eventId: "event2",
-    alertClass: AlertClassType.Trigger,
+    alertClass: AlertClassType.Medium,
     trigger: true,
     centroid: [24.8, -13.68], // Mufumbwe center
     startTime: "2026-04-07T10:00:00Z",
     peakTime: "2026-04-10T08:00:00Z",
     endTime: "2026-04-13T16:00:00Z",
-    availableLayers: [{ resourceId: 'flood_map_ZMB_RP20_c0_b3857', dataType: MapLayerDataType.EventExtent, displayType: MapLayerDisplayType.Raster }],
-    exposedAdminRegions: [
+    availableLayers: [{ resourceId: 'flood_map_ZMB_RP20_c0_b3857', dataType: MapLayerInfoType.EventExtent, displayType: MapLayerDisplayType.Raster }],
+    exposedAdminAreas: [
       // ADM0 - Country (sum of all ADM3)
       [
         {

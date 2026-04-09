@@ -7,8 +7,10 @@ export enum HazardType {
   Drought = "drought",
 }
 
+// Enum to identify alert classes
+// These then point to the color/style/localized string in the front end.
+// A given country may support only a subset of these.
 export enum AlertClassType {
-  Trigger = "trigger",
   High = "high",
   Medium = "medium",  
   Low = "low",
@@ -32,22 +34,28 @@ export enum ExposedItemType {
   Clinics = "clinics",
 }
 
-export enum MapLayerDataType {
+// Key to identify the type of map layer info being shown.
+// This is used to style/label it on the frontend.
+export enum MapLayerInfoType {
   Population = "population",
   EventExtent = "event_extent",
-  RcLocs = "rc_locs",
+  RedCrossBranches = "red_cross_branches",
   Clinics = "clinics",
 }
 
 export enum MapLayerDisplayType {
+  // Image data, i.e. PNGs
   Raster = "raster",
-  Vector = "vector",
+  // Vector shape data for lines and polygons, including admin areas
+  Shape = "shape",
+  // Vector point data, such as for glofas locations
   Point = "point",
-  MVT = "mvt"
+  // Vector tiles, used for dense vector information such as many buildings and roads
+  VectorTile = "vector_tile",
 }
 
 // Data for showing exposure of a given ExposedItemType
-export interface ExposedItem {
+export interface ExposureCategory {
   type: ExposedItemType;
   exposed: number;
   total: number;
@@ -61,7 +69,7 @@ export interface MapLayerDetails {
 
   // The type of data on this layer
   // This can be used to label the layer in the UI, style it, etc.
-  dataType: MapLayerDataType;
+  dataType: MapLayerInfoType;
   
   // The way this data will be displayed
   displayType: MapLayerDisplayType;
@@ -69,7 +77,7 @@ export interface MapLayerDetails {
 
 // Data for an overview of an event
 export interface EventOverviewData {
-  hazardType: HazardType[];
+  hazardTypes: HazardType[];
 
   // Translated, user-facing name for the event
   eventName: string;
@@ -95,8 +103,8 @@ export interface EventOverviewData {
   firstIssuedAt: string;
   lastUpdatedAt: string;
 
-  // Lists of details for each exposed admin region, grouped by admin level (0, 1, 2...)
-  exposedAdminRegions: EventAdminAreaData[][];
+  // List of lists of details for each exposed admin area. The first index is the admin level (0, 1, 2...)
+  exposedAdminAreas: EventAdminAreaData[][];
 
   // Other data layers that can be added to the map for this event
   availableLayers: MapLayerDetails[];
@@ -117,7 +125,7 @@ export interface EventAdminAreaData {
   placeCode: string;
   adminLevel: number;
   name: string;
-  exposure: ExposedItem[];
+  exposure: ExposureCategory[];
 }
 
 // Data for all events, keyed by event ID
@@ -137,7 +145,6 @@ export interface CountryMapData {
 
 // Supported event data sources for a country.
 export enum EventDataSources {
-  IbfFlood = "ibf_flood",
-  IbfDrought = "ibf_drought",
-  MrwFlood = "mrw_flood",
+  Ibf = "ibf",
+  Mrw = "mrw",
 }
