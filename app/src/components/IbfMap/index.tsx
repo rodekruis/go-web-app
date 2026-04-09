@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import "ol/ol.css";
 import { OlDataMap } from "./OlDataMap";
@@ -11,7 +12,7 @@ import {
   noCountrySelectedValue,
   eventIdParamsKey,
 } from "#utils/ibfMap";
-import { getEventData, type AllEventsData } from "#utils/ibfMapHelpers";
+import { getCurrentCountryEventData, getEventDetails, type AllEventsData } from "#utils/ibfMapHelpers";
 
 /**
  * Base map component for IBF data maps *
@@ -19,40 +20,53 @@ import { getEventData, type AllEventsData } from "#utils/ibfMapHelpers";
  * @returns A standalone component
  */
 export function IbfMapContainer() {
-  // Load the country from the search params
-  // This is only done once at page load
+  // Search params are used to create a linkable state for the app so users can share links to specific views.
   const [searchParams, setSearchParams] = useSearchParams();
-  const selectedCountry =
-    searchParams.get(countryParamsKey)?.toUpperCase() || noCountrySelectedValue;
 
-  // Fetch the current latest event data once at first page load
-  const eventData: AllEventsData = getEventData(selectedCountry);
+  // Load the view details from the search params
+  // This is only done once at page load
+  const selectedCountry = searchParams.get(countryParamsKey)?.toUpperCase() || noCountrySelectedValue;
+  const selectedEventId = searchParams.get(eventIdParamsKey) || "";
+
+  // Check if a country is in the search params
+  if (selectedCountry === noCountrySelectedValue) {
+    // TODO: add an error or redirect, since the portal requires a selected country.
+    console.debug("[IbfMapContainer] No country selected");
+  }
+
+  // Event data is loaded once on page load, then only updated via refresh
+  const [eventData, setEventData] = useState<AllEventsData>(() => {
+    if (selectedEventId) {
+      return getEventDetails(selectedEventId);
+    }
+    return getCurrentCountryEventData(selectedCountry);
+  });
 
   // Handle event selection from control panel
   const handleEventClick = (eventId: string) => {
     // TODO: this will change map zoom, focus, etc.
-    console.debug(`[IbfMap] Event selected: ${eventId}`);
-  };
-
-  // Callback to update search params based on user interactions.
-  const handleMapItemSelected = (eventId: string) => {
-    // TODO: pass what is clicked on to the data panel and UI panel.
-
-    // Set search params.
-    // TODO: set more values in the search params
-    if (eventId) {
+    
+    // Set search params for URL sharing only - does not reload data
       setSearchParams({
         [countryParamsKey]: selectedCountry,
         [eventIdParamsKey]: eventId,
       });
-    } else {
-      setSearchParams({
-        [countryParamsKey]: selectedCountry,
-        [eventIdParamsKey]: "",
-      });
-    }
   };
 
+  // Handle refresh all - clears event selection and reloads data
+  const handleRefreshAll = () => {
+    setSearchParams({
+      [countryParamsKey]: selectedCountry,
+    });
+    setEventData(getCurrentCountryEventData(selectedCountry));
+  };
+
+  // Callback to update search params based on user interactions.
+  const handleMapItemSelected = (eventId: string) => {
+    // TODO: pass what is clicked on to the data panel and UI panel.    
+    console.debug(`[IbfMap] Event selected: ${eventId}`);
+  };
+  
   // Data loader hook - manages layer loading and caching
   const {
     registerMapAddLayer,
@@ -69,6 +83,7 @@ export function IbfMapContainer() {
           <IbfControlPanel
             eventData={eventData}
             onEventClick={handleEventClick}
+            onRefreshAll={handleRefreshAll}
             onToggleFloodExtents={toggleFloodExtents}
             onTogglePopulation={togglePopulation}
             onHideAllLayers={hideAllLayers}

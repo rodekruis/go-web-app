@@ -303,6 +303,7 @@ function EventButton({ event, onEventClick }: EventButtonProps) {
 interface IbfControlPanelProps {
   eventData: AllEventsData;
   onEventClick: (eventId: string) => void;
+  onRefreshAll: () => void;
   onToggleFloodExtents: (rasterImageId: string) => void;
   onTogglePopulation: () => void;
   onHideAllLayers: () => void;
@@ -316,6 +317,7 @@ interface IbfControlPanelProps {
 export function IbfControlPanel({
   eventData,
   onEventClick,
+  onRefreshAll,
   onToggleFloodExtents,
   onTogglePopulation,
   onHideAllLayers,
@@ -359,7 +361,15 @@ export function IbfControlPanel({
 
   return (
     <div className={styles.dataContainer}>
-      <h3>Upcoming Events ({countryCode})</h3>
+      <div className={styles.headerRow}>
+        <h3>Upcoming Events ({countryCode})</h3>
+        <Button
+          name="refresh-all"
+          onClick={onRefreshAll}
+        >
+          Refresh All
+        </Button>
+      </div>
       {events.map((event) => (
         <EventButton
           key={event.eventId}

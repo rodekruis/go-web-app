@@ -11,13 +11,26 @@ import type { AllEventsData, EventOverviewData, EventAdminDetail, Infrastructure
 export type { AllEventsData, EventOverviewData, EventAdminDetail, InfrastructureExposure };
 
 // Fetch upcoming or live event data for a country
-export function getEventData(country: string): AllEventsData {
+export function getCurrentCountryEventData(country: string): AllEventsData {
     // TODO: Use the API for fetching this for any country.
   if (country === "MW") {
     return mockAllEventsData_MW;
   } else if (country === "ZM") {
     return mockAllEventsData_ZM;
   } else return {};
+}
+
+// Fetch a specific event's details, and only return that event
+export function getEventDetails(eventId: string): AllEventsData {
+  // Look in mock output for the event data with the matching eventId, and only return that event.
+  const allMockData: AllEventsData[] = [mockAllEventsData_MW, mockAllEventsData_ZM];
+  for (const countryEvents of allMockData) {
+    const eventData = countryEvents[eventId];
+    if (eventData) {
+      return { [eventId]: eventData };
+    }
+  }
+  return {} as AllEventsData;
 }
 
 // Raw GitHub URLs for direct file access
