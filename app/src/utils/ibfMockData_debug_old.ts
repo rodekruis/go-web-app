@@ -1,6 +1,6 @@
 // NOTE: debug file to be moved to seed data repo.
 
-import type { AllEventsData } from './ibfMapTypes';
+import type { AllEventsData } from './ibfMapTypes_old';
 
 // Mock data for testing - populations are made up, summed up the hierarchy
 export const mockAllEventsData_MW: AllEventsData = {
