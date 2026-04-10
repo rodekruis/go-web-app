@@ -6,6 +6,7 @@ import { MvtStyleCreator } from "./ibfMapStyles";
 import VectorTile from "ol/source/VectorTile";
 import { mockAllEventsData_MW, mockAllEventsData_ZM } from "./ibfMockData_debug";
 import { CountryData } from "./ibfMap";
+import { pgFeatureserv } from '#config';
 import type { AllEventsData, EventOverviewData, EventAdminAreaData, ExposureCategory, MapLayerDetails, SelectedEventMapDetails } from "./ibfMapTypes";
 
 // Re-export types for consumers
@@ -171,7 +172,6 @@ const getImageExtentsAsync = async (
   name: string,
 ): Promise<number[]> => {
   const jsonUrl = `${baseUri}${name}_metadata.json`;
-  console.log(`Fetching image extents from ${jsonUrl}`);
 
   try {
     const response = await fetch(jsonUrl);
@@ -185,19 +185,25 @@ const getImageExtentsAsync = async (
     }
     throw new Error('Invalid JSON structure: missing "bounds" property');
   } catch (error) {
-    console.error("Error loading image extents:", error);
+    // TODO: make user facing error
+    console.error(`Error loading image extents from ${jsonUrl}:`, error);
     return [0, 0, 0, 0];
   }
 };
 
 
 export const getAdminRegionUrl = (country: string, adm: number): string => {
+  // Get the simplification factor based on the admin level.
   let factor = adminZoomToFactor[adm];
   if (!factor) {
-    console.warn(`No simplification factor found for admin level ${adm}, defaulting to 0.01`);
+    // The fallback is safe, so no need to make this error user facing.
+    // The fallback just results in a possibly larger data size.
+    // Log it though so devs can investigate.
+    console.error(`No simplification factor found for admin level ${adm}, defaulting to 0.01`);
     factor = 0.01;
   }
-  return `http://localhost:9000/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27&limit=10000&transform=simplify,${factor}`;
+  
+  return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27&limit=10000&transform=simplify,${factor}`;
 };
 
 export const getNestedAdminUrl = (
@@ -210,5 +216,5 @@ export const getNestedAdminUrl = (
     console.warn(`No simplification factor found for admin level ${adm}, defaulting to 0.01`);
     factor = 0.01;
   }
-  return `http://localhost:9000/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
+  return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
 };

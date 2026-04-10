@@ -129,6 +129,7 @@ export function OlDataMap({
 
       if (mapStyleJsonUrl) {
         apply(mapInstanceRef.current, mapStyleJsonUrl).catch((error: any) => {
+          // TODO: make the error user facing
           console.error("Style apply error:", error);
         });
       }
@@ -206,13 +207,6 @@ export function OlDataMap({
     state.isEventSelected = !!selectedEventDetails;
     state.affectedRegionsByLevel = selectedEventDetails?.affectedRegionsByLevel ?? new Map();
 
-    // DEBUG: Log affected regions
-    console.log("[OlDataMap] Event selection changed:", {
-      eventId: state.selectedEventId,
-      isEventSelected: state.isEventSelected,
-      affectedRegionsByLevel: Object.fromEntries(state.affectedRegionsByLevel),
-    });
-
     // If event selected with affected regions, drill down to admin3
     if (selectedEventDetails) {
       // Get the first affected admin1 region as parent for drilling down
@@ -222,13 +216,11 @@ export function OlDataMap({
       if (affectedAdmin2 && affectedAdmin2.length > 0) {
         // If we have admin2 affected regions, load admin3 for the first one
         const parentCode = affectedAdmin2[0]!;
-        console.log("[OlDataMap] Drilling to admin3 with parent:", parentCode);
         addAdminLayer(2, selectedCountry, parentCode.substring(0, 3)); // admin2 parent is admin1 code
         addAdminLayer(3, selectedCountry, parentCode);
       } else if (affectedAdmin1 && affectedAdmin1.length > 0) {
         // If we have admin1 affected regions, load admin2, then admin3
         const admin1Code = affectedAdmin1[0]!;
-        console.log("[OlDataMap] Drilling from admin1:", admin1Code);
         addAdminLayer(2, selectedCountry, admin1Code);
         // Admin3 will be loaded after user clicks on admin2, or we can load all
       }

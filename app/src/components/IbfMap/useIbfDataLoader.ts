@@ -4,102 +4,100 @@ import {
   makeEventImageLayer,
   makePopulationImageLayer,
 } from "#utils/ibfMapHelpers";
-
-interface LayerCache {
-  addLayerToMap: ((layer: BaseLayer) => void) | null;
-  layers: Map<string, BaseLayer>;
-}
+import { MapLayerInfoType, MapLayerDisplayType, type MapLayerDetails } from "#utils/ibfMapTypes";
 
 /**
- * Hook to manage IBF map data layer loading and caching.
+ * Hook used to manage and share data for the IBF map components.
  *
  * Responsibilities:
- * - Cache loaded layers to avoid re-fetching
- * - Toggle layer visibility
- * - Connect to the OpenLayers map via registration callback
+ * - Load and cache data
+ * - Create, cache, and toggle map data layers
  *
+ * TODO: Change this to ISO_A3.
+ * See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41656
  * @param selectedCountry - ISO_A2 country code for country-specific layers
  */
 export function useIbfDataLoader(selectedCountry: string) {
-  const cacheRef = useRef<LayerCache>({
-    addLayerToMap: null,
-    layers: new Map(),
-  });
 
-  /**
-   * Register the map's addLayer function.
-   * Called by OlDataMap when the map is ready.
-   */
+  // Reference to the function (passed in by the map component) for adding layers to the map.
+  const addLayerToMapFunction = useRef<((layer: BaseLayer) => void) | null>(null);
+
+  // Cache of all loaded layers.
+  // The key is fixed based on the layer details.
+  const layersCache = useRef(new Map<string, BaseLayer>());
+
+  const _getLayerKey = (layerDetails: MapLayerDetails): string => {
+    // Note: The reource ID may be empty for non-event layers, such as population.
+    return `${layerDetails.dataType}_${selectedCountry}_${layerDetails.resourceId}`;
+  }
+
+  // Register the map's addLayer function.
+  // Called by OlDataMap when the map is ready.
   const registerMapAddLayer = useCallback(
     (addLayer: (layer: BaseLayer) => void) => {
-      cacheRef.current.addLayerToMap = addLayer;
+      addLayerToMapFunction.current = addLayer;
     },
     []
   );
 
-  /**
-   * Toggle a layer by key. Loads it if not cached, toggles visibility if cached.
-   */
-  const toggleLayer = useCallback(
-    async (key: string, loadLayer: () => Promise<BaseLayer>) => {
-      const cache = cacheRef.current;
+  // Toggle the map layer.
+  // If there is no cached layer, load it with the passed in loadLayer function
+  const _toggleLayer = async (key: string, loadLayer: () => Promise<BaseLayer>) => {
+    if (!addLayerToMapFunction.current) {
+      console.error("[useIbfDataLoader] Map not ready");
+      return;
+    }
 
-      if (!cache.addLayerToMap) {
-        console.error("[useIbfDataLoader] Map not ready");
-        return;
+    const existing = layersCache.current.get(key);
+    if (existing) {
+      existing.setVisible(!existing.getVisible());
+      return;
+    }
+
+    try {
+      const layer = await loadLayer();
+      layersCache.current.set(key, layer);
+      addLayerToMapFunction.current(layer);
+    } catch (error) {
+      // TODO: make this error user facing
+      console.error(`[useIbfDataLoader] Failed to load layer ${key}:`, error);
+    }
+  };
+
+  // Toggle a map layer based on its details
+  const toggleMapLayer = (layerDetails: MapLayerDetails) => {
+    const { dataType, displayType, resourceId } = layerDetails;
+
+    if (displayType === MapLayerDisplayType.Raster) {
+      switch (dataType) {
+        case MapLayerInfoType.Population:
+          _toggleLayer(_getLayerKey(layerDetails), () =>
+            makePopulationImageLayer(selectedCountry)
+          );
+          break;
+        case MapLayerInfoType.EventExtent:
+          _toggleLayer(_getLayerKey(layerDetails), () =>
+            makeEventImageLayer(resourceId)
+          );
+          break;
+        default:
+          console.error(`[useIbfDataLoader] Unsupported layer type: ${dataType}`);
       }
+    } else {
+      // TODO: Handle other display types (Shape, Point, VectorTile)
+      console.warn(`[useIbfDataLoader] Unsupported display type: ${displayType}`);
+    }
+  };
 
-      const existing = cache.layers.get(key);
-      if (existing) {
-        existing.setVisible(!existing.getVisible());
-        return;
-      }
-
-      try {
-        const layer = await loadLayer();
-        cache.layers.set(key, layer);
-        cache.addLayerToMap(layer);
-      } catch (error) {
-        console.error(`[useIbfDataLoader] Failed to load layer ${key}:`, error);
-      }
-    },
-    []
-  );
-
-  /**
-   * Toggle flood extents layer for a specific event.
-   */
-  const toggleFloodExtents = useCallback(
-    (rasterImageId: string) => {
-      toggleLayer(`flood_${rasterImageId}`, () =>
-        makeEventImageLayer(rasterImageId)
-      );
-    },
-    [toggleLayer]
-  );
-
-  /**
-   * Toggle population layer for the selected country.
-   */
-  const togglePopulation = useCallback(() => {
-    toggleLayer(`population_${selectedCountry}`, () =>
-      makePopulationImageLayer(selectedCountry)
-    );
-  }, [toggleLayer, selectedCountry]);
-
-  /**
-   * Hide all loaded layers.
-   */
-  const hideAllLayers = useCallback(() => {
-    for (const layer of cacheRef.current.layers.values()) {
+  const hideAllLayers = () => {
+    for (const layer of layersCache.current.values()) {
       layer.setVisible(false);
     }
-  }, []);
+  };
 
   return {
     registerMapAddLayer,
-    toggleFloodExtents,
-    togglePopulation,
+    toggleMapLayer,
     hideAllLayers,
   };
 }

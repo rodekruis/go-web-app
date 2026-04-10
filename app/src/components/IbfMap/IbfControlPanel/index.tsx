@@ -1,3 +1,8 @@
+// This is debug UI, and will be rewritten, and rereviewed fully later.
+// The same for the CSS file.
+// The functions/callbacks passed in and calling out are models of what will be used
+// However, these will be split into another layer filter component (and reworked).
+
 import { useState } from "react";
 import {
   type AllEventsData,
@@ -6,7 +11,7 @@ import {
   type ExposureCategory,
   ExposedItemType,
 } from "#utils/ibfMapHelpers";
-import { MapLayerDisplayType } from "#utils/ibfMapTypes";
+import { MapLayerDisplayType, MapLayerInfoType, type MapLayerDetails } from "#utils/ibfMapTypes";
 import styles from "./styles.module.css";
 import { Button } from "@ifrc-go/ui";
 import { ChevronDownLineIcon, ChevronUpLineIcon } from "@ifrc-go/icons";
@@ -20,7 +25,7 @@ function getExposureByType(
 }
 
 // Helper to get population exposure from admin area
-function getPopulation(adminArea: EventAdminAreaData | undefined): number {
+function getExposedPopulation(adminArea: EventAdminAreaData | undefined): number {
   const popExposure = getExposureByType(
     adminArea?.exposure,
     ExposedItemType.Population,
@@ -28,12 +33,11 @@ function getPopulation(adminArea: EventAdminAreaData | undefined): number {
   return popExposure?.exposed ?? 0;
 }
 
-// Get the first raster layer resourceId from availableLayers, or null if none
-function getRasterLayerId(event: EventOverviewData): string | null {
-  const rasterLayer = event.availableLayers.find(
+// Get the first raster layer from availableLayers, or null if none
+function getRasterLayer(event: EventOverviewData): MapLayerDetails | null {
+  return event.availableLayers.find(
     (layer) => layer.displayType === MapLayerDisplayType.Raster,
-  );
-  return rasterLayer?.resourceId ?? null;
+  ) ?? null;
 }
 
 // Format label for exposure type - uses type value with _ID appended if no user-friendly label
@@ -56,8 +60,7 @@ interface EventButtonProps {
 interface EventDetailViewProps {
   event: EventOverviewData;
   onBack: () => void;
-  onToggleFloodExtents: (rasterImageId: string) => void;
-  onTogglePopulation: () => void;
+  onToggleMapLayer: (layerDetails: MapLayerDetails) => void;
 }
 
 /**
@@ -133,17 +136,16 @@ function CollapsibleSection({
 function EventDetailView({
   event,
   onBack,
-  onToggleFloodExtents,
-  onTogglePopulation,
+  onToggleMapLayer,
 }: EventDetailViewProps) {
   // Get admin data at different levels
   const admin0 = event.exposedAdminAreas[0]?.[0];
   const admin1Regions = event.exposedAdminAreas[1] ?? [];
   const admin3Regions = event.exposedAdminAreas[3] ?? [];
 
-  const totalPopulation = getPopulation(admin0);
+  const totalPopulation = getExposedPopulation(admin0);
   const exposedDistrictsCount = admin3Regions.length;
-  const rasterLayerId = getRasterLayerId(event);
+  const rasterLayer = getRasterLayer(event);
 
   // Get exposure categories for infrastructure (exclude population)
   const infraExposure =
@@ -182,16 +184,16 @@ function EventDetailView({
 
       {/* Raster Layer Buttons */}
       <div className={styles.buttonGroup}>
-        {rasterLayerId && (
+        {rasterLayer && (
           <Button
             name="toggleFlood"
-            onClick={() => onToggleFloodExtents(rasterLayerId)}
+            onClick={() => onToggleMapLayer(rasterLayer)}
           >
             Toggle flood extents
           </Button>
         )}
 
-        <Button name="togglePopulation" onClick={onTogglePopulation}>
+        <Button name="togglePopulation" onClick={() => onToggleMapLayer({ resourceId: '', dataType: MapLayerInfoType.Population, displayType: MapLayerDisplayType.Raster })}>
           Toggle population
         </Button>
       </div>
@@ -220,7 +222,7 @@ function EventDetailView({
           {admin3Regions.map((district) => (
             <div key={district.placeCode} className={styles.districtTableRow}>
               <span>{district.name}</span>
-              <span>{getPopulation(district).toLocaleString()}</span>
+              <span>{getExposedPopulation(district).toLocaleString()}</span>
             </div>
           ))}
         </div>
@@ -294,7 +296,7 @@ function formatStartTime(startTime: string): string {
 function EventButton({ event, onEventClick }: EventButtonProps) {
   // Get admin0 (country level) for total population
   const admin0 = event.exposedAdminAreas[0]?.[0];
-  const totalPopulation = getPopulation(admin0);
+  const totalPopulation = getExposedPopulation(admin0);
 
   // Get admin1 regions for affected areas
   const admin1Regions = event.exposedAdminAreas[1] ?? [];
@@ -333,8 +335,7 @@ interface IbfControlPanelProps {
   eventData: AllEventsData;
   onEventClick: (eventId: string) => void;
   onRefreshAll: () => void;
-  onToggleFloodExtents: (rasterImageId: string) => void;
-  onTogglePopulation: () => void;
+  onToggleMapLayer: (layerDetails: MapLayerDetails) => void;
   onHideAllLayers: () => void;
   countryCode: string;
   selectedAdminPlaceCode: string | null;
@@ -348,8 +349,7 @@ export function IbfControlPanel({
   eventData,
   onEventClick,
   onRefreshAll,
-  onToggleFloodExtents,
-  onTogglePopulation,
+  onToggleMapLayer,
   onHideAllLayers,
   countryCode,
   selectedAdminPlaceCode,
@@ -382,8 +382,7 @@ export function IbfControlPanel({
         <EventDetailView
           event={selectedEvent}
           onBack={handleBack}
-          onToggleFloodExtents={onToggleFloodExtents}
-          onTogglePopulation={onTogglePopulation}
+          onToggleMapLayer={onToggleMapLayer}
         />
       </div>
     );

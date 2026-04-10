@@ -78,8 +78,7 @@ export function IbfMapContainer() {
   // Data loader hook - manages layer loading and caching
   const {
     registerMapAddLayer,
-    toggleFloodExtents,
-    togglePopulation,
+    toggleMapLayer,
     hideAllLayers,
   } = useIbfDataLoader(selectedCountry);
 
@@ -92,8 +91,7 @@ export function IbfMapContainer() {
             eventData={eventData}
             onEventClick={handleEventClick}
             onRefreshAll={handleRefreshAll}
-            onToggleFloodExtents={toggleFloodExtents}
-            onTogglePopulation={togglePopulation}
+            onToggleMapLayer={toggleMapLayer}
             onHideAllLayers={hideAllLayers}
             countryCode={selectedCountry}
             selectedAdminPlaceCode={selectedAdminPlaceCode}
