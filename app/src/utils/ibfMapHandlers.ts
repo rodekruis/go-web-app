@@ -31,11 +31,12 @@ function fitToFeature(state: AdminLayerState, feature: FeatureLike) {
 
 export interface AdminLayerState {
   mapInstance: MapOl | null;
+  // Selected codes by level: 1/2/3 = admin levels
+  // TODO: support variable max admin levels (2,3 or 4) for here and throughout the code
   selectedAdminCodes: Map<number, string | null>;
-  selectedAdminRegion: string;
   selectedEventId: string;
   isEventSelected: boolean;
-  // Affected region codes by admin level, populated when an event is selected
+  // Affected region codes by admin level. This is populated when an event is selected.
   affectedRegionsByLevel: Map<number, string[]>;
 }
 
@@ -43,7 +44,7 @@ export interface AdminLayerState {
 const zIndexMap = { 1: 100, 2: 120, 3: 150 } as const;
 
 // Create a VectorLayer for the given admin level.
-// For level 1, uses selectedAdminRegion from state.
+// For level 1, uses selectedAdminCodes.get(0) (the region) from state.
 // For levels 2 and 3, uses country + parentCode to scope the query.
 export function createAdminLayer(
   state: AdminLayerState,
@@ -53,7 +54,7 @@ export function createAdminLayer(
 ): VectorLayer {
   const url =
     adminLevel === 1
-      ? getAdminRegionUrl(state.selectedAdminRegion, 1)
+      ? getAdminRegionUrl(state.selectedAdminCodes.get(0) ?? '', 1)
       : getNestedAdminUrl(country!, parentCode!, adminLevel);
 
   const layer = new VectorLayer({
@@ -160,6 +161,6 @@ export function handleFeatureClick(
     return { handled: true, showLevel: 2, country, parentCode: newSelectedRegionCode };
   }
 
-  state.selectedAdminRegion = newSelectedRegionCode;
+  state.selectedAdminCodes.set(0, newSelectedRegionCode);
   return { handled: true };
 }

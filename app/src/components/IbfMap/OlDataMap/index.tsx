@@ -78,7 +78,6 @@ export function OlDataMap({
     const state: AdminLayerState = {
       mapInstance: null,
       selectedAdminCodes: new Map([[1, null], [2, null], [3, null]]),
-      selectedAdminRegion: selectedCountry,
       selectedEventId: selectedEventDetails?.eventId ?? "",
       isEventSelected: !!selectedEventDetails,
       affectedRegionsByLevel: selectedEventDetails?.affectedRegionsByLevel ?? new Map(),
