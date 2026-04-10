@@ -5,10 +5,11 @@ import ImageStatic from "ol/source/ImageStatic";
 import { MvtStyleCreator } from "./ibfMapStyles";
 import VectorTile from "ol/source/VectorTile";
 import { mockAllEventsData_MW, mockAllEventsData_ZM } from "./ibfMockData_debug";
-import type { AllEventsData, EventOverviewData, EventAdminAreaData, ExposureCategory, MapLayerDetails } from "./ibfMapTypes";
+import { CountryData } from "./ibfMap";
+import type { AllEventsData, EventOverviewData, EventAdminAreaData, ExposureCategory, MapLayerDetails, SelectedEventMapDetails } from "./ibfMapTypes";
 
 // Re-export types for consumers
-export type { AllEventsData, EventOverviewData, EventAdminAreaData, ExposureCategory, MapLayerDetails };
+export type { AllEventsData, EventOverviewData, EventAdminAreaData, ExposureCategory, MapLayerDetails, SelectedEventMapDetails };
 export { ExposedItemType } from "./ibfMapTypes";
 
 // Fetch upcoming or live event data for a country
@@ -32,6 +33,39 @@ export function getEventDetails(eventId: string): AllEventsData {
     }
   }
   return {} as AllEventsData;
+}
+
+// Extract the map-relevant details from event data for a selected event
+// Returns null if no event is selected or event not found
+export function getSelectedEventMapDetails(
+  eventData: AllEventsData,
+  eventId: string | null,
+): SelectedEventMapDetails | null {
+  if (!eventId) return null;
+  
+  const event = eventData[eventId];
+  if (!event) return null;
+
+  // Build affected regions map by admin level
+  const affectedRegionsByLevel = new Map<number, string[]>();
+  if (event.exposedAdminAreas) {
+    event.exposedAdminAreas.forEach((adminAreas, level) => {
+      if (adminAreas && adminAreas.length > 0) {
+        const codes = adminAreas.map(area => area.placeCode);
+        affectedRegionsByLevel.set(level, codes);
+      }
+    });
+  } else {
+    // TODO: this is an error, so show something in the UI about this.
+    // Although this should be checked for on the backend, at least let the user here know the error.
+    console.log("[getSelectedEventMapDetails] No exposedAdminAreas found for event:", eventId);
+  }
+
+  return {
+    eventId,
+    centroid: event.centroid,
+    affectedRegionsByLevel,
+  };
 }
 
 // Raw GitHub URLs for direct file access
@@ -76,15 +110,10 @@ export const makeMvtLayerAsync = (
   });
 };
 
-// TODO: can we just switch to ISO3 if we don't use that admin map from where we click on countries?
+// TODO: Try to switch to ISO3 in the data, so we can avoid ISO2 -> ISO3 mapping.
+// See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41656
 export const getISO3FromISO2 = (iso2: string): string => {
-  const iso2ToIso3Map: Record<string, string> = {
-    MW: "MWI",
-    ZM: "ZMB",
-    // to do
-  };
-
-  const output = iso2ToIso3Map[iso2];
+  const output = CountryData.get(iso2)?.iso_a3;
   if (!output) {
     console.warn(
       `No ISO3 mapping found for ISO2 code ${iso2}, returning input as fallback`,
@@ -183,13 +212,3 @@ export const getNestedAdminUrl = (
   }
   return `http://localhost:9000/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
 };
-
-// TODO RM this
-export function getAffectedRegionsForEvent(eventId: string): string[] {
-  // TODO: debug code
-  // Replace with actual event data
-  if (eventId == "event1") {
-    return ["MW31104", "MW31106", "MW31105", "MW31108", "MW31109"];
-  }
-  return ["MW30703", "MW30707", "MW30708", "MW30704", "MW30706", "MW30705"];
-}

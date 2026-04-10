@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import "ol/ol.css";
 import { OlDataMap } from "./OlDataMap";
@@ -12,7 +12,7 @@ import {
   noCountrySelectedValue,
   eventIdParamsKey,
 } from "#utils/ibfMap";
-import { getCurrentCountryEventData, getEventDetails, type AllEventsData } from "#utils/ibfMapHelpers";
+import { getCurrentCountryEventData, getEventDetails, getSelectedEventMapDetails, type AllEventsData } from "#utils/ibfMapHelpers";
 
 /**
  * Base map component for IBF data maps *
@@ -41,6 +41,13 @@ export function IbfMapContainer() {
     }
     return getCurrentCountryEventData(selectedCountry);
   });
+  const [selectedAdminPlaceCode, setSelectedAdminPlaceCode] = useState<string | null>(null);
+
+  // Derive map details for the selected event (centroid, affected regions)
+  const selectedEventMapDetails = useMemo(
+    () => getSelectedEventMapDetails(eventData, selectedEventId || null),
+    [eventData, selectedEventId]
+  );
 
   // Handle event selection from control panel
   const handleEventClick = (eventId: string) => {
@@ -62,9 +69,10 @@ export function IbfMapContainer() {
   };
 
   // Callback to update search params based on user interactions.
-  const handleMapItemSelected = (eventId: string) => {
+  const handleMapItemSelected = (placeCode: string) => {
     // TODO: pass what is clicked on to the data panel and UI panel.    
-    console.debug(`[IbfMap] Event selected: ${eventId}`);
+    setSelectedAdminPlaceCode(placeCode);
+    console.debug(`[IbfMap] Admin area selected: ${placeCode}`);
   };
   
   // Data loader hook - manages layer loading and caching
@@ -88,11 +96,13 @@ export function IbfMapContainer() {
             onTogglePopulation={togglePopulation}
             onHideAllLayers={hideAllLayers}
             countryCode={selectedCountry}
+            selectedAdminPlaceCode={selectedAdminPlaceCode}
           />
         </div>
         <div className={styles.mapColumn}>
           <OlDataMap
             selectedCountry={selectedCountry}
+            selectedEventDetails={selectedEventMapDetails}
             mapStyleJsonUrl={mapUrlSimpleStyleJson}
             addLayerFunction={registerMapAddLayer}
             onSelect={handleMapItemSelected}

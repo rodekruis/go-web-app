@@ -8,7 +8,6 @@ import { noCountrySelectedValue } from "./ibfMap";
 import {
   getAdminRegionUrl,
   getNestedAdminUrl,
-  getAffectedRegionsForEvent,
   COL_CODE,
   COL_COUNTRY,
 } from "./ibfMapHelpers";
@@ -37,6 +36,8 @@ export interface AdminLayerState {
   selectedEventId: string;
   isEventSelected: boolean;
   animComplete: boolean;
+  // Affected region codes by admin level, populated when an event is selected
+  affectedRegionsByLevel: Map<number, string[]>;
 }
 
 const zIndexMap = { 1: 100, 2: 120, 3: 150 } as const;
@@ -63,9 +64,11 @@ export function createAdminLayer(
     style: (feature) => {
       const code = feature.get(COL_CODE);
       if (adminLevel === 3) {
-        const affectedRegions = getAffectedRegionsForEvent(
-          state.selectedEventId,
-        );
+        const affectedRegions = state.affectedRegionsByLevel.get(3) ?? [];
+        // DEBUG: Log on first feature render
+        if (code) {
+          console.log("[styleAdmin3] code:", code, "affectedRegions:", affectedRegions, "isEventSelected:", state.isEventSelected);
+        }
         return styleAdmin3Region(
           code,
           state.selectedAdminCodes.get(3) ?? null,
@@ -74,16 +77,20 @@ export function createAdminLayer(
         );
       }
       if (adminLevel === 2) {
+        const affectedRegions = state.affectedRegionsByLevel.get(2) ?? [];
         return styleAdmin2region(
           code,
           state.selectedAdminCodes.get(2) ?? null,
+          affectedRegions,
           state.animComplete,
           state.isEventSelected,
         );
       }
+      const affectedRegions = state.affectedRegionsByLevel.get(1) ?? [];
       return styleAdmin1region(
         code,
         state.selectedAdminCodes.get(1) ?? null,
+        affectedRegions,
         state.animComplete,
         state.isEventSelected,
       );
@@ -104,7 +111,7 @@ export function handleFeatureClick(
   adminLayers: Map<number, VectorLayer>,
   eventLayer: VectorLayer | null,
   selectedCountry: string,
-  onSelect: (eventId: string) => void,
+  onSelect: (placeCode: string) => void,
 ): { handled: boolean; showLevel?: 2 | 3; country?: string; parentCode?: string } {
   const properties = feature.getProperties();
   console.log("Clicked feature properties222:", properties);
@@ -117,7 +124,7 @@ export function handleFeatureClick(
   console.log(`>>>>2 ${state.isEventSelected}`);
   let processAdmin3Clicks = layer === adminLayers.get(3);
   if (processAdmin3Clicks && state.isEventSelected) {
-    const affectedRegions = getAffectedRegionsForEvent(state.selectedEventId);
+    const affectedRegions = state.affectedRegionsByLevel.get(3) ?? [];
     if (!affectedRegions.includes(newSelectedRegionCode)) {
       processAdmin3Clicks = false;
     }
@@ -126,6 +133,7 @@ export function handleFeatureClick(
   // Clicked on admin3 layer
   if (processAdmin3Clicks) {
     console.log(`>>>>processAdmin3Clicks ${state.isEventSelected}`);
+    onSelect(newSelectedRegionCode);
     state.selectedAdminCodes.set(3, newSelectedRegionCode);
     for (const l of adminLayers.values()) l.changed();
 
@@ -136,7 +144,7 @@ export function handleFeatureClick(
   console.log(`>>>>admin2 ${state.isEventSelected}`);
   // Clicked on admin2 layer
   if (layer === adminLayers.get(2) && state.isEventSelected === false) {
-    onSelect(state.selectedEventId);
+    onSelect(newSelectedRegionCode);
 
     state.selectedAdminCodes.set(2, newSelectedRegionCode);
     adminLayers.get(2)?.changed();
@@ -150,7 +158,7 @@ export function handleFeatureClick(
   console.log(`>>>>admin1 ${state.isEventSelected}`);
   // Clicked on admin1 layer
   if (layer === adminLayers.get(1) && state.isEventSelected === false) {
-    onSelect(state.selectedEventId);
+    onSelect(newSelectedRegionCode);
 
     state.selectedAdminCodes.set(1, newSelectedRegionCode);
     adminLayers.get(1)?.changed();

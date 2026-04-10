@@ -14,21 +14,24 @@ import { ChevronDownLineIcon, ChevronUpLineIcon } from "@ifrc-go/icons";
 // Helper to get exposure value by type from the exposure array
 function getExposureByType(
   exposure: ExposureCategory[] | undefined,
-  type: ExposedItemType
+  type: ExposedItemType,
 ): ExposureCategory | undefined {
   return exposure?.find((e) => e.type === type);
 }
 
 // Helper to get population exposure from admin area
 function getPopulation(adminArea: EventAdminAreaData | undefined): number {
-  const popExposure = getExposureByType(adminArea?.exposure, ExposedItemType.Population);
+  const popExposure = getExposureByType(
+    adminArea?.exposure,
+    ExposedItemType.Population,
+  );
   return popExposure?.exposed ?? 0;
 }
 
 // Get the first raster layer resourceId from availableLayers, or null if none
 function getRasterLayerId(event: EventOverviewData): string | null {
   const rasterLayer = event.availableLayers.find(
-    (layer) => layer.displayType === MapLayerDisplayType.Raster
+    (layer) => layer.displayType === MapLayerDisplayType.Raster,
   );
   return rasterLayer?.resourceId ?? null;
 }
@@ -63,6 +66,18 @@ interface EventDetailViewProps {
 function formatStartDate(startTime: string): string {
   const start = new Date(startTime);
   return start.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
+/**
+ * Formats peak reached time for display.
+ */
+function formatPeakTime(peakTime: string): string {
+  const peak = new Date(peakTime);
+  return peak.toLocaleDateString("en-US", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -129,11 +144,10 @@ function EventDetailView({
   const totalPopulation = getPopulation(admin0);
   const exposedDistrictsCount = admin3Regions.length;
   const rasterLayerId = getRasterLayerId(event);
-  
+
   // Get exposure categories for infrastructure (exclude population)
-  const infraExposure = admin0?.exposure.filter(
-    (e) => e.type !== ExposedItemType.Population
-  ) ?? [];
+  const infraExposure =
+    admin0?.exposure.filter((e) => e.type !== ExposedItemType.Population) ?? [];
 
   return (
     <div className={styles.eventDetailView}>
@@ -157,8 +171,12 @@ function EventDetailView({
         </div>
         <div className={styles.infoRow}>
           <span>
-            {admin1Regions.map((r) => r.name).join(", ") || "N/A"}
+            Reach high threshold:{" "}
+            {formatPeakTime(event.reachesPeakAlertClassTime)}
           </span>
+        </div>
+        <div className={styles.infoRow}>
+          <span>{admin1Regions.map((r) => r.name).join(", ") || "N/A"}</span>
         </div>
       </div>
 
@@ -242,8 +260,8 @@ function EventDetailView({
 
       {/* Footer */}
       <div className={styles.footer}>
-        Event created on: {formatFooterDate(event.firstIssuedAt)}. Last
-        updated on: {formatFooterDate(event.lastUpdatedAt)}
+        Event created on: {formatFooterDate(event.firstIssuedAt)}. Last updated
+        on: {formatFooterDate(event.lastUpdatedAt)}
       </div>
     </div>
   );
@@ -319,6 +337,7 @@ interface IbfControlPanelProps {
   onTogglePopulation: () => void;
   onHideAllLayers: () => void;
   countryCode: string;
+  selectedAdminPlaceCode: string | null;
 }
 
 /**
@@ -333,6 +352,7 @@ export function IbfControlPanel({
   onTogglePopulation,
   onHideAllLayers,
   countryCode,
+  selectedAdminPlaceCode,
 }: IbfControlPanelProps) {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const events = Object.values(eventData);
@@ -347,6 +367,13 @@ export function IbfControlPanel({
     onHideAllLayers();
     setSelectedEventId(null);
   };
+
+  if (selectedAdminPlaceCode) {
+    // TODO: change the view based on this
+    console.debug(
+      `[IbfControlPanel] Selected admin area: ${selectedAdminPlaceCode}`,
+    );
+  }
 
   // Show detail view if an event is selected
   if (selectedEvent) {
@@ -374,10 +401,7 @@ export function IbfControlPanel({
     <div className={styles.dataContainer}>
       <div className={styles.headerRow}>
         <h3>Upcoming Events ({countryCode})</h3>
-        <Button
-          name="refresh-all"
-          onClick={onRefreshAll}
-        >
+        <Button name="refresh-all" onClick={onRefreshAll}>
           Refresh All
         </Button>
       </div>
