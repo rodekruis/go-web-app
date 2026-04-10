@@ -12,15 +12,16 @@ import {
   noCountrySelectedValue,
   eventIdParamsKey,
 } from "#utils/ibfMap";
-import { getCurrentCountryEventData, getEventDetails, getSelectedEventMapDetails, type AllEventsData } from "#utils/ibfMapHelpers";
+import { getCurrentCountryEventData, getEventDetails, getSelectedEventMapDetails } from "#utils/ibfMapHelpers";
+import type { AllEventsData } from "#utils/ibfMapTypes";
 
 /**
- * Base map component for IBF data maps *
- * This component manages multiple nested components including for map data fetching, display, and control. *
+ * Base map component for IBF data maps
+ * This component manages multiple nested components including for map data fetching, display, and control.
  * @returns A standalone component
  */
 export function IbfMapContainer() {
-  // Search params are used to create a linkable state for the app so users can share links to specific views.
+  // Search params are used to create a shareable URL to a specific view.
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Load the view details from the search params
@@ -30,17 +31,18 @@ export function IbfMapContainer() {
 
   // Check if a country is in the search params
   if (selectedCountry === noCountrySelectedValue) {
-    // TODO: add an error or redirect, since the portal requires a selected country.
-    console.debug("[IbfMapContainer] No country selected");
+    // TODO: add a user facing error or redirect, since the portal requires a selected country.
+    console.error("No country selected. Cannot load the portal.");
   }
 
-  // Event data is loaded once on page load, then only updated via refresh
+  // Event data is loaded once on page load, then only updated via the refresh function
   const [eventData, setEventData] = useState<AllEventsData>(() => {
     if (selectedEventId) {
       return getEventDetails(selectedEventId);
     }
     return getCurrentCountryEventData(selectedCountry);
   });
+
   const [selectedAdminPlaceCode, setSelectedAdminPlaceCode] = useState<string | null>(null);
 
   // Derive map details for the selected event (centroid, affected regions)
@@ -49,23 +51,24 @@ export function IbfMapContainer() {
     [eventData, selectedEventId]
   );
 
+  // Refresh page and put in a default start state
+  const handleRefreshAll = () => {
+    // Clear search params except for the country
+    setSearchParams({
+      [countryParamsKey]: selectedCountry,
+    });
+
+    // Reload event data and set it
+    setEventData(getCurrentCountryEventData(selectedCountry));
+  };
+
   // Handle event selection from control panel
   const handleEventClick = (eventId: string) => {
-    // TODO: this will change map zoom, focus, etc.
-    
     // Set search params for URL sharing only - does not reload data
       setSearchParams({
         [countryParamsKey]: selectedCountry,
         [eventIdParamsKey]: eventId,
       });
-  };
-
-  // Handle refresh all - clears event selection and reloads data
-  const handleRefreshAll = () => {
-    setSearchParams({
-      [countryParamsKey]: selectedCountry,
-    });
-    setEventData(getCurrentCountryEventData(selectedCountry));
   };
 
   // Callback to update search params based on user interactions.

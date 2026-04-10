@@ -1,3 +1,6 @@
+// TODO: Find a better differentiation between ibfMap.ts and ibfMapHelpers.ts and simplify
+// Task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41662
+
 import VectorTileLayer from "ol/layer/VectorTile";
 import MVT from "ol/format/MVT";
 import ImageLayer from "ol/layer/Image";
@@ -7,25 +10,43 @@ import VectorTile from "ol/source/VectorTile";
 import { mockAllEventsData_MW, mockAllEventsData_ZM } from "./ibfMockData_debug";
 import { CountryData } from "./ibfMap";
 import { pgFeatureserv } from '#config';
-import type { AllEventsData, EventOverviewData, EventAdminAreaData, ExposureCategory, MapLayerDetails, SelectedEventMapDetails } from "./ibfMapTypes";
+import type { AllEventsData, SelectedEventMapDetails } from "./ibfMapTypes";
 
-// Re-export types for consumers
-export type { AllEventsData, EventOverviewData, EventAdminAreaData, ExposureCategory, MapLayerDetails, SelectedEventMapDetails };
-export { ExposedItemType } from "./ibfMapTypes";
+// Raw GitHub URLs for direct file access
+// TODO: move this to the env file and set up conditional to target either the seed repo or the API
+// depending on the environment or another setting.
+const seedRepoBaseUrl = "https://raw.githubusercontent.com/rodekruis/IBF-seed-data/main/";
+const seedRepoEventDataUrl =
+  `${seedRepoBaseUrl}raster-data/mock-events/rgba/`;
+const seedRepoPopDataUrl =
+  `${seedRepoBaseUrl}raster-data/population/rgba/`;
 
-// Fetch upcoming or live event data for a country
+// Simplification algorithm factor for simplifying vector data
+// Example of factor values on vector object size:
+//    full vector size: 300kb
+//    .0005 = 279kb
+//    .001 = 188kb
+//    .05 = 53kb
+//    .01 = 30kb
+const adminLevelToSimplificationFactor : number[] = [0.01, 0.01, 0.005, 0.004];
+
+// Fetch upcoming or ongoing event data for a country
 export function getCurrentCountryEventData(country: string): AllEventsData {
-    // TODO: Use the API for fetching this for any country.
+  // TODO: Use the API for fetching this for any country, and only use mock data if set to do so in the env file.
+
+  // TODO: Try to switch to ISO3 in the data, so we can avoid ISO2 -> ISO3 mapping.
+  // See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41656
   if (country === "MW") {
     return mockAllEventsData_MW;
   } else if (country === "ZM") {
     return mockAllEventsData_ZM;
-  } else return {};
+  } else return {} as AllEventsData;
 }
 
 // Fetch a specific event's details, and only return that event
 export function getEventDetails(eventId: string): AllEventsData {
-  // Look in mock output for the event data with the matching eventId, and only return that event.
+  // TODO: Use the API for fetching this for any country, and only use mock data if set to do so in the env file.
+  // For mock data, look for the event data with the matching eventId, and only return that event.
   const allMockData: AllEventsData[] = [mockAllEventsData_MW, mockAllEventsData_ZM];
   for (const countryEvents of allMockData) {
     const eventData = countryEvents[eventId];
@@ -57,37 +78,18 @@ export function getSelectedEventMapDetails(
       }
     });
   } else {
-    // TODO: this is an error, so show something in the UI about this.
-    // Although this should be checked for on the backend, at least let the user here know the error.
-    console.log("[getSelectedEventMapDetails] No exposedAdminAreas found for event:", eventId);
+    // TODO: Show user facing error.
+    console.error("No exposedAdminAreas found for event:", eventId);
   }
 
+  // TODO: Return extents (of all exposed admin areas)
+  // TODO: Return zoom level based on extents
   return {
     eventId,
     centroid: event.centroid,
     affectedRegionsByLevel,
   };
 }
-
-// Raw GitHub URLs for direct file access
-// TODO: move to where uris will be stored (env and other config file)
-const seedRepoEventDataUrl =
-  "https://raw.githubusercontent.com/rodekruis/IBF-seed-data/main/raster-data/mock-events/rgba/";
-const seedRepoPopDataUrl =
-  "https://raw.githubusercontent.com/rodekruis/IBF-seed-data/main/raster-data/population/rgba/";
-
-  // TODO: rework where this goes
-export const COL_COUNTRY = "country";
-export const COL_ADMIN_LEVEL = "admin_level";
-export const COL_CODE = "code";
-
-// example of factor numbers on vector object size:
-// full size: 300kb
-// .0005 = 279kb
-// .001 = 188kb
-// .05 = 53kb
-// .01 = 30kb
-const adminZoomToFactor : number[] = [0.01, 0.01, 0.005, 0.004];
 
 /**
  * Create a vector tile layer for the map.
@@ -140,7 +142,7 @@ export const makePopulationImageLayer = async (country_code: string) => {
 
 const makeStaticImageLayer = async (baseUri: string, name: string) => {
   const extents = await getImageExtentsAsync(baseUri, name);
-  const rasterUrl = getRasterDataUrl(baseUri, name);
+  const rasterUrl = `${baseUri}${name}.png`;
   return new ImageLayer({
     source: new ImageStatic({
       url: rasterUrl,
@@ -149,16 +151,6 @@ const makeStaticImageLayer = async (baseUri: string, name: string) => {
       imageExtent: extents,
     }),
   });
-};
-
-/**
- * Build the URL for the png raster data. *
- * @param baseUri base URL for the data source
- * @param name filename (no extension)
- * @returns the full URL to the png image
- */
-const getRasterDataUrl = (baseUri: string, name: string): string => {
-  return `${baseUri}${name}.png`;
 };
 
 /**
@@ -191,30 +183,29 @@ const getImageExtentsAsync = async (
   }
 };
 
-
-export const getAdminRegionUrl = (country: string, adm: number): string => {
-  // Get the simplification factor based on the admin level.
-  let factor = adminZoomToFactor[adm];
+// Get the simplification factor based on the admin level
+const getSimplificationFactor = (adminLevel: number): number => {
+  let factor = adminLevelToSimplificationFactor[adminLevel];
   if (!factor) {
     // The fallback is safe, so no need to make this error user facing.
     // The fallback just results in a possibly larger data size.
     // Log it though so devs can investigate.
-    console.error(`No simplification factor found for admin level ${adm}, defaulting to 0.01`);
+    console.error(`No simplification factor found for admin level ${adminLevel}, defaulting to 0.01`);
     factor = 0.01;
   }
-  
-  return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27&limit=10000&transform=simplify,${factor}`;
+  return factor;
+};
+
+export const getAdminRegionUrl = (country: string, adminLevel: number): string => {
+  let factor = getSimplificationFactor(adminLevel);  
+  return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adminLevel}%27&limit=10000&transform=simplify,${factor}`;
 };
 
 export const getNestedAdminUrl = (
   country: string,
   parentCode: string,
-  adm: number,
+  adminLevel: number,
 ): string => {
-  let factor = adminZoomToFactor[adm];
-  if (!factor) {
-    console.warn(`No simplification factor found for admin level ${adm}, defaulting to 0.01`);
-    factor = 0.01;
-  }
-  return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adm}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
+  let factor = getSimplificationFactor(adminLevel);
+  return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adminLevel}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
 };

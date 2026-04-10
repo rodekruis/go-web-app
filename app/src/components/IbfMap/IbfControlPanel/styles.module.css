@@ -1,6 +1,6 @@
 .dataContainer {
     margin: 20px;
-    background-color: #f9ebff;
+    background-color: #dffde4;
 }
 
 .headerRow {
@@ -17,7 +17,7 @@
 .eventCard {
     margin-bottom: 16px;
     padding: 8px;
-    border: 1px solid #87d684;
+    border: 1px solid #ec74ff;
     border-radius: 4px;
 }
 

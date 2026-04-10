@@ -170,11 +170,10 @@ export const styleAdmin3Region = (
 export const styleAdmin2region = (
   code: string,
   selectedCode: string | null,
-  animComplete: boolean,
   isEventSelected: boolean,
 ): Style => {
   // Don't fill the selected region if the selected code starts with code
-  if (selectedCode && selectedCode.startsWith(code) && animComplete) {
+  if (selectedCode && selectedCode.startsWith(code)) {
     return new Style({
 
     });
@@ -205,11 +204,10 @@ export const styleAdmin2region = (
 export const styleAdmin1region = (
   code: string,
   selectedCode: string | null,
-  animComplete: boolean,
   isEventSelected: boolean,
 ): Style => {
   // Don't fill the selected region
-  if (selectedCode && selectedCode.startsWith(code) && animComplete) {
+  if (selectedCode && selectedCode.startsWith(code)) {
     return new Style({
       stroke: new Stroke({
         color: "#fcfc1d",

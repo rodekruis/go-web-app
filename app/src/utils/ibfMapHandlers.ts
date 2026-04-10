@@ -4,12 +4,14 @@ import BaseLayer from "ol/layer/Base";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import GeoJSON from "ol/format/GeoJSON";
-import { noCountrySelectedValue } from "./ibfMap";
+import {
+  noCountrySelectedValue,
+  PLACE_CODE_FIELD_KEY,
+  COUNTRY_FIELD_KEY,
+} from "./ibfMap";
 import {
   getAdminRegionUrl,
   getNestedAdminUrl,
-  COL_CODE,
-  COL_COUNTRY,
 } from "./ibfMapHelpers";
 import {
   styleAdmin1region,
@@ -21,11 +23,9 @@ import {
 function fitToFeature(state: AdminLayerState, feature: FeatureLike) {
   const geometry = feature.getGeometry?.();
   if (!geometry) return;
-  state.animComplete = false;
   state.mapInstance?.getView().fit(geometry.getExtent(), {
     duration: 500,
     padding: [50, 50, 50, 50],
-    callback: () => { state.animComplete = true; },
   });
 }
 
@@ -35,11 +35,11 @@ export interface AdminLayerState {
   selectedAdminRegion: string;
   selectedEventId: string;
   isEventSelected: boolean;
-  animComplete: boolean;
   // Affected region codes by admin level, populated when an event is selected
   affectedRegionsByLevel: Map<number, string[]>;
 }
 
+// Z index maps to make sure lower-level admin layers are not hidden by their parents
 const zIndexMap = { 1: 100, 2: 120, 3: 150 } as const;
 
 // Create a VectorLayer for the given admin level.
@@ -62,7 +62,7 @@ export function createAdminLayer(
       format: new GeoJSON(),
     }),
     style: (feature) => {
-      const code = feature.get(COL_CODE);
+      const code = feature.get(PLACE_CODE_FIELD_KEY);
       if (adminLevel === 3) {
         const affectedRegions = state.affectedRegionsByLevel.get(3) ?? [];
 
@@ -77,14 +77,12 @@ export function createAdminLayer(
         return styleAdmin2region(
           code,
           state.selectedAdminCodes.get(2) ?? null,
-          state.animComplete,
           state.isEventSelected,
         );
       }
       return styleAdmin1region(
         code,
         state.selectedAdminCodes.get(1) ?? null,
-        state.animComplete,
         state.isEventSelected,
       );
     },
@@ -116,7 +114,7 @@ export function handleFeatureClick(
     // TODO: handle event layer interaction when they are added to the map.
   }
 
-  const newSelectedRegionCode = properties[COL_CODE] || noCountrySelectedValue;
+  const newSelectedRegionCode = properties[PLACE_CODE_FIELD_KEY] || noCountrySelectedValue;
 
   let processAdmin3Clicks = layer === adminLayers.get(3);
   if (processAdmin3Clicks && state.isEventSelected) {
@@ -143,7 +141,7 @@ export function handleFeatureClick(
     state.selectedAdminCodes.set(2, newSelectedRegionCode);
     adminLayers.get(2)?.changed();
 
-    const country = properties[COL_COUNTRY] || selectedCountry;
+    const country = properties[COUNTRY_FIELD_KEY] || selectedCountry;
 
     fitToFeature(state, feature);
     return { handled: true, showLevel: 3, country, parentCode: newSelectedRegionCode };
@@ -156,7 +154,7 @@ export function handleFeatureClick(
     state.selectedAdminCodes.set(1, newSelectedRegionCode);
     adminLayers.get(1)?.changed();
 
-    const country = properties[COL_COUNTRY] || selectedCountry;
+    const country = properties[COUNTRY_FIELD_KEY] || selectedCountry;
 
     fitToFeature(state, feature);
     return { handled: true, showLevel: 2, country, parentCode: newSelectedRegionCode };

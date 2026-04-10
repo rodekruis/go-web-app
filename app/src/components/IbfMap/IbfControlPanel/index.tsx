@@ -10,8 +10,10 @@ import {
   type EventAdminAreaData,
   type ExposureCategory,
   ExposedItemType,
-} from "#utils/ibfMapHelpers";
-import { MapLayerDisplayType, MapLayerInfoType, type MapLayerDetails } from "#utils/ibfMapTypes";
+  MapLayerDisplayType,
+  MapLayerInfoType,
+  type MapLayerDetails,
+} from "#utils/ibfMapTypes";
 import styles from "./styles.module.css";
 import { Button } from "@ifrc-go/ui";
 import { ChevronDownLineIcon, ChevronUpLineIcon } from "@ifrc-go/icons";

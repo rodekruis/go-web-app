@@ -10,7 +10,7 @@ import {
   handleFeatureClick,
   type AdminLayerState,
 } from "#utils/ibfMapHandlers";
-import type { SelectedEventMapDetails } from "#utils/ibfMapHelpers";
+import type { SelectedEventMapDetails } from "#utils/ibfMapTypes";
 import { apply } from "ol-mapbox-style";
 import styles from "./styles.module.css";
 import VectorLayer from "ol/layer/Vector";
@@ -81,7 +81,6 @@ export function OlDataMap({
       selectedAdminRegion: selectedCountry,
       selectedEventId: selectedEventDetails?.eventId ?? "",
       isEventSelected: !!selectedEventDetails,
-      animComplete: true,
       affectedRegionsByLevel: selectedEventDetails?.affectedRegionsByLevel ?? new Map(),
     };
     stateRef.current = state;
