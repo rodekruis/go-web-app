@@ -13,7 +13,7 @@ import { pgFeatureserv } from '#config';
 import type { AllEventsData, MapLayerDetails, SelectedEventMapDetails } from "./ibfMapTypes";
 
 // Raw GitHub URLs for direct file access
-// TODO: move this to the env file and set up conditional to target either the seed repo or the API
+// TODO: Once we have working API, we'll need a conditional here to target either the seed repo or the API
 // depending on the environment or another setting.
 const seedRepoBaseUrl = "https://raw.githubusercontent.com/rodekruis/IBF-seed-data/main/";
 const seedRepoEventDataUrl =
@@ -182,7 +182,8 @@ const getImageExtentsAsync = async (
   }
 };
 
-// Get the simplification factor based on the admin level
+// Get the vector simplification factor (for the query algorithm)
+// This factor is based on the admin level
 const getSimplificationFactor = (adminLevel: number): number => {
   let factor = adminLevelToSimplificationFactor[adminLevel];
   if (!factor) {
@@ -209,33 +210,34 @@ export const getNestedAdminUrl = (
   return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adminLevel}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
 };
 
+// Get the z index offset to make sure lower-level admin layers are not hidden by their parents
+export function getAdminAreaZIndex(level: number): number {
+  // Start with a base offset of 1000, and add the level
+  return 1000 + level;
+  }
+
 // Get the map layer z index offset on which the layer is drawn.
 // Higher numbers are drawn on top of other layers.
 // Change the numbers in this function to change the layering order. Use ints.
 export function getZIndexOffset (layerDetails: MapLayerDetails) : number {
-  // Begin with a starting offset of a high number
-  let offset = 1000;
 
-  // Add additional offset based on the layer type
+  // Note: admin levels are handled by this function: getAdminAreaZIndex
+  // Set the number below in relation to what the admin layer is drawn at.
+
   switch (layerDetails.dataType) {
     case "population":
-      offset += 0;
-      break;
+      return 500;
     case "event_extent":
-      offset += 100;
-      break;
+      return 1100;
     case "red_cross_branches":
       // Give point data a higher offset
-      offset += 201;
-      break;
+      return 1201;
     case "clinics":
       // Give point data a higher offset
-      offset += 202;
-      break;
+      return 1202;
     default:
       // No need for a user facing error, but we should log this to correctly handle it later.
       console.error("Unknown layer data type for z-indexing:", layerDetails.dataType);
-      break;
+      return 1; // draw on the lowest layer above the base map
   }
-  return offset;
 }

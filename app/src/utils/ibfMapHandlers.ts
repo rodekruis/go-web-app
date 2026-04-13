@@ -12,6 +12,7 @@ import {
 import {
   getAdminRegionUrl,
   getNestedAdminUrl,
+  getAdminAreaZIndex,
 } from "./ibfMapHelpers";
 import {
   styleAdmin1region,
@@ -39,9 +40,6 @@ export interface AdminLayerState {
   // Affected region codes by admin level. This is populated when an event is selected.
   exposedRegionsByLevel: Map<number, string[]>;
 }
-
-// Z index maps to make sure lower-level admin layers are not hidden by their parents
-const zIndexMap = { 1: 100, 2: 120, 3: 150 } as const;
 
 // Create a VectorLayer for the given admin level.
 // For level 1, uses selectedAdminCodes.get(1) (the region) from state.
@@ -89,7 +87,7 @@ export function createAdminLayer(
     },
   });
 
-  layer.setZIndex(zIndexMap[adminLevel]);
+  layer.setZIndex(getAdminAreaZIndex(adminLevel));
   return layer;
 }
 
