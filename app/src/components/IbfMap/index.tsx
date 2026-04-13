@@ -127,6 +127,7 @@ export function IbfMapContainer() {
           />
           <IbfControlPanel
             eventData={eventData}
+            activeEventId={activeEventId}
             onEventClick={handleEventClick}
             onRefreshAll={handleRefreshAll}
             onDeselectEvent={deselectEvent}

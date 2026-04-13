@@ -310,6 +310,7 @@ function EventButton({ event, onEventClick }: EventButtonProps) {
 
 interface IbfControlPanelProps {
   eventData: AllEventsData;
+  activeEventId: string | null;
   onEventClick: (eventId: string) => void;
   onRefreshAll: () => void;
   onDeselectEvent: () => void;
@@ -323,24 +324,18 @@ interface IbfControlPanelProps {
  */
 export function IbfControlPanel({
   eventData,
+  activeEventId,
   onEventClick,
   onRefreshAll,
   onDeselectEvent,
   countryCode,
   selectedAdminPlaceCode,
 }: IbfControlPanelProps) {
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const events = Object.values(eventData);
-  const selectedEvent = selectedEventId ? eventData[selectedEventId] : null;
-
-  const handleEventClick = (eventId: string) => {
-    setSelectedEventId(eventId);
-    onEventClick(eventId);
-  };
+  const selectedEvent = activeEventId ? eventData[activeEventId] : null;
 
   const handleBack = () => {
     onDeselectEvent();
-    setSelectedEventId(null);
   };
 
   if (selectedAdminPlaceCode) {
@@ -379,7 +374,7 @@ export function IbfControlPanel({
         <EventButton
           key={event.eventId}
           event={event}
-          onEventClick={handleEventClick}
+          onEventClick={onEventClick}
         />
       ))}
     </div>
