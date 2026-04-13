@@ -1,4 +1,4 @@
-# IBF map component
+# IBF Map Component
 
 This component will be the shared NRW map component.
 
@@ -8,13 +8,13 @@ The "Ol..." prefix stands for OpenLayers (the mapping front library used), and t
 
 ## Basic Architecture
 
-- The `IbfMap component` is the main container for all the NRW mapping components.
+- The `IbfMap` component is the main container for all the NRW mapping components.
 - The `useIbfDataLoader` hook is the shared object used for loading/caching all data. This joins the UI logic of loading/selecting data between the UI components and the data map component.
 - `OlDataMap` is the NRW map component. It handles admin area rendering/selection, and can have any data layer added to it.
 - `OlGlobalMap` is a general global view component that can be used for global map interaction.
 - `IbfControlPanel` and `IbfLayerPanel` are the UI interaction layers.
 
-## Running locally
+## Running Locally
 
 This requires some IBF setup to run. To run locally, do the following:
 
@@ -23,6 +23,7 @@ This requires some IBF setup to run. To run locally, do the following:
 3. Set up this repo to run, following the readme in the base directory. Be sure to recopy `example.env` into `.env` each time there were any changes in example.env.
 4. Launch with `pnpm start` from `/go-web-app/app`.
 5. Navigate to http://localhost:3000/ibf?c=mw
+6. Linking directly to an event is supported, if it is in the mock data. For instance http://localhost:3000/ibf?c=MW&e=event1
 
 ## Testing
 
