@@ -177,17 +177,16 @@ export function OlDataMap({
               feature,
               layer,
               adminLayers,
-              selectedCountry,
               onSelect,
             );
-            if (result.showLevel) {
+            if (result?.showChildLevel) {
               addAdminLayer(
-                result.showLevel,
-                result.country,
+                result.showChildLevel,
+                selectedCountry,
                 result.parentCode,
               );
             }
-            return result.handled;
+            return true;
           },
           {
             layerFilter: isInteractiveLayer,
@@ -252,6 +251,7 @@ export function OlDataMap({
         const [lon, lat] = selectedEventDetails.centroid;
         map.getView().animate({
           center: fromLonLat([lon, lat]),
+          // TODO: derive zoom from event details
           zoom: 9,
           duration: 500,
         });

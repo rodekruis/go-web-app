@@ -7,11 +7,7 @@ import BaseLayer from "ol/layer/Base";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import GeoJSON from "ol/format/GeoJSON";
-import {
-  noCountrySelectedValue,
-  PLACE_CODE_FIELD_KEY,
-  COUNTRY_FIELD_KEY,
-} from "./ibfMap";
+import { noCountrySelectedValue, PLACE_CODE_FIELD_KEY } from "./ibfMap";
 import {
   getAdminRegionUrl,
   getNestedAdminUrl,
@@ -106,14 +102,11 @@ export function handleFeatureClick(
   feature: FeatureLike,
   layer: BaseLayer,
   adminLayers: Map<number, VectorLayer>,
-  selectedCountry: string,
   onSelect: (placeCode: string) => void,
 ): {
-  handled: boolean;
-  showLevel?: 2 | 3;
-  country?: string;
-  parentCode?: string;
-} {
+  showChildLevel: 2 | 3;
+  parentCode: string;
+} | void {
   const properties = feature.getProperties();
 
   // Print out all features of the item clicked on.
@@ -141,7 +134,7 @@ export function handleFeatureClick(
     for (const l of adminLayers.values()) l.changed();
 
     fitToFeature(state, feature);
-    return { handled: true };
+    return;
   }
 
   // Handle clicks for admin1 and 2
@@ -149,39 +142,32 @@ export function handleFeatureClick(
   if (!state.isEventSelected()) {
     let selectedLayer: VectorLayer | null = null;
     let level = 0;
+    // Only 2 and 3 are valid child levels
+    let childLevel: 2 | 3 = 2;
 
     // Clicked on admin2 layer
     if (layer === adminLayers.get(2)) {
       selectedLayer = adminLayers.get(2) ?? null;
       level = 2;
+      childLevel = 3;
     }
     // Clicked on admin1 layer
     else if (layer === adminLayers.get(1)) {
       selectedLayer = adminLayers.get(1) ?? null;
-      level = 1;
     }
 
     if (selectedLayer) {
       onSelect(newSelectedRegionCode);
-
       state.selectedAdminCodes.set(level, newSelectedRegionCode);
       selectedLayer.changed();
-
-      const country = properties[COUNTRY_FIELD_KEY] || selectedCountry;
-
       fitToFeature(state, feature);
 
-      const childLevel = (level + 1) as 2 | 3;
-
       return {
-        handled: true,
-        showLevel: childLevel,
-        country,
+        showChildLevel: childLevel,
         parentCode: newSelectedRegionCode,
       };
     }
   }
 
   state.selectedAdminCodes.set(0, newSelectedRegionCode);
-  return { handled: true };
 }
