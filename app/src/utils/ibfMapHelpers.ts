@@ -10,7 +10,7 @@ import VectorTile from "ol/source/VectorTile";
 import { mockAllEventsData_MW, mockAllEventsData_ZM } from "./ibfMockData_debug";
 import { CountryData } from "./ibfMap";
 import { pgFeatureserv } from '#config';
-import type { AllEventsData, SelectedEventMapDetails } from "./ibfMapTypes";
+import type { AllEventsData, MapLayerDetails, SelectedEventMapDetails } from "./ibfMapTypes";
 
 // Raw GitHub URLs for direct file access
 // TODO: move this to the env file and set up conditional to target either the seed repo or the API
@@ -209,3 +209,34 @@ export const getNestedAdminUrl = (
   let factor = getSimplificationFactor(adminLevel);
   return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adminLevel}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
 };
+
+// Get the map layer z index offset on which the layer is drawn.
+// Higher numbers are drawn on top of other layers.
+// Change the numbers in this function to change the layering order. Use ints.
+export function getZIndexOffset (layerDetails: MapLayerDetails) : number {
+  // Begin with a starting offset of a high number
+  let offset = 1000;
+
+  // Add additional offset based on the layer type
+  switch (layerDetails.dataType) {
+    case "population":
+      offset += 0;
+      break;
+    case "event_extent":
+      offset += 100;
+      break;
+    case "red_cross_branches":
+      // Give point data a higher offset
+      offset += 201;
+      break;
+    case "clinics":
+      // Give point data a higher offset
+      offset += 202;
+      break;
+    default:
+      // No need for a user facing error, but we should log this to correctly handle it later.
+      console.error("Unknown layer data type for z-indexing:", layerDetails.dataType);
+      break;
+  }
+  return offset;
+}

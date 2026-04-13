@@ -10,10 +10,10 @@ import {
   handleFeatureClick,
   type AdminLayerState,
 } from "#utils/ibfMapHandlers";
-import type { SelectedEventMapDetails } from "#utils/ibfMapTypes";
-import { apply } from "ol-mapbox-style";
+import type { MapLayerDetails, SelectedEventMapDetails } from "#utils/ibfMapTypes";
 import styles from "./styles.module.css";
 import VectorLayer from "ol/layer/Vector";
+import { getZIndexOffset } from "#utils/ibfMapHelpers";
 
 function createView(countryInfo?: CountryData) {
   if (!countryInfo) {
@@ -29,21 +29,17 @@ function createView(countryInfo?: CountryData) {
 
 interface OlDataMapProps {
   // ISO_A2 code of the selected country
+  // TODO: move to ISO_A3
+  // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41656
   selectedCountry: string;
 
   // Details for the currently selected event (centroid, affected regions)
   // Pass null when no event is selected
   selectedEventDetails?: SelectedEventMapDetails | null;
 
-  // StyleJson format vector tile map url
-  mapStyleJsonUrl?: string;
-
-  // Optional base map layer
-  additionalVectorLayer?: BaseLayer;
-
   // Optional arg to expose adding a layer
   // It is a function that takes the add-layer function as an argument.
-  addLayerFunction?: (addLayer: (layer: BaseLayer) => void) => void;
+  addLayerFunction?: (addLayer: (layer: BaseLayer, layerInfo: MapLayerDetails) => void) => void;
 
   // Callback for when an admin area is selected.
   onSelect: (placeCode: string) => void;
@@ -56,8 +52,6 @@ interface OlDataMapProps {
 export function OlDataMap({
   selectedCountry,
   selectedEventDetails,
-  additionalVectorLayer,
-  mapStyleJsonUrl,
   addLayerFunction,
   onSelect,
 }: OlDataMapProps) {
@@ -119,24 +113,11 @@ export function OlDataMap({
         view: createView(legacy_countryInfo),
       });
 
-      if (additionalVectorLayer) {
-        // Ensure this layer is on top of the other map layers
-        additionalVectorLayer.setZIndex(1000);
-        mapInstanceRef.current.addLayer(additionalVectorLayer);
-      }
-
-      if (mapStyleJsonUrl) {
-        apply(mapInstanceRef.current, mapStyleJsonUrl).catch((error: any) => {
-          // TODO: make the error user facing
-          console.error("Style apply error:", error);
-        });
-      }
-
       // Expose addLayer function to parent
       if (addLayerFunction) {
-        addLayerFunction((newLayer: BaseLayer) => {
-          // Ensure layer appears above other layers
-          newLayer.setZIndex(2000);
+        addLayerFunction((newLayer: BaseLayer, layerDetails: MapLayerDetails) => {
+          const zIndex = getZIndexOffset(layerDetails);
+          newLayer.setZIndex(zIndex);
           mapInstanceRef.current?.addLayer(newLayer);
         });
       }

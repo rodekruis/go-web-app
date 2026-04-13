@@ -20,7 +20,7 @@ import { MapLayerInfoType, MapLayerDisplayType, type MapLayerDetails } from "#ut
 export function useIbfDataLoader(selectedCountry: string) {
 
   // Reference to the function (passed in by the map component) for adding layers to the map.
-  const addLayerToMapFunction = useRef<((layer: BaseLayer) => void) | null>(null);
+  const addLayerToMapFunction = useRef<((layer: BaseLayer, layerInfo: MapLayerDetails) => void) | null>(null);
 
   // Cache of all loaded layers.
   // The key is fixed based on the layer details.
@@ -34,15 +34,16 @@ export function useIbfDataLoader(selectedCountry: string) {
   // Register the map's addLayer function.
   // Called by OlDataMap when the map is ready.
   const registerMapAddLayer = useCallback(
-    (addLayer: (layer: BaseLayer) => void) => {
+    (addLayer: (layer: BaseLayer, layerInfo: MapLayerDetails) => void) => {
       addLayerToMapFunction.current = addLayer;
     },
     []
   );
 
-  // Toggle the map layer.
-  // If there is no cached layer, load it with the passed in loadLayer function
-  const _toggleLayer = async (key: string, loadLayer: () => Promise<BaseLayer>) => {
+  // Internal function for handling layer toggling logic
+  // If there is a cached layer, toggle it's visibility.
+  // Otherwise, load it with the passed in loadLayer function.
+  const _toggleLayer = async (key: string, layerDetails: MapLayerDetails, loadLayer: () => Promise<BaseLayer>) => {
     if (!addLayerToMapFunction.current) {
       console.error("[useIbfDataLoader] Map not ready");
       return;
@@ -57,26 +58,27 @@ export function useIbfDataLoader(selectedCountry: string) {
     try {
       const layer = await loadLayer();
       layersCache.current.set(key, layer);
-      addLayerToMapFunction.current(layer);
+      addLayerToMapFunction.current(layer, layerDetails);
     } catch (error) {
       // TODO: make this error user facing
       console.error(`[useIbfDataLoader] Failed to load layer ${key}:`, error);
     }
   };
 
-  // Toggle a map layer based on its details
+  // Exposed function to toggle a map layer
+  // If the layer is not cached, it will be loaded.
   const toggleMapLayer = (layerDetails: MapLayerDetails) => {
     const { dataType, displayType, resourceId } = layerDetails;
 
     if (displayType === MapLayerDisplayType.Raster) {
       switch (dataType) {
         case MapLayerInfoType.Population:
-          _toggleLayer(_getLayerKey(layerDetails), () =>
+          _toggleLayer(_getLayerKey(layerDetails), layerDetails, () =>
             makePopulationImageLayer(selectedCountry)
           );
           break;
         case MapLayerInfoType.EventExtent:
-          _toggleLayer(_getLayerKey(layerDetails), () =>
+          _toggleLayer(_getLayerKey(layerDetails), layerDetails, () =>
             makeEventImageLayer(resourceId)
           );
           break;
@@ -89,6 +91,7 @@ export function useIbfDataLoader(selectedCountry: string) {
     }
   };
 
+  // Set the visibility of all cached layers to false.
   const hideAllLayers = () => {
     for (const layer of layersCache.current.values()) {
       layer.setVisible(false);

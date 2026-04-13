@@ -8,7 +8,6 @@ import { useIbfDataLoader } from "./useIbfDataLoader";
 import styles from "./styles.module.css";
 import {
   countryParamsKey,
-  mapUrlSimpleStyleJson,
   noCountrySelectedValue,
   eventIdParamsKey,
 } from "#utils/ibfMap";
@@ -104,7 +103,6 @@ export function IbfMapContainer() {
           <OlDataMap
             selectedCountry={selectedCountry}
             selectedEventDetails={selectedEventMapDetails}
-            mapStyleJsonUrl={mapUrlSimpleStyleJson}
             addLayerFunction={registerMapAddLayer}
             onSelect={handleMapItemSelected}
           />
