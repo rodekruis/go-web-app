@@ -13,7 +13,7 @@ import {
 import {
   createAdminLayer,
   handleFeatureClick,
-  type AdminLayerState,
+  type MapViewState,
 } from "#utils/ibfMapInteractionHelpers";
 import type {
   MapLayerDetails,
@@ -56,7 +56,10 @@ interface OlDataMapProps {
 }
 
 /**
- * OpenLayers map component for IBF data maps *
+ * OpenLayers map component for IBF data maps
+ * This mainly handles interactivity of the map, with additional data layers added via the
+ * exposed addLayerFunction.
+ * Admin areas are the main interactive feature of the map, so they need to be added and managed by this component.
  * @returns A component that can be either standalone, or nested in a IbfMapContainer.
  */
 export function OlDataMap({
@@ -67,7 +70,7 @@ export function OlDataMap({
 }: OlDataMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<MapOl | null>(null);
-  const stateRef = useRef<AdminLayerState | null>(null);
+  const stateRef = useRef<MapViewState | null>(null);
   const adminLayersRef = useRef<Map<number, VectorLayer>>(new Map());
   // Store addAdminLayer function to call from event selection effect
   const addAdminLayerFunctionRef = useRef<
@@ -79,7 +82,7 @@ export function OlDataMap({
       : CountryData.get(selectedCountry);
 
   useEffect(() => {
-    const state: AdminLayerState = {
+    const state: MapViewState = {
       mapInstance: null,
       selectedAdminCodes: new Map([
         [1, null],
@@ -87,9 +90,11 @@ export function OlDataMap({
         [3, null],
       ]),
       selectedEventId: selectedEventDetails?.eventId ?? "",
-      isEventSelected: !!selectedEventDetails,
       exposedRegionsByLevel:
         selectedEventDetails?.exposedRegionsByLevel ?? new Map(),
+      isEventSelected() {
+        return this.selectedEventId !== "";
+      },
     };
     stateRef.current = state;
 
@@ -133,7 +138,7 @@ export function OlDataMap({
         view: createView(legacy_countryInfo),
       });
 
-      // Apply MapTiler base map style
+      // Apply base map style
       apply(mapInstanceRef.current, mapUrlSimpleStyleJson);
 
       // Expose addLayer function to parent
@@ -202,7 +207,8 @@ export function OlDataMap({
     };
   }, []);
 
-  // Effect: respond to event selection changes (pan to centroid, update styling)
+  // When and event selection changes, the following runs to update the view,
+  // such as pan, zoom, change focused admin level, update styling, etc.
   useEffect(() => {
     const state = stateRef.current;
     const map = mapInstanceRef.current;
@@ -211,7 +217,6 @@ export function OlDataMap({
 
     // Update state with new event details
     state.selectedEventId = selectedEventDetails?.eventId ?? "";
-    state.isEventSelected = !!selectedEventDetails;
     state.exposedRegionsByLevel =
       selectedEventDetails?.exposedRegionsByLevel ?? new Map();
 

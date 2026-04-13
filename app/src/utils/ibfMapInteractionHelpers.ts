@@ -1,5 +1,5 @@
-// Helpers for map interactions, including admin areas,
-// since these are the main interactive feature on the map,
+// Helpers for map interactions, including for admin areas
+// since these are the main interactive feature on the map.
 
 import MapOl from "ol/Map.js";
 import { FeatureLike } from "ol/Feature";
@@ -24,7 +24,7 @@ import {
 } from "./ibfMapStyles";
 
 // Fit the map view to a feature's geometry with animation
-function fitToFeature(state: AdminLayerState, feature: FeatureLike) {
+function fitToFeature(state: MapViewState, feature: FeatureLike) {
   const geometry = feature.getGeometry?.();
   if (!geometry) return;
   state.mapInstance?.getView().fit(geometry.getExtent(), {
@@ -33,20 +33,24 @@ function fitToFeature(state: AdminLayerState, feature: FeatureLike) {
   });
 }
 
-export interface AdminLayerState {
+export interface MapViewState {
   mapInstance: MapOl | null;
-  // Selected codes by level: 1/2/3 = admin levels
-  // TODO: support variable max admin levels (2,3 or 4) for here and throughout the code
+
+  // Map of the selected codes, indexed by the admin level (level 1, 2, 3).
+  // TODO: support variable max admin levels (2, 3 or 4) for here, and throughout the code
   selectedAdminCodes: Map<number, string | null>;
+
   selectedEventId: string;
-  isEventSelected: boolean;
+
   // Affected region codes by admin level. This is populated when an event is selected.
   exposedRegionsByLevel: Map<number, string[]>;
+
+  isEventSelected(): boolean;
 }
 
 // Create a VectorLayer for the given admin level.
 export function createAdminLayer(
-  state: AdminLayerState,
+  state: MapViewState,
   adminLevel: 1 | 2 | 3,
   country?: string,
   parentCode?: string,
@@ -72,20 +76,20 @@ export function createAdminLayer(
           code,
           state.selectedAdminCodes.get(3) ?? null,
           affectedRegions,
-          state.isEventSelected,
+          state.isEventSelected(),
         );
       }
       if (adminLevel === 2) {
         return styleAdmin2region(
           code,
           state.selectedAdminCodes.get(2) ?? null,
-          state.isEventSelected,
+          state.isEventSelected(),
         );
       }
       return styleAdmin1region(
         code,
         state.selectedAdminCodes.get(1) ?? null,
-        state.isEventSelected,
+        state.isEventSelected(),
       );
     },
   });
@@ -98,7 +102,7 @@ export function createAdminLayer(
 // Returns an object describing what happened so the caller can
 // manage layers and animations.
 export function handleFeatureClick(
-  state: AdminLayerState,
+  state: MapViewState,
   feature: FeatureLike,
   layer: BaseLayer,
   adminLayers: Map<number, VectorLayer>,
@@ -123,7 +127,7 @@ export function handleFeatureClick(
     properties[PLACE_CODE_FIELD_KEY] || noCountrySelectedValue;
 
   let processAdmin3Clicks = layer === adminLayers.get(3);
-  if (processAdmin3Clicks && state.isEventSelected) {
+  if (processAdmin3Clicks && state.isEventSelected()) {
     const affectedRegions = state.exposedRegionsByLevel.get(3) ?? [];
     if (!affectedRegions.includes(newSelectedRegionCode)) {
       processAdmin3Clicks = false;
@@ -140,40 +144,42 @@ export function handleFeatureClick(
     return { handled: true };
   }
 
-  // Clicked on admin2 layer
-  if (layer === adminLayers.get(2) && state.isEventSelected === false) {
-    onSelect(newSelectedRegionCode);
+  // Handle clicks for admin1 and 2
+  // For current design, the user can't interact with these is an event is selected.
+  if (!state.isEventSelected()) {
+    let selectedLayer: VectorLayer | null = null;
+    let level = 0;
 
-    state.selectedAdminCodes.set(2, newSelectedRegionCode);
-    adminLayers.get(2)?.changed();
+    // Clicked on admin2 layer
+    if (layer === adminLayers.get(2)) {
+      selectedLayer = adminLayers.get(2) ?? null;
+      level = 2;
+    }
+    // Clicked on admin1 layer
+    else if (layer === adminLayers.get(1)) {
+      selectedLayer = adminLayers.get(1) ?? null;
+      level = 1;
+    }
 
-    const country = properties[COUNTRY_FIELD_KEY] || selectedCountry;
+    if (selectedLayer) {
+      onSelect(newSelectedRegionCode);
 
-    fitToFeature(state, feature);
-    return {
-      handled: true,
-      showLevel: 3,
-      country,
-      parentCode: newSelectedRegionCode,
-    };
-  }
+      state.selectedAdminCodes.set(level, newSelectedRegionCode);
+      selectedLayer.changed();
 
-  // Clicked on admin1 layer
-  if (layer === adminLayers.get(1) && state.isEventSelected === false) {
-    onSelect(newSelectedRegionCode);
+      const country = properties[COUNTRY_FIELD_KEY] || selectedCountry;
 
-    state.selectedAdminCodes.set(1, newSelectedRegionCode);
-    adminLayers.get(1)?.changed();
+      fitToFeature(state, feature);
 
-    const country = properties[COUNTRY_FIELD_KEY] || selectedCountry;
+      const childLevel = (level + 1) as 2 | 3;
 
-    fitToFeature(state, feature);
-    return {
-      handled: true,
-      showLevel: 2,
-      country,
-      parentCode: newSelectedRegionCode,
-    };
+      return {
+        handled: true,
+        showLevel: childLevel,
+        country,
+        parentCode: newSelectedRegionCode,
+      };
+    }
   }
 
   state.selectedAdminCodes.set(0, newSelectedRegionCode);
