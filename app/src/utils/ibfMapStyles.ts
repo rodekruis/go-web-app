@@ -6,6 +6,9 @@ import Circle from "ol/style/Circle";
 export type MvtStyleCreator = (feature: FeatureLike, selected: string) => Style;
 const deselectedColor = "rgba(0, 0, 0, 0.07)";
 
+// TODO: review the styling for perf in terms of what to render, and how to reduce
+// the number of features that must be looped through when styling
+
 // Debug style
 // Fix later
 //
