@@ -115,6 +115,12 @@ export function IbfMapContainer() {
       <IbfDataPanel selectedCountry={selectedCountry} />
       <div className={styles.mainContent}>
         <div className={styles.controlPanelColumn}>
+          <IbfLayerPanel
+            eventLayers={selectedEventLayers}
+            countryCode={selectedCountry}
+            onToggleMapLayer={toggleMapLayer}
+            onHideAllLayers={hideAllLayers}
+          />
           <IbfControlPanel
             eventData={eventData}
             onEventClick={handleEventClick}
@@ -122,12 +128,6 @@ export function IbfMapContainer() {
             onDeselectEvent={deselectEvent}
             countryCode={selectedCountry}
             selectedAdminPlaceCode={selectedAdminPlaceCode}
-          />
-          <IbfLayerPanel
-            eventLayers={selectedEventLayers}
-            countryCode={selectedCountry}
-            onToggleMapLayer={toggleMapLayer}
-            onHideAllLayers={hideAllLayers}
           />
         </div>
         <div className={styles.mapColumn}>

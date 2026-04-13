@@ -19,7 +19,7 @@ The "Ol..." prefix stands for OpenLayers (the mapping front library used), and t
 This requires some IBF setup to run. To run locally, do the following:
 
 1. Launch the [docker container for IBF](https://github.com/rodekruis/IBF/blob/main/services/docker-compose.yml)
-2. Populate the admin areas with the [upload_admin_areas.py script] (https://github.com/rodekruis/IBF/blob/main/data/data_management/data_upload/upload_admin_areas.py). This requires a local copy of the seed-data-repo, so you'll need to clone that as well. See the [IBF data readme](https://github.com/rodekruis/IBF/blob/main/data/README.md) for more info.
+2. Populate the admin areas with the [upload_admin_areas.py script](https://github.com/rodekruis/IBF/blob/main/data/data_management/data_upload/upload_admin_areas.py). This requires a local copy of the seed-data-repo, so you'll need to clone that as well. See the [IBF data readme](https://github.com/rodekruis/IBF/blob/main/data/README.md) for more info.
 3. Set up this repo to run, following the readme in the base directory. Be sure to recopy `example.env` into `.env` each time there were any changes in example.env.
 4. Launch with `pnpm start` from `/go-web-app/app`.
 5. Navigate to http://localhost:3000/ibf?c=mw
