@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import "ol/ol.css";
 import { OlDataMap } from "./OlDataMap";
 import { IbfControlPanel } from "./IbfControlPanel";
+import { IbfLayerPanel } from "./IbfLayerPanel";
 import { IbfDataPanel } from "./IbfDataPanel";
 import { useIbfDataLoader } from "./useIbfDataLoader";
 import useAlert from "#hooks/useAlert";
@@ -13,7 +14,6 @@ import {
   eventIdParamsKey,
 } from "#utils/ibfMap";
 import { getCurrentCountryEventData, getEventDetails, getSelectedEventMapDetails } from "#utils/ibfMapHelpers";
-import type { AllEventsData } from "#utils/ibfMapTypes";
 
 /**
  * Base map component for IBF data maps
@@ -41,26 +41,36 @@ export function IbfMapContainer() {
   }
 
   // Event data is loaded once on page load, then only updated via the refresh function
-  const [eventData, setEventData] = useState<AllEventsData>(() => {
-    if (selectedEventId) {
-      return getEventDetails(selectedEventId);
-    }
-    return getCurrentCountryEventData(selectedCountry);
-  });
+  const initialEventData = selectedEventId
+    ? getEventDetails(selectedEventId)
+    : getCurrentCountryEventData(selectedCountry);
 
   const [selectedAdminPlaceCode, setSelectedAdminPlaceCode] = useState<string | null>(null);
 
+  // Data loader hook - manages layer loading, caching, and shared event state
+  const {
+    eventData,
+    setEventData,
+    selectedEventId: activeEventId,
+    selectEvent,
+    deselectEvent,
+    selectedEventLayers,
+    registerMapAddLayer,
+    toggleMapLayer,
+    hideAllLayers,
+  } = useIbfDataLoader(selectedCountry, initialEventData, selectedEventId);
+
   // Derive map details for the selected event (centroid, affected regions)
   const selectedEventMapDetails = useMemo(() => {
-    const details = getSelectedEventMapDetails(eventData, selectedEventId || null);
+    const details = getSelectedEventMapDetails(eventData, activeEventId);
     if (details && details.exposedRegionsByLevel.size === 0) {
       alert.show('No exposed regions', {
         variant: 'danger',
-        description: `No exposed regions found for event "${selectedEventId}".`,
+        description: `No exposed regions found for event "${activeEventId}".`,
       });
     }
     return details;
-  }, [eventData, selectedEventId, alert]);
+  }, [eventData, activeEventId, alert]);
 
   // Refresh page and put in a default start state
   const handleRefreshAll = () => {
@@ -75,6 +85,7 @@ export function IbfMapContainer() {
 
   // Handle event selection from control panel
   const handleEventClick = (eventId: string) => {
+    selectEvent(eventId);
     // Set search params for URL sharing only - does not reload data
       setSearchParams({
         [countryParamsKey]: selectedCountry,
@@ -89,13 +100,7 @@ export function IbfMapContainer() {
     console.debug(`[IbfMap] Admin area selected: ${placeCode}`);
   };
   
-  // Data loader hook - manages layer loading and caching
-  const {
-    registerMapAddLayer,
-    toggleMapLayer,
-    hideAllLayers,
-  } = useIbfDataLoader(selectedCountry);
-
+  
   return (
     <div className={styles.container}>
       <IbfDataPanel selectedCountry={selectedCountry} />
@@ -105,10 +110,15 @@ export function IbfMapContainer() {
             eventData={eventData}
             onEventClick={handleEventClick}
             onRefreshAll={handleRefreshAll}
-            onToggleMapLayer={toggleMapLayer}
-            onHideAllLayers={hideAllLayers}
+            onDeselectEvent={deselectEvent}
             countryCode={selectedCountry}
             selectedAdminPlaceCode={selectedAdminPlaceCode}
+          />
+          <IbfLayerPanel
+            eventLayers={selectedEventLayers}
+            countryCode={selectedCountry}
+            onToggleMapLayer={toggleMapLayer}
+            onHideAllLayers={hideAllLayers}
           />
         </div>
         <div className={styles.mapColumn}>

@@ -1,11 +1,11 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import BaseLayer from "ol/layer/Base";
 import useAlert from "#hooks/useAlert";
 import {
   makeEventImageLayer,
   makePopulationImageLayer,
 } from "#utils/ibfMapHelpers";
-import { MapLayerInfoType, MapLayerDisplayType, type MapLayerDetails } from "#utils/ibfMapTypes";
+import { MapLayerInfoType, MapLayerDisplayType, type MapLayerDetails, type AllEventsData } from "#utils/ibfMapTypes";
 
 /**
  * Hook used to manage and share data for the IBF map components.
@@ -18,8 +18,12 @@ import { MapLayerInfoType, MapLayerDisplayType, type MapLayerDetails } from "#ut
  * See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41656
  * @param selectedCountry - ISO_A2 country code for country-specific layers
  */
-export function useIbfDataLoader(selectedCountry: string) {
+export function useIbfDataLoader(selectedCountry: string, initialEventData: AllEventsData, initialEventId: string) {
   const alert = useAlert();
+
+  // Shared state: event data and selected event
+  const [eventData, setEventData] = useState<AllEventsData>(initialEventData);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(initialEventId || null);
 
   // Reference to the function (passed in by the map component) for adding layers to the map.
   const addLayerToMapFunction = useRef<((layer: BaseLayer, layerInfo: MapLayerDetails) => void) | null>(null);
@@ -103,7 +107,29 @@ export function useIbfDataLoader(selectedCountry: string) {
     }
   };
 
+  // Select an event by ID
+  const selectEvent = (eventId: string) => {
+    setSelectedEventId(eventId);
+  };
+
+  // Deselect the current event, hiding all layers
+  const deselectEvent = () => {
+    hideAllLayers();
+    setSelectedEventId(null);
+  };
+
+  // Get available layers for the currently selected event
+  const selectedEventLayers: MapLayerDetails[] = selectedEventId && eventData[selectedEventId]
+    ? eventData[selectedEventId].availableLayers
+    : [];
+
   return {
+    eventData,
+    setEventData,
+    selectedEventId,
+    selectEvent,
+    deselectEvent,
+    selectedEventLayers,
     registerMapAddLayer,
     toggleMapLayer,
     hideAllLayers,

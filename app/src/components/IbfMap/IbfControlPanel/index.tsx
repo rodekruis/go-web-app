@@ -1,7 +1,7 @@
-// This is debug UI, and will be rewritten, and rereviewed fully later.
+// TODO: This component has debug UI, and much will be rewritten.
 // The same for the CSS file.
-// The functions/callbacks passed in and calling out are models of what will be used
-// However, these will be split into another layer filter component (and reworked).
+// It will be rereviewed fully later.
+// The functions/callbacks passed in and calling out are planned to be kept though, so those can be reviewed.
 
 import { useState } from "react";
 import {
@@ -10,9 +10,6 @@ import {
   type EventAdminAreaData,
   type ExposureCategory,
   ExposedItemType,
-  MapLayerDisplayType,
-  MapLayerInfoType,
-  type MapLayerDetails,
 } from "#utils/ibfMapTypes";
 import styles from "./styles.module.css";
 import { Button } from "@ifrc-go/ui";
@@ -35,14 +32,8 @@ function getExposedPopulation(adminArea: EventAdminAreaData | undefined): number
   return popExposure?.exposed ?? 0;
 }
 
-// Get the first raster layer from availableLayers, or null if none
-function getRasterLayer(event: EventOverviewData): MapLayerDetails | null {
-  return event.availableLayers.find(
-    (layer) => layer.displayType === MapLayerDisplayType.Raster,
-  ) ?? null;
-}
-
 // Format label for exposure type - uses type value with _ID appended if no user-friendly label
+// TODO: move to loc file. See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41713
 function getExposureLabel(type: ExposedItemType): string {
   const labels: Record<ExposedItemType, string> = {
     [ExposedItemType.Population]: "Population",
@@ -62,12 +53,12 @@ interface EventButtonProps {
 interface EventDetailViewProps {
   event: EventOverviewData;
   onBack: () => void;
-  onToggleMapLayer: (layerDetails: MapLayerDetails) => void;
 }
 
 /**
  * Formats event start time for display.
  */
+// TODO: move to loc file. See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41713
 function formatStartDate(startTime: string): string {
   const start = new Date(startTime);
   return start.toLocaleDateString("en-US", {
@@ -80,6 +71,7 @@ function formatStartDate(startTime: string): string {
 /**
  * Formats peak reached time for display.
  */
+// TODO: move to loc file. See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41713
 function formatPeakTime(peakTime: string): string {
   const peak = new Date(peakTime);
   return peak.toLocaleDateString("en-US", {
@@ -92,6 +84,7 @@ function formatPeakTime(peakTime: string): string {
 /**
  * Formats date for footer display.
  */
+// TODO: Get correct string formatting for locale, pending design.
 function formatFooterDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString("en-US", {
@@ -133,12 +126,11 @@ function CollapsibleSection({
 }
 
 /**
- * Detail view for a selected event with layer toggle buttons.
+ * Detail view for a selected event
  */
 function EventDetailView({
   event,
   onBack,
-  onToggleMapLayer,
 }: EventDetailViewProps) {
   // Get admin data at different levels
   const admin0 = event.exposedAdminAreas[0]?.[0];
@@ -147,7 +139,6 @@ function EventDetailView({
 
   const totalPopulation = getExposedPopulation(admin0);
   const exposedDistrictsCount = admin3Regions.length;
-  const rasterLayer = getRasterLayer(event);
 
   // Get exposure categories for infrastructure (exclude population)
   const infraExposure =
@@ -182,22 +173,6 @@ function EventDetailView({
         <div className={styles.infoRow}>
           <span>{admin1Regions.map((r) => r.name).join(", ") || "N/A"}</span>
         </div>
-      </div>
-
-      {/* Raster Layer Buttons */}
-      <div className={styles.buttonGroup}>
-        {rasterLayer && (
-          <Button
-            name="toggleFlood"
-            onClick={() => onToggleMapLayer(rasterLayer)}
-          >
-            Toggle flood extents
-          </Button>
-        )}
-
-        <Button name="togglePopulation" onClick={() => onToggleMapLayer({ resourceId: '', dataType: MapLayerInfoType.Population, displayType: MapLayerDisplayType.Raster })}>
-          Toggle population
-        </Button>
       </div>
 
       {/* Population Exposure Section */}
@@ -274,6 +249,7 @@ function EventDetailView({
 /**
  * Formats the start time relative to now.
  */
+// TODO: move to loc file. See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41713
 function formatStartTime(startTime: string): string {
   const now = new Date();
   const start = new Date(startTime);
@@ -337,8 +313,7 @@ interface IbfControlPanelProps {
   eventData: AllEventsData;
   onEventClick: (eventId: string) => void;
   onRefreshAll: () => void;
-  onToggleMapLayer: (layerDetails: MapLayerDetails) => void;
-  onHideAllLayers: () => void;
+  onDeselectEvent: () => void;
   countryCode: string;
   selectedAdminPlaceCode: string | null;
 }
@@ -351,8 +326,7 @@ export function IbfControlPanel({
   eventData,
   onEventClick,
   onRefreshAll,
-  onToggleMapLayer,
-  onHideAllLayers,
+  onDeselectEvent,
   countryCode,
   selectedAdminPlaceCode,
 }: IbfControlPanelProps) {
@@ -366,7 +340,7 @@ export function IbfControlPanel({
   };
 
   const handleBack = () => {
-    onHideAllLayers();
+    onDeselectEvent();
     setSelectedEventId(null);
   };
 
@@ -384,7 +358,6 @@ export function IbfControlPanel({
         <EventDetailView
           event={selectedEvent}
           onBack={handleBack}
-          onToggleMapLayer={onToggleMapLayer}
         />
       </div>
     );
