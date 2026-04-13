@@ -44,7 +44,7 @@ export interface AdminLayerState {
 const zIndexMap = { 1: 100, 2: 120, 3: 150 } as const;
 
 // Create a VectorLayer for the given admin level.
-// For level 1, uses selectedAdminCodes.get(0) (the region) from state.
+// For level 1, uses selectedAdminCodes.get(1) (the region) from state.
 // For levels 2 and 3, uses country + parentCode to scope the query.
 export function createAdminLayer(
   state: AdminLayerState,
@@ -54,7 +54,7 @@ export function createAdminLayer(
 ): VectorLayer {
   const url =
     adminLevel === 1
-      ? getAdminRegionUrl(state.selectedAdminCodes.get(0) ?? '', 1)
+      ? getAdminRegionUrl(state.selectedAdminCodes.get(1) ?? '', 1)
       : getNestedAdminUrl(country!, parentCode!, adminLevel);
 
   const layer = new VectorLayer({

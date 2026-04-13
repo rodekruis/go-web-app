@@ -4,7 +4,8 @@ import { View } from "ol";
 import { fromLonLat } from "ol/proj";
 import BaseLayer from "ol/layer/Base";
 import { defaults as defaultControls } from "ol/control/defaults.js";
-import { CountryData, noCountrySelectedValue } from "#utils/ibfMap";
+import { apply } from "ol-mapbox-style";
+import { CountryData, mapUrlSimpleStyleJson, noCountrySelectedValue } from "#utils/ibfMap";
 import {
   createAdminLayer,
   handleFeatureClick,
@@ -112,6 +113,9 @@ export function OlDataMap({
         controls: defaultControls({ attribution: false }),
         view: createView(legacy_countryInfo),
       });
+
+      // Apply MapTiler base map style
+      apply(mapInstanceRef.current, mapUrlSimpleStyleJson);
 
       // Expose addLayer function to parent
       if (addLayerFunction) {
