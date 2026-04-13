@@ -141,7 +141,7 @@ export function handleFeatureClick(
   // For current design, the user can't interact with these is an event is selected.
   if (!state.isEventSelected()) {
     let selectedLayer: VectorLayer | null = null;
-    let level = 0;
+    let level = 1;
     // Only 2 and 3 are valid child levels
     let childLevel: 2 | 3 = 2;
 
@@ -154,6 +154,7 @@ export function handleFeatureClick(
     // Clicked on admin1 layer
     else if (layer === adminLayers.get(1)) {
       selectedLayer = adminLayers.get(1) ?? null;
+      // use defaults for level and childLevel
     }
 
     if (selectedLayer) {

@@ -346,7 +346,7 @@ export function IbfControlPanel({
   if (selectedAdminPlaceCode) {
     // TODO: change the view based on this
     console.debug(
-      `[IbfControlPanel] Selected admin area: ${selectedAdminPlaceCode}`,
+      `TODO: [IbfControlPanel] Selected admin area: ${selectedAdminPlaceCode}`,
     );
   }
 

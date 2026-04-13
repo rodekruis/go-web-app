@@ -12,7 +12,7 @@ import {
   mockAllEventsData_ZM,
 } from "./ibfMockData_debug";
 import { CountryData } from "./ibfMap";
-import { pgFeatureserv } from "#config";
+import { pgFeatureserv, seedDataRepo } from "#config";
 import type {
   AllEventsData,
   MapLayerDetails,
@@ -22,10 +22,8 @@ import type {
 // Raw GitHub URLs for direct file access
 // TODO: Once we have working API, we'll need a conditional here to target either the seed repo or the API
 // depending on the environment or another setting.
-const seedRepoBaseUrl =
-  "https://raw.githubusercontent.com/rodekruis/IBF-seed-data/main/";
-const seedRepoEventDataUrl = `${seedRepoBaseUrl}raster-data/mock-events/rgba/`;
-const seedRepoPopDataUrl = `${seedRepoBaseUrl}raster-data/population/rgba/`;
+const seedRepoEventDataUrl = `${seedDataRepo}raster-data/mock-events/rgba/`;
+const seedRepoPopDataUrl = `${seedDataRepo}raster-data/population/rgba/`;
 
 // Simplification algorithm factor for simplifying vector data
 // Example of factor values on vector object size:
