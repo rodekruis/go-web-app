@@ -1,3 +1,6 @@
+// Helpers for map interactions, including admin areas,
+// since these are the main interactive feature on the map,
+
 import MapOl from "ol/Map.js";
 import { FeatureLike } from "ol/Feature";
 import BaseLayer from "ol/layer/Base";
@@ -42,14 +45,14 @@ export interface AdminLayerState {
 }
 
 // Create a VectorLayer for the given admin level.
-// For level 1, uses selectedAdminCodes.get(1) (the region) from state.
-// For levels 2 and 3, uses country + parentCode to scope the query.
 export function createAdminLayer(
   state: AdminLayerState,
   adminLevel: 1 | 2 | 3,
   country?: string,
   parentCode?: string,
 ): VectorLayer {
+  // Create the admin area url.
+  // Admin level 1 has a different format than nested admin levels.
   const url =
     adminLevel === 1
       ? getAdminRegionUrl(country ?? '', 1)

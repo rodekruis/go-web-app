@@ -10,7 +10,7 @@ import {
   createAdminLayer,
   handleFeatureClick,
   type AdminLayerState,
-} from "#utils/ibfMapHandlers";
+} from "#utils/ibfMapInteractionHelpers";
 import type { MapLayerDetails, SelectedEventMapDetails } from "#utils/ibfMapTypes";
 import styles from "./styles.module.css";
 import VectorLayer from "ol/layer/Vector";
