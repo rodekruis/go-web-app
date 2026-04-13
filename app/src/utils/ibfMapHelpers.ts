@@ -69,12 +69,12 @@ export function getSelectedEventMapDetails(
   if (!event) return null;
 
   // Build affected regions map by admin level
-  const affectedRegionsByLevel = new Map<number, string[]>();
+  const exposedRegionsByLevel = new Map<number, string[]>();
   if (event.exposedAdminAreas) {
     event.exposedAdminAreas.forEach((adminAreas, level) => {
       if (adminAreas && adminAreas.length > 0) {
         const codes = adminAreas.map(area => area.placeCode);
-        affectedRegionsByLevel.set(level, codes);
+        exposedRegionsByLevel.set(level, codes);
       }
     });
   } else {
@@ -87,7 +87,7 @@ export function getSelectedEventMapDetails(
   return {
     eventId,
     centroid: event.centroid,
-    affectedRegionsByLevel,
+    exposedRegionsByLevel,
   };
 }
 

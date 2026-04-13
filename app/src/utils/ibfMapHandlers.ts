@@ -37,7 +37,7 @@ export interface AdminLayerState {
   selectedEventId: string;
   isEventSelected: boolean;
   // Affected region codes by admin level. This is populated when an event is selected.
-  affectedRegionsByLevel: Map<number, string[]>;
+  exposedRegionsByLevel: Map<number, string[]>;
 }
 
 // Z index maps to make sure lower-level admin layers are not hidden by their parents
@@ -54,7 +54,7 @@ export function createAdminLayer(
 ): VectorLayer {
   const url =
     adminLevel === 1
-      ? getAdminRegionUrl(state.selectedAdminCodes.get(1) ?? '', 1)
+      ? getAdminRegionUrl(country ?? '', 1)
       : getNestedAdminUrl(country!, parentCode!, adminLevel);
 
   const layer = new VectorLayer({
@@ -65,7 +65,7 @@ export function createAdminLayer(
     style: (feature) => {
       const code = feature.get(PLACE_CODE_FIELD_KEY);
       if (adminLevel === 3) {
-        const affectedRegions = state.affectedRegionsByLevel.get(3) ?? [];
+        const affectedRegions = state.exposedRegionsByLevel.get(3) ?? [];
 
         return styleAdmin3Region(
           code,
@@ -107,9 +107,12 @@ export function handleFeatureClick(
 ): { handled: boolean; showLevel?: 2 | 3; country?: string; parentCode?: string } {
   const properties = feature.getProperties();
 
-  // Debug: print all properties of items
-  // TODO: remove this before shipping, but for now, it is the most important log line for map dev.
-  console.log("Clicked feature properties:", properties);
+  // Print out all features of the item clicked on.
+  // Use only for DEV builds.
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.log("Clicked feature properties:", properties);
+  }
 
   if (layer === eventLayer) {
     // TODO: handle event layer interaction when they are added to the map.
@@ -119,7 +122,7 @@ export function handleFeatureClick(
 
   let processAdmin3Clicks = layer === adminLayers.get(3);
   if (processAdmin3Clicks && state.isEventSelected) {
-    const affectedRegions = state.affectedRegionsByLevel.get(3) ?? [];
+    const affectedRegions = state.exposedRegionsByLevel.get(3) ?? [];
     if (!affectedRegions.includes(newSelectedRegionCode)) {
       processAdmin3Clicks = false;
     }

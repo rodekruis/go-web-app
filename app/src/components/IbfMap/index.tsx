@@ -53,7 +53,7 @@ export function IbfMapContainer() {
   // Derive map details for the selected event (centroid, affected regions)
   const selectedEventMapDetails = useMemo(() => {
     const details = getSelectedEventMapDetails(eventData, selectedEventId || null);
-    if (details && details.affectedRegionsByLevel.size === 0) {
+    if (details && details.exposedRegionsByLevel.size === 0) {
       alert.show('No exposed regions', {
         variant: 'danger',
         description: `No exposed regions found for event "${selectedEventId}".`,

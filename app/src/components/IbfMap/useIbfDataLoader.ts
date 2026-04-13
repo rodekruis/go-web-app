@@ -29,7 +29,7 @@ export function useIbfDataLoader(selectedCountry: string) {
   const layersCache = useRef(new Map<string, BaseLayer>());
 
   const _getLayerKey = (layerDetails: MapLayerDetails): string => {
-    // Note: The reource ID may be empty for non-event layers, such as population.
+    // Note: The resource ID may be empty for non-event layers, such as population.
     return `${layerDetails.dataType}_${selectedCountry}_${layerDetails.resourceId}`;
   }
 

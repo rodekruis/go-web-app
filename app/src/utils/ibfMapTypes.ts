@@ -155,5 +155,5 @@ export interface SelectedEventMapDetails {
   eventId: string;
   centroid: [number, number];
   // Admin area codes affected by this event, keyed by admin level
-  affectedRegionsByLevel: Map<number, string[]>;
+  exposedRegionsByLevel: Map<number, string[]>;
 }

@@ -34,7 +34,7 @@ interface OlDataMapProps {
   // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41656
   selectedCountry: string;
 
-  // Details for the currently selected event (centroid, affected regions)
+  // Details for the currently selected event (centroid, exposed regions)
   // Pass null when no event is selected
   selectedEventDetails?: SelectedEventMapDetails | null;
 
@@ -75,7 +75,7 @@ export function OlDataMap({
       selectedAdminCodes: new Map([[1, null], [2, null], [3, null]]),
       selectedEventId: selectedEventDetails?.eventId ?? "",
       isEventSelected: !!selectedEventDetails,
-      affectedRegionsByLevel: selectedEventDetails?.affectedRegionsByLevel ?? new Map(),
+      exposedRegionsByLevel: selectedEventDetails?.exposedRegionsByLevel ?? new Map(),
     };
     stateRef.current = state;
 
@@ -127,7 +127,7 @@ export function OlDataMap({
       }
 
       state.mapInstance = mapInstanceRef.current;
-      addAdminLayer(1);
+      addAdminLayer(1, selectedCountry);
 
       // Change cursor on hover
       mapInstanceRef.current.on("pointermove", (evt) => {
@@ -188,24 +188,32 @@ export function OlDataMap({
     // Update state with new event details
     state.selectedEventId = selectedEventDetails?.eventId ?? "";
     state.isEventSelected = !!selectedEventDetails;
-    state.affectedRegionsByLevel = selectedEventDetails?.affectedRegionsByLevel ?? new Map();
+    state.exposedRegionsByLevel = selectedEventDetails?.exposedRegionsByLevel ?? new Map();
 
-    // If event selected with affected regions, drill down to admin3
+    // If event selected with exposed regions, drill down to admin3
     if (selectedEventDetails) {
-      // Get the first affected admin1 region as parent for drilling down
-      const affectedAdmin1 = state.affectedRegionsByLevel.get(1);
-      const affectedAdmin2 = state.affectedRegionsByLevel.get(2);
-      
-      if (affectedAdmin2 && affectedAdmin2.length > 0) {
-        // If we have admin2 affected regions, load admin3 for the first one
-        const parentCode = affectedAdmin2[0]!;
-        addAdminLayer(2, selectedCountry, parentCode.substring(0, 3)); // admin2 parent is admin1 code
+      // Get the first exposed admin1 region as parent for drilling down
+      const exposedAdmin1 = state.exposedRegionsByLevel.get(1);
+      const exposedAdmin2 = state.exposedRegionsByLevel.get(2);
+
+      // Set admin1 selection to match the event's admin1 region
+      if (exposedAdmin1 && exposedAdmin1.length > 0) {
+        state.selectedAdminCodes.set(1, exposedAdmin1[0]!);
+        // Reload admin1 layer to reflect new selection
+        addAdminLayer(1, selectedCountry);
+      }
+
+      if (exposedAdmin2 && exposedAdmin2.length > 0) {
+        // If we have one or more admin2 exposed regions,
+        // load admin 2 and all it's childed admin3 regions.
+        // TODO: revist this logic after more designs are done
+        const parentCode = exposedAdmin2[0]!;
+        addAdminLayer(2, selectedCountry, parentCode);
         addAdminLayer(3, selectedCountry, parentCode);
-      } else if (affectedAdmin1 && affectedAdmin1.length > 0) {
-        // If we have admin1 affected regions, load admin2, then admin3
-        const admin1Code = affectedAdmin1[0]!;
+      } else if (exposedAdmin1 && exposedAdmin1.length > 0) {
+        // If there are no exposed admin 2, just admin 1, load the admin 1 and its child admin 2 regions.
+        const admin1Code = exposedAdmin1[0]!;
         addAdminLayer(2, selectedCountry, admin1Code);
-        // Admin3 will be loaded after user clicks on admin2, or we can load all
       }
 
       // Pan to event centroid
