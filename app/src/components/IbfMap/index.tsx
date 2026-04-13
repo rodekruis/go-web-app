@@ -79,6 +79,9 @@ export function IbfMapContainer() {
       [countryParamsKey]: selectedCountry,
     });
 
+    // Deselect current event and admin areas
+    deselectEvent();
+
     // Reload event data and set it
     setEventData(getCurrentCountryEventData(selectedCountry));
   };

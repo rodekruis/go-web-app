@@ -38,11 +38,11 @@ interface OlDataMapProps {
   // Pass null when no event is selected
   selectedEventDetails?: SelectedEventMapDetails | null;
 
-  // Optional arg to expose adding a layer
+  // Optional arg to expose a method for adding a layer
   // It is a function that takes the add-layer function as an argument.
   addLayerFunction?: (addLayer: (layer: BaseLayer, layerInfo: MapLayerDetails) => void) => void;
 
-  // Callback for when an admin area is selected.
+  // Callback for when a map feature is selected.
   onSelect: (placeCode: string) => void;
 }
 
@@ -67,8 +67,6 @@ export function OlDataMap({
       ? undefined
       : CountryData.get(selectedCountry);
 
-  let TODO_eventLayer: VectorLayer | null = null;
-
   useEffect(() => {
     const state: AdminLayerState = {
       mapInstance: null,
@@ -83,8 +81,7 @@ export function OlDataMap({
     adminLayersRef.current = adminLayers;
 
     function isInteractiveLayer(layer: BaseLayer) {
-      return layer === TODO_eventLayer
-        || adminLayers.get(1) === layer
+      return adminLayers.get(1) === layer
         || adminLayers.get(2) === layer
         || adminLayers.get(3) === layer;
     }
@@ -150,7 +147,6 @@ export function OlDataMap({
               feature,
               layer,
               adminLayers,
-              TODO_eventLayer,
               selectedCountry,
               onSelect,
             );
@@ -225,6 +221,9 @@ export function OlDataMap({
           duration: 500,
         });
       }
+    } else {
+      // No event selected: reset admin layers back to level 1 only
+      addAdminLayer(1, selectedCountry);
     }
 
     // Trigger re-render of admin layers to apply new styling

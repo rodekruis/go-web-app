@@ -102,7 +102,6 @@ export function handleFeatureClick(
   feature: FeatureLike,
   layer: BaseLayer,
   adminLayers: Map<number, VectorLayer>,
-  eventLayer: VectorLayer | null,
   selectedCountry: string,
   onSelect: (placeCode: string) => void,
 ): { handled: boolean; showLevel?: 2 | 3; country?: string; parentCode?: string } {
@@ -113,10 +112,6 @@ export function handleFeatureClick(
   if (import.meta.env.DEV) {
     // eslint-disable-next-line no-console
     console.log("Clicked feature properties:", properties);
-  }
-
-  if (layer === eventLayer) {
-    // TODO: handle event layer interaction when they are added to the map.
   }
 
   const newSelectedRegionCode = properties[PLACE_CODE_FIELD_KEY] || noCountrySelectedValue;
