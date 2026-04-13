@@ -5,6 +5,7 @@ import { OlDataMap } from "./OlDataMap";
 import { IbfControlPanel } from "./IbfControlPanel";
 import { IbfDataPanel } from "./IbfDataPanel";
 import { useIbfDataLoader } from "./useIbfDataLoader";
+import useAlert from "#hooks/useAlert";
 import styles from "./styles.module.css";
 import {
   countryParamsKey,
@@ -20,6 +21,8 @@ import type { AllEventsData } from "#utils/ibfMapTypes";
  * @returns A standalone component
  */
 export function IbfMapContainer() {
+  const alert = useAlert();
+
   // Search params are used to create a shareable URL to a specific view.
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -30,8 +33,11 @@ export function IbfMapContainer() {
 
   // Check if a country is in the search params
   if (selectedCountry === noCountrySelectedValue) {
-    // TODO: add a user facing error or redirect, since the portal requires a selected country.
     console.error("No country selected. Cannot load the portal.");
+    alert.show('No country selected', {
+      variant: 'danger',
+      description: 'A country must be selected to load the portal.',
+    });
   }
 
   // Event data is loaded once on page load, then only updated via the refresh function
@@ -45,10 +51,16 @@ export function IbfMapContainer() {
   const [selectedAdminPlaceCode, setSelectedAdminPlaceCode] = useState<string | null>(null);
 
   // Derive map details for the selected event (centroid, affected regions)
-  const selectedEventMapDetails = useMemo(
-    () => getSelectedEventMapDetails(eventData, selectedEventId || null),
-    [eventData, selectedEventId]
-  );
+  const selectedEventMapDetails = useMemo(() => {
+    const details = getSelectedEventMapDetails(eventData, selectedEventId || null);
+    if (details && details.affectedRegionsByLevel.size === 0) {
+      alert.show('No exposed regions', {
+        variant: 'danger',
+        description: `No exposed regions found for event "${selectedEventId}".`,
+      });
+    }
+    return details;
+  }, [eventData, selectedEventId, alert]);
 
   // Refresh page and put in a default start state
   const handleRefreshAll = () => {

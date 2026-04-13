@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
 import BaseLayer from "ol/layer/Base";
+import useAlert from "#hooks/useAlert";
 import {
   makeEventImageLayer,
   makePopulationImageLayer,
@@ -18,6 +19,7 @@ import { MapLayerInfoType, MapLayerDisplayType, type MapLayerDetails } from "#ut
  * @param selectedCountry - ISO_A2 country code for country-specific layers
  */
 export function useIbfDataLoader(selectedCountry: string) {
+  const alert = useAlert();
 
   // Reference to the function (passed in by the map component) for adding layers to the map.
   const addLayerToMapFunction = useRef<((layer: BaseLayer, layerInfo: MapLayerDetails) => void) | null>(null);
@@ -60,8 +62,11 @@ export function useIbfDataLoader(selectedCountry: string) {
       layersCache.current.set(key, layer);
       addLayerToMapFunction.current(layer, layerDetails);
     } catch (error) {
-      // TODO: make this error user facing
       console.error(`[useIbfDataLoader] Failed to load layer ${key}:`, error);
+      alert.show('Failed to load map layer', {
+        variant: 'danger',
+        description: 'The map layer could not be loaded. Please try again.',
+      });
     }
   };
 

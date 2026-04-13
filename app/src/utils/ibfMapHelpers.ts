@@ -78,7 +78,7 @@ export function getSelectedEventMapDetails(
       }
     });
   } else {
-    // TODO: Show user facing error.
+    // Log error and let caller handle the empty map.
     console.error("No exposedAdminAreas found for event:", eventId);
   }
 
@@ -177,9 +177,8 @@ const getImageExtentsAsync = async (
     }
     throw new Error('Invalid JSON structure: missing "bounds" property');
   } catch (error) {
-    // TODO: make user facing error
-    console.error(`Error loading image extents from ${jsonUrl}:`, error);
-    return [0, 0, 0, 0];
+    // Re-throw with a customized message
+    throw new Error(`Error loading image extents from ${jsonUrl}: ${error}`);
   }
 };
 
