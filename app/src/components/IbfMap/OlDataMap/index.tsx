@@ -84,6 +84,7 @@ export function OlDataMap({
   useEffect(() => {
     const state: MapViewState = {
       mapInstance: null,
+      // TODO: support countries with max admin levels of 2, 3, and 4
       selectedAdminCodes: new Map([
         [1, null],
         [2, null],
