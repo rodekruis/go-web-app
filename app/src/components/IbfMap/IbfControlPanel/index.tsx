@@ -24,7 +24,9 @@ function getExposureByType(
 }
 
 // Helper to get population exposure from admin area
-function getExposedPopulation(adminArea: EventAdminAreaData | undefined): number {
+function getExposedPopulation(
+  adminArea: EventAdminAreaData | undefined,
+): number {
   const popExposure = getExposureByType(
     adminArea?.exposure,
     ExposedItemType.Population,
@@ -128,10 +130,7 @@ function CollapsibleSection({
 /**
  * Detail view for a selected event
  */
-function EventDetailView({
-  event,
-  onBack,
-}: EventDetailViewProps) {
+function EventDetailView({ event, onBack }: EventDetailViewProps) {
   // Get admin data at different levels
   const admin0 = event.exposedAdminAreas[0]?.[0];
   const admin1Regions = event.exposedAdminAreas[1] ?? [];
@@ -355,10 +354,7 @@ export function IbfControlPanel({
   if (selectedEvent) {
     return (
       <div className={styles.dataContainer}>
-        <EventDetailView
-          event={selectedEvent}
-          onBack={handleBack}
-        />
+        <EventDetailView event={selectedEvent} onBack={handleBack} />
       </div>
     );
   }

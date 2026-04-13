@@ -13,7 +13,11 @@ import {
   noCountrySelectedValue,
   eventIdParamsKey,
 } from "#utils/ibfMap";
-import { getCurrentCountryEventData, getEventDetails, getSelectedEventMapDetails } from "#utils/ibfMapHelpers";
+import {
+  getCurrentCountryEventData,
+  getEventDetails,
+  getSelectedEventMapDetails,
+} from "#utils/ibfMapHelpers";
 
 /**
  * Base map component for IBF data maps
@@ -28,15 +32,16 @@ export function IbfMapContainer() {
 
   // Load the view details from the search params
   // This is only done once at page load
-  const selectedCountry = searchParams.get(countryParamsKey)?.toUpperCase() || noCountrySelectedValue;
+  const selectedCountry =
+    searchParams.get(countryParamsKey)?.toUpperCase() || noCountrySelectedValue;
   const selectedEventId = searchParams.get(eventIdParamsKey) || "";
 
   // Check if a country is in the search params
   if (selectedCountry === noCountrySelectedValue) {
     console.error("No country selected. Cannot load the portal.");
-    alert.show('No country selected', {
-      variant: 'danger',
-      description: 'A country must be selected to load the portal.',
+    alert.show("No country selected", {
+      variant: "danger",
+      description: "A country must be selected to load the portal.",
     });
   }
 
@@ -45,7 +50,9 @@ export function IbfMapContainer() {
     ? getEventDetails(selectedEventId)
     : getCurrentCountryEventData(selectedCountry);
 
-  const [selectedAdminPlaceCode, setSelectedAdminPlaceCode] = useState<string | null>(null);
+  const [selectedAdminPlaceCode, setSelectedAdminPlaceCode] = useState<
+    string | null
+  >(null);
 
   // Data loader hook - manages layer loading, caching, and shared event state
   const {
@@ -64,8 +71,8 @@ export function IbfMapContainer() {
   const selectedEventMapDetails = useMemo(() => {
     const details = getSelectedEventMapDetails(eventData, activeEventId);
     if (details && details.exposedRegionsByLevel.size === 0) {
-      alert.show('No exposed regions', {
-        variant: 'danger',
+      alert.show("No exposed regions", {
+        variant: "danger",
         description: `No exposed regions found for event "${activeEventId}".`,
       });
     }
@@ -90,20 +97,19 @@ export function IbfMapContainer() {
   const handleEventClick = (eventId: string) => {
     selectEvent(eventId);
     // Set search params for URL sharing only - does not reload data
-      setSearchParams({
-        [countryParamsKey]: selectedCountry,
-        [eventIdParamsKey]: eventId,
-      });
+    setSearchParams({
+      [countryParamsKey]: selectedCountry,
+      [eventIdParamsKey]: eventId,
+    });
   };
 
   // Callback to update search params based on user interactions.
   const handleMapItemSelected = (placeCode: string) => {
-    // TODO: pass what is clicked on to the data panel and UI panel.    
+    // TODO: pass what is clicked on to the data panel and UI panel.
     setSelectedAdminPlaceCode(placeCode);
     console.debug(`[IbfMap] Admin area selected: ${placeCode}`);
   };
-  
-  
+
   return (
     <div className={styles.container}>
       <IbfDataPanel selectedCountry={selectedCountry} />

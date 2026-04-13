@@ -55,7 +55,7 @@ export function createAdminLayer(
   // Admin level 1 has a different format than nested admin levels.
   const url =
     adminLevel === 1
-      ? getAdminRegionUrl(country ?? '', 1)
+      ? getAdminRegionUrl(country ?? "", 1)
       : getNestedAdminUrl(country!, parentCode!, adminLevel);
 
   const layer = new VectorLayer({
@@ -104,7 +104,12 @@ export function handleFeatureClick(
   adminLayers: Map<number, VectorLayer>,
   selectedCountry: string,
   onSelect: (placeCode: string) => void,
-): { handled: boolean; showLevel?: 2 | 3; country?: string; parentCode?: string } {
+): {
+  handled: boolean;
+  showLevel?: 2 | 3;
+  country?: string;
+  parentCode?: string;
+} {
   const properties = feature.getProperties();
 
   // Print out all features of the item clicked on.
@@ -114,7 +119,8 @@ export function handleFeatureClick(
     console.log("Clicked feature properties:", properties);
   }
 
-  const newSelectedRegionCode = properties[PLACE_CODE_FIELD_KEY] || noCountrySelectedValue;
+  const newSelectedRegionCode =
+    properties[PLACE_CODE_FIELD_KEY] || noCountrySelectedValue;
 
   let processAdmin3Clicks = layer === adminLayers.get(3);
   if (processAdmin3Clicks && state.isEventSelected) {
@@ -144,7 +150,12 @@ export function handleFeatureClick(
     const country = properties[COUNTRY_FIELD_KEY] || selectedCountry;
 
     fitToFeature(state, feature);
-    return { handled: true, showLevel: 3, country, parentCode: newSelectedRegionCode };
+    return {
+      handled: true,
+      showLevel: 3,
+      country,
+      parentCode: newSelectedRegionCode,
+    };
   }
 
   // Clicked on admin1 layer
@@ -157,7 +168,12 @@ export function handleFeatureClick(
     const country = properties[COUNTRY_FIELD_KEY] || selectedCountry;
 
     fitToFeature(state, feature);
-    return { handled: true, showLevel: 2, country, parentCode: newSelectedRegionCode };
+    return {
+      handled: true,
+      showLevel: 2,
+      country,
+      parentCode: newSelectedRegionCode,
+    };
   }
 
   state.selectedAdminCodes.set(0, newSelectedRegionCode);

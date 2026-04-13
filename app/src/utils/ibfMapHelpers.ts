@@ -7,19 +7,25 @@ import ImageLayer from "ol/layer/Image";
 import ImageStatic from "ol/source/ImageStatic";
 import { MvtStyleCreator } from "./ibfMapStyles";
 import VectorTile from "ol/source/VectorTile";
-import { mockAllEventsData_MW, mockAllEventsData_ZM } from "./ibfMockData_debug";
+import {
+  mockAllEventsData_MW,
+  mockAllEventsData_ZM,
+} from "./ibfMockData_debug";
 import { CountryData } from "./ibfMap";
-import { pgFeatureserv } from '#config';
-import type { AllEventsData, MapLayerDetails, SelectedEventMapDetails } from "./ibfMapTypes";
+import { pgFeatureserv } from "#config";
+import type {
+  AllEventsData,
+  MapLayerDetails,
+  SelectedEventMapDetails,
+} from "./ibfMapTypes";
 
 // Raw GitHub URLs for direct file access
 // TODO: Once we have working API, we'll need a conditional here to target either the seed repo or the API
 // depending on the environment or another setting.
-const seedRepoBaseUrl = "https://raw.githubusercontent.com/rodekruis/IBF-seed-data/main/";
-const seedRepoEventDataUrl =
-  `${seedRepoBaseUrl}raster-data/mock-events/rgba/`;
-const seedRepoPopDataUrl =
-  `${seedRepoBaseUrl}raster-data/population/rgba/`;
+const seedRepoBaseUrl =
+  "https://raw.githubusercontent.com/rodekruis/IBF-seed-data/main/";
+const seedRepoEventDataUrl = `${seedRepoBaseUrl}raster-data/mock-events/rgba/`;
+const seedRepoPopDataUrl = `${seedRepoBaseUrl}raster-data/population/rgba/`;
 
 // Simplification algorithm factor for simplifying vector data
 // Example of factor values on vector object size:
@@ -28,7 +34,7 @@ const seedRepoPopDataUrl =
 //    .001 = 188kb
 //    .05 = 53kb
 //    .01 = 30kb
-const adminLevelToSimplificationFactor : number[] = [0.01, 0.01, 0.005, 0.004];
+const adminLevelToSimplificationFactor: number[] = [0.01, 0.01, 0.005, 0.004];
 
 // Fetch upcoming or ongoing event data for a country
 export function getCurrentCountryEventData(country: string): AllEventsData {
@@ -47,7 +53,10 @@ export function getCurrentCountryEventData(country: string): AllEventsData {
 export function getEventDetails(eventId: string): AllEventsData {
   // TODO: Use the API for fetching this for any country, and only use mock data if set to do so in the env file.
   // For mock data, look for the event data with the matching eventId, and only return that event.
-  const allMockData: AllEventsData[] = [mockAllEventsData_MW, mockAllEventsData_ZM];
+  const allMockData: AllEventsData[] = [
+    mockAllEventsData_MW,
+    mockAllEventsData_ZM,
+  ];
   for (const countryEvents of allMockData) {
     const eventData = countryEvents[eventId];
     if (eventData) {
@@ -64,7 +73,7 @@ export function getSelectedEventMapDetails(
   eventId: string | null,
 ): SelectedEventMapDetails | null {
   if (!eventId) return null;
-  
+
   const event = eventData[eventId];
   if (!event) return null;
 
@@ -73,7 +82,7 @@ export function getSelectedEventMapDetails(
   if (event.exposedAdminAreas) {
     event.exposedAdminAreas.forEach((adminAreas, level) => {
       if (adminAreas && adminAreas.length > 0) {
-        const codes = adminAreas.map(area => area.placeCode);
+        const codes = adminAreas.map((area) => area.placeCode);
         exposedRegionsByLevel.set(level, codes);
       }
     });
@@ -190,14 +199,19 @@ const getSimplificationFactor = (adminLevel: number): number => {
     // The fallback is safe, so no need to make this error user facing.
     // The fallback just results in a possibly larger data size.
     // Log it though so devs can investigate.
-    console.error(`No simplification factor found for admin level ${adminLevel}, defaulting to 0.01`);
+    console.error(
+      `No simplification factor found for admin level ${adminLevel}, defaulting to 0.01`,
+    );
     factor = 0.01;
   }
   return factor;
 };
 
-export const getAdminRegionUrl = (country: string, adminLevel: number): string => {
-  let factor = getSimplificationFactor(adminLevel);  
+export const getAdminRegionUrl = (
+  country: string,
+  adminLevel: number,
+): string => {
+  let factor = getSimplificationFactor(adminLevel);
   return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adminLevel}%27&limit=10000&transform=simplify,${factor}`;
 };
 
@@ -214,13 +228,12 @@ export const getNestedAdminUrl = (
 export function getAdminAreaZIndex(level: number): number {
   // Start with a base offset of 1000, and add the level
   return 1000 + level;
-  }
+}
 
 // Get the map layer z index offset on which the layer is drawn.
 // Higher numbers are drawn on top of other layers.
 // Change the numbers in this function to change the layering order. Use ints.
-export function getZIndexOffset (layerDetails: MapLayerDetails) : number {
-
+export function getZIndexOffset(layerDetails: MapLayerDetails): number {
   // Note: admin levels are handled by this function: getAdminAreaZIndex
   // Set the number below in relation to what the admin layer is drawn at.
 
@@ -237,7 +250,10 @@ export function getZIndexOffset (layerDetails: MapLayerDetails) : number {
       return 1202;
     default:
       // No need for a user facing error, but we should log this to correctly handle it later.
-      console.error("Unknown layer data type for z-indexing:", layerDetails.dataType);
+      console.error(
+        "Unknown layer data type for z-indexing:",
+        layerDetails.dataType,
+      );
       return 1; // draw on the lowest layer above the base map
   }
 }

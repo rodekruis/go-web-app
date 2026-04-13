@@ -4,10 +4,7 @@
 // The functions/callbacks passed in and calling out are planned to be kept though, so those can be reviewed.
 
 import { Button } from "@ifrc-go/ui";
-import {
-  type MapLayerDetails,
-  MapLayerInfoType,
-} from "#utils/ibfMapTypes";
+import { type MapLayerDetails, MapLayerInfoType } from "#utils/ibfMapTypes";
 import { mockCountryLayers } from "#utils/ibfMockCountryData_debug";
 import styles from "./styles.module.css";
 

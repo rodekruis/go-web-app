@@ -5,13 +5,20 @@ import { fromLonLat } from "ol/proj";
 import BaseLayer from "ol/layer/Base";
 import { defaults as defaultControls } from "ol/control/defaults.js";
 import { apply } from "ol-mapbox-style";
-import { CountryData, mapUrlSimpleStyleJson, noCountrySelectedValue } from "#utils/ibfMap";
+import {
+  CountryData,
+  mapUrlSimpleStyleJson,
+  noCountrySelectedValue,
+} from "#utils/ibfMap";
 import {
   createAdminLayer,
   handleFeatureClick,
   type AdminLayerState,
 } from "#utils/ibfMapInteractionHelpers";
-import type { MapLayerDetails, SelectedEventMapDetails } from "#utils/ibfMapTypes";
+import type {
+  MapLayerDetails,
+  SelectedEventMapDetails,
+} from "#utils/ibfMapTypes";
 import styles from "./styles.module.css";
 import VectorLayer from "ol/layer/Vector";
 import { getZIndexOffset } from "#utils/ibfMapHelpers";
@@ -40,7 +47,9 @@ interface OlDataMapProps {
 
   // Optional arg to expose a method for adding a layer
   // It is a function that takes the add-layer function as an argument.
-  addLayerFunction?: (addLayer: (layer: BaseLayer, layerInfo: MapLayerDetails) => void) => void;
+  addLayerFunction?: (
+    addLayer: (layer: BaseLayer, layerInfo: MapLayerDetails) => void,
+  ) => void;
 
   // Callback for when a map feature is selected.
   onSelect: (placeCode: string) => void;
@@ -61,7 +70,9 @@ export function OlDataMap({
   const stateRef = useRef<AdminLayerState | null>(null);
   const adminLayersRef = useRef<Map<number, VectorLayer>>(new Map());
   // Store addAdminLayer function to call from event selection effect
-  const addAdminLayerRef = useRef<((level: 1 | 2 | 3, country?: string, parentCode?: string) => void) | null>(null);
+  const addAdminLayerFunctionRef = useRef<
+    ((level: 1 | 2 | 3, country?: string, parentCode?: string) => void) | null
+  >(null);
   const legacy_countryInfo =
     selectedCountry === noCountrySelectedValue
       ? undefined
@@ -70,10 +81,15 @@ export function OlDataMap({
   useEffect(() => {
     const state: AdminLayerState = {
       mapInstance: null,
-      selectedAdminCodes: new Map([[1, null], [2, null], [3, null]]),
+      selectedAdminCodes: new Map([
+        [1, null],
+        [2, null],
+        [3, null],
+      ]),
       selectedEventId: selectedEventDetails?.eventId ?? "",
       isEventSelected: !!selectedEventDetails,
-      exposedRegionsByLevel: selectedEventDetails?.exposedRegionsByLevel ?? new Map(),
+      exposedRegionsByLevel:
+        selectedEventDetails?.exposedRegionsByLevel ?? new Map(),
     };
     stateRef.current = state;
 
@@ -81,12 +97,18 @@ export function OlDataMap({
     adminLayersRef.current = adminLayers;
 
     function isInteractiveLayer(layer: BaseLayer) {
-      return adminLayers.get(1) === layer
-        || adminLayers.get(2) === layer
-        || adminLayers.get(3) === layer;
+      return (
+        adminLayers.get(1) === layer ||
+        adminLayers.get(2) === layer ||
+        adminLayers.get(3) === layer
+      );
     }
 
-    function addAdminLayer(level: 1 | 2 | 3, country?: string, parentCode?: string) {
+    function addAdminLayer(
+      level: 1 | 2 | 3,
+      country?: string,
+      parentCode?: string,
+    ) {
       // Remove layers at this level and below
       for (let l = 3; l >= level; l--) {
         const existing = adminLayers.get(l);
@@ -102,7 +124,7 @@ export function OlDataMap({
       adminLayers.set(level, newLayer);
     }
     // Store ref for use in event selection effect
-    addAdminLayerRef.current = addAdminLayer;
+    addAdminLayerFunctionRef.current = addAdminLayer;
 
     if (mapRef.current && !mapInstanceRef.current) {
       mapInstanceRef.current = new MapOl({
@@ -116,11 +138,13 @@ export function OlDataMap({
 
       // Expose addLayer function to parent
       if (addLayerFunction) {
-        addLayerFunction((newLayer: BaseLayer, layerDetails: MapLayerDetails) => {
-          const zIndex = getZIndexOffset(layerDetails);
-          newLayer.setZIndex(zIndex);
-          mapInstanceRef.current?.addLayer(newLayer);
-        });
+        addLayerFunction(
+          (newLayer: BaseLayer, layerDetails: MapLayerDetails) => {
+            const zIndex = getZIndexOffset(layerDetails);
+            newLayer.setZIndex(zIndex);
+            mapInstanceRef.current?.addLayer(newLayer);
+          },
+        );
       }
 
       state.mapInstance = mapInstanceRef.current;
@@ -151,7 +175,11 @@ export function OlDataMap({
               onSelect,
             );
             if (result.showLevel) {
-              addAdminLayer(result.showLevel, result.country, result.parentCode);
+              addAdminLayer(
+                result.showLevel,
+                result.country,
+                result.parentCode,
+              );
             }
             return result.handled;
           },
@@ -178,13 +206,14 @@ export function OlDataMap({
   useEffect(() => {
     const state = stateRef.current;
     const map = mapInstanceRef.current;
-    const addAdminLayer = addAdminLayerRef.current;
+    const addAdminLayer = addAdminLayerFunctionRef.current;
     if (!state || !map || !addAdminLayer) return;
 
     // Update state with new event details
     state.selectedEventId = selectedEventDetails?.eventId ?? "";
     state.isEventSelected = !!selectedEventDetails;
-    state.exposedRegionsByLevel = selectedEventDetails?.exposedRegionsByLevel ?? new Map();
+    state.exposedRegionsByLevel =
+      selectedEventDetails?.exposedRegionsByLevel ?? new Map();
 
     // If event selected with exposed regions, drill down to admin3
     if (selectedEventDetails) {

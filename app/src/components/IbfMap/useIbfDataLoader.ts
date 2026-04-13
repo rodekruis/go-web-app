@@ -5,7 +5,12 @@ import {
   makeEventImageLayer,
   makePopulationImageLayer,
 } from "#utils/ibfMapHelpers";
-import { MapLayerInfoType, MapLayerDisplayType, type MapLayerDetails, type AllEventsData } from "#utils/ibfMapTypes";
+import {
+  MapLayerInfoType,
+  MapLayerDisplayType,
+  type MapLayerDetails,
+  type AllEventsData,
+} from "#utils/ibfMapTypes";
 
 /**
  * Hook used to manage and share data for the IBF map components.
@@ -18,15 +23,23 @@ import { MapLayerInfoType, MapLayerDisplayType, type MapLayerDetails, type AllEv
  * See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41656
  * @param selectedCountry - ISO_A2 country code for country-specific layers
  */
-export function useIbfDataLoader(selectedCountry: string, initialEventData: AllEventsData, initialEventId: string) {
+export function useIbfDataLoader(
+  selectedCountry: string,
+  initialEventData: AllEventsData,
+  initialEventId: string,
+) {
   const alert = useAlert();
 
   // Shared state: event data and selected event
   const [eventData, setEventData] = useState<AllEventsData>(initialEventData);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(initialEventId || null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(
+    initialEventId || null,
+  );
 
   // Reference to the function (passed in by the map component) for adding layers to the map.
-  const addLayerToMapFunction = useRef<((layer: BaseLayer, layerInfo: MapLayerDetails) => void) | null>(null);
+  const addLayerToMapFunction = useRef<
+    ((layer: BaseLayer, layerInfo: MapLayerDetails) => void) | null
+  >(null);
 
   // Cache of all loaded layers.
   // The key is fixed based on the layer details.
@@ -35,7 +48,7 @@ export function useIbfDataLoader(selectedCountry: string, initialEventData: AllE
   const _getLayerKey = (layerDetails: MapLayerDetails): string => {
     // Note: The resource ID may be empty for non-event layers, such as population.
     return `${layerDetails.dataType}_${selectedCountry}_${layerDetails.resourceId}`;
-  }
+  };
 
   // Register the map's addLayer function.
   // Called by OlDataMap when the map is ready.
@@ -43,13 +56,17 @@ export function useIbfDataLoader(selectedCountry: string, initialEventData: AllE
     (addLayer: (layer: BaseLayer, layerInfo: MapLayerDetails) => void) => {
       addLayerToMapFunction.current = addLayer;
     },
-    []
+    [],
   );
 
   // Internal function for handling layer toggling logic
   // If there is a cached layer, toggle it's visibility.
   // Otherwise, load it with the passed in loadLayer function.
-  const _toggleLayer = async (key: string, layerDetails: MapLayerDetails, loadLayer: () => Promise<BaseLayer>) => {
+  const _toggleLayer = async (
+    key: string,
+    layerDetails: MapLayerDetails,
+    loadLayer: () => Promise<BaseLayer>,
+  ) => {
     if (!addLayerToMapFunction.current) {
       console.error("[useIbfDataLoader] Map not ready");
       return;
@@ -67,9 +84,9 @@ export function useIbfDataLoader(selectedCountry: string, initialEventData: AllE
       addLayerToMapFunction.current(layer, layerDetails);
     } catch (error) {
       console.error(`[useIbfDataLoader] Failed to load layer ${key}:`, error);
-      alert.show('Failed to load map layer', {
-        variant: 'danger',
-        description: 'The map layer could not be loaded. Please try again.',
+      alert.show("Failed to load map layer", {
+        variant: "danger",
+        description: "The map layer could not be loaded. Please try again.",
       });
     }
   };
@@ -83,20 +100,24 @@ export function useIbfDataLoader(selectedCountry: string, initialEventData: AllE
       switch (dataType) {
         case MapLayerInfoType.Population:
           _toggleLayer(_getLayerKey(layerDetails), layerDetails, () =>
-            makePopulationImageLayer(selectedCountry)
+            makePopulationImageLayer(selectedCountry),
           );
           break;
         case MapLayerInfoType.EventExtent:
           _toggleLayer(_getLayerKey(layerDetails), layerDetails, () =>
-            makeEventImageLayer(resourceId)
+            makeEventImageLayer(resourceId),
           );
           break;
         default:
-          console.error(`[useIbfDataLoader] Unsupported layer type: ${dataType}`);
+          console.error(
+            `[useIbfDataLoader] Unsupported layer type: ${dataType}`,
+          );
       }
     } else {
       // TODO: Handle other display types (Shape, Point, VectorTile)
-      console.warn(`[useIbfDataLoader] Unsupported display type: ${displayType}`);
+      console.warn(
+        `[useIbfDataLoader] Unsupported display type: ${displayType}`,
+      );
     }
   };
 
@@ -119,9 +140,10 @@ export function useIbfDataLoader(selectedCountry: string, initialEventData: AllE
   };
 
   // Get available layers for the currently selected event
-  const selectedEventLayers: MapLayerDetails[] = selectedEventId && eventData[selectedEventId]
-    ? eventData[selectedEventId].availableLayers
-    : [];
+  const selectedEventLayers: MapLayerDetails[] =
+    selectedEventId && eventData[selectedEventId]
+      ? eventData[selectedEventId].availableLayers
+      : [];
 
   return {
     eventData,
