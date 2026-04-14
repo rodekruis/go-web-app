@@ -212,7 +212,8 @@ export default function OlDataMap({
                 mapInstanceRef.current = null;
             }
         };
-    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // When and event selection changes, the following runs to update the view,
     // such as pan, zoom, change focused admin level, update styling, etc.
