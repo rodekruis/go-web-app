@@ -1,5 +1,7 @@
 # IBF Map Component
 
+(Note: this readme is here while this component is in dev. The goal is to enable anyone to setup and test the changes. The content here should be reworked or moved to another readme as dev wraps up on this.)
+
 This component will be the shared NRW map component.
 
 The "Ibf..." prefix naming of the files and components is to help tell the new changes apart from existing GO components. More general components will be derived from these after working more with the TC team.
@@ -16,11 +18,13 @@ The "Ol..." prefix stands for OpenLayers (the mapping front library used), and t
 
 ## Running Locally
 
+(Note: This is the temporary setup process and will change as dev progresses)
+
 This requires some IBF setup to run. To run locally, do the following:
 
 1. Launch the [IBF back-end services](https://github.com/rodekruis/IBF/blob/main/services/docker-compose.yml). See [README](https://github.com/rodekruis/IBF/blob/main/README.md).
 2. Populate the admin areas with the [upload_admin_areas.py script](https://github.com/rodekruis/IBF/blob/main/data/data_management/data_upload/upload_admin_areas.py). This requires a local copy of the seed-data-repo, so you'll need to clone that as well. See the [IBF data readme](https://github.com/rodekruis/IBF/blob/main/data/README.md) for more info.
-3. Set up this repo to run, following the readme in the base directory. Be sure to recopy `example.env` into `.env` each time there were any changes in example.env.
+3. Set up this repo to run, following the readme in the base directory. Be sure to recopy `sample.env` into `.env` each time there were any changes in example.env.
 4. Launch with `pnpm start` from `/go-web-app/app`.
 5. Navigate to http://localhost:3000/ibf?c=mw
 6. Linking directly to an event is supported, if it is in the mock data. For instance http://localhost:3000/ibf?c=MW&e=event1
