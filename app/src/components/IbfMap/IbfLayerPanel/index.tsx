@@ -5,12 +5,15 @@
 // so those can be reviewed.
 
 import { Button } from '@ifrc-go/ui';
+import type MapOl from 'ol/Map';
 
 import {
     type MapLayerDetails,
     MapLayerInfoType,
 } from '#utils/ibfMapTypes';
 import mockCountryLayers from '#utils/ibfMockCountryData_debug';
+
+import { printMapToPdf } from '../../../utils/ibfMapToPdfExporter';
 
 import styles from './styles.module.css';
 
@@ -30,6 +33,7 @@ interface IbfLayerPanelProps {
   countryCode: string;
   onToggleMapLayer: (layerDetails: MapLayerDetails) => void;
   onHideAllLayers: () => void;
+  mapRef: React.RefObject<MapOl | null>;
 }
 
 /**
@@ -40,6 +44,7 @@ export default function IbfLayerPanel({
     countryCode,
     onToggleMapLayer,
     onHideAllLayers,
+    mapRef,
 }: IbfLayerPanelProps) {
     // TODO: use real data instead of mock. Pending IBF API
     const countryLayers = mockCountryLayers[countryCode] ?? [];
@@ -49,6 +54,18 @@ export default function IbfLayerPanel({
     if (!hasAnyLayers) {
         return (
             <div className={styles.container}>
+                <div className={styles.exportButtonRow}>
+                    <Button
+                        name="export-map"
+                        onClick={() => {
+                            if (mapRef.current) {
+                                printMapToPdf(mapRef.current, `ibf-map-${countryCode}-${new Date().toISOString().split('T')[0]}.pdf`);
+                            }
+                        }}
+                    >
+                        Export
+                    </Button>
+                </div>
                 <div className={styles.title}>Map Layers</div>
                 <p>No layers available</p>
             </div>
@@ -57,44 +74,50 @@ export default function IbfLayerPanel({
 
     return (
         <div className={styles.container}>
+            <div className={styles.exportButtonRow}>
+                <Button
+                    name="export-map"
+                    onClick={() => {
+                        if (mapRef.current) {
+                            printMapToPdf(mapRef.current, `ibf-map-${countryCode}-${new Date().toISOString().split('T')[0]}.pdf`);
+                        }
+                    }}
+                >
+                    Export
+                </Button>
+            </div>
             <div className={styles.title}>Map Layers</div>
 
             {eventLayers.length > 0 && (
-                <>
-                    <div className={styles.sectionTitle}>Event Layers</div>
-                    <div className={styles.buttonGroup}>
-                        {eventLayers.map((layer) => (
-                            <Button
-                                key={`${layer.dataType}_${layer.resourceId}`}
-                                name={`toggle_${layer.dataType}_${layer.resourceId}`}
-                                onClick={() => onToggleMapLayer(layer)}
-                            >
-                                Toggle
-                                {' '}
-                                {getLayerLabel(layer)}
-                            </Button>
-                        ))}
-                    </div>
-                </>
+                <div className={styles.buttonGroup}>
+                    {eventLayers.map((layer) => (
+                        <Button
+                            key={`${layer.dataType}_${layer.resourceId}`}
+                            name={`toggle_${layer.dataType}_${layer.resourceId}`}
+                            onClick={() => onToggleMapLayer(layer)}
+                        >
+                            Toggle
+                            {' '}
+                            {getLayerLabel(layer)}
+                        </Button>
+                    ))}
+                </div>
             )}
 
             {countryLayers.length > 0 && (
-                <>
-                    <div className={styles.sectionTitle}>Country Layers</div>
-                    <div className={styles.buttonGroup}>
-                        {countryLayers.map((layer) => (
-                            <Button
-                                key={`${layer.dataType}_${layer.resourceId}`}
-                                name={`toggle_country_${layer.dataType}`}
-                                onClick={() => onToggleMapLayer(layer)}
-                            >
-                                Toggle
-                                {' '}
-                                {getLayerLabel(layer)}
-                            </Button>
-                        ))}
-                    </div>
-                </>
+                <div className={styles.buttonGroup}>
+                    {countryLayers.map((layer) => (
+                        <Button
+                            key={`${layer.dataType}_${layer.resourceId}`}
+                            name={`toggle_country_${layer.dataType}`}
+                            onClick={() => onToggleMapLayer(layer)}
+                        >
+                            Toggle
+                            {' '}
+                            {getLayerLabel(layer)}
+                        </Button>
+                    ))}
+                </div>
             )}
 
             <div className={styles.hideAllButton}>

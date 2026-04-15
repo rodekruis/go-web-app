@@ -27,3 +27,9 @@
 .hide-all-button {
     margin-top: 12px;
 }
+
+.export-button-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}

@@ -3,9 +3,11 @@ import 'ol/ol.css';
 import {
     useEffect,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import type MapOl from 'ol/Map';
 
 import useAlert from '#hooks/useAlert';
 import {
@@ -63,6 +65,9 @@ export default function IbfMapContainer() {
     const [selectedAdminPlaceCode, setSelectedAdminPlaceCode] = useState<
     string | null
   >(null);
+
+    // Store map instance for PDF export
+    const mapRef = useRef<MapOl | null>(null);
 
     // Data loader hook - manages layer loading, caching, and shared event state
     const {
@@ -126,31 +131,39 @@ export default function IbfMapContainer() {
 
     return (
         <div className={styles.container}>
-            <IbfDataPanel selectedCountry={selectedCountry} />
+            <div id="nrw-data-panel">
+                <IbfDataPanel selectedCountry={selectedCountry} />
+            </div>
             <div className={styles.mainContent}>
                 <div className={styles.controlPanelColumn}>
-                    <IbfLayerPanel
-                        eventLayers={selectedEventLayers}
-                        countryCode={selectedCountry}
-                        onToggleMapLayer={toggleMapLayer}
-                        onHideAllLayers={hideAllLayers}
-                    />
-                    <IbfControlPanel
-                        eventData={eventData}
-                        activeEventId={activeEventId}
-                        onEventClick={handleEventClick}
-                        onRefreshAll={handleRefreshAll}
-                        onDeselectEvent={deselectEvent}
-                        countryCode={selectedCountry}
-                        selectedAdminPlaceCode={selectedAdminPlaceCode}
-                    />
+                    <div id="nrw-layer-panel">
+                        <IbfLayerPanel
+                            eventLayers={selectedEventLayers}
+                            countryCode={selectedCountry}
+                            onToggleMapLayer={toggleMapLayer}
+                            onHideAllLayers={hideAllLayers}
+                            mapRef={mapRef}
+                        />
+                    </div>
+                    <div id="nrw-control-panel">
+                        <IbfControlPanel
+                            eventData={eventData}
+                            activeEventId={activeEventId}
+                            onEventClick={handleEventClick}
+                            onRefreshAll={handleRefreshAll}
+                            onDeselectEvent={deselectEvent}
+                            countryCode={selectedCountry}
+                            selectedAdminPlaceCode={selectedAdminPlaceCode}
+                        />
+                    </div>
                 </div>
-                <div className={styles.mapColumn}>
+                <div className={styles.mapColumn} id="nrw-map">
                     <OlDataMap
                         selectedCountry={selectedCountry}
                         selectedEventDetails={selectedEventMapDetails}
                         addLayerFunction={registerMapAddLayer}
                         onSelect={handleMapItemSelected}
+                        onMapReady={(map: MapOl) => { mapRef.current = map; }}
                     />
                 </div>
             </div>
