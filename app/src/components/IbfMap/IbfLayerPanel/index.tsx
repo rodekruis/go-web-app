@@ -13,9 +13,27 @@ import {
 } from '#utils/ibfMapTypes';
 import mockCountryLayers from '#utils/ibfMockCountryData_debug';
 
-import { printMapToPdf } from '../../../utils/ibfMapToPdfExporter';
+import { exportMapToPdf } from '../../../utils/nrwMapToPdfExporter';
 
 import styles from './styles.module.css';
+
+function handleExportMapClick(
+    mapRef: React.RefObject<MapOl | null>,
+    countryCode: string,
+    eventId?: string,
+    peakDay?: string,
+) {
+    if (mapRef.current) {
+        const filenameParts = [countryCode];
+        if (eventId) {
+            filenameParts.push(`event_${eventId}`);
+        }
+        if (peakDay) {
+            filenameParts.push(`peak_${peakDay}`);
+        }
+        exportMapToPdf(mapRef.current, filenameParts);
+    }
+}
 
 // TODO: move to loc file. See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41713
 function getLayerLabel(layer: MapLayerDetails): string {
@@ -34,6 +52,8 @@ interface IbfLayerPanelProps {
   onToggleMapLayer: (layerDetails: MapLayerDetails) => void;
   onHideAllLayers: () => void;
   mapRef: React.RefObject<MapOl | null>;
+  eventId?: string;
+  peakDay?: string;
 }
 
 /**
@@ -45,6 +65,8 @@ export default function IbfLayerPanel({
     onToggleMapLayer,
     onHideAllLayers,
     mapRef,
+    eventId,
+    peakDay,
 }: IbfLayerPanelProps) {
     // TODO: use real data instead of mock. Pending IBF API
     const countryLayers = mockCountryLayers[countryCode] ?? [];
@@ -57,11 +79,7 @@ export default function IbfLayerPanel({
                 <div className={styles.exportButtonRow}>
                     <Button
                         name="export-map"
-                        onClick={() => {
-                            if (mapRef.current) {
-                                printMapToPdf(mapRef.current, `ibf-map-${countryCode}-${new Date().toISOString().split('T')[0]}.pdf`);
-                            }
-                        }}
+                        onClick={() => handleExportMapClick(mapRef, countryCode, eventId, peakDay)}
                     >
                         Export
                     </Button>
@@ -77,11 +95,7 @@ export default function IbfLayerPanel({
             <div className={styles.exportButtonRow}>
                 <Button
                     name="export-map"
-                    onClick={() => {
-                        if (mapRef.current) {
-                            printMapToPdf(mapRef.current, `ibf-map-${countryCode}-${new Date().toISOString().split('T')[0]}.pdf`);
-                        }
-                    }}
+                    onClick={() => handleExportMapClick(mapRef, countryCode, eventId, peakDay)}
                 >
                     Export
                 </Button>

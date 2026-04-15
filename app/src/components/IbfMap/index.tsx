@@ -20,6 +20,7 @@ import {
     getEventDetails,
     getSelectedEventMapDetails,
 } from '#utils/ibfMapHelpers';
+import { PrintElementId } from '#utils/nrwMapToPdfExporter';
 
 import IbfControlPanel from './IbfControlPanel';
 import IbfDataPanel from './IbfDataPanel';
@@ -88,6 +89,15 @@ export default function IbfMapContainer() {
         [eventData, activeEventId],
     );
 
+    // Derive peak day for the selected event (for PDF export filename)
+    const selectedEventPeakDay = useMemo(() => {
+        if (!activeEventId || !eventData[activeEventId]) {
+            return undefined;
+        }
+        const peakTime = eventData[activeEventId].reachesPeakAlertClassTime;
+        return peakTime ? peakTime.split('T')[0] : undefined;
+    }, [eventData, activeEventId]);
+
     // Show alert when no exposed regions found in a selected event
     useEffect(() => {
         if (selectedEventMapDetails && selectedEventMapDetails.exposedRegionsByLevel.size === 0) {
@@ -131,21 +141,23 @@ export default function IbfMapContainer() {
 
     return (
         <div className={styles.container}>
-            <div id="nrw-data-panel">
+            <div id={PrintElementId.DataPanel}>
                 <IbfDataPanel selectedCountry={selectedCountry} />
             </div>
             <div className={styles.mainContent}>
                 <div className={styles.controlPanelColumn}>
-                    <div id="nrw-layer-panel">
+                    <div id={PrintElementId.LayerPanel}>
                         <IbfLayerPanel
                             eventLayers={selectedEventLayers}
                             countryCode={selectedCountry}
                             onToggleMapLayer={toggleMapLayer}
                             onHideAllLayers={hideAllLayers}
                             mapRef={mapRef}
+                            eventId={activeEventId ?? undefined}
+                            peakDay={selectedEventPeakDay}
                         />
                     </div>
-                    <div id="nrw-control-panel">
+                    <div id={PrintElementId.ControlPanel}>
                         <IbfControlPanel
                             eventData={eventData}
                             activeEventId={activeEventId}
@@ -157,7 +169,7 @@ export default function IbfMapContainer() {
                         />
                     </div>
                 </div>
-                <div className={styles.mapColumn} id="nrw-map">
+                <div className={styles.mapColumn} id={PrintElementId.Map}>
                     <OlDataMap
                         selectedCountry={selectedCountry}
                         selectedEventDetails={selectedEventMapDetails}

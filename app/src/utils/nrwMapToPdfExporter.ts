@@ -2,26 +2,22 @@ import html2canvas from 'html2canvas';
 import JsPDF from 'jspdf';
 import type MapOl from 'ol/Map';
 
-interface PrintElementIds {
-    dataPanel: string;
-    layerPanel: string;
-    controlPanel: string;
-    map: string;
+// IDs to identify the elements that should be captured for the PDF.
+export enum PrintElementId {
+    DataPanel = 'nrw-data-panel',
+    LayerPanel = 'nrw-layer-panel',
+    ControlPanel = 'nrw-control-panel',
+    Map = 'nrw-map',
 }
 
-const DEFAULT_ELEMENT_IDS: PrintElementIds = {
-    dataPanel: 'nrw-data-panel',
-    layerPanel: 'nrw-layer-panel',
-    controlPanel: 'nrw-control-panel',
-    map: 'nrw-map',
-};
-
+// Properties of a captured element, including the canvas and its dimensions
 interface CapturedElement {
     canvas: HTMLCanvasElement;
     width: number;
     height: number;
 }
 
+// Capture the content of a DOM element as a canvas using html2canvas
 async function captureElement(elementId: string): Promise<CapturedElement | null> {
     const element = document.getElementById(elementId);
     if (!element) {
@@ -30,8 +26,8 @@ async function captureElement(elementId: string): Promise<CapturedElement | null
     }
 
     const canvas = await html2canvas(element, {
+        // Needed to handle map layers from external sources
         useCORS: true,
-        allowTaint: false,
     });
 
     return {
@@ -42,10 +38,10 @@ async function captureElement(elementId: string): Promise<CapturedElement | null
 }
 
 /**
- * Captures the OpenLayers map after waiting for render to complete.
- * This ensures all layers (including tiles) are fully rendered.
+ * Captures the OpenLayers map
+ * This ensures all map layers are fully rendered.
  */
-async function captureOlMap(
+async function captureMap(
     mapInstance: MapOl,
     mapElementId: string,
 ): Promise<CapturedElement | null> {
@@ -92,33 +88,31 @@ async function captureOlMap(
 }
 
 /**
- * Captures the IBF map, data panel, and control panels and generates a PDF.
- * Layout: A4 portrait with data panel on top, map in the middle,
- * and control panel (left) + layers panel (right) at the bottom.
- * @param mapInstance - The OpenLayers map instance (required for proper map capture)
- * @param filename - The name of the PDF file to download (default: 'ibf-map-report.pdf')
- * @param elementIds - Custom element IDs to capture (optional)
+ * Captures the NRW map and associated panels and generates a PDF.
+ * @param mapInstance - The OpenLayers map instance
+ * @param filenameSections - List of strings to include in the filename
  */
-export async function printMapToPdf(
+export async function exportMapToPdf(
     mapInstance: MapOl,
-    filename: string = 'ibf-map-report.pdf',
-    elementIds: PrintElementIds = DEFAULT_ELEMENT_IDS,
+    filenameSections: string[] = [],
 ): Promise<void> {
+    const filename = `nrw-map-${filenameSections.join('-')}.pdf`;
     try {
         // Capture panels in parallel, but map needs special handling
         const [dataPanel, layerPanel, controlPanel] = await Promise.all([
-            captureElement(elementIds.dataPanel),
-            captureElement(elementIds.layerPanel),
-            captureElement(elementIds.controlPanel),
+            captureElement(PrintElementId.DataPanel),
+            captureElement(PrintElementId.LayerPanel),
+            captureElement(PrintElementId.ControlPanel),
         ]);
 
         // Capture map using OpenLayers rendercomplete event
-        const mapElement = await captureOlMap(mapInstance, elementIds.map);
+        const mapElement = await captureMap(mapInstance, PrintElementId.Map);
 
-        // Create PDF in portrait A4 orientation
+        // Create PDF
         const pdf = new JsPDF({
             orientation: 'portrait',
             unit: 'mm',
+            // A4 size (supports multiple pages)
             format: 'a4',
         });
 
@@ -128,13 +122,9 @@ export async function printMapToPdf(
         const contentWidth = pageWidth - 2 * margin;
         const gap = 5;
 
-        // Layout configuration:
-        // Page 1: Data panel at the top, map below
-        // Page 2: Control panel (left) and Layer panel (right)
-
         let currentY = margin;
 
-        // 1. Add data panel at the top (full width)
+        // Add the data panel
         if (dataPanel) {
             const dataPanelMaxHeight = 30;
             const aspectRatio = dataPanel.width / dataPanel.height;
@@ -157,10 +147,10 @@ export async function printMapToPdf(
             currentY += scaledHeight + gap;
         }
 
-        // Calculate available height for the map (full remaining space on page 1)
+        // Calculate available height for the map based on remaining page space
         const mapMaxHeight = pageHeight - currentY - margin;
 
-        // 2. Add map (full width, uses remaining space on page 1)
+        // Add map
         if (mapElement) {
             const aspectRatio = mapElement.width / mapElement.height;
             let scaledWidth = contentWidth;
@@ -184,11 +174,11 @@ export async function printMapToPdf(
             );
         }
 
-        // 3. Add second page for panels: Control panel (left) and Layer panel (right)
+        // Add second page for the other panels
         pdf.addPage();
         const bottomPanelWidth = (contentWidth - gap) / 2;
 
-        // Control panel on the left (full size)
+        // Add the control panel on the left
         if (controlPanel) {
             const aspectRatio = controlPanel.width / controlPanel.height;
             const scaledWidth = bottomPanelWidth;
@@ -204,7 +194,7 @@ export async function printMapToPdf(
             );
         }
 
-        // Layer panel on the right (full size)
+        // Add the layer panel on the right
         if (layerPanel) {
             const aspectRatio = layerPanel.width / layerPanel.height;
             const scaledWidth = bottomPanelWidth;
@@ -222,7 +212,7 @@ export async function printMapToPdf(
             );
         }
 
-        // Download the PDF
+        // Save the PDF locally
         pdf.save(filename);
     } catch (error) {
         console.error('Error generating PDF:', error);
@@ -230,4 +220,4 @@ export async function printMapToPdf(
     }
 }
 
-export default printMapToPdf;
+export default exportMapToPdf;
