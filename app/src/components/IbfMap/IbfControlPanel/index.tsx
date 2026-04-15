@@ -289,9 +289,9 @@ function formatStartTime(startTime: string): string {
     const diffDays = Math.floor(diffHours / 24);
 
     if (diffDays > 0) {
-        return `Starts ${rtf.format(diffDays, 'day')}`;
+        return `Starts in ${rtf.format(diffDays, 'day')}`;
     }
-    return `Starts ${rtf.format(diffHours, 'hour')}`;
+    return `Starts in ${rtf.format(diffHours, 'hour')}`;
 }
 
 /**
