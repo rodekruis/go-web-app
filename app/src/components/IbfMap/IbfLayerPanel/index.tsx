@@ -4,36 +4,19 @@
 // The functions/callbacks passed in and calling out are planned to be kept though,
 // so those can be reviewed.
 
+import { useCallback } from 'react';
 import { Button } from '@ifrc-go/ui';
 import type MapOl from 'ol/Map';
 
+import useAlert from '#hooks/useAlert';
 import {
     type MapLayerDetails,
     MapLayerInfoType,
 } from '#utils/ibfMapTypes';
 import mockCountryLayers from '#utils/ibfMockCountryData_debug';
-
-import { exportMapToPdf } from '../../../utils/nrwMapToPdfExporter';
+import { exportMapToPdf } from '#utils/nrwMapToPdfExporter';
 
 import styles from './styles.module.css';
-
-function handleExportMapClick(
-    mapRef: React.RefObject<MapOl | null>,
-    countryCode: string,
-    eventId?: string,
-    peakDay?: string,
-) {
-    if (mapRef.current) {
-        const filenameParts = [countryCode];
-        if (eventId) {
-            filenameParts.push(`event_${eventId}`);
-        }
-        if (peakDay) {
-            filenameParts.push(`peak_${peakDay}`);
-        }
-        exportMapToPdf(mapRef.current, filenameParts);
-    }
-}
 
 // TODO: move to loc file. See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41713
 function getLayerLabel(layer: MapLayerDetails): string {
@@ -68,6 +51,26 @@ export default function IbfLayerPanel({
     eventId,
     peakDay,
 }: IbfLayerPanelProps) {
+    const alert = useAlert();
+
+    const handleExportMapClick = useCallback(async () => {
+        if (mapRef.current) {
+            const filenameParts = [countryCode];
+            if (eventId) {
+                filenameParts.push(`event_${eventId}`);
+            }
+            if (peakDay) {
+                filenameParts.push(`peak_${peakDay}`);
+            }
+            try {
+                await exportMapToPdf(mapRef.current, filenameParts);
+            } catch (error) {
+                alert.show('Failed to export map. Please try again.', { variant: 'danger' });
+                console.error('Map export error:', error);
+            }
+        }
+    }, [mapRef, countryCode, eventId, peakDay, alert]);
+
     // TODO: use real data instead of mock. Pending IBF API
     const countryLayers = mockCountryLayers[countryCode] ?? [];
 
@@ -79,7 +82,7 @@ export default function IbfLayerPanel({
                 <div className={styles.exportButtonRow}>
                     <Button
                         name="export-map"
-                        onClick={() => handleExportMapClick(mapRef, countryCode, eventId, peakDay)}
+                        onClick={handleExportMapClick}
                     >
                         Export
                     </Button>
@@ -95,7 +98,7 @@ export default function IbfLayerPanel({
             <div className={styles.exportButtonRow}>
                 <Button
                     name="export-map"
-                    onClick={() => handleExportMapClick(mapRef, countryCode, eventId, peakDay)}
+                    onClick={handleExportMapClick}
                 >
                     Export
                 </Button>

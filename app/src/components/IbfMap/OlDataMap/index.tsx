@@ -60,7 +60,7 @@ interface OlDataMapProps {
   onSelect: (placeCode: string) => void;
 
   // Callback when the map instance is ready
-  // This is needed pass references of the map for exporting to PDF
+  // This is needed to pass references of the map for exporting to PDF
   onMapReady?: (map: MapOl) => void;
 }
 
@@ -170,7 +170,7 @@ export default function OlDataMap({
             addAdminLayer(1, selectedCountry);
 
             // Notify parent that map is ready
-            if (onMapReady) {
+            if (onMapReady && mapInstanceRef.current) {
                 onMapReady(mapInstanceRef.current);
             }
 

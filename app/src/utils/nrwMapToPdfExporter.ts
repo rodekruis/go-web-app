@@ -97,7 +97,11 @@ export async function exportMapToPdf(
     mapInstance: MapOl,
     filenameSections: string[] = [],
 ): Promise<void> {
-    const filename = `nrw-map-${filenameSections.join('-')}.pdf`;
+    let filename = `nrw-map-${filenameSections.join('-')}.pdf`;
+
+    // Sanitize filename by replacing invalid characters with underscores
+    filename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+
     try {
         // Capture panels in parallel, but map needs special handling
         const [dataPanel, layerPanel, controlPanel] = await Promise.all([
