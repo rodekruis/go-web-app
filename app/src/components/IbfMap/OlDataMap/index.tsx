@@ -92,6 +92,7 @@ export default function OlDataMap({
         const state: MapViewState = {
             mapInstance: null,
             // TODO: support countries with max admin levels of 2, 3, and 4
+            // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41768
             selectedAdminCodes: new Map([
                 [1, null],
                 [2, null],

@@ -5,19 +5,19 @@
     height: calc(100vh - 40px);
 }
 
-.mainContent {
+.main-content {
     display: flex;
     flex: 1;
     min-height: 0;
 }
 
-.controlPanelColumn {
+.control-panel-column {
     width: 300px;
     flex-shrink: 0;
     overflow-y: auto;
 }
 
-.mapColumn {
+.map-column {
     flex: 1;
     min-width: 0;
 }

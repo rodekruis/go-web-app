@@ -104,6 +104,8 @@ function formatFooterDate(dateStr: string): string {
 
 /**
  * Collapsible section component.
+ * NOTE: this is generic enough to move into its own component.
+ * If there is not a GO component already, and if the UI mock ups still need this, do so.
  */
 function CollapsibleSection({
     title,
@@ -138,6 +140,8 @@ function CollapsibleSection({
  */
 function EventDetailView({ event, onBack }: EventDetailViewProps) {
     // Get admin data at different levels
+    // TODO: support multiple max admin levels
+    // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41768
     const admin0 = event.exposedAdminAreas[0]?.[0];
     const admin1Regions = event.exposedAdminAreas[1] ?? [];
     const admin3Regions = event.exposedAdminAreas[3] ?? [];

@@ -38,6 +38,7 @@ export interface MapViewState {
 
   // Map of the selected codes, indexed by the admin level (level 1, 2, 3).
   // TODO: support variable max admin levels (2, 3 or 4) for here, and throughout the code
+  // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41768
   selectedAdminCodes: Map<number, string | null>;
 
   selectedEventId: string;

@@ -10,7 +10,7 @@
     color: #333;
 }
 
-.sectionTitle {
+.section-title {
     font-size: 12px;
     font-weight: 500;
     color: #666;
@@ -18,12 +18,12 @@
     margin-top: 12px;
 }
 
-.buttonGroup {
+.button-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.hideAllButton {
+.hide-all-button {
     margin-top: 12px;
 }
