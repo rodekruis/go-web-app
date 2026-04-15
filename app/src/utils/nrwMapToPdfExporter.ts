@@ -89,6 +89,7 @@ async function captureMap(
 
 /**
  * Captures the NRW map and associated panels and generates a PDF.
+ * TODO: there is no PDF export style design, so the exported layout will change
  * @param mapInstance - The OpenLayers map instance
  * @param filenameSections - List of strings to include in the filename
  */
