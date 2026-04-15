@@ -284,13 +284,14 @@ function formatStartTime(startTime: string): string {
         return 'Ongoing';
     }
 
+    const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffHours / 24);
 
     if (diffDays > 0) {
-        return `Starts in ${diffDays} day${diffDays === 1 ? '' : 's'}`;
+        return `Starts ${rtf.format(diffDays, 'day')}`;
     }
-    return `Starts in ${diffHours} hour${diffHours === 1 ? '' : 's'}`;
+    return `Starts ${rtf.format(diffHours, 'hour')}`;
 }
 
 /**
