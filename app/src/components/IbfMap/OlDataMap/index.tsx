@@ -41,9 +41,7 @@ function createView(countryInfo?: CountryData) {
 }
 
 interface OlDataMapProps {
-  // ISO_A2 code of the selected country
-  // TODO: move to ISO_A3
-  // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41656
+  // ISO_A3 code of the selected country
   selectedCountry: string;
 
   // Details for the currently selected event (centroid, exposed regions)

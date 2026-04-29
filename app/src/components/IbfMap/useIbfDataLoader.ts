@@ -24,9 +24,7 @@ import {
  * - Load and cache data
  * - Create, cache, and toggle map data layers
  *
- * TODO: Change this to ISO_A3.
- * See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41656
- * @param selectedCountry - ISO_A2 country code for country-specific layers
+ * @param selectedCountry - ISO_A3 country code for country-specific layers
  */
 export default function useIbfDataLoader(
     selectedCountry: string,

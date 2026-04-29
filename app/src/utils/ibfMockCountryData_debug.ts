@@ -4,15 +4,15 @@ import {
     MapLayerInfoType,
 } from '#utils/ibfMapTypes';
 
-// Mock country map data for countries that don't yet have backend support
+// Mock country map data for countries. This will be moved to the backend in the future.
 export default {
-    MW: [
+    MWI: [
         { resourceId: '', dataType: MapLayerInfoType.Population, displayType: MapLayerDisplayType.Raster },
     ],
-    KE: [
+    KEN: [
         { resourceId: '', dataType: MapLayerInfoType.Population, displayType: MapLayerDisplayType.Raster },
     ],
-    ZM: [
+    ZMB: [
         { resourceId: '', dataType: MapLayerInfoType.Population, displayType: MapLayerDisplayType.Raster },
     ],
 } as Record<string, MapLayerDetails[]>;

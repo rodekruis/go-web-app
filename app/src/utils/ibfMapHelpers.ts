@@ -12,7 +12,6 @@ import {
     seedDataRepo,
 } from '#config';
 
-import { CountryData } from './ibfMap';
 import { type MvtStyleCreator } from './ibfMapStyles';
 import type {
     AllEventsData,
@@ -20,8 +19,8 @@ import type {
     SelectedEventMapDetails,
 } from './ibfMapTypes';
 import {
-    mockAllEventsData_MW,
-    mockAllEventsData_ZM,
+    mockAllEventsData_MW as mockAllEventsData_MWI,
+    mockAllEventsData_ZM as mockAllEventsData_ZMB,
 } from './ibfMockData_debug';
 
 // Raw GitHub URLs for direct file access
@@ -44,13 +43,10 @@ const adminLevelToSimplificationFactor: number[] = [0.01, 0.01, 0.005, 0.004];
 export function getCurrentCountryEventData(country: string): AllEventsData {
     // TODO: Use the API for fetching this for any country, and only use mock data
     // if set to do so in the env file.
-
-    // TODO: Try to switch to ISO3 in the data, so we can avoid ISO2 -> ISO3 mapping.
-    // See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41656
-    if (country === 'MW') {
-        return mockAllEventsData_MW;
-    } if (country === 'ZM') {
-        return mockAllEventsData_ZM;
+    if (country === 'MWI') {
+        return mockAllEventsData_MWI;
+    } if (country === 'ZMB') {
+        return mockAllEventsData_ZMB;
     } return {} as AllEventsData;
 }
 
@@ -60,8 +56,8 @@ export function getEventDetails(eventId: string): AllEventsData {
     // if set to do so in the env file.
     // For mock data, look for the event data with the matching eventId, and only return that event.
     const allMockData: AllEventsData[] = [
-        mockAllEventsData_MW,
-        mockAllEventsData_ZM,
+        mockAllEventsData_MWI,
+        mockAllEventsData_ZMB,
     ];
     for (let i = 0; i < allMockData.length; i += 1) {
         const countryEvents = allMockData[i];
@@ -111,7 +107,7 @@ export function getSelectedEventMapDetails(
 
 /**
  * Create a vector tile layer for the map.
- * @param selectedCountry The ISO_A2 code of the selected country,
+ * @param selectedCountry The ISO_A3 code of the selected country,
  * or noCountrySelectedValue for none.
  * @param mapVectorTileUrl The URL template for the vector tiles
  * @param getMapStyle A function for an MVT tile style creator
@@ -130,19 +126,6 @@ export const makeMvtLayerAsync = (
     style: (feature) => getMapStyle(feature, selectedCountry),
 });
 
-// TODO: Try to switch to ISO3 in the data, so we can avoid ISO2 -> ISO3 mapping.
-// See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41656
-export const getISO3FromISO2 = (iso2: string): string => {
-    const output = CountryData.get(iso2)?.iso_a3;
-    if (!output) {
-        console.warn(
-            `No ISO3 mapping found for ISO2 code ${iso2}, returning input as fallback`,
-        );
-        return iso2; // fallback to input if no mapping found
-    }
-    return output;
-};
-
 // Raster layer functions
 export const makeEventImageLayer = async (name: string) => {
     const baseUri = seedRepoEventDataUrl;
@@ -153,7 +136,7 @@ export const makePopulationImageLayer = async (country_code: string) => {
     const baseUri = seedRepoPopDataUrl;
     return makeStaticImageLayer(
         baseUri,
-        `${getISO3FromISO2(country_code)}_population`,
+        `${country_code}_population`,
     );
 };
 
