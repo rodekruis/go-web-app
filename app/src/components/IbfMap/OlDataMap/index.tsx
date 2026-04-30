@@ -4,18 +4,18 @@ import {
 } from 'react';
 import { View } from 'ol';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
+import type { Extent } from 'ol/extent';
 import type BaseLayer from 'ol/layer/Base';
 import type VectorLayer from 'ol/layer/Vector';
 import MapOl from 'ol/Map.js';
 import { fromLonLat } from 'ol/proj';
 import { apply } from 'ol-mapbox-style';
 
+import { mapUrlSimpleStyleJson } from '#utils/ibfMap';
 import {
-    CountryData,
-    mapUrlSimpleStyleJson,
-    noCountrySelectedValue,
-} from '#utils/ibfMap';
-import { getZIndexOffset } from '#utils/ibfMapHelpers';
+    getExtentForVectorData,
+    getZIndexOffset,
+} from '#utils/ibfMapHelpers';
 import {
     createAdminLayer,
     handleFeatureClick,
@@ -27,18 +27,6 @@ import type {
 } from '#utils/ibfMapTypes';
 
 import styles from './styles.module.css';
-
-function createView(countryInfo?: CountryData) {
-    if (!countryInfo) {
-        return new View({ center: [0, 0], zoom: 2 });
-    }
-    return new View({
-        center: fromLonLat([countryInfo.latlon[1], countryInfo.latlon[0]]),
-        zoom: countryInfo.initialZoom,
-        extent: countryInfo.safeExtents,
-        constrainOnlyCenter: true,
-    });
-}
 
 interface OlDataMapProps {
   // ISO_A3 code of the selected country
@@ -87,9 +75,6 @@ export default function OlDataMap({
         | null
         >(null,
         );
-    const legacy_countryInfo = selectedCountry === noCountrySelectedValue
-        ? undefined
-        : CountryData.get(selectedCountry);
 
     useEffect(() => {
         const state: MapViewState = {
@@ -121,6 +106,25 @@ export default function OlDataMap({
             );
         }
 
+        function constrainViewToExtent(extent: Extent) {
+            const map = mapInstanceRef.current;
+            if (!map) {
+                return;
+            }
+
+            const currentView = map.getView();
+            const constrainedView = new View({
+                center: currentView.getCenter(),
+                resolution: currentView.getResolution(),
+                rotation: currentView.getRotation(),
+                projection: currentView.getProjection(),
+                extent,
+                constrainOnlyCenter: true,
+            });
+
+            map.setView(constrainedView);
+        }
+
         function addAdminLayer(
             level: 1 | 2 | 3,
             country?: string,
@@ -139,6 +143,23 @@ export default function OlDataMap({
             const newLayer = createAdminLayer(state, level, country, parentCode);
             mapInstanceRef.current?.addLayer(newLayer);
             adminLayers.set(level, newLayer);
+
+            // For admin level 1, set the view extent and zoom to fit the admin areas
+            if (level === 1 && mapInstanceRef.current) {
+                const map = mapInstanceRef.current;
+                const source = newLayer.getSource();
+                if (source) {
+                    source.on('featuresloadend', () => {
+                        const extent = getExtentForVectorData(source);
+                        if (extent) {
+                            constrainViewToExtent(extent);
+                            map.getView().fit(extent, {
+                                duration: 500,
+                            });
+                        }
+                    });
+                }
+            }
         }
         // Store ref for use in event selection effect
         addAdminLayerFunctionRef.current = addAdminLayer;
@@ -147,7 +168,7 @@ export default function OlDataMap({
             mapInstanceRef.current = new MapOl({
                 target: mapRef.current,
                 controls: defaultControls({ attribution: false }),
-                view: createView(legacy_countryInfo),
+                view: new View({ center: [0, 0], zoom: 2 }),
             });
 
             // Apply base map style
@@ -165,7 +186,7 @@ export default function OlDataMap({
             }
 
             state.mapInstance = mapInstanceRef.current;
-            addAdminLayer(1, selectedCountry);
+            addAdminLayer(1, selectedCountry, undefined);
 
             // Notify parent that map is ready
             if (onMapReady && mapInstanceRef.current) {
@@ -245,8 +266,6 @@ export default function OlDataMap({
             // Set admin1 selection to match the event's admin1 region
             if (exposedAdmin1 && exposedAdmin1.length > 0) {
                 state.selectedAdminCodes.set(1, exposedAdmin1[0]!);
-                // Reload admin1 layer to reflect new selection
-                addAdminLayer(1, selectedCountry);
             }
 
             if (exposedAdmin2 && exposedAdmin2.length > 0) {
@@ -275,6 +294,7 @@ export default function OlDataMap({
             }
         } else {
             // No event selected: reset admin layers back to level 1 only
+            // and fit view to country extent
             addAdminLayer(1, selectedCountry);
         }
 

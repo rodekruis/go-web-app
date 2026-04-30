@@ -1,10 +1,18 @@
 // TODO: Find a better differentiation between ibfMap.ts and ibfMapHelpers.ts and simplify
 // Task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41662
 
+import {
+    buffer as bufferExtent,
+    type Extent,
+    getHeight,
+    getWidth,
+    isEmpty,
+} from 'ol/extent';
 import MVT from 'ol/format/MVT';
 import ImageLayer from 'ol/layer/Image';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import ImageStatic from 'ol/source/ImageStatic';
+import type VectorSource from 'ol/source/Vector';
 import VectorTile from 'ol/source/VectorTile';
 
 import {
@@ -37,7 +45,7 @@ const seedRepoPopDataUrl = `${seedDataRepo}raster-data/population/rgba/`;
 //    .001 = 188kb
 //    .05 = 53kb
 //    .01 = 30kb
-const adminLevelToSimplificationFactor: number[] = [0.01, 0.01, 0.005, 0.004];
+const adminLevelToSimplificationFactor: number[] = [0.05, 0.01, 0.005, 0.004];
 
 // Fetch upcoming or ongoing event data for a country
 export function getCurrentCountryEventData(country: string): AllEventsData {
@@ -126,41 +134,13 @@ export const makeMvtLayerAsync = (
     style: (feature) => getMapStyle(feature, selectedCountry),
 });
 
-// Raster layer functions
-export const makeEventImageLayer = async (name: string) => {
-    const baseUri = seedRepoEventDataUrl;
-    return makeStaticImageLayer(baseUri, name);
-};
-
-export const makePopulationImageLayer = async (country_code: string) => {
-    const baseUri = seedRepoPopDataUrl;
-    return makeStaticImageLayer(
-        baseUri,
-        `${country_code}_population`,
-    );
-};
-
-const makeStaticImageLayer = async (baseUri: string, name: string) => {
-    const extents = await getImageExtentsAsync(baseUri, name);
-    const rasterUrl = `${baseUri}${name}.png`;
-    return new ImageLayer({
-        source: new ImageStatic({
-            url: rasterUrl,
-            projection: 'EPSG:3857',
-            interpolate: false,
-            imageExtent: extents,
-            crossOrigin: 'anonymous',
-        }),
-    });
-};
-
 /**
  * Fetches the extents from the png metadata JSON file. *
  * @param baseUri base URL for the data source
  * @param name the same name as the image
  * @returns the extents in EPSG:3857, ordered [left, bottom, right, top]
  */
-const getImageExtentsAsync = async (
+const getRasterExtentsAsync = async (
     baseUri: string,
     name: string,
 ): Promise<number[]> => {
@@ -185,6 +165,34 @@ const getImageExtentsAsync = async (
     }
 };
 
+const makeStaticImageLayer = async (baseUri: string, name: string) => {
+    const extents = await getRasterExtentsAsync(baseUri, name);
+    const rasterUrl = `${baseUri}${name}.png`;
+    return new ImageLayer({
+        source: new ImageStatic({
+            url: rasterUrl,
+            projection: 'EPSG:3857',
+            interpolate: false,
+            imageExtent: extents,
+            crossOrigin: 'anonymous',
+        }),
+    });
+};
+
+// Raster layer functions
+export const makeEventImageLayer = async (name: string) => {
+    const baseUri = seedRepoEventDataUrl;
+    return makeStaticImageLayer(baseUri, name);
+};
+
+export const makePopulationImageLayer = async (country_code: string) => {
+    const baseUri = seedRepoPopDataUrl;
+    return makeStaticImageLayer(
+        baseUri,
+        `${country_code}_population`,
+    );
+};
+
 // Get the vector simplification factor (for the query algorithm)
 // This factor is based on the admin level
 const getSimplificationFactor = (adminLevel: number): number => {
@@ -199,6 +207,11 @@ const getSimplificationFactor = (adminLevel: number): number => {
         factor = 0.01;
     }
     return factor;
+};
+
+export const getGlobalAdmin0Url = (): string => {
+    const factor = getSimplificationFactor(0);
+    return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=admin_level=%270%27&limit=10000&transform=simplify,${factor}`;
 };
 
 export const getAdminRegionUrl = (
@@ -250,4 +263,26 @@ export function getZIndexOffset(layerDetails: MapLayerDetails): number {
             );
             return 1; // draw on the lowest layer above the base map
     }
+}
+
+// Get the extents that fits all the supplied vector data, with added padding
+export function getExtentForVectorData(
+    source: VectorSource,
+): Extent | null {
+    const extent = source.getExtent();
+
+    if (!extent || isEmpty(extent)) {
+        return null;
+    }
+
+    // Padding ratio for all sides.
+    // 0.1 = 10%
+    const paddingRatio = 0.1;
+
+    // Set the padding amount by the larger of the two dimensions
+    const extentWidth = getWidth(extent);
+    const extentHeight = getHeight(extent);
+    const paddingAmount = Math.max(extentWidth, extentHeight) * paddingRatio;
+
+    return bufferExtent(extent, paddingAmount);
 }

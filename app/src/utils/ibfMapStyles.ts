@@ -7,6 +7,7 @@ import {
 import Circle from 'ol/style/Circle';
 
 import {
+    COUNTRY_FIELD_KEY,
     CountryData,
     isoA2CountryNameProperty,
 } from './ibfMap';
@@ -16,6 +17,40 @@ const deselectedColor = 'rgba(0, 0, 0, 0.07)';
 
 // TODO: review the styling for perf in terms of what to render, and how to reduce
 // the number of features that must be looped through when styling
+
+export const styleAdmin0 = (
+    feature: FeatureLike,
+    selectedCountry: string,
+) => {
+    const country = feature.get(COUNTRY_FIELD_KEY);
+    const isSelected = country === selectedCountry;
+    return new Style({
+        fill: new Fill({
+            color: isSelected ? 'rgba(112, 119, 93, 0.55)' : 'rgba(0, 0, 0, 0.07)',
+        }),
+        stroke: new Stroke({
+            color: '#8d8d8d',
+            width: 1,
+        }),
+    });
+};
+
+export const styleAdmin1 = (
+    feature: FeatureLike,
+    selectedCountry: string,
+) => {
+    const country = feature.get(COUNTRY_FIELD_KEY);
+    const isSelectedCountry = country === selectedCountry;
+    return new Style({
+        fill: new Fill({
+            color: isSelectedCountry ? 'rgba(87, 152, 227, 0.35)' : 'rgba(87, 152, 227, 0.2)',
+        }),
+        stroke: new Stroke({
+            color: 'rgba(35, 113, 203, 0.84)',
+            width: 1,
+        }),
+    });
+};
 
 // Debug style
 // Fix later
