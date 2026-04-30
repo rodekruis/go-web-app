@@ -6,7 +6,7 @@ import {
 } from 'ol/style';
 import Circle from 'ol/style/Circle';
 
-import { COUNTRY_FIELD_KEY } from './ibfMap';
+import { COUNTRY_FIELD_KEY } from './ibfMapHelpers';
 
 export type MvtStyleCreator = (feature: FeatureLike, selected: string) => Style;
 const deselectedColor = 'rgba(0, 0, 0, 0.07)';

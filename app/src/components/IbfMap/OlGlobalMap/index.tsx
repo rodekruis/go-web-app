@@ -14,13 +14,11 @@ import VectorSource from 'ol/source/Vector';
 
 import {
     COUNTRY_FIELD_KEY,
-    noCountrySelectedValue,
-} from '#utils/ibfMap';
-import {
     getAdminAreaZIndex,
     getAdminRegionUrl,
     getExtentForVectorData,
     getGlobalAdmin0Url,
+    noCountrySelectedValue,
 } from '#utils/ibfMapHelpers';
 import {
     styleAdmin0,

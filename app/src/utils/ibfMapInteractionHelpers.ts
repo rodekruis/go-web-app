@@ -9,13 +9,11 @@ import type MapOl from 'ol/Map.js';
 import VectorSource from 'ol/source/Vector';
 
 import {
-    noCountrySelectedValue,
-    PLACE_CODE_FIELD_KEY,
-} from './ibfMap';
-import {
     getAdminAreaZIndex,
     getAdminRegionUrl,
     getNestedAdminUrl,
+    noCountrySelectedValue,
+    PLACE_CODE_FIELD_KEY,
 } from './ibfMapHelpers';
 import {
     styleAdmin1region,

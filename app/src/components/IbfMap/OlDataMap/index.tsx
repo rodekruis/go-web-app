@@ -11,10 +11,10 @@ import MapOl from 'ol/Map.js';
 import { fromLonLat } from 'ol/proj';
 import { apply } from 'ol-mapbox-style';
 
-import { mapUrlSimpleStyleJson } from '#utils/ibfMap';
 import {
     getExtentForVectorData,
     getZIndexOffset,
+    mapUrlSimpleStyleJson,
 } from '#utils/ibfMapHelpers';
 import {
     createAdminLayer,

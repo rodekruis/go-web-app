@@ -13,12 +13,10 @@ import useAlert from '#hooks/useAlert';
 import {
     countryParamsKey,
     eventIdParamsKey,
-    noCountrySelectedValue,
-} from '#utils/ibfMap';
-import {
     getCurrentCountryEventData,
     getEventDetails,
     getSelectedEventMapDetails,
+    noCountrySelectedValue,
     sanitizeCountryCode,
     sanitizeIdParam,
 } from '#utils/ibfMapHelpers';
