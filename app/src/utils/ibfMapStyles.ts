@@ -6,11 +6,7 @@ import {
 } from 'ol/style';
 import Circle from 'ol/style/Circle';
 
-import {
-    COUNTRY_FIELD_KEY,
-    CountryData,
-    isoA2CountryNameProperty,
-} from './ibfMap';
+import { COUNTRY_FIELD_KEY } from './ibfMap';
 
 export type MvtStyleCreator = (feature: FeatureLike, selected: string) => Style;
 const deselectedColor = 'rgba(0, 0, 0, 0.07)';
@@ -49,33 +45,6 @@ export const styleAdmin1 = (
             color: 'rgba(35, 113, 203, 0.84)',
             width: 1,
         }),
-    });
-};
-
-// Debug style
-// Fix later
-//
-// Style for vector tile (MVT) maps
-export const styleMvtGreyWorldMap: MvtStyleCreator = (
-    feature: FeatureLike,
-    selected: string,
-) => {
-    const iso_a2 = feature.get(isoA2CountryNameProperty);
-    const isSelected = iso_a2 === selected;
-    const countryInfo = CountryData.get(iso_a2);
-    const isIbfSupported = countryInfo?.ibfSupported ?? false;
-
-    let fillColor = '#000000';
-
-    if (isIbfSupported) {
-        fillColor = isSelected ? '#f98cc2' : '#f8bbd9';
-    } else {
-        fillColor = isSelected ? '#ababab' : '#e0e0e0';
-    }
-
-    return new Style({
-        fill: new Fill({ color: fillColor }),
-        stroke: new Stroke({ color: '#a4a4a4', width: 1 }),
     });
 };
 
