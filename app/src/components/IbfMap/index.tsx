@@ -19,6 +19,8 @@ import {
     getCurrentCountryEventData,
     getEventDetails,
     getSelectedEventMapDetails,
+    sanitizeCountryCode,
+    sanitizeIdParam,
 } from '#utils/ibfMapHelpers';
 import { PrintElementId } from '#utils/nrwMapToPdfExporter';
 
@@ -47,9 +49,8 @@ export default function IbfMapContainer() {
 
     // Load the view details from the search params
     // This is only done once at page load
-    const selectedCountry = searchParams.get(countryParamsKey)?.toUpperCase()
-    || noCountrySelectedValue;
-    const selectedEventId = searchParams.get(eventIdParamsKey) || '';
+    const selectedCountry = sanitizeCountryCode(searchParams.get(countryParamsKey));
+    const selectedEventId = sanitizeIdParam(searchParams.get(eventIdParamsKey));
 
     // Check if a country is in the search params
     if (selectedCountry === noCountrySelectedValue) {
@@ -125,10 +126,11 @@ export default function IbfMapContainer() {
     // Handle event selection from control panel
     const handleEventClick = (eventId: string) => {
         selectEvent(eventId);
+        const cleanedEventId = sanitizeIdParam(eventId);
         // Set search params for URL sharing only - does not reload data
         setSearchParams({
             [countryParamsKey]: selectedCountry,
-            [eventIdParamsKey]: eventId,
+            [eventIdParamsKey]: cleanedEventId,
         });
     };
 

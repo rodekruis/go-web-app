@@ -19,6 +19,7 @@ import {
     pgFeatureserv,
     seedDataRepo,
 } from '#config';
+import { noCountrySelectedValue } from '#utils/ibfMap';
 
 import { type MvtStyleCreator } from './ibfMapStyles';
 import type {
@@ -46,6 +47,24 @@ const seedRepoPopDataUrl = `${seedDataRepo}raster-data/population/rgba/`;
 //    .05 = 53kb
 //    .01 = 30kb
 const adminLevelToSimplificationFactor: number[] = [0.05, 0.01, 0.005, 0.004];
+
+// Accept ids containing only alphanumeric characters and hyphens, with a max length
+export function sanitizeIdParam(value: string | null | undefined): string {
+    const maxLength = 36;
+    const idRegex = /^[A-Za-z0-9-]+$/;
+    const cleanedValue = value?.trim() ?? '';
+    if (cleanedValue.length > maxLength) {
+        return '';
+    }
+    return idRegex.test(cleanedValue) ? cleanedValue : '';
+}
+
+// Convert to uppercase and accept only 3 letter length codes
+export function sanitizeCountryCode(value: string | null | undefined): string {
+    const countryRegex = /^[A-Z]{3}$/;
+    const cleanedValue = value?.trim().toUpperCase() ?? '';
+    return countryRegex.test(cleanedValue) ? cleanedValue : noCountrySelectedValue;
+}
 
 // Fetch upcoming or ongoing event data for a country
 export function getCurrentCountryEventData(country: string): AllEventsData {
