@@ -35,6 +35,9 @@ export const noCountrySelectedValue = 'None';
 // URL search parameter keys
 export const countryParamsKey = 'c';
 export const eventIdParamsKey = 'e';
+export const mapZoomParamsKey = 'mz';
+export const mapCenterLatParamsKey = 'mlat';
+export const mapCenterLonParamsKey = 'mlon';
 
 // Data field keys, for instance keys in the GeoJSON data.
 export const COUNTRY_FIELD_KEY = 'country';
@@ -77,6 +80,40 @@ export function sanitizeCountryCode(value: string | null | undefined): string {
     const countryRegex = /^[A-Z]{3}$/;
     const cleanedValue = value?.trim().toUpperCase() ?? '';
     return countryRegex.test(cleanedValue) ? cleanedValue : noCountrySelectedValue;
+}
+
+function sanitizeFloatInRange(
+    value: string | null | undefined,
+    min: number,
+    max: number,
+): number | null {
+    const cleanedValue = value?.trim() ?? '';
+    if (cleanedValue === '') {
+        return null;
+    }
+
+    const parsedValue = Number(cleanedValue);
+    if (!Number.isFinite(parsedValue)) {
+        return null;
+    }
+
+    if (parsedValue < min || parsedValue > max) {
+        return null;
+    }
+
+    return parsedValue;
+}
+
+export function sanitizeMapZoomParam(value: string | null | undefined): number | null {
+    return sanitizeFloatInRange(value, 0, 24);
+}
+
+export function sanitizeMapLatitudeParam(value: string | null | undefined): number | null {
+    return sanitizeFloatInRange(value, -90, 90);
+}
+
+export function sanitizeMapLongitudeParam(value: string | null | undefined): number | null {
+    return sanitizeFloatInRange(value, -180, 180);
 }
 
 // Fetch upcoming or ongoing event data for a country
