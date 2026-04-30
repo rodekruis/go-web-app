@@ -4,7 +4,6 @@ import {
     Stroke,
     Style,
 } from 'ol/style';
-import Circle from 'ol/style/Circle';
 
 import { COUNTRY_FIELD_KEY } from './ibfMapHelpers';
 
@@ -171,18 +170,3 @@ export const styleAdmin1region = (
         }),
     });
 };
-
-// Event centroids, marking the center of one or more events
-// TODO: use this when event layer added back in
-export const EventCentroidStyle = new Style({
-    image: new Circle({
-        radius: 10,
-        fill: new Fill({
-            color: 'rgba(235, 96, 96, 0.8)',
-        }),
-        stroke: new Stroke({
-            color: '#8b0000',
-            width: 1,
-        }),
-    }),
-});
