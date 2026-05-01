@@ -1,3 +1,4 @@
+import { View } from 'ol';
 import {
     buffer as bufferExtent,
     type Extent,
@@ -10,6 +11,8 @@ import MVT from 'ol/format/MVT';
 import ImageLayer from 'ol/layer/Image';
 import VectorLayer from 'ol/layer/Vector';
 import VectorTileLayer from 'ol/layer/VectorTile';
+import type MapOl from 'ol/Map';
+import { fromLonLat } from 'ol/proj';
 import ImageStatic from 'ol/source/ImageStatic';
 import VectorSource from 'ol/source/Vector';
 import VectorTile from 'ol/source/VectorTile';
@@ -559,4 +562,68 @@ export function getExtentForVectorData(
     const paddingAmount = Math.max(extentWidth, extentHeight) * paddingRatio;
 
     return bufferExtent(extent, paddingAmount);
+}
+
+export interface InitialMapViewParams {
+    zoom?: number;
+    center?: {
+        lon: number;
+        lat: number;
+    };
+}
+
+/**
+ * Initialize the map view with extent constraint and optional initial position.
+ *
+ * Behavior:
+ * - Always constrains panning to the given extent
+ * - If valid center coords provided, centers there
+ * - If valid zoom provided with center, applies that zoom
+ * - If no valid center, fits the view to the extent
+ *
+ * @param map - The OpenLayers map instance
+ * @param extent - The extent to constrain panning to
+ * @param initialView - Optional initial view params (center, zoom) from URL
+ */
+export function initializeMapView(
+    map: MapOl,
+    extent: Extent,
+    initialView?: InitialMapViewParams | null,
+): void {
+    const currentView = map.getView();
+
+    // Create constrained view that limits panning to the extent
+    const constrainedView = new View({
+        center: currentView.getCenter(),
+        resolution: currentView.getResolution(),
+        rotation: currentView.getRotation(),
+        projection: currentView.getProjection(),
+        extent,
+        constrainOnlyCenter: true,
+    });
+    map.setView(constrainedView);
+
+    const hasValidCenter = initialView?.center
+        && Number.isFinite(initialView.center.lon)
+        && Number.isFinite(initialView.center.lat);
+
+    if (hasValidCenter) {
+        // Apply center from URL params
+        constrainedView.setCenter(
+            fromLonLat([
+                initialView!.center!.lon,
+                initialView!.center!.lat,
+            ]),
+        );
+
+        // Apply zoom if valid
+        if (initialView?.zoom !== undefined && Number.isFinite(initialView.zoom)) {
+            constrainedView.setZoom(initialView.zoom);
+        }
+    } else {
+        // No valid center - fit to extent (default behavior)
+        constrainedView.fit(extent, {
+            duration: 500,
+        });
+    }
 }

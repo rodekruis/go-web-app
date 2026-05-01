@@ -4,7 +4,6 @@ import {
 } from 'react';
 import { View } from 'ol';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
-import type { Extent } from 'ol/extent';
 import type BaseLayer from 'ol/layer/Base';
 import type VectorLayer from 'ol/layer/Vector';
 import MapOl from 'ol/Map.js';
@@ -17,6 +16,7 @@ import { apply } from 'ol-mapbox-style';
 import {
     getExtentForVectorData,
     getZIndexOffset,
+    initializeMapView,
     mapUrlSimpleStyleJson,
 } from '#utils/ibfMapHelpers';
 import {
@@ -126,25 +126,6 @@ export default function OlDataMap({
             );
         }
 
-        function constrainViewToExtent(extent: Extent) {
-            const map = mapInstanceRef.current;
-            if (!map) {
-                return;
-            }
-
-            const currentView = map.getView();
-            const constrainedView = new View({
-                center: currentView.getCenter(),
-                resolution: currentView.getResolution(),
-                rotation: currentView.getRotation(),
-                projection: currentView.getProjection(),
-                extent,
-                constrainOnlyCenter: true,
-            });
-
-            map.setView(constrainedView);
-        }
-
         function addAdminLayer(
             level: 1 | 2 | 3,
             country?: string,
@@ -164,33 +145,23 @@ export default function OlDataMap({
             mapInstanceRef.current?.addLayer(newLayer);
             adminLayers.set(level, newLayer);
 
-            // For admin level 1, set the view extent and zoom to fit the admin areas
+            // For admin level 1
+            // This is only done at first load of the country, so this handles setting
+            // the inital map focus and panning extents (which are based on admin level 1)
             if (level === 1 && mapInstanceRef.current) {
                 const map = mapInstanceRef.current;
                 const source = newLayer.getSource();
                 if (source) {
-                    source.on('featuresloadend', () => {
+                    source.once('featuresloadend', () => {
                         const extent = getExtentForVectorData(source);
                         if (extent) {
-                            constrainViewToExtent(extent);
-
-                            // Override default zoom
-                            // TODO reowrk this
-                            if (shouldApplyInitialMapViewRef.current && initialMapView) {
-                                map.getView().setCenter(
-                                    fromLonLat([
-                                        initialMapView.center.lon,
-                                        initialMapView.center.lat,
-                                    ]),
-                                );
-                                map.getView().setZoom(initialMapView.zoom);
-                                shouldApplyInitialMapViewRef.current = false;
-                                return;
-                            }
-
-                            map.getView().fit(extent, {
-                                duration: 500,
-                            });
+                            // Apply initial view from URL params (first load only),
+                            // otherwise fit to extent
+                            const viewParams = shouldApplyInitialMapViewRef.current
+                                ? initialMapView
+                                : null;
+                            initializeMapView(map, extent, viewParams);
+                            shouldApplyInitialMapViewRef.current = false;
                         }
                     });
                 }

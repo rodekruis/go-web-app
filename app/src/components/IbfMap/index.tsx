@@ -46,10 +46,7 @@ import styles from './styles.module.css';
 export default function IbfMapContainer() {
     const alert = useAlert();
 
-    // Search params are used to create a shareable URL to a specific view.
-    // TODO: add more data to the params, and also handle scrubbing the values
-    // to prevent injection attacks (if needed)
-    // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/40917
+    // Search params used for deeplinking
     const [searchParams, setSearchParams] = useSearchParams();
 
     // Load the view details from the search params
@@ -179,7 +176,7 @@ export default function IbfMapContainer() {
         placeCode: string,
         mapView?: MapSelectionView,
     ) => {
-    // TODO: pass what is clicked on to the data panel and UI panel.
+        // TODO: pass what is clicked on to the data panel and UI panel.
         setSelectedAdminPlaceCode(placeCode);
         console.debug(`TODO: [IbfMap] Admin area selected: ${placeCode}`);
         updateSearchParamsWithMapView(mapView);

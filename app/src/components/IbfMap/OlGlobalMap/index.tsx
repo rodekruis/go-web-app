@@ -100,15 +100,12 @@ export default function OlGlobalMap({ onSelect }: OlGlobalMapProps) {
         mapInstanceRef.current.addLayer(admin1Layer);
         admin1LayerRef.current = admin1Layer;
 
-        // Callback to fit the map to the admin 1 content
-        const onFeaturesLoadEnd = () => {
+        // Fit the map to the admin 1 content when loaded
+        admin1Source.once('featuresloadend', () => {
             if (selectedCountryRef.current === country) {
                 fitToLoadedAdmin1(admin1Source);
             }
-            // Clean up listener
-            admin1Source.un('featuresloadend', onFeaturesLoadEnd);
-        };
-        admin1Source.on('featuresloadend', onFeaturesLoadEnd);
+        });
     };
 
     const updateSelectedCountry = (country: string) => {
