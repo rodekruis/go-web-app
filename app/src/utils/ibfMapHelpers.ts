@@ -5,7 +5,6 @@ import {
     getWidth,
     isEmpty,
 } from 'ol/extent';
-import type { FeatureLike } from 'ol/Feature';
 import GeoJSON from 'ol/format/GeoJSON';
 import MVT from 'ol/format/MVT';
 import ImageLayer from 'ol/layer/Image';
@@ -22,6 +21,7 @@ import {
     seedDataRepo,
 } from '#config';
 
+import { type MvtStyleCreator } from './ibfMapStyles';
 import type {
     AllEventsData,
     MapLayerDetails,
@@ -123,8 +123,6 @@ type ClinicLocResult = {
 type GoDataResults<T> = {
     results?: T[];
 };
-
-export type MvtStyleCreator = (feature: FeatureLike, selected: string) => Style;
 
 // Simplification algorithm factor for simplifying vector data
 // Example of factor values on vector object size:

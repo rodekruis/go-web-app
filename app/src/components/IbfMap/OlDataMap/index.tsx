@@ -219,34 +219,34 @@ export default function OlDataMap({
             // Click handler
             mapInstanceRef.current.on('click', (evt) => {
                 mapPopup.hide();
-        mapInstanceRef.current!.forEachFeatureAtPixel(
-            evt.pixel,
-            (feature, layer) => {
-                if (layer && pointLayers.has(layer)) {
-                    mapPopup.show(feature, evt.coordinate);
-                    return true;
-                }
+                mapInstanceRef.current!.forEachFeatureAtPixel(
+                    evt.pixel,
+                    (feature, layer) => {
+                        if (layer && pointLayers.has(layer)) {
+                            mapPopup.show(feature, evt.coordinate);
+                            return true;
+                        }
 
-                const result = handleFeatureClick(
-                    state,
-                    feature,
-                    layer,
-                    adminLayers,
-                    onSelect,
+                        const result = handleFeatureClick(
+                            state,
+                            feature,
+                            layer,
+                            adminLayers,
+                            onSelect,
+                        );
+                        if (result?.showChildLevel) {
+                            addAdminLayer(
+                                result.showChildLevel,
+                                selectedCountry,
+                                result.parentCode,
+                            );
+                        }
+                        return true;
+                    },
+                    {
+                        layerFilter: isInteractiveLayer,
+                    },
                 );
-                if (result?.showChildLevel) {
-                    addAdminLayer(
-                        result.showChildLevel,
-                        selectedCountry,
-                        result.parentCode,
-                    );
-                }
-                return true;
-            },
-            {
-                layerFilter: isInteractiveLayer,
-            },
-        );
             });
         }
 
@@ -258,6 +258,7 @@ export default function OlDataMap({
             adminLayers.clear();
             pointLayers.clear();
             if (mapInstanceRef.current) {
+                mapInstanceRef.current.removeOverlay(mapPopup.overlay);
                 mapInstanceRef.current.setTarget(undefined);
                 mapInstanceRef.current = null;
             }
