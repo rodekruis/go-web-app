@@ -12,6 +12,7 @@ import type MapOl from 'ol/Map';
 import useAlert from '#hooks/useAlert';
 import {
     countryParamsKey,
+    defaultMapZoom,
     eventIdParamsKey,
     getCurrentCountryEventData,
     getEventDetails,
@@ -57,19 +58,23 @@ export default function IbfMapContainer() {
     const selectedMapLat = sanitizeMapLatitudeParam(searchParams.get(mapCenterLatParamsKey));
     const selectedMapLon = sanitizeMapLongitudeParam(searchParams.get(mapCenterLonParamsKey));
 
-    const initialMapView = (
-        selectedMapZoom !== null
-        && selectedMapLat !== null
-        && selectedMapLon !== null
-    )
-        ? {
-            zoom: selectedMapZoom,
-            center: {
-                lat: selectedMapLat,
-                lon: selectedMapLon,
-            },
+    // If these are valid latlon values, return an initial map view
+    const initialMapView = () => {
+        if (selectedMapLat !== null && selectedMapLon !== null) {
+            let mapZoom = defaultMapZoom;
+            if (selectedMapZoom) {
+                mapZoom = selectedMapZoom;
+            }
+            return {
+                zoom: mapZoom,
+                center: {
+                    lat: selectedMapLat,
+                    lon: selectedMapLon,
+                },
+            };
         }
-        : null;
+        return null;
+    };
 
     // Check if a country is in the search params
     if (selectedCountry === noCountrySelectedValue) {
@@ -168,7 +173,8 @@ export default function IbfMapContainer() {
             nextSearchParams[mapCenterLatParamsKey] = mapView.center.lat.toFixed(6);
         }
 
-        setSearchParams(nextSearchParams);
+        // Update searchParams, but replace existing entry to not fill up the back button stack.
+        setSearchParams(nextSearchParams, { replace: true });
     };
 
     // Callback to update search params based on user interactions.
@@ -220,7 +226,7 @@ export default function IbfMapContainer() {
                     <OlDataMap
                         selectedCountry={selectedCountry}
                         selectedEventDetails={selectedEventMapDetails}
-                        initialMapView={initialMapView}
+                        initialMapView={initialMapView()}
                         addLayerFunction={registerMapAddLayer}
                         onSelect={handleMapItemSelected}
                         onViewChange={handleMapViewChanged}

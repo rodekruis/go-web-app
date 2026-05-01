@@ -38,6 +38,9 @@ import {
 // Map property strings
 export const noCountrySelectedValue = 'None';
 
+// Default map values
+export const defaultMapZoom = 3;
+
 // URL search parameter keys
 export const countryParamsKey = 'c';
 export const eventIdParamsKey = 'e';

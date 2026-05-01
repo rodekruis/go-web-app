@@ -4,9 +4,11 @@ import {
 } from 'react';
 import { View } from 'ol';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
+import type { EventsKey } from 'ol/events';
 import type BaseLayer from 'ol/layer/Base';
 import type VectorLayer from 'ol/layer/Vector';
 import MapOl from 'ol/Map.js';
+import { unByKey } from 'ol/Observable';
 import {
     fromLonLat,
     toLonLat,
@@ -91,6 +93,19 @@ export default function OlDataMap({
     // Store addAdminLayer function to call from event selection effect
     const addAdminLayerFunctionRef = useRef<AddAdminLayerFunction | null>(null);
     const shouldApplyInitialMapViewRef = useRef(Boolean(initialMapView));
+    // Store event handler keys for cleanup
+    const eventKeysRef = useRef<EventsKey[]>([]);
+    // Callbacks tracked by refs in case they change
+    const onSelectRef = useRef(onSelect);
+    const onViewChangeRef = useRef(onViewChange);
+
+    useEffect(() => {
+        onSelectRef.current = onSelect;
+    }, [onSelect]);
+
+    useEffect(() => {
+        onViewChangeRef.current = onViewChange;
+    }, [onViewChange]);
 
     useEffect(() => {
         const state: MapViewState = {
@@ -204,18 +219,19 @@ export default function OlDataMap({
             }
 
             // Change cursor on hover
-            mapInstanceRef.current.on('pointermove', (evt) => {
+            const pointerMoveKey = mapInstanceRef.current.on('pointermove', (evt) => {
                 const pixel = mapInstanceRef.current!.getEventPixel(evt.originalEvent);
                 const hit = mapInstanceRef.current!.hasFeatureAtPixel(pixel, {
                     layerFilter: isInteractiveLayer,
                 });
-        mapInstanceRef.current!.getTargetElement().style.cursor = hit
-            ? 'pointer'
-            : '';
+                mapInstanceRef.current!.getTargetElement().style.cursor = hit
+                    ? 'pointer'
+                    : '';
             });
+            eventKeysRef.current.push(pointerMoveKey);
 
             // Click handler
-            mapInstanceRef.current.on('click', (evt) => {
+            const clickKey = mapInstanceRef.current.on('click', (evt) => {
                 mapPopup.hide();
                 mapInstanceRef.current!.forEachFeatureAtPixel(
                     evt.pixel,
@@ -230,7 +246,7 @@ export default function OlDataMap({
                             feature,
                             layer,
                             adminLayers,
-                            onSelect,
+                            onSelectRef.current,
                         );
                         if (result?.showChildLevel) {
                             addAdminLayer(
@@ -246,9 +262,10 @@ export default function OlDataMap({
                     },
                 );
             });
+            eventKeysRef.current.push(clickKey);
 
             // Update map view state after each pan/zoom end ('moveend')
-            mapInstanceRef.current.on('moveend', () => {
+            const moveEndKey = mapInstanceRef.current.on('moveend', () => {
                 const view = mapInstanceRef.current!.getView();
                 const center = view.getCenter();
                 const zoom = view.getZoom();
@@ -263,7 +280,7 @@ export default function OlDataMap({
                     return;
                 }
 
-                onViewChange?.({
+                onViewChangeRef.current?.({
                     zoom,
                     center: {
                         lon,
@@ -271,6 +288,7 @@ export default function OlDataMap({
                     },
                 });
             });
+            eventKeysRef.current.push(moveEndKey);
         }
 
         return () => {
@@ -280,6 +298,9 @@ export default function OlDataMap({
             });
             adminLayers.clear();
             pointLayers.clear();
+            // Unregister all event listeners
+            eventKeysRef.current.forEach((key) => unByKey(key));
+            eventKeysRef.current = [];
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.removeOverlay(mapPopup.overlay);
                 mapInstanceRef.current.setTarget(undefined);
