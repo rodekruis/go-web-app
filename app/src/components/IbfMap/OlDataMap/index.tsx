@@ -25,6 +25,9 @@ import type {
     MapLayerDetails,
     SelectedEventMapDetails,
 } from '#utils/ibfMapTypes';
+import { MapLayerDisplayType } from '#utils/ibfMapTypes';
+
+import { createMapPopupPanel } from '../MapPopupPanel';
 
 import styles from './styles.module.css';
 
@@ -69,6 +72,7 @@ export default function OlDataMap({
     const mapInstanceRef = useRef<MapOl | null>(null);
     const stateRef = useRef<MapViewState | null>(null);
     const adminLayersRef = useRef<Map<number, VectorLayer>>(new Map());
+    const pointLayersRef = useRef<Set<BaseLayer>>(new Set());
     // Store addAdminLayer function to call from event selection effect
     const addAdminLayerFunctionRef = useRef<(
       (level: 1 | 2 | 3, country?: string, parentCode?: string) => void)
@@ -97,12 +101,16 @@ export default function OlDataMap({
 
         const adminLayers = new Map<number, VectorLayer>();
         adminLayersRef.current = adminLayers;
+        const pointLayers = pointLayersRef.current;
+
+        const mapPopup = createMapPopupPanel();
 
         function isInteractiveLayer(layer: BaseLayer) {
             return (
                 adminLayers.get(1) === layer
-        || adminLayers.get(2) === layer
-        || adminLayers.get(3) === layer
+                || adminLayers.get(2) === layer
+                || adminLayers.get(3) === layer
+                || pointLayers.has(layer)
             );
         }
 
@@ -173,6 +181,7 @@ export default function OlDataMap({
 
             // Apply base map style
             apply(mapInstanceRef.current, mapUrlSimpleStyleJson);
+            mapInstanceRef.current.addOverlay(mapPopup.overlay);
 
             // Expose addLayer function to parent
             if (addLayerFunction) {
@@ -180,6 +189,9 @@ export default function OlDataMap({
                     (newLayer: BaseLayer, layerDetails: MapLayerDetails) => {
                         const zIndex = getZIndexOffset(layerDetails);
                         newLayer.setZIndex(zIndex);
+                        if (layerDetails.displayType === MapLayerDisplayType.Point) {
+                            pointLayers.add(newLayer);
+                        }
                         mapInstanceRef.current?.addLayer(newLayer);
                     },
                 );
@@ -206,9 +218,15 @@ export default function OlDataMap({
 
             // Click handler
             mapInstanceRef.current.on('click', (evt) => {
+                mapPopup.hide();
         mapInstanceRef.current!.forEachFeatureAtPixel(
             evt.pixel,
             (feature, layer) => {
+                if (layer && pointLayers.has(layer)) {
+                    mapPopup.show(feature, evt.coordinate);
+                    return true;
+                }
+
                 const result = handleFeatureClick(
                     state,
                     feature,
@@ -233,10 +251,12 @@ export default function OlDataMap({
         }
 
         return () => {
+            mapPopup.hide();
             adminLayers.forEach((layer) => {
                 mapInstanceRef.current?.removeLayer(layer);
             });
             adminLayers.clear();
+            pointLayers.clear();
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.setTarget(undefined);
                 mapInstanceRef.current = null;

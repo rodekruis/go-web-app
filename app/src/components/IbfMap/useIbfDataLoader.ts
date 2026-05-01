@@ -7,9 +7,15 @@ import type BaseLayer from 'ol/layer/Base';
 
 import useAlert from '#hooks/useAlert';
 import {
+    makeClinicPointLayer,
     makeEventImageLayer,
     makePopulationImageLayer,
+    makeRcBranchesPointLayer,
 } from '#utils/ibfMapHelpers';
+import {
+    styleClinicPoint,
+    styleRcBranchPoint,
+} from '#utils/ibfMapStyles';
 import {
     type AllEventsData,
     type MapLayerDetails,
@@ -98,32 +104,56 @@ export default function useIbfDataLoader(
     const toggleMapLayer = (layerDetails: MapLayerDetails) => {
         const { dataType, displayType, resourceId } = layerDetails;
 
-        if (displayType === MapLayerDisplayType.Raster) {
-            switch (dataType) {
-                case MapLayerInfoType.Population:
-                    toggleLayer(
-                        getLayerKey(layerDetails),
-                        layerDetails,
-                        () => makePopulationImageLayer(selectedCountry),
-                    );
-                    break;
-                case MapLayerInfoType.EventExtent:
-                    toggleLayer(
-                        getLayerKey(layerDetails),
-                        layerDetails,
-                        () => makeEventImageLayer(resourceId),
-                    );
-                    break;
-                default:
-                    console.error(
-                        `[useIbfDataLoader] Unsupported layer type: ${dataType}`,
-                    );
-            }
-        } else {
-            // TODO: Handle other display types (Shape, Point, VectorTile)
-            console.warn(
-                `[useIbfDataLoader] Unsupported display type: ${displayType}`,
-            );
+        switch (displayType) {
+            case MapLayerDisplayType.Raster:
+                switch (dataType) {
+                    case MapLayerInfoType.Population:
+                        toggleLayer(
+                            getLayerKey(layerDetails),
+                            layerDetails,
+                            () => makePopulationImageLayer(selectedCountry),
+                        );
+                        break;
+                    case MapLayerInfoType.EventExtent:
+                        toggleLayer(
+                            getLayerKey(layerDetails),
+                            layerDetails,
+                            () => makeEventImageLayer(resourceId),
+                        );
+                        break;
+                    default:
+                        console.error(
+                            `[useIbfDataLoader] Unsupported raster layer type: ${dataType}`,
+                        );
+                }
+                break;
+            case MapLayerDisplayType.Point:
+                switch (dataType) {
+                    case MapLayerInfoType.RedCrossBranches:
+                        toggleLayer(
+                            getLayerKey(layerDetails),
+                            layerDetails,
+                            () => makeRcBranchesPointLayer(selectedCountry, styleRcBranchPoint),
+                        );
+                        break;
+                    case MapLayerInfoType.Clinics:
+                        toggleLayer(
+                            getLayerKey(layerDetails),
+                            layerDetails,
+                            () => makeClinicPointLayer(selectedCountry, styleClinicPoint),
+                        );
+                        break;
+                    default:
+                        console.error(
+                            `[useIbfDataLoader] Unsupported point layer type: ${dataType}`,
+                        );
+                }
+                break;
+            default:
+                // TODO: Handle other display types (Shape, VectorTile)
+                console.error(
+                    `[useIbfDataLoader] Unsupported display type: ${displayType}`,
+                );
         }
     };
 
