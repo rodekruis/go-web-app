@@ -8,7 +8,10 @@ import type { Extent } from 'ol/extent';
 import type BaseLayer from 'ol/layer/Base';
 import type VectorLayer from 'ol/layer/Vector';
 import MapOl from 'ol/Map.js';
-import { fromLonLat } from 'ol/proj';
+import {
+    fromLonLat,
+    toLonLat,
+} from 'ol/proj';
 import { apply } from 'ol-mapbox-style';
 
 import {
@@ -19,6 +22,7 @@ import {
 import {
     createAdminLayer,
     handleFeatureClick,
+    type MapSelectionView,
     type MapViewState,
 } from '#utils/ibfMapInteractionHelpers';
 import type {
@@ -45,13 +49,22 @@ interface OlDataMapProps {
     addLayer: (layer: BaseLayer, layerInfo: MapLayerDetails) => void,
   ) => void;
 
-  // Callback for when a map feature is selected.
-  onSelect: (placeCode: string) => void;
+  // Callbacks for the map interactions
+  // Interactable feature click callback (i.e. on clicking admin area)
+  onSelect: (placeCode: string, mapView?: MapSelectionView) => void;
+  // Callback for when map center/zoom change finishes
+  // This will be hit a lot though map interaction, so don't run costly actions on it
+  onViewChange?: (mapView: MapSelectionView) => void;
+
+  // Initial map view from URL search params, if available
+  initialMapView?: MapSelectionView | null;
 
   // Callback when the map instance is ready
   // This is needed to pass references of the map for exporting to PDF
   onMapReady?: (map: MapOl) => void;
 }
+
+type AddAdminLayerFunction = (level: 1 | 2 | 3, country?: string, parentCode?: string) => void;
 
 /**
  * OpenLayers map component for IBF data maps
@@ -64,8 +77,10 @@ interface OlDataMapProps {
 export default function OlDataMap({
     selectedCountry,
     selectedEventDetails,
+    initialMapView,
     addLayerFunction,
     onSelect,
+    onViewChange,
     onMapReady,
 }: OlDataMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
@@ -74,11 +89,8 @@ export default function OlDataMap({
     const adminLayersRef = useRef<Map<number, VectorLayer>>(new Map());
     const pointLayersRef = useRef<Set<BaseLayer>>(new Set());
     // Store addAdminLayer function to call from event selection effect
-    const addAdminLayerFunctionRef = useRef<(
-      (level: 1 | 2 | 3, country?: string, parentCode?: string) => void)
-        | null
-        >(null,
-        );
+    const addAdminLayerFunctionRef = useRef<AddAdminLayerFunction | null>(null);
+    const shouldApplyInitialMapViewRef = useRef(Boolean(initialMapView));
 
     useEffect(() => {
         const state: MapViewState = {
@@ -161,6 +173,21 @@ export default function OlDataMap({
                         const extent = getExtentForVectorData(source);
                         if (extent) {
                             constrainViewToExtent(extent);
+
+                            // Override default zoom
+                            // TODO reowrk this
+                            if (shouldApplyInitialMapViewRef.current && initialMapView) {
+                                map.getView().setCenter(
+                                    fromLonLat([
+                                        initialMapView.center.lon,
+                                        initialMapView.center.lat,
+                                    ]),
+                                );
+                                map.getView().setZoom(initialMapView.zoom);
+                                shouldApplyInitialMapViewRef.current = false;
+                                return;
+                            }
+
                             map.getView().fit(extent, {
                                 duration: 500,
                             });
@@ -247,6 +274,31 @@ export default function OlDataMap({
                         layerFilter: isInteractiveLayer,
                     },
                 );
+            });
+
+            // Update map view state after each pan/zoom end ('moveend')
+            mapInstanceRef.current.on('moveend', () => {
+                const view = mapInstanceRef.current!.getView();
+                const center = view.getCenter();
+                const zoom = view.getZoom();
+
+                if (!center || zoom === undefined) {
+                    return;
+                }
+
+                const [lon, lat] = toLonLat(center);
+
+                if (lon === undefined || lat === undefined) {
+                    return;
+                }
+
+                onViewChange?.({
+                    zoom,
+                    center: {
+                        lon,
+                        lat,
+                    },
+                });
             });
         }
 
