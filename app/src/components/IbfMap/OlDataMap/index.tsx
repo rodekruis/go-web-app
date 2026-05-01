@@ -276,7 +276,7 @@ export default function OlDataMap({
 
                 const [lon, lat] = toLonLat(center);
 
-                if (lon === undefined || lat === undefined) {
+                if (!Number.isFinite(lon) || !Number.isFinite(lat)) {
                     return;
                 }
 
