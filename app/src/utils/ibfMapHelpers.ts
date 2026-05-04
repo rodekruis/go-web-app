@@ -44,9 +44,10 @@ export const defaultMapZoom = 3;
 // URL search parameter keys
 export const countryParamsKey = 'c';
 export const eventIdParamsKey = 'e';
-export const mapZoomParamsKey = 'mz';
-export const mapCenterLatParamsKey = 'mlat';
-export const mapCenterLonParamsKey = 'mlon';
+export const mapZoomParamsKey = 'z';
+export const mapCenterLatParamsKey = 'lat';
+export const mapCenterLonParamsKey = 'lon';
+export const adminParamsKey = 'a';
 
 // Data field keys, for instance keys in the GeoJSON data.
 export const COUNTRY_FIELD_KEY = 'country';
@@ -491,7 +492,12 @@ const getSimplificationFactor = (adminLevel: number): number => {
 
 export const getGlobalAdmin0Url = (): string => {
     const factor = getSimplificationFactor(0);
-    return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=admin_level=%270%27&limit=10000&transform=simplify,${factor}`;
+    const baseQuery = `${pgFeatureserv}/collections/debug.admin_areas/items?filter=`;
+    const levelParam = 'admin_level=%270%27';
+    const limitParam = 'limit=10000';
+    const simplifyParam = `transform=simplify,${factor}`;
+
+    return `${baseQuery}${levelParam}&${limitParam}&${simplifyParam}`;
 };
 
 export const getAdminRegionUrl = (
@@ -499,7 +505,14 @@ export const getAdminRegionUrl = (
     adminLevel: number,
 ): string => {
     const factor = getSimplificationFactor(adminLevel);
-    return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adminLevel}%27&limit=10000&transform=simplify,${factor}`;
+    const and = '%20AND%20';
+    const baseQuery = `${pgFeatureserv}/collections/debug.admin_areas/items?filter=`;
+    const countryParam = `country=%27${country}%27`;
+    const levelParam = `admin_level=%27${adminLevel}%27`;
+    const limitParam = 'limit=10000';
+    const simplifyParam = `transform=simplify,${factor}`;
+
+    return `${baseQuery}${countryParam}${and}${levelParam}&${limitParam}&${simplifyParam}`;
 };
 
 export const getNestedAdminUrl = (
@@ -508,7 +521,16 @@ export const getNestedAdminUrl = (
     adminLevel: number,
 ): string => {
     const factor = getSimplificationFactor(adminLevel);
-    return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adminLevel}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
+    const and = '%20AND%20';
+    const baseQuery = `${pgFeatureserv}/collections/debug.admin_areas/items?filter=`;
+    const countryParam = `country=%27${country}%27`;
+    const levelParam = `admin_level=%27${adminLevel}%27`;
+    const parentColumn = `admin${adminLevel - 1}_pcode`;
+    const parentParam = `${parentColumn}=%27${parentCode}%27`;
+    const limitParam = 'limit=10000';
+    const simplifyParam = `transform=simplify,${factor}`;
+
+    return `${baseQuery}${countryParam}${and}${levelParam}${and}${parentParam}&${limitParam}&${simplifyParam}`;
 };
 
 // Get the z index offset to make sure lower-level admin layers are not hidden by their parents
