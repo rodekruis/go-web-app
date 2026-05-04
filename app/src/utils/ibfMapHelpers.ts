@@ -52,6 +52,10 @@ export const adminParamsKey = 'a';
 // Data field keys, for instance keys in the GeoJSON data.
 export const COUNTRY_FIELD_KEY = 'country';
 export const PLACE_CODE_FIELD_KEY = 'code';
+export const ADMIN_LEVEL_FIELD_KEY = 'admin_level';
+export const ADMIN1_PCODE_FIELD_KEY = 'admin1_pcode';
+export const ADMIN2_PCODE_FIELD_KEY = 'admin2_pcode';
+export const ADMIN3_PCODE_FIELD_KEY = 'admin3_pcode';
 
 // Map URLs
 const maptilerBaseUrl = 'https://api.maptiler.com';
@@ -543,6 +547,62 @@ export const getNestedAdminUrl = (
 
     return `${baseQuery}${countryParam}${and}${levelParam}${and}${parentParam}&${limitParam}&${simplifyParam}`;
 };
+
+// Get a single admin area by its code (for initial selection from URL)
+// Excludes geometry to reduce payload size
+export const getAdminAreaDetailsNoGeoUrl = (
+    country: string,
+    code: string,
+): string => {
+    const baseQuery = `${pgFeatureserv}/collections/debug.admin_areas/items?filter=`;
+    const and = '%20AND%20';
+    const countryParam = `country=%27${country}%27`;
+    const codeParam = `code=%27${code}%27`;
+    const limitParam = 'limit=1';
+    // Only fetch needed properties, exclude geom
+    const propsParam = `properties=${PLACE_CODE_FIELD_KEY},${ADMIN_LEVEL_FIELD_KEY},${ADMIN1_PCODE_FIELD_KEY},${ADMIN2_PCODE_FIELD_KEY},${ADMIN3_PCODE_FIELD_KEY}`;
+
+    return `${baseQuery}${countryParam}${and}${codeParam}&${limitParam}&${propsParam}`;
+};
+
+// Admin area details fetched from the API
+// This is used for finding info on selected admin areas.
+export interface AdminAreaDetails {
+    code: string;
+    adminLevel: number;
+    admin1Pcode: string | null;
+    admin2Pcode: string | null;
+    admin3Pcode: string | null;
+}
+
+// Fetch admin area details directly
+export async function fetchAdminAreaDetails(
+    country: string,
+    code: string,
+): Promise<AdminAreaDetails | null> {
+    const url = getAdminAreaDetailsNoGeoUrl(country, code);
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            return null;
+        }
+        const data = await response.json();
+        const features = data?.features;
+        if (!features || features.length === 0) {
+            return null;
+        }
+        const props = features[0].properties;
+        return {
+            code: props[PLACE_CODE_FIELD_KEY],
+            adminLevel: Number(props[ADMIN_LEVEL_FIELD_KEY]),
+            admin1Pcode: props[ADMIN1_PCODE_FIELD_KEY] ?? null,
+            admin2Pcode: props[ADMIN2_PCODE_FIELD_KEY] ?? null,
+            admin3Pcode: props[ADMIN3_PCODE_FIELD_KEY] ?? null,
+        };
+    } catch {
+        return null;
+    }
+}
 
 // Get the z index offset to make sure lower-level admin layers are not hidden by their parents
 export function getAdminAreaZIndex(level: number): number {

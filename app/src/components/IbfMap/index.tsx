@@ -59,6 +59,7 @@ export default function IbfMapContainer() {
     const selectedMapZoom = sanitizeMapZoomParam(searchParams.get(mapZoomParamsKey));
     const selectedMapLat = sanitizeMapLatitudeParam(searchParams.get(mapCenterLatParamsKey));
     const selectedMapLon = sanitizeMapLongitudeParam(searchParams.get(mapCenterLonParamsKey));
+    const initialAdminCode = sanitizeAdminCode(searchParams.get(adminParamsKey)) || null;
 
     // If these are valid latlon values, return an initial map view
     const initialMapView = () => {
@@ -92,7 +93,7 @@ export default function IbfMapContainer() {
 
     const [selectedAdminPlaceCode, setSelectedAdminPlaceCode] = useState<
     string | null
-  >(null);
+    >(initialAdminCode);
 
     // Store map instance for PDF export
     const mapRef = useRef<MapOl | null>(null);
@@ -235,6 +236,7 @@ export default function IbfMapContainer() {
                         selectedCountry={selectedCountry}
                         selectedEventDetails={selectedEventMapDetails}
                         initialMapView={initialMapView()}
+                        initialAdminCode={initialAdminCode}
                         addLayerFunction={registerMapAddLayer}
                         onSelect={handleMapItemSelected}
                         onViewChange={handleMapViewChanged}
