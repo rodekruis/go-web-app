@@ -195,6 +195,17 @@ export function sanitizeMapLongitudeParam(value: string | null | undefined): num
     return sanitizeFloatInRange(value, -180, 180);
 }
 
+// Sanitize admin place code: alphanumeric only, uppercase, max 64 chars
+export function sanitizeAdminCode(value: string | null | undefined): string {
+    const maxLength = 64;
+    const adminCodeRegex = /^[A-Z0-9]+$/;
+    const cleanedValue = value?.trim().toUpperCase() ?? '';
+    if (cleanedValue.length > maxLength) {
+        return '';
+    }
+    return adminCodeRegex.test(cleanedValue) ? cleanedValue : '';
+}
+
 // Fetch upcoming or ongoing event data for a country
 export function getCurrentCountryEventData(country: string): AllEventsData {
     // TODO: Use the API for fetching this for any country, and only use mock data
