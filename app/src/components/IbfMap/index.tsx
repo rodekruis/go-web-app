@@ -20,14 +20,17 @@ import {
     getSelectedEventMapDetails,
     mapCenterLatParamsKey,
     mapCenterLonParamsKey,
+    mapLayersParamsKey,
     mapZoomParamsKey,
     noCountrySelectedValue,
+    parseMapLayersParam,
     sanitizeAdminCode,
     sanitizeCountryCode,
     sanitizeIdParam,
     sanitizeMapLatitudeParam,
     sanitizeMapLongitudeParam,
     sanitizeMapZoomParam,
+    serializeMapLayersParam,
 } from '#utils/ibfMapHelpers';
 import type { MapSelectionView } from '#utils/ibfMapInteractionHelpers';
 import { PrintElementId } from '#utils/nrwMapToPdfExporter';
@@ -52,14 +55,27 @@ export default function IbfMapContainer() {
     // Search params used for deeplinking
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // Load the view details from the search params
-    // This is only done once at page load
-    const selectedCountry = sanitizeCountryCode(searchParams.get(countryParamsKey));
-    const selectedEventId = sanitizeIdParam(searchParams.get(eventIdParamsKey));
-    const selectedMapZoom = sanitizeMapZoomParam(searchParams.get(mapZoomParamsKey));
-    const selectedMapLat = sanitizeMapLatitudeParam(searchParams.get(mapCenterLatParamsKey));
-    const selectedMapLon = sanitizeMapLongitudeParam(searchParams.get(mapCenterLonParamsKey));
-    const initialAdminCode = sanitizeAdminCode(searchParams.get(adminParamsKey)) || null;
+    // Load the view details from the search params.
+    // This is only done once at page load; subsequent URL updates from this
+    // component must not affect the values used here. A lazy useState
+    // initializer guarantees the snapshot runs exactly once on mount.
+    const [{
+        selectedCountry,
+        selectedEventId,
+        selectedMapZoom,
+        selectedMapLat,
+        selectedMapLon,
+        initialAdminCode,
+        initialLayerIds,
+    }] = useState(() => ({
+        selectedCountry: sanitizeCountryCode(searchParams.get(countryParamsKey)),
+        selectedEventId: sanitizeIdParam(searchParams.get(eventIdParamsKey)),
+        selectedMapZoom: sanitizeMapZoomParam(searchParams.get(mapZoomParamsKey)),
+        selectedMapLat: sanitizeMapLatitudeParam(searchParams.get(mapCenterLatParamsKey)),
+        selectedMapLon: sanitizeMapLongitudeParam(searchParams.get(mapCenterLonParamsKey)),
+        initialAdminCode: sanitizeAdminCode(searchParams.get(adminParamsKey)) || null,
+        initialLayerIds: parseMapLayersParam(searchParams.get(mapLayersParamsKey)),
+    }));
 
     // If these are valid latlon values, return an initial map view
     const initialMapView = () => {
@@ -109,7 +125,9 @@ export default function IbfMapContainer() {
         registerMapAddLayer,
         toggleMapLayer,
         hideAllLayers,
-    } = useIbfDataLoader(selectedCountry, initialEventData, selectedEventId);
+        activeLayerIds,
+        isMapReady,
+    } = useIbfDataLoader(selectedCountry, initialEventData, selectedEventId, initialLayerIds);
 
     // Derive map details for the selected event (centroid, affected regions)
     const selectedEventMapDetails = useMemo(
@@ -136,6 +154,20 @@ export default function IbfMapContainer() {
         }
     }, [selectedEventMapDetails, activeEventId, alert]);
 
+    // Sync the active layer IDs to the URL
+    useEffect(() => {
+        setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            const value = serializeMapLayersParam(activeLayerIds);
+            if (value) {
+                next.set(mapLayersParamsKey, value);
+            } else {
+                next.delete(mapLayersParamsKey);
+            }
+            return next;
+        }, { replace: true });
+    }, [activeLayerIds, setSearchParams]);
+
     // Refresh page and put in a default start state
     const handleRefreshAll = () => {
     // Clear search params except for the country
@@ -155,10 +187,15 @@ export default function IbfMapContainer() {
         selectEvent(eventId);
         const cleanedEventId = sanitizeIdParam(eventId);
         // Set search params for URL sharing only - does not reload data
-        setSearchParams({
+        const nextParams: Record<string, string> = {
             [countryParamsKey]: selectedCountry,
             [eventIdParamsKey]: cleanedEventId,
-        });
+        };
+        const layersValue = serializeMapLayersParam(activeLayerIds);
+        if (layersValue) {
+            nextParams[mapLayersParamsKey] = layersValue;
+        }
+        setSearchParams(nextParams);
     };
 
     const updateSearchParamsWithMapView = (
@@ -182,6 +219,11 @@ export default function IbfMapContainer() {
             nextSearchParams[mapZoomParamsKey] = mapView.zoom.toFixed(2);
             nextSearchParams[mapCenterLonParamsKey] = mapView.center.lon.toFixed(6);
             nextSearchParams[mapCenterLatParamsKey] = mapView.center.lat.toFixed(6);
+        }
+
+        const layersValue = serializeMapLayersParam(activeLayerIds);
+        if (layersValue) {
+            nextSearchParams[mapLayersParamsKey] = layersValue;
         }
 
         // Update searchParams, but replace existing entry to not fill up the back button stack.
@@ -217,6 +259,8 @@ export default function IbfMapContainer() {
                             mapRef={mapRef}
                             eventId={activeEventId ?? undefined}
                             peakDay={selectedEventPeakDay}
+                            initialLayerIds={initialLayerIds}
+                            isMapReady={isMapReady}
                         />
                     </div>
                     <div id={PrintElementId.ControlPanel}>
