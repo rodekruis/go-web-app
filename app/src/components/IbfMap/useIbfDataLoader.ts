@@ -76,7 +76,8 @@ export default function useIbfDataLoader(
         [],
     );
 
-    // Update the active layer ids set based on a layer's new visibility.
+    // Update the active layer ids
+    // Run this whenever a layer's visibility changes.
     const updateActiveLayerIds = (resourceId: string, isVisible: boolean) => {
         if (!resourceId) {
             return;

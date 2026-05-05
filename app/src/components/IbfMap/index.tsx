@@ -55,10 +55,8 @@ export default function IbfMapContainer() {
     // Search params used for deeplinking
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // Load the view details from the search params.
-    // This is only done once at page load; subsequent URL updates from this
-    // component must not affect the values used here. A lazy useState
-    // initializer guarantees the snapshot runs exactly once on mount.
+    // Load the view details from the search params for setting initial display
+    // This is only done once at page load
     const [{
         selectedCountry,
         selectedEventId,
@@ -177,14 +175,23 @@ export default function IbfMapContainer() {
 
         // Deselect current event and admin areas
         deselectEvent();
+        setSelectedAdminPlaceCode(null);
 
         // Reload event data and set it
         setEventData(getCurrentCountryEventData(selectedCountry));
     };
 
+    // Handle event deselection (e.g. user goes back to all events view)
+    const handleDeselectEvent = () => {
+        deselectEvent();
+        setSelectedAdminPlaceCode(null);
+    };
+
     // Handle event selection from control panel
     const handleEventClick = (eventId: string) => {
         selectEvent(eventId);
+        // Clear any user-selected admin area when changing events
+        setSelectedAdminPlaceCode(null);
         const cleanedEventId = sanitizeIdParam(eventId);
         // Set search params for URL sharing only - does not reload data
         const nextParams: Record<string, string> = {
@@ -269,7 +276,7 @@ export default function IbfMapContainer() {
                             activeEventId={activeEventId}
                             onEventClick={handleEventClick}
                             onRefreshAll={handleRefreshAll}
-                            onDeselectEvent={deselectEvent}
+                            onDeselectEvent={handleDeselectEvent}
                             countryCode={selectedCountry}
                             selectedAdminPlaceCode={selectedAdminPlaceCode}
                         />
