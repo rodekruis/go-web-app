@@ -48,6 +48,7 @@ export const mapZoomParamsKey = 'z';
 export const mapCenterLatParamsKey = 'lat';
 export const mapCenterLonParamsKey = 'lon';
 export const adminParamsKey = 'a';
+export const mapLayersParamsKey = 'l';
 
 // Data field keys, for instance keys in the GeoJSON data.
 export const COUNTRY_FIELD_KEY = 'country';
@@ -208,6 +209,38 @@ export function sanitizeAdminCode(value: string | null | undefined): string {
         return '';
     }
     return adminCodeRegex.test(cleanedValue) ? cleanedValue : '';
+}
+
+// Sanitize a single layer ID: alphanumeric, hyphens, and underscores allowed
+function sanitizeLayerId(value: string): string {
+    const maxLength = 100;
+    const layerIdRegex = /^[A-Za-z0-9_-]+$/;
+    const cleanedValue = value.trim();
+    if (cleanedValue.length === 0 || cleanedValue.length > maxLength) {
+        return '';
+    }
+    return layerIdRegex.test(cleanedValue) ? cleanedValue : '';
+}
+
+// Parse comma-separated layer IDs from URL param
+// Returns empty array if value is null/undefined/empty
+export function parseMapLayersParam(value: string | null | undefined): string[] {
+    if (!value || value.trim() === '') {
+        return [];
+    }
+    return value
+        .split(',')
+        .map(sanitizeLayerId)
+        .filter((id) => id.length > 0);
+}
+
+// Serialize layer IDs array to comma-separated string for URL param
+// Returns empty string if array is empty
+export function serializeMapLayersParam(layerIds: string[]): string {
+    return layerIds
+        .map(sanitizeLayerId)
+        .filter((id) => id.length > 0)
+        .join(',');
 }
 
 // Fetch upcoming or ongoing event data for a country

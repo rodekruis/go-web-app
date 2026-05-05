@@ -420,6 +420,8 @@ export default function OlDataMap({
                     state.selectedAdminCodes.set(l as 2 | 3 | 4, null);
                 }
             }
+            // Layer 1 remains, but clear any admin area selection on it
+            state.selectedAdminCodes.set(1, null);
         }
 
         // Trigger re-render of admin layers to apply new styling
