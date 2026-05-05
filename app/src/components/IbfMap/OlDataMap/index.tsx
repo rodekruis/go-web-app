@@ -175,7 +175,7 @@ export default function OlDataMap({
         function initMapAdminLayers(
             country?: string,
         ) {
-            const newLayer = addAdminLayer(1, country, undefined);
+            const newLayer = addAdminLayer(1, country);
 
             // get initial admin selection from URL params
             if (initialAdminCode && shouldApplyInitialAdminRef.current) {
@@ -186,14 +186,6 @@ export default function OlDataMap({
                     if (!currentState || !currentAddAdminLayer) return;
 
                     if (details) {
-                        // Set the map view state
-                        // This set to the code (if exists) or null, and then overwrites
-                        // the null value for the current admin level with the actual code.
-                        currentState.selectedAdminCodes.set(1, details.admin1Pcode);
-                        currentState.selectedAdminCodes.set(2, details.admin2Pcode);
-                        currentState.selectedAdminCodes.set(3, details.admin3Pcode);
-                        currentState.selectedAdminCodes.set(details.adminLevel, details.code);
-
                         // Add layers based on current admin level selection
                         if (details.adminLevel === 1) {
                             currentAddAdminLayer(2, country, details.code);
@@ -208,6 +200,13 @@ export default function OlDataMap({
                             // TODO: add support for admin level 4
                             // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41768
                         }
+
+                        // Set the map view state
+                        // This must be done after the above layers were added
+                        currentState.selectedAdminCodes.set(1, details.admin1Pcode);
+                        currentState.selectedAdminCodes.set(2, details.admin2Pcode);
+                        currentState.selectedAdminCodes.set(3, details.admin3Pcode);
+                        currentState.selectedAdminCodes.set(details.adminLevel, details.code);
                     }
 
                     shouldApplyInitialAdminRef.current = false;
