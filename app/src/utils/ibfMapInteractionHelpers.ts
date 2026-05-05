@@ -35,7 +35,7 @@ function fitToFeature(state: MapViewState, feature: FeatureLike) {
 export interface MapViewState {
   mapInstance: MapOl | null;
 
-  // Map of the selected codes, indexed by the admin level (level 1, 2, 3).
+  // Map of the selected codes, indexed by the admin level (level 1, 2, 3, 4).
   // TODO: support variable max admin levels (2, 3 or 4) for here, and throughout the code
   // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41768
   selectedAdminCodes: Map<number, string | null>;
@@ -82,7 +82,7 @@ function getCurrentMapSelectionView(state: MapViewState): MapSelectionView | und
 // Create a VectorLayer for the given admin level.
 export function createAdminLayer(
     state: MapViewState,
-    adminLevel: 1 | 2 | 3,
+    adminLevel: 1 | 2 | 3 | 4,
     country?: string,
     parentCode?: string,
 ): VectorLayer {
@@ -138,7 +138,7 @@ export function handleFeatureClick(
     adminLayers: Map<number, VectorLayer>,
     onSelect: (placeCode: string, mapView?: MapSelectionView) => void,
 ): {
-  showChildLevel: 2 | 3;
+  showChildLevel: 2 | 3 | 4;
   parentCode: string;
 } | void {
     const properties = feature.getProperties();

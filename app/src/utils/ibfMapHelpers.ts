@@ -44,13 +44,18 @@ export const defaultMapZoom = 3;
 // URL search parameter keys
 export const countryParamsKey = 'c';
 export const eventIdParamsKey = 'e';
-export const mapZoomParamsKey = 'mz';
-export const mapCenterLatParamsKey = 'mlat';
-export const mapCenterLonParamsKey = 'mlon';
+export const mapZoomParamsKey = 'z';
+export const mapCenterLatParamsKey = 'lat';
+export const mapCenterLonParamsKey = 'lon';
+export const adminParamsKey = 'a';
 
 // Data field keys, for instance keys in the GeoJSON data.
 export const COUNTRY_FIELD_KEY = 'country';
 export const PLACE_CODE_FIELD_KEY = 'code';
+export const ADMIN_LEVEL_FIELD_KEY = 'admin_level';
+export const ADMIN1_PCODE_FIELD_KEY = 'admin1_pcode';
+export const ADMIN2_PCODE_FIELD_KEY = 'admin2_pcode';
+export const ADMIN3_PCODE_FIELD_KEY = 'admin3_pcode';
 
 // Map URLs
 const maptilerBaseUrl = 'https://api.maptiler.com';
@@ -192,6 +197,17 @@ export function sanitizeMapLatitudeParam(value: string | null | undefined): numb
 
 export function sanitizeMapLongitudeParam(value: string | null | undefined): number | null {
     return sanitizeFloatInRange(value, -180, 180);
+}
+
+// Sanitize admin place code: alphanumeric only, uppercase, max 64 chars
+export function sanitizeAdminCode(value: string | null | undefined): string {
+    const maxLength = 64;
+    const adminCodeRegex = /^[A-Z0-9]+$/;
+    const cleanedValue = value?.trim().toUpperCase() ?? '';
+    if (cleanedValue.length > maxLength) {
+        return '';
+    }
+    return adminCodeRegex.test(cleanedValue) ? cleanedValue : '';
 }
 
 // Fetch upcoming or ongoing event data for a country
@@ -491,7 +507,12 @@ const getSimplificationFactor = (adminLevel: number): number => {
 
 export const getGlobalAdmin0Url = (): string => {
     const factor = getSimplificationFactor(0);
-    return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=admin_level=%270%27&limit=10000&transform=simplify,${factor}`;
+    const baseQuery = `${pgFeatureserv}/collections/debug.admin_areas/items?filter=`;
+    const levelParam = 'admin_level=%270%27';
+    const limitParam = 'limit=10000';
+    const simplifyParam = `transform=simplify,${factor}`;
+
+    return `${baseQuery}${levelParam}&${limitParam}&${simplifyParam}`;
 };
 
 export const getAdminRegionUrl = (
@@ -499,7 +520,14 @@ export const getAdminRegionUrl = (
     adminLevel: number,
 ): string => {
     const factor = getSimplificationFactor(adminLevel);
-    return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adminLevel}%27&limit=10000&transform=simplify,${factor}`;
+    const and = '%20AND%20';
+    const baseQuery = `${pgFeatureserv}/collections/debug.admin_areas/items?filter=`;
+    const countryParam = `country=%27${country}%27`;
+    const levelParam = `admin_level=%27${adminLevel}%27`;
+    const limitParam = 'limit=10000';
+    const simplifyParam = `transform=simplify,${factor}`;
+
+    return `${baseQuery}${countryParam}${and}${levelParam}&${limitParam}&${simplifyParam}`;
 };
 
 export const getNestedAdminUrl = (
@@ -508,8 +536,73 @@ export const getNestedAdminUrl = (
     adminLevel: number,
 ): string => {
     const factor = getSimplificationFactor(adminLevel);
-    return `${pgFeatureserv}/collections/debug.admin_areas/items?filter=country=%27${country}%27%20AND%20admin_level=%27${adminLevel}%27%20AND%20code%20LIKE%20%27${parentCode}%25%27&limit=10000&transform=simplify,${factor}`;
+    const and = '%20AND%20';
+    const baseQuery = `${pgFeatureserv}/collections/debug.admin_areas/items?filter=`;
+    const countryParam = `country=%27${country}%27`;
+    const levelParam = `admin_level=%27${adminLevel}%27`;
+    const parentColumn = `admin${adminLevel - 1}_pcode`;
+    const parentParam = `${parentColumn}=%27${parentCode}%27`;
+    const limitParam = 'limit=10000';
+    const simplifyParam = `transform=simplify,${factor}`;
+
+    return `${baseQuery}${countryParam}${and}${levelParam}${and}${parentParam}&${limitParam}&${simplifyParam}`;
 };
+
+// Get a single admin area by its code (for initial selection from URL)
+// Excludes geometry to reduce payload size
+export const getAdminAreaDetailsNoGeoUrl = (
+    country: string,
+    code: string,
+): string => {
+    const baseQuery = `${pgFeatureserv}/collections/debug.admin_areas/items?filter=`;
+    const and = '%20AND%20';
+    const countryParam = `country=%27${country}%27`;
+    const codeParam = `code=%27${code}%27`;
+    const limitParam = 'limit=1';
+    // Only fetch needed properties, exclude geom
+    const propsParam = `properties=${PLACE_CODE_FIELD_KEY},${ADMIN_LEVEL_FIELD_KEY},${ADMIN1_PCODE_FIELD_KEY},${ADMIN2_PCODE_FIELD_KEY},${ADMIN3_PCODE_FIELD_KEY}`;
+
+    return `${baseQuery}${countryParam}${and}${codeParam}&${limitParam}&${propsParam}`;
+};
+
+// Admin area details fetched from the API
+// This is used for finding info on selected admin areas.
+export interface AdminAreaDetails {
+    code: string;
+    adminLevel: number;
+    admin1Pcode: string | null;
+    admin2Pcode: string | null;
+    admin3Pcode: string | null;
+}
+
+// Fetch admin area details directly
+export async function fetchAdminAreaDetails(
+    country: string,
+    code: string,
+): Promise<AdminAreaDetails | null> {
+    const url = getAdminAreaDetailsNoGeoUrl(country, code);
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            return null;
+        }
+        const data = await response.json();
+        const features = data?.features;
+        if (!features || features.length === 0) {
+            return null;
+        }
+        const props = features[0].properties;
+        return {
+            code: props[PLACE_CODE_FIELD_KEY],
+            adminLevel: Number(props[ADMIN_LEVEL_FIELD_KEY]),
+            admin1Pcode: props[ADMIN1_PCODE_FIELD_KEY] ?? null,
+            admin2Pcode: props[ADMIN2_PCODE_FIELD_KEY] ?? null,
+            admin3Pcode: props[ADMIN3_PCODE_FIELD_KEY] ?? null,
+        };
+    } catch {
+        return null;
+    }
+}
 
 // Get the z index offset to make sure lower-level admin layers are not hidden by their parents
 export function getAdminAreaZIndex(level: number): number {

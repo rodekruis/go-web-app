@@ -11,6 +11,7 @@ import type MapOl from 'ol/Map';
 
 import useAlert from '#hooks/useAlert';
 import {
+    adminParamsKey,
     countryParamsKey,
     defaultMapZoom,
     eventIdParamsKey,
@@ -21,6 +22,7 @@ import {
     mapCenterLonParamsKey,
     mapZoomParamsKey,
     noCountrySelectedValue,
+    sanitizeAdminCode,
     sanitizeCountryCode,
     sanitizeIdParam,
     sanitizeMapLatitudeParam,
@@ -57,6 +59,7 @@ export default function IbfMapContainer() {
     const selectedMapZoom = sanitizeMapZoomParam(searchParams.get(mapZoomParamsKey));
     const selectedMapLat = sanitizeMapLatitudeParam(searchParams.get(mapCenterLatParamsKey));
     const selectedMapLon = sanitizeMapLongitudeParam(searchParams.get(mapCenterLonParamsKey));
+    const initialAdminCode = sanitizeAdminCode(searchParams.get(adminParamsKey)) || null;
 
     // If these are valid latlon values, return an initial map view
     const initialMapView = () => {
@@ -90,7 +93,7 @@ export default function IbfMapContainer() {
 
     const [selectedAdminPlaceCode, setSelectedAdminPlaceCode] = useState<
     string | null
-  >(null);
+    >(initialAdminCode);
 
     // Store map instance for PDF export
     const mapRef = useRef<MapOl | null>(null);
@@ -158,13 +161,21 @@ export default function IbfMapContainer() {
         });
     };
 
-    const updateSearchParamsWithMapView = (mapView?: MapSelectionView) => {
+    const updateSearchParamsWithMapView = (
+        mapView?: MapSelectionView,
+        adminCode?: string,
+    ) => {
         const nextSearchParams: Record<string, string> = {
             [countryParamsKey]: selectedCountry,
         };
 
         if (activeEventId) {
             nextSearchParams[eventIdParamsKey] = sanitizeIdParam(activeEventId);
+        }
+
+        const sanitizedAdminCode = sanitizeAdminCode(adminCode);
+        if (sanitizedAdminCode) {
+            nextSearchParams[adminParamsKey] = sanitizedAdminCode;
         }
 
         if (mapView) {
@@ -182,14 +193,12 @@ export default function IbfMapContainer() {
         placeCode: string,
         mapView?: MapSelectionView,
     ) => {
-        // TODO: pass what is clicked on to the data panel and UI panel.
         setSelectedAdminPlaceCode(placeCode);
-        console.debug(`TODO: [IbfMap] Admin area selected: ${placeCode}`);
-        updateSearchParamsWithMapView(mapView);
+        updateSearchParamsWithMapView(mapView, placeCode);
     };
 
     const handleMapViewChanged = (mapView: MapSelectionView) => {
-        updateSearchParamsWithMapView(mapView);
+        updateSearchParamsWithMapView(mapView, selectedAdminPlaceCode ?? undefined);
     };
 
     return (
@@ -227,6 +236,7 @@ export default function IbfMapContainer() {
                         selectedCountry={selectedCountry}
                         selectedEventDetails={selectedEventMapDetails}
                         initialMapView={initialMapView()}
+                        initialAdminCode={initialAdminCode}
                         addLayerFunction={registerMapAddLayer}
                         onSelect={handleMapItemSelected}
                         onViewChange={handleMapViewChanged}
