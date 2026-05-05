@@ -1,5 +1,6 @@
 import { type FeatureLike } from 'ol/Feature';
 import {
+    Circle,
     Fill,
     Stroke,
     Style,
@@ -170,3 +171,29 @@ export const styleAdmin1region = (
         }),
     });
 };
+
+export const styleRcBranchPoint = new Style({
+    image: new Circle({
+        radius: 6,
+        fill: new Fill({
+            color: '#cc1111',
+        }),
+        stroke: new Stroke({
+            color: '#ffffff',
+            width: 2,
+        }),
+    }),
+});
+
+export const styleClinicPoint = new Style({
+    image: new Circle({
+        radius: 6,
+        fill: new Fill({
+            color: '#6a1b9a',
+        }),
+        stroke: new Stroke({
+            color: '#ffffff',
+            width: 2,
+        }),
+    }),
+});

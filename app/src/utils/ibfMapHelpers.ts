@@ -1,3 +1,4 @@
+import { View } from 'ol';
 import {
     buffer as bufferExtent,
     type Extent,
@@ -5,12 +6,17 @@ import {
     getWidth,
     isEmpty,
 } from 'ol/extent';
+import GeoJSON from 'ol/format/GeoJSON';
 import MVT from 'ol/format/MVT';
 import ImageLayer from 'ol/layer/Image';
+import VectorLayer from 'ol/layer/Vector';
 import VectorTileLayer from 'ol/layer/VectorTile';
+import type MapOl from 'ol/Map';
+import { fromLonLat } from 'ol/proj';
 import ImageStatic from 'ol/source/ImageStatic';
-import type VectorSource from 'ol/source/Vector';
+import VectorSource from 'ol/source/Vector';
 import VectorTile from 'ol/source/VectorTile';
+import type Style from 'ol/style/Style';
 
 import {
     maptilerApiKey,
@@ -32,9 +38,15 @@ import {
 // Map property strings
 export const noCountrySelectedValue = 'None';
 
+// Default map values
+export const defaultMapZoom = 3;
+
 // URL search parameter keys
 export const countryParamsKey = 'c';
 export const eventIdParamsKey = 'e';
+export const mapZoomParamsKey = 'mz';
+export const mapCenterLatParamsKey = 'mlat';
+export const mapCenterLonParamsKey = 'mlon';
 
 // Data field keys, for instance keys in the GeoJSON data.
 export const COUNTRY_FIELD_KEY = 'country';
@@ -51,6 +63,75 @@ export const mapUrlSimpleStyleJson = `${maptilerBaseUrl}/maps/019c41d2-17c7-7e5e
 // depending on the environment or another setting.
 const seedRepoEventDataUrl = `${seedDataRepo}raster-data/mock-events/rgba/`;
 const seedRepoPopDataUrl = `${seedDataRepo}raster-data/population/rgba/`;
+
+// GO API URLs for local units data
+// TODO: Revisit these sources as part of this task:
+// https://dev.azure.com/redcrossnl/IBF/_workitems/edit/42046
+// At a minimum, we need a more complete dataset for clinics
+// IFRC GO clinics data only seems to list RC locs that are also clinics
+// For the Philippines, this is a 100% crossover.
+const goApiBaseUrl = 'https://goadmin.ifrc.org/api/v2';
+const GO_API_RESULTS_LIMIT = 200;
+const getRcLocsApiUrl = (countryIso3: string) => `${goApiBaseUrl}/public-local-units/?country__iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
+const getHealthLocsApiUrl = (countryIso3: string) => `${goApiBaseUrl}/health-local-units/?iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
+
+// Format of GO API result for Red Cross locations
+type RcLocResult = {
+    id?: number;
+    country_details?: {
+        iso3?: string;
+    };
+    local_branch_name?: string;
+    english_branch_name?: string;
+    address_loc?: string;
+    address_en?: string;
+    modified_at?: string;
+    status?: number;
+    status_details?: string;
+    type?: number;
+    type_details?: {
+        name?: string;
+    };
+    health_details?: {
+        health_facility_type?: number;
+        health_facility_type_details?: {
+            name?: string;
+        };
+    };
+    link?: string;
+    location_geojson?: {
+        type?: string;
+        coordinates?: [number, number] | number[];
+    };
+};
+
+// Format of GO API result for Clinic locations
+type ClinicLocResult = {
+    id?: number;
+    country_iso3?: string;
+    local_branch_name?: string;
+    english_branch_name?: string;
+    address_loc?: string;
+    address_en?: string;
+    modified_at?: string;
+    status?: number;
+    status_details?: string;
+    type_details?: {
+        name?: string;
+    };
+    health_facility_type_details?: {
+        name?: string;
+    };
+    link?: string;
+    location?: {
+        lat?: number;
+        lng?: number;
+    };
+};
+
+type GoDataResults<T> = {
+    results?: T[];
+};
 
 // Simplification algorithm factor for simplifying vector data
 // Example of factor values on vector object size:
@@ -77,6 +158,40 @@ export function sanitizeCountryCode(value: string | null | undefined): string {
     const countryRegex = /^[A-Z]{3}$/;
     const cleanedValue = value?.trim().toUpperCase() ?? '';
     return countryRegex.test(cleanedValue) ? cleanedValue : noCountrySelectedValue;
+}
+
+function sanitizeFloatInRange(
+    value: string | null | undefined,
+    min: number,
+    max: number,
+): number | null {
+    const cleanedValue = value?.trim() ?? '';
+    if (cleanedValue === '') {
+        return null;
+    }
+
+    const parsedValue = Number(cleanedValue);
+    if (!Number.isFinite(parsedValue)) {
+        return null;
+    }
+
+    if (parsedValue < min || parsedValue > max) {
+        return null;
+    }
+
+    return parsedValue;
+}
+
+export function sanitizeMapZoomParam(value: string | null | undefined): number | null {
+    return sanitizeFloatInRange(value, 0, 24);
+}
+
+export function sanitizeMapLatitudeParam(value: string | null | undefined): number | null {
+    return sanitizeFloatInRange(value, -90, 90);
+}
+
+export function sanitizeMapLongitudeParam(value: string | null | undefined): number | null {
+    return sanitizeFloatInRange(value, -180, 180);
 }
 
 // Fetch upcoming or ongoing event data for a country
@@ -225,6 +340,139 @@ export const makePopulationImageLayer = async (country_code: string) => {
     );
 };
 
+const isValidCoordinatePair = (
+    longitude: number,
+    latitude: number,
+): boolean => Number.isFinite(longitude)
+    && Number.isFinite(latitude)
+    && Math.abs(longitude) <= 180
+    && Math.abs(latitude) <= 90;
+
+const makePointLayerFromFeatures = (
+    features: GeoJSON.Feature[],
+    style: Style,
+): VectorLayer => {
+    const source = new VectorSource({
+        features: new GeoJSON().readFeatures(
+            {
+                type: 'FeatureCollection',
+                features,
+            },
+            {
+                dataProjection: 'EPSG:4326',
+                featureProjection: 'EPSG:3857',
+            },
+        ),
+    });
+
+    return new VectorLayer({
+        source,
+        style,
+    });
+};
+
+export const makeRcBranchesPointLayer = async (
+    selectedCountry: string,
+    style: Style,
+): Promise<VectorLayer> => {
+    const apiUrl = getRcLocsApiUrl(selectedCountry);
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+        throw new Error(
+            `Failed to load RC branches data: HTTP ${response.status} ${response.statusText}`,
+        );
+    }
+
+    const data: GoDataResults<RcLocResult> = await response.json();
+    const filteredFeatures: GeoJSON.Feature[] = (data.results ?? [])
+        .flatMap((item) => {
+            const coordinates = item.location_geojson?.coordinates;
+            if (!coordinates || coordinates.length < 2) {
+                return [];
+            }
+
+            const longitude = Number(coordinates[0]);
+            const latitude = Number(coordinates[1]);
+            if (!isValidCoordinatePair(longitude, latitude)) {
+                return [];
+            }
+
+            return [{
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: [longitude, latitude],
+                },
+                properties: {
+                    id: item.id,
+                    name: item.local_branch_name,
+                    local_branch_name: item.local_branch_name,
+                    english_branch_name: item.english_branch_name,
+                    address_loc: item.address_loc,
+                    address_en: item.address_en,
+                    modified_at: item.modified_at,
+                    status: item.status,
+                    status_display: item.status_details,
+                    type_name: item.type_details?.name,
+                    health_facility_type_name:
+                        item.health_details?.health_facility_type_details?.name,
+                    link: item.link,
+                    country: selectedCountry,
+                },
+            } as GeoJSON.Feature];
+        });
+
+    return makePointLayerFromFeatures(filteredFeatures, style);
+};
+
+export const makeClinicPointLayer = async (
+    selectedCountry: string,
+    style: Style,
+): Promise<VectorLayer> => {
+    const apiUrl = getHealthLocsApiUrl(selectedCountry);
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+        throw new Error(
+            `Failed to load clinic data: HTTP ${response.status} ${response.statusText}`,
+        );
+    }
+
+    const data: GoDataResults<ClinicLocResult> = await response.json();
+    const filteredFeatures: GeoJSON.Feature[] = (data.results ?? [])
+        .flatMap((item) => {
+            const longitude = Number(item.location?.lng);
+            const latitude = Number(item.location?.lat);
+            if (!isValidCoordinatePair(longitude, latitude)) {
+                return [];
+            }
+
+            return [{
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: [longitude, latitude],
+                },
+                properties: {
+                    id: item.id,
+                    name: item.local_branch_name,
+                    local_branch_name: item.local_branch_name,
+                    english_branch_name: item.english_branch_name,
+                    address_loc: item.address_loc,
+                    address_en: item.address_en,
+                    modified_at: item.modified_at,
+                    status: item.status,
+                    status_display: item.status_details,
+                    type_name: item.type_details?.name,
+                    health_facility_type_name: item.health_facility_type_details?.name,
+                    link: item.link,
+                    country: selectedCountry,
+                },
+            } as GeoJSON.Feature];
+        });
+
+    return makePointLayerFromFeatures(filteredFeatures, style);
+};
+
 // Get the vector simplification factor (for the query algorithm)
 // This factor is based on the admin level
 const getSimplificationFactor = (adminLevel: number): number => {
@@ -317,4 +565,68 @@ export function getExtentForVectorData(
     const paddingAmount = Math.max(extentWidth, extentHeight) * paddingRatio;
 
     return bufferExtent(extent, paddingAmount);
+}
+
+export interface InitialMapViewParams {
+    zoom?: number;
+    center?: {
+        lon: number;
+        lat: number;
+    };
+}
+
+/**
+ * Initialize the map view with extent constraint and optional initial position.
+ *
+ * Behavior:
+ * - Always constrains panning to the given extent
+ * - If valid center coords provided, centers there
+ * - If valid zoom provided with center, applies that zoom
+ * - If no valid center, fits the view to the extent
+ *
+ * @param map - The OpenLayers map instance
+ * @param extent - The extent to constrain panning to
+ * @param initialView - Optional initial view params (center, zoom) from URL
+ */
+export function initializeMapView(
+    map: MapOl,
+    extent: Extent,
+    initialView?: InitialMapViewParams | null,
+): void {
+    const currentView = map.getView();
+
+    // Create constrained view that limits panning to the extent
+    const constrainedView = new View({
+        center: currentView.getCenter(),
+        resolution: currentView.getResolution(),
+        rotation: currentView.getRotation(),
+        projection: currentView.getProjection(),
+        extent,
+        constrainOnlyCenter: true,
+    });
+    map.setView(constrainedView);
+
+    const hasValidCenter = initialView?.center
+        && Number.isFinite(initialView.center.lon)
+        && Number.isFinite(initialView.center.lat);
+
+    if (hasValidCenter) {
+        // Apply center from URL params
+        constrainedView.setCenter(
+            fromLonLat([
+                initialView!.center!.lon,
+                initialView!.center!.lat,
+            ]),
+        );
+
+        // Apply zoom if valid
+        if (initialView?.zoom !== undefined && Number.isFinite(initialView.zoom)) {
+            constrainedView.setZoom(initialView.zoom);
+        }
+    } else {
+        // No valid center - fit to extent (default behavior)
+        constrainedView.fit(extent, {
+            duration: 500,
+        });
+    }
 }
