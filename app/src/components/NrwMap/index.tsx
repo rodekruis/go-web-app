@@ -6,60 +6,55 @@ import {
     useRef,
     useState,
 } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import type MapOl from 'ol/Map';
 
 import useAlert from '#hooks/useAlert';
 import {
-    adminParamsKey,
-    countryParamsKey,
     defaultMapZoom,
-    eventIdParamsKey,
+    noCountrySelectedValue,
+} from '#utils/nrw/nrwConstants';
+import {
     getCurrentCountryEventData,
     getEventDetails,
-    getSelectedEventMapDetails,
-    mapCenterLatParamsKey,
-    mapCenterLonParamsKey,
-    mapZoomParamsKey,
-    noCountrySelectedValue,
-    sanitizeAdminCode,
-    sanitizeCountryCode,
-    sanitizeIdParam,
-    sanitizeMapLatitudeParam,
-    sanitizeMapLongitudeParam,
-    sanitizeMapZoomParam,
-} from '#utils/ibfMapHelpers';
-import type { MapSelectionView } from '#utils/ibfMapInteractionHelpers';
-import { PrintElementId } from '#utils/nrwMapToPdfExporter';
+} from '#utils/nrw/nrwDataFetchHelpers';
+import { getSelectedEventMapDetails } from '#utils/nrw/nrwMapHelpers';
+import type { MapSelectionView } from '#utils/nrw/nrwMapInteractionHelpers';
+import { PrintElementId } from '#utils/nrw/nrwMapToPdfExporter';
 
-import IbfControlPanel from './IbfControlPanel';
-import IbfDataPanel from './IbfDataPanel';
-import IbfLayerPanel from './IbfLayerPanel';
+import NrwControlPanel from './NrwControlPanel';
+import NrwDataPanel from './NrwDataPanel';
+import NrwLayerPanel from './NrwLayerPanel';
 import OlDataMap from './OlDataMap';
-import useIbfDataLoader from './useIbfDataLoader';
+import useNrwDataLoader from './useNrwDataLoader';
+import useNrwMapSearchParams from './useNrwMapSearchParams';
 
 import styles from './styles.module.css';
 
 /**
- * Base map component for IBF data maps
+ * Base map component for NRW data maps
  * This component manages multiple nested components including for map data fetching,
  * display, and control.
  * @returns A standalone component
  */
-export default function IbfMapContainer() {
+export default function NrwMapContainer() {
     const alert = useAlert();
 
-    // Search params used for deeplinking
-    const [searchParams, setSearchParams] = useSearchParams();
-
-    // Load the view details from the search params
-    // This is only done once at page load
-    const selectedCountry = sanitizeCountryCode(searchParams.get(countryParamsKey));
-    const selectedEventId = sanitizeIdParam(searchParams.get(eventIdParamsKey));
-    const selectedMapZoom = sanitizeMapZoomParam(searchParams.get(mapZoomParamsKey));
-    const selectedMapLat = sanitizeMapLatitudeParam(searchParams.get(mapCenterLatParamsKey));
-    const selectedMapLon = sanitizeMapLongitudeParam(searchParams.get(mapCenterLonParamsKey));
-    const initialAdminCode = sanitizeAdminCode(searchParams.get(adminParamsKey)) || null;
+    // All URL search param handling lives in this hook.
+    const {
+        initial: {
+            selectedCountry,
+            selectedEventId,
+            selectedMapZoom,
+            selectedMapLat,
+            selectedMapLon,
+            initialAdminCode,
+            initialLayerIds,
+        },
+        syncLayerIds,
+        resetToCountry,
+        setEventParams,
+        setMapViewParams,
+    } = useNrwMapSearchParams();
 
     // If these are valid latlon values, return an initial map view
     const initialMapView = () => {
@@ -109,7 +104,9 @@ export default function IbfMapContainer() {
         registerMapAddLayer,
         toggleMapLayer,
         hideAllLayers,
-    } = useIbfDataLoader(selectedCountry, initialEventData, selectedEventId);
+        activeLayerIds,
+        isMapReady,
+    } = useNrwDataLoader(selectedCountry, initialEventData, selectedEventId, initialLayerIds);
 
     // Derive map details for the selected event (centroid, affected regions)
     const selectedEventMapDetails = useMemo(
@@ -136,56 +133,40 @@ export default function IbfMapContainer() {
         }
     }, [selectedEventMapDetails, activeEventId, alert]);
 
+    // Sync the active layer IDs to the URL
+    useEffect(() => {
+        syncLayerIds(activeLayerIds);
+    }, [activeLayerIds, syncLayerIds]);
+
     // Refresh page and put in a default start state
     const handleRefreshAll = () => {
-    // Clear search params except for the country
-        setSearchParams({
-            [countryParamsKey]: selectedCountry,
-        });
+        resetToCountry(selectedCountry);
 
         // Deselect current event and admin areas
         deselectEvent();
+        setSelectedAdminPlaceCode(null);
 
         // Reload event data and set it
         setEventData(getCurrentCountryEventData(selectedCountry));
     };
 
+    // Handle event deselection (e.g. user goes back to all events view)
+    const handleDeselectEvent = () => {
+        deselectEvent();
+        setSelectedAdminPlaceCode(null);
+    };
+
     // Handle event selection from control panel
     const handleEventClick = (eventId: string) => {
         selectEvent(eventId);
-        const cleanedEventId = sanitizeIdParam(eventId);
+        // Clear any user-selected admin area when changing events
+        setSelectedAdminPlaceCode(null);
         // Set search params for URL sharing only - does not reload data
-        setSearchParams({
-            [countryParamsKey]: selectedCountry,
-            [eventIdParamsKey]: cleanedEventId,
+        setEventParams({
+            country: selectedCountry,
+            eventId,
+            layerIds: activeLayerIds,
         });
-    };
-
-    const updateSearchParamsWithMapView = (
-        mapView?: MapSelectionView,
-        adminCode?: string,
-    ) => {
-        const nextSearchParams: Record<string, string> = {
-            [countryParamsKey]: selectedCountry,
-        };
-
-        if (activeEventId) {
-            nextSearchParams[eventIdParamsKey] = sanitizeIdParam(activeEventId);
-        }
-
-        const sanitizedAdminCode = sanitizeAdminCode(adminCode);
-        if (sanitizedAdminCode) {
-            nextSearchParams[adminParamsKey] = sanitizedAdminCode;
-        }
-
-        if (mapView) {
-            nextSearchParams[mapZoomParamsKey] = mapView.zoom.toFixed(2);
-            nextSearchParams[mapCenterLonParamsKey] = mapView.center.lon.toFixed(6);
-            nextSearchParams[mapCenterLatParamsKey] = mapView.center.lat.toFixed(6);
-        }
-
-        // Update searchParams, but replace existing entry to not fill up the back button stack.
-        setSearchParams(nextSearchParams, { replace: true });
     };
 
     // Callback to update search params based on user interactions.
@@ -194,22 +175,34 @@ export default function IbfMapContainer() {
         mapView?: MapSelectionView,
     ) => {
         setSelectedAdminPlaceCode(placeCode);
-        updateSearchParamsWithMapView(mapView, placeCode);
+        setMapViewParams({
+            country: selectedCountry,
+            eventId: activeEventId,
+            adminCode: placeCode,
+            mapView,
+            layerIds: activeLayerIds,
+        });
     };
 
     const handleMapViewChanged = (mapView: MapSelectionView) => {
-        updateSearchParamsWithMapView(mapView, selectedAdminPlaceCode ?? undefined);
+        setMapViewParams({
+            country: selectedCountry,
+            eventId: activeEventId,
+            adminCode: selectedAdminPlaceCode ?? undefined,
+            mapView,
+            layerIds: activeLayerIds,
+        });
     };
 
     return (
         <div className={styles.container}>
             <div id={PrintElementId.DataPanel}>
-                <IbfDataPanel selectedCountry={selectedCountry} />
+                <NrwDataPanel selectedCountry={selectedCountry} />
             </div>
             <div className={styles.mainContent}>
                 <div className={styles.controlPanelColumn}>
                     <div id={PrintElementId.LayerPanel}>
-                        <IbfLayerPanel
+                        <NrwLayerPanel
                             eventLayers={selectedEventLayers}
                             countryCode={selectedCountry}
                             onToggleMapLayer={toggleMapLayer}
@@ -217,15 +210,17 @@ export default function IbfMapContainer() {
                             mapRef={mapRef}
                             eventId={activeEventId ?? undefined}
                             peakDay={selectedEventPeakDay}
+                            initialLayerIds={initialLayerIds}
+                            isMapReady={isMapReady}
                         />
                     </div>
                     <div id={PrintElementId.ControlPanel}>
-                        <IbfControlPanel
+                        <NrwControlPanel
                             eventData={eventData}
                             activeEventId={activeEventId}
                             onEventClick={handleEventClick}
                             onRefreshAll={handleRefreshAll}
-                            onDeselectEvent={deselectEvent}
+                            onDeselectEvent={handleDeselectEvent}
                             countryCode={selectedCountry}
                             selectedAdminPlaceCode={selectedAdminPlaceCode}
                         />

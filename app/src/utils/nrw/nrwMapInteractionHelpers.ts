@@ -10,17 +10,19 @@ import { toLonLat } from 'ol/proj';
 import VectorSource from 'ol/source/Vector';
 
 import {
-    getAdminAreaZIndex,
-    getAdminRegionUrl,
-    getNestedAdminUrl,
     noCountrySelectedValue,
     PLACE_CODE_FIELD_KEY,
-} from './ibfMapHelpers';
+} from './nrwConstants';
+import { getAdminAreaZIndex } from './nrwMapHelpers';
 import {
     styleAdmin1region,
     styleAdmin2region,
     styleAdmin3Region,
-} from './ibfMapStyles';
+} from './nrwMapStyles';
+import {
+    getAdminRegionUrl,
+    getNestedAdminUrl,
+} from './nrwUrls';
 
 // Fit the map view to a feature's geometry with animation
 function fitToFeature(state: MapViewState, feature: FeatureLike) {
@@ -66,7 +68,8 @@ function getCurrentMapSelectionView(state: MapViewState): MapSelectionView | und
     }
 
     const [lon, lat] = toLonLat(center);
-    if (!Number.isFinite(lon) || !Number.isFinite(lat)) {
+    if (lon === undefined || lat === undefined
+        || !Number.isFinite(lon) || !Number.isFinite(lat)) {
         return undefined;
     }
 
