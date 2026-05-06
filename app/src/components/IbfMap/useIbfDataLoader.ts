@@ -47,7 +47,8 @@ export default function useIbfDataLoader(
     );
 
     // Resource IDs of currently visible layers (population, event extent, etc.)
-    const [activeLayerIds, setActiveLayerIds] = useState<string[]>([]);
+    // The starting value is any layer IDs in the deeplink.
+    const [activeLayerIds, setActiveLayerIds] = useState<string[]>(initialLayerIds);
 
     // If the base map setup is complete.
     // This must be awaited before any layers can be added to the map.
@@ -62,8 +63,6 @@ export default function useIbfDataLoader(
     // Cache of all loaded layers.
     // The key is fixed based on the layer details.
     const layersCache = useRef(new Map<string, BaseLayer>());
-
-    // Note: The resource ID may be empty for non-event layers, such as population.
     const getLayerKey = (layerDetails: MapLayerDetails): string => `${layerDetails.dataType}_${selectedCountry}_${layerDetails.resourceId}`;
 
     // Register the map's addLayer function.
