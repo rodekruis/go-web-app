@@ -16,11 +16,9 @@ import {
 import { apply } from 'ol-mapbox-style';
 
 import {
-    fetchAdminAreaDetails,
     getExtentForVectorData,
     getZIndexOffset,
     initializeMapView,
-    mapUrlSimpleStyleJson,
 } from '#utils/ibfMapHelpers';
 import {
     createAdminLayer,
@@ -33,6 +31,8 @@ import type {
     SelectedEventMapDetails,
 } from '#utils/ibfMapTypes';
 import { MapLayerDisplayType } from '#utils/ibfMapTypes';
+import { fetchAdminAreaDetails } from '#utils/nrwDataFetchHelpers';
+import { mapUrlSimpleStyleJson } from '#utils/nrwUrls';
 
 import { createMapPopupPanel } from '../MapPopupPanel';
 

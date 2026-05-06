@@ -9,18 +9,20 @@ import type MapOl from 'ol/Map.js';
 import { toLonLat } from 'ol/proj';
 import VectorSource from 'ol/source/Vector';
 
-import {
-    getAdminAreaZIndex,
-    getAdminRegionUrl,
-    getNestedAdminUrl,
-    noCountrySelectedValue,
-    PLACE_CODE_FIELD_KEY,
-} from './ibfMapHelpers';
+import { getAdminAreaZIndex } from './ibfMapHelpers';
 import {
     styleAdmin1region,
     styleAdmin2region,
     styleAdmin3Region,
 } from './ibfMapStyles';
+import {
+    noCountrySelectedValue,
+    PLACE_CODE_FIELD_KEY,
+} from './nrwConstants';
+import {
+    getAdminRegionUrl,
+    getNestedAdminUrl,
+} from './nrwUrls';
 
 // Fit the map view to a feature's geometry with animation
 function fitToFeature(state: MapViewState, feature: FeatureLike) {
