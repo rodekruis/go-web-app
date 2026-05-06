@@ -50,9 +50,9 @@ const adminLevelToSimplificationFactor: number[] = [0.05, 0.01, 0.005, 0.004];
 const getSimplificationFactor = (adminLevel: number): number => {
     let factor = adminLevelToSimplificationFactor[adminLevel];
     if (!factor) {
-    // The fallback is safe, so no need to make this error user facing.
-    // The fallback just results in a possibly larger data size.
-    // Log it though so devs can investigate.
+        // The fallback is safe, so no need to make this error user facing.
+        // The fallback just results in a possibly larger data size.
+        // Log it though so devs can investigate.
         console.error(
             `No simplification factor found for admin level ${adminLevel}, defaulting to 0.01`,
         );
