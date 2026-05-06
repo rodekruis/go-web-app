@@ -10,4 +10,4 @@ export function Component() {
     );
 }
 
-Component.displayName = 'IbfGlobal';
+Component.displayName = 'NrwGlobal';

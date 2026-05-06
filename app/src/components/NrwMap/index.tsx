@@ -21,17 +21,17 @@ import { getSelectedEventMapDetails } from '#utils/nrw/nrwMapHelpers';
 import type { MapSelectionView } from '#utils/nrw/nrwMapInteractionHelpers';
 import { PrintElementId } from '#utils/nrw/nrwMapToPdfExporter';
 
-import IbfControlPanel from './NrwControlPanel';
-import IbfDataPanel from './NrwDataPanel';
-import IbfLayerPanel from './NrwLayerPanel';
+import NrwControlPanel from './NrwControlPanel';
+import NrwDataPanel from './NrwDataPanel';
+import NrwLayerPanel from './NrwLayerPanel';
 import OlDataMap from './OlDataMap';
-import useIbfDataLoader from './useIbfDataLoader';
+import useNrwDataLoader from './useNrwDataLoader';
 import useNrwMapSearchParams from './useNrwMapSearchParams';
 
 import styles from './styles.module.css';
 
 /**
- * Base map component for IBF data maps
+ * Base map component for NRW data maps
  * This component manages multiple nested components including for map data fetching,
  * display, and control.
  * @returns A standalone component
@@ -106,7 +106,7 @@ export default function NrwMapContainer() {
         hideAllLayers,
         activeLayerIds,
         isMapReady,
-    } = useIbfDataLoader(selectedCountry, initialEventData, selectedEventId, initialLayerIds);
+    } = useNrwDataLoader(selectedCountry, initialEventData, selectedEventId, initialLayerIds);
 
     // Derive map details for the selected event (centroid, affected regions)
     const selectedEventMapDetails = useMemo(
@@ -197,12 +197,12 @@ export default function NrwMapContainer() {
     return (
         <div className={styles.container}>
             <div id={PrintElementId.DataPanel}>
-                <IbfDataPanel selectedCountry={selectedCountry} />
+                <NrwDataPanel selectedCountry={selectedCountry} />
             </div>
             <div className={styles.mainContent}>
                 <div className={styles.controlPanelColumn}>
                     <div id={PrintElementId.LayerPanel}>
-                        <IbfLayerPanel
+                        <NrwLayerPanel
                             eventLayers={selectedEventLayers}
                             countryCode={selectedCountry}
                             onToggleMapLayer={toggleMapLayer}
@@ -215,7 +215,7 @@ export default function NrwMapContainer() {
                         />
                     </div>
                     <div id={PrintElementId.ControlPanel}>
-                        <IbfControlPanel
+                        <NrwControlPanel
                             eventData={eventData}
                             activeEventId={activeEventId}
                             onEventClick={handleEventClick}

@@ -74,7 +74,7 @@ interface OlDataMapProps {
 type AddAdminLayerFunction = (level: 1 | 2 | 3, country?: string, parentCode?: string) => void;
 
 /**
- * OpenLayers map component for IBF data maps
+ * OpenLayers map component for NRW data maps
  * This mainly handles interactivity of the map, with additional data layers added via the
  * exposed addLayerFunction.
  * Admin areas are the main interactive feature of the map, so they need to be added and

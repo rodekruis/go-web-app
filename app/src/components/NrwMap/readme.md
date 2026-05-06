@@ -1,4 +1,4 @@
-# IBF Map Component
+# NRW Map Component
 
 (Note: this readme is here while this component is in dev. The goal is to enable anyone to setup and test the changes. The content here should be reworked or moved to another readme as dev wraps up on this.)
 
