@@ -26,7 +26,7 @@ import IbfDataPanel from './IbfDataPanel';
 import IbfLayerPanel from './IbfLayerPanel';
 import OlDataMap from './OlDataMap';
 import useIbfDataLoader from './useIbfDataLoader';
-import useIbfMapSearchParams from './useIbfMapSearchParams';
+import useNrwMapSearchParams from './useNrwMapSearchParams';
 
 import styles from './styles.module.css';
 
@@ -54,7 +54,7 @@ export default function IbfMapContainer() {
         resetToCountry,
         setEventParams,
         setMapViewParams,
-    } = useIbfMapSearchParams();
+    } = useNrwMapSearchParams();
 
     // If these are valid latlon values, return an initial map view
     const initialMapView = () => {

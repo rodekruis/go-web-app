@@ -48,11 +48,11 @@ interface EventParams {
 }
 
 /**
- * Encapsulates all URL search param handling for the IBF Map: a one-time
- * read of initial params at mount, plus helpers that write subsequent
- * updates back to the URL.
+ * Hook for search parameter handling for NRW.
+ * The parameters are loaded once on mount
+ * and are written to during page use to keep track of the state.
  */
-export default function useIbfMapSearchParams() {
+export default function useNrwMapSearchParams() {
     const [searchParams, setSearchParams] = useSearchParams();
 
     // Read initial param values once on mount for setting initial display.
