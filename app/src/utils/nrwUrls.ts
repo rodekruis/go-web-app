@@ -116,7 +116,13 @@ export const getAdminAreaDetailsNoGeoUrl = (
     const codeParam = `code=%27${code}%27`;
     const limitParam = 'limit=1';
     // Only fetch needed properties, exclude geom
-    const propsParam = `properties=${PLACE_CODE_FIELD_KEY},${ADMIN_LEVEL_FIELD_KEY},${ADMIN1_PCODE_FIELD_KEY},${ADMIN2_PCODE_FIELD_KEY},${ADMIN3_PCODE_FIELD_KEY}`;
+    const propsParam = `properties=${[
+        PLACE_CODE_FIELD_KEY,
+        ADMIN_LEVEL_FIELD_KEY,
+        ADMIN1_PCODE_FIELD_KEY,
+        ADMIN2_PCODE_FIELD_KEY,
+        ADMIN3_PCODE_FIELD_KEY,
+    ].join(',')}`;
 
     return `${baseQuery}${countryParam}${and}${codeParam}&${limitParam}&${propsParam}`;
 };
