@@ -14,8 +14,9 @@ import {
 
 // Map URLs
 const maptilerBaseUrl = 'https://api.maptiler.com';
+const maptilerSimpleStylePath = '/maps/019c41d2-17c7-7e5e-9a47-d3b3f9515a5b/style.json';
 // Simple, default IBF data map
-export const mapUrlSimpleStyleJson = `${maptilerBaseUrl}/maps/019c41d2-17c7-7e5e-9a47-d3b3f9515a5b/style.json?key=${maptilerApiKey}`;
+export const mapUrlSimpleStyleJson = `${maptilerBaseUrl}${maptilerSimpleStylePath}?key=${maptilerApiKey}`;
 
 // Raw GitHub URLs for direct file access
 // TODO: Once we have working API, we'll need a conditional here to target either the
