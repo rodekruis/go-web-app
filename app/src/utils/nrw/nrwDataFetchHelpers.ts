@@ -166,11 +166,15 @@ export async function getEventDetails(eventId: string): Promise<AllEventsData> {
 // Fetch country-level map layer data
 // TODO: Use the API instead of mock data. Pending IBF API
 export async function getCountryMapData(): Promise<Record<string, CountryMapData>> {
-    const response = await fetch(seedRepoMockCountryDataUrl);
-    if (!response.ok) {
-        return {};
+    try {
+        const response = await fetch(seedRepoMockCountryDataUrl);
+        if (!response.ok) {
+            return {} as Record<string, CountryMapData>;
+        }
+        return await response.json() as Record<string, CountryMapData>;
+    } catch {
+        return {} as Record<string, CountryMapData>;
     }
-    return response.json() as Promise<Record<string, CountryMapData>>;
 }
 
 export const makeRcBranchesPointLayer = async (
