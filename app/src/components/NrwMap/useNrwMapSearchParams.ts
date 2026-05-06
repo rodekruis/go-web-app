@@ -4,7 +4,7 @@ import {
 } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import type { MapSelectionView } from '#utils/ibfMapInteractionHelpers';
+import type { MapSelectionView } from '#utils/nrw/nrwMapInteractionHelpers';
 import {
     adminParamsKey,
     countryParamsKey,
@@ -21,7 +21,7 @@ import {
     sanitizeMapLongitudeParam,
     sanitizeMapZoomParam,
     serializeMapLayersParam,
-} from '#utils/nrwSearchParamHelpers';
+} from '#utils/nrw/nrwSearchParamHelpers';
 
 interface InitialParams {
     selectedCountry: string;

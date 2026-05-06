@@ -3,7 +3,7 @@ import {
     EventDataSources,
     MapLayerDisplayType,
     MapLayerInfoType,
-} from '#utils/ibfMapTypes';
+} from '#utils/nrw/nrwMapTypes';
 
 // Mock country map data for countries. This will be moved to the backend in the future.
 export default {

@@ -7,26 +7,26 @@ import type BaseLayer from 'ol/layer/Base';
 
 import useAlert from '#hooks/useAlert';
 import {
+    makeClinicPointLayer,
+    makeRcBranchesPointLayer,
+} from '#utils/nrw/nrwDataFetchHelpers';
+import {
     makeEventImageLayer,
     makePopulationImageLayer,
-} from '#utils/ibfMapHelpers';
+} from '#utils/nrw/nrwMapHelpers';
 import {
     styleClinicPoint,
     styleRcBranchPoint,
-} from '#utils/ibfMapStyles';
+} from '#utils/nrw/nrwMapStyles';
 import {
     type AllEventsData,
     type MapLayerDetails,
     MapLayerDisplayType,
     MapLayerInfoType,
-} from '#utils/ibfMapTypes';
-import {
-    makeClinicPointLayer,
-    makeRcBranchesPointLayer,
-} from '#utils/nrwDataFetchHelpers';
+} from '#utils/nrw/nrwMapTypes';
 
 /**
- * Hook used to manage and share data for the IBF map components.
+ * Hook used to manage and share data for the NRW map components.
  *
  * Responsibilities:
  * - Load and cache data
@@ -34,7 +34,7 @@ import {
  *
  * @param selectedCountry - ISO_A3 country code for country-specific layers
  */
-export default function useIbfDataLoader(
+export default function useNrwDataLoader(
     selectedCountry: string,
     initialEventData: AllEventsData,
     initialEventId: string,
@@ -104,7 +104,7 @@ export default function useIbfDataLoader(
         loadLayer: () => Promise<BaseLayer>,
     ) => {
         if (!addLayerToMapFunction.current) {
-            console.error('[useIbfDataLoader] Map not ready');
+            console.error('[useNrwDataLoader] Map not ready');
             return;
         }
 
@@ -122,7 +122,7 @@ export default function useIbfDataLoader(
             addLayerToMapFunction.current(layer, layerDetails);
             updateActiveLayerIds(layerDetails.resourceId, layer.getVisible());
         } catch (error) {
-            console.error(`[useIbfDataLoader] Failed to load layer ${key}:`, error);
+            console.error(`[useNrwDataLoader] Failed to load layer ${key}:`, error);
             alert.show('Failed to load map layer', {
                 variant: 'danger',
                 description: 'The map layer could not be loaded. Please try again.',
@@ -154,7 +154,7 @@ export default function useIbfDataLoader(
                         break;
                     default:
                         console.error(
-                            `[useIbfDataLoader] Unsupported raster layer type: ${dataType}`,
+                            `[useNrwDataLoader] Unsupported raster layer type: ${dataType}`,
                         );
                 }
                 break;
@@ -176,14 +176,14 @@ export default function useIbfDataLoader(
                         break;
                     default:
                         console.error(
-                            `[useIbfDataLoader] Unsupported point layer type: ${dataType}`,
+                            `[useNrwDataLoader] Unsupported point layer type: ${dataType}`,
                         );
                 }
                 break;
             default:
                 // TODO: Handle other display types (Shape, VectorTile)
                 console.error(
-                    `[useIbfDataLoader] Unsupported display type: ${displayType}`,
+                    `[useNrwDataLoader] Unsupported display type: ${displayType}`,
                 );
         }
     };

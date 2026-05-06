@@ -15,26 +15,26 @@ import {
 } from 'ol/proj';
 import { apply } from 'ol-mapbox-style';
 
+import { fetchAdminAreaDetails } from '#utils/nrw/nrwDataFetchHelpers';
 import {
     getExtentForVectorData,
     getZIndexOffset,
     initializeMapView,
-} from '#utils/ibfMapHelpers';
+} from '#utils/nrw/nrwMapHelpers';
 import {
     createAdminLayer,
     handleFeatureClick,
     type MapSelectionView,
     type MapViewState,
-} from '#utils/ibfMapInteractionHelpers';
+} from '#utils/nrw/nrwMapInteractionHelpers';
 import type {
     MapLayerDetails,
     SelectedEventMapDetails,
-} from '#utils/ibfMapTypes';
-import { MapLayerDisplayType } from '#utils/ibfMapTypes';
-import { fetchAdminAreaDetails } from '#utils/nrwDataFetchHelpers';
-import { mapUrlSimpleStyleJson } from '#utils/nrwUrls';
+} from '#utils/nrw/nrwMapTypes';
+import { MapLayerDisplayType } from '#utils/nrw/nrwMapTypes';
+import { mapUrlSimpleStyleJson } from '#utils/nrw/nrwUrls';
 
-import { createMapPopupPanel } from '../MapPopupPanel';
+import { createMapPopupPanel } from '../NrwMapPopupPanel';
 
 import styles from './styles.module.css';
 
@@ -74,12 +74,12 @@ interface OlDataMapProps {
 type AddAdminLayerFunction = (level: 1 | 2 | 3, country?: string, parentCode?: string) => void;
 
 /**
- * OpenLayers map component for IBF data maps
+ * OpenLayers map component for NRW data maps
  * This mainly handles interactivity of the map, with additional data layers added via the
  * exposed addLayerFunction.
  * Admin areas are the main interactive feature of the map, so they need to be added and
  * managed by this component.
- * @returns A component that can be either standalone, or nested in a IbfMapContainer.
+ * @returns A component that can be either standalone, or nested in a NrwMapContainer.
  */
 export default function OlDataMap({
     selectedCountry,

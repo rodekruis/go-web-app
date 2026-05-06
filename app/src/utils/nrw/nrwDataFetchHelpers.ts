@@ -2,21 +2,21 @@ import type VectorLayer from 'ol/layer/Vector';
 import type Style from 'ol/style/Style';
 
 import {
-    isValidCoordinatePair,
-    makePointLayerFromFeatures,
-} from './ibfMapHelpers';
-import { type AllEventsData } from './ibfMapTypes';
-import {
-    mockAllEventsData_MW as mockAllEventsData_MWI,
-    mockAllEventsData_ZM as mockAllEventsData_ZMB,
-} from './ibfMockData_debug';
-import {
     ADMIN_LEVEL_FIELD_KEY,
     ADMIN1_PCODE_FIELD_KEY,
     ADMIN2_PCODE_FIELD_KEY,
     ADMIN3_PCODE_FIELD_KEY,
     PLACE_CODE_FIELD_KEY,
 } from './nrwConstants';
+import {
+    isValidCoordinatePair,
+    makePointLayerFromFeatures,
+} from './nrwMapHelpers';
+import { type AllEventsData } from './nrwMapTypes';
+import {
+    mockAllEventsData_MW as mockAllEventsData_MWI,
+    mockAllEventsData_ZM as mockAllEventsData_ZMB,
+} from './nrwMockData_debug';
 import {
     getAdminAreaDetailsNoGeoUrl,
     getHealthLocsApiUrl,

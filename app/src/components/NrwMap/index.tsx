@@ -9,34 +9,34 @@ import {
 import type MapOl from 'ol/Map';
 
 import useAlert from '#hooks/useAlert';
-import { getSelectedEventMapDetails } from '#utils/ibfMapHelpers';
-import type { MapSelectionView } from '#utils/ibfMapInteractionHelpers';
 import {
     defaultMapZoom,
     noCountrySelectedValue,
-} from '#utils/nrwConstants';
+} from '#utils/nrw/nrwConstants';
 import {
     getCurrentCountryEventData,
     getEventDetails,
-} from '#utils/nrwDataFetchHelpers';
-import { PrintElementId } from '#utils/nrwMapToPdfExporter';
+} from '#utils/nrw/nrwDataFetchHelpers';
+import { getSelectedEventMapDetails } from '#utils/nrw/nrwMapHelpers';
+import type { MapSelectionView } from '#utils/nrw/nrwMapInteractionHelpers';
+import { PrintElementId } from '#utils/nrw/nrwMapToPdfExporter';
 
-import IbfControlPanel from './IbfControlPanel';
-import IbfDataPanel from './IbfDataPanel';
-import IbfLayerPanel from './IbfLayerPanel';
+import NrwControlPanel from './NrwControlPanel';
+import NrwDataPanel from './NrwDataPanel';
+import NrwLayerPanel from './NrwLayerPanel';
 import OlDataMap from './OlDataMap';
-import useIbfDataLoader from './useIbfDataLoader';
+import useNrwDataLoader from './useNrwDataLoader';
 import useNrwMapSearchParams from './useNrwMapSearchParams';
 
 import styles from './styles.module.css';
 
 /**
- * Base map component for IBF data maps
+ * Base map component for NRW data maps
  * This component manages multiple nested components including for map data fetching,
  * display, and control.
  * @returns A standalone component
  */
-export default function IbfMapContainer() {
+export default function NrwMapContainer() {
     const alert = useAlert();
 
     // All URL search param handling lives in this hook.
@@ -106,7 +106,7 @@ export default function IbfMapContainer() {
         hideAllLayers,
         activeLayerIds,
         isMapReady,
-    } = useIbfDataLoader(selectedCountry, initialEventData, selectedEventId, initialLayerIds);
+    } = useNrwDataLoader(selectedCountry, initialEventData, selectedEventId, initialLayerIds);
 
     // Derive map details for the selected event (centroid, affected regions)
     const selectedEventMapDetails = useMemo(
@@ -197,12 +197,12 @@ export default function IbfMapContainer() {
     return (
         <div className={styles.container}>
             <div id={PrintElementId.DataPanel}>
-                <IbfDataPanel selectedCountry={selectedCountry} />
+                <NrwDataPanel selectedCountry={selectedCountry} />
             </div>
             <div className={styles.mainContent}>
                 <div className={styles.controlPanelColumn}>
                     <div id={PrintElementId.LayerPanel}>
-                        <IbfLayerPanel
+                        <NrwLayerPanel
                             eventLayers={selectedEventLayers}
                             countryCode={selectedCountry}
                             onToggleMapLayer={toggleMapLayer}
@@ -215,7 +215,7 @@ export default function IbfMapContainer() {
                         />
                     </div>
                     <div id={PrintElementId.ControlPanel}>
-                        <IbfControlPanel
+                        <NrwControlPanel
                             eventData={eventData}
                             activeEventId={activeEventId}
                             onEventClick={handleEventClick}

@@ -9,16 +9,16 @@ import type MapOl from 'ol/Map.js';
 import { toLonLat } from 'ol/proj';
 import VectorSource from 'ol/source/Vector';
 
-import { getAdminAreaZIndex } from './ibfMapHelpers';
-import {
-    styleAdmin1region,
-    styleAdmin2region,
-    styleAdmin3Region,
-} from './ibfMapStyles';
 import {
     noCountrySelectedValue,
     PLACE_CODE_FIELD_KEY,
 } from './nrwConstants';
+import { getAdminAreaZIndex } from './nrwMapHelpers';
+import {
+    styleAdmin1region,
+    styleAdmin2region,
+    styleAdmin3Region,
+} from './nrwMapStyles';
 import {
     getAdminRegionUrl,
     getNestedAdminUrl,

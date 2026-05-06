@@ -14,12 +14,12 @@ import { Button } from '@ifrc-go/ui';
 import type MapOl from 'ol/Map';
 
 import useAlert from '#hooks/useAlert';
+import { exportMapToPdf } from '#utils/nrw/nrwMapToPdfExporter';
 import {
     type MapLayerDetails,
     MapLayerInfoType,
-} from '#utils/ibfMapTypes';
-import mockCountryLayers from '#utils/ibfMockCountryData_debug';
-import { exportMapToPdf } from '#utils/nrwMapToPdfExporter';
+} from '#utils/nrw/nrwMapTypes';
+import mockCountryLayers from '#utils/nrw/nrwMockCountryData_debug';
 
 import styles from './styles.module.css';
 
@@ -34,7 +34,7 @@ function getLayerLabel(layer: MapLayerDetails): string {
     return labels[layer.dataType] ?? layer.dataType;
 }
 
-interface IbfLayerPanelProps {
+interface NrwLayerPanelProps {
   eventLayers: MapLayerDetails[];
   countryCode: string;
   onToggleMapLayer: (layerDetails: MapLayerDetails) => void;
@@ -51,7 +51,7 @@ interface IbfLayerPanelProps {
 /**
  * Control panel showing layers that can be toggled for the selected country and event.
  */
-export default function IbfLayerPanel({
+export default function NrwLayerPanel({
     eventLayers,
     countryCode,
     onToggleMapLayer,
@@ -61,7 +61,7 @@ export default function IbfLayerPanel({
     peakDay,
     initialLayerIds,
     isMapReady,
-}: IbfLayerPanelProps) {
+}: NrwLayerPanelProps) {
     const alert = useAlert();
 
     // Whether the panel is still in its initial state (no user interaction yet).

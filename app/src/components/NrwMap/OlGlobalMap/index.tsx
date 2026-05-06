@@ -13,21 +13,21 @@ import Map from 'ol/Map.js';
 import VectorSource from 'ol/source/Vector';
 
 import {
+    COUNTRY_FIELD_KEY,
+    noCountrySelectedValue,
+} from '#utils/nrw/nrwConstants';
+import {
     getAdminAreaZIndex,
     getExtentForVectorData,
-} from '#utils/ibfMapHelpers';
+} from '#utils/nrw/nrwMapHelpers';
 import {
     styleAdmin0,
     styleAdmin1,
-} from '#utils/ibfMapStyles';
-import {
-    COUNTRY_FIELD_KEY,
-    noCountrySelectedValue,
-} from '#utils/nrwConstants';
+} from '#utils/nrw/nrwMapStyles';
 import {
     getAdminRegionUrl,
     getGlobalAdmin0Url,
-} from '#utils/nrwUrls';
+} from '#utils/nrw/nrwUrls';
 
 import styles from './styles.module.css';
 

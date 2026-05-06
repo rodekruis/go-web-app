@@ -18,12 +18,12 @@ import VectorSource from 'ol/source/Vector';
 import VectorTile from 'ol/source/VectorTile';
 import type Style from 'ol/style/Style';
 
-import { type MvtStyleCreator } from './ibfMapStyles';
+import { type MvtStyleCreator } from './nrwMapStyles';
 import type {
     AllEventsData,
     MapLayerDetails,
     SelectedEventMapDetails,
-} from './ibfMapTypes';
+} from './nrwMapTypes';
 import {
     seedRepoEventDataUrl,
     seedRepoPopDataUrl,
