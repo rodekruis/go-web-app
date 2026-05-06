@@ -17,7 +17,7 @@ import {
     type EventOverviewData,
     ExposedItemType,
     type ExposureCategory,
-} from '#utils/ibfMapTypes';
+} from '#utils/nrw/nrwMapTypes';
 
 import styles from './styles.module.css';
 

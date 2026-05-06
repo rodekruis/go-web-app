@@ -7,23 +7,23 @@ import type BaseLayer from 'ol/layer/Base';
 
 import useAlert from '#hooks/useAlert';
 import {
+    makeClinicPointLayer,
+    makeRcBranchesPointLayer,
+} from '#utils/nrw/nrwDataFetchHelpers';
+import {
     makeEventImageLayer,
     makePopulationImageLayer,
-} from '#utils/ibfMapHelpers';
+} from '#utils/nrw/nrwMapHelpers';
 import {
     styleClinicPoint,
     styleRcBranchPoint,
-} from '#utils/ibfMapStyles';
+} from '#utils/nrw/nrwMapStyles';
 import {
     type AllEventsData,
     type MapLayerDetails,
     MapLayerDisplayType,
     MapLayerInfoType,
-} from '#utils/ibfMapTypes';
-import {
-    makeClinicPointLayer,
-    makeRcBranchesPointLayer,
-} from '#utils/nrwDataFetchHelpers';
+} from '#utils/nrw/nrwMapTypes';
 
 /**
  * Hook used to manage and share data for the IBF map components.

@@ -9,21 +9,21 @@ import {
 import type MapOl from 'ol/Map';
 
 import useAlert from '#hooks/useAlert';
-import { getSelectedEventMapDetails } from '#utils/ibfMapHelpers';
-import type { MapSelectionView } from '#utils/ibfMapInteractionHelpers';
 import {
     defaultMapZoom,
     noCountrySelectedValue,
-} from '#utils/nrwConstants';
+} from '#utils/nrw/nrwConstants';
 import {
     getCurrentCountryEventData,
     getEventDetails,
-} from '#utils/nrwDataFetchHelpers';
-import { PrintElementId } from '#utils/nrwMapToPdfExporter';
+} from '#utils/nrw/nrwDataFetchHelpers';
+import { getSelectedEventMapDetails } from '#utils/nrw/nrwMapHelpers';
+import type { MapSelectionView } from '#utils/nrw/nrwMapInteractionHelpers';
+import { PrintElementId } from '#utils/nrw/nrwMapToPdfExporter';
 
-import IbfControlPanel from './IbfControlPanel';
-import IbfDataPanel from './IbfDataPanel';
-import IbfLayerPanel from './IbfLayerPanel';
+import IbfControlPanel from './NrwControlPanel';
+import IbfDataPanel from './NrwDataPanel';
+import IbfLayerPanel from './NrwLayerPanel';
 import OlDataMap from './OlDataMap';
 import useIbfDataLoader from './useIbfDataLoader';
 import useNrwMapSearchParams from './useNrwMapSearchParams';
@@ -36,7 +36,7 @@ import styles from './styles.module.css';
  * display, and control.
  * @returns A standalone component
  */
-export default function IbfMapContainer() {
+export default function NrwMapContainer() {
     const alert = useAlert();
 
     // All URL search param handling lives in this hook.

@@ -14,12 +14,12 @@ import { Button } from '@ifrc-go/ui';
 import type MapOl from 'ol/Map';
 
 import useAlert from '#hooks/useAlert';
+import { exportMapToPdf } from '#utils/nrw/nrwMapToPdfExporter';
 import {
     type MapLayerDetails,
     MapLayerInfoType,
-} from '#utils/ibfMapTypes';
-import mockCountryLayers from '#utils/ibfMockCountryData_debug';
-import { exportMapToPdf } from '#utils/nrwMapToPdfExporter';
+} from '#utils/nrw/nrwMapTypes';
+import mockCountryLayers from '#utils/nrw/nrwMockCountryData_debug';
 
 import styles from './styles.module.css';
 
