@@ -153,11 +153,12 @@ export interface GlofasStationData {
   // Max river discharge at peak
   maxDischarge : number;
 
-  // The values of discharge, ordered in the rarity of the event.
-  // Order: No alert, 1.5 year, 2 year, 5 year, 20 year
-  // TODO: There are 5 thresholds, but only 5 categories.
-  // This should be 4 thresholds then. We need more design clarity on this.
-  dischargeThresholds : [number, number, number, number, number];
+  // The discharge minimum thresholds, ordered in the rarity of the event.
+  // Order: once in 1.5 year, 2 year, 5 year, 20 year
+  dischargeThresholds : [number, number, number, number];
+
+  // Text statement for defined triggers
+  triggerStatement?: string;
 }
 
 // Country-level non-event data
