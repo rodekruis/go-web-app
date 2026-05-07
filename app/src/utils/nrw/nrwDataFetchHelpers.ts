@@ -1,6 +1,7 @@
 import type VectorLayer from 'ol/layer/Vector';
 import type Style from 'ol/style/Style';
 
+import getMockGlofasStationData from './mockData/mock_GlofasData';
 import {
     ADMIN_LEVEL_FIELD_KEY,
     ADMIN1_PCODE_FIELD_KEY,
@@ -15,6 +16,7 @@ import {
 import {
     type AllEventsData,
     type CountryMapData,
+    type GlofasStationData,
 } from './nrwMapTypes';
 import {
     getAdminAreaDetailsNoGeoUrl,
@@ -161,6 +163,13 @@ export async function getEventDetails(eventId: string): Promise<AllEventsData> {
         }
     }
     return {} as AllEventsData;
+}
+
+// Fetch Glofas station data for a specific event
+// TODO: Use the API instead of mock data. Pending IBF API
+export async function getEventGlofasData(country: string, eventId: string):
+Promise<GlofasStationData[]> {
+    return getMockGlofasStationData(country, eventId);
 }
 
 // Fetch country-level map layer data

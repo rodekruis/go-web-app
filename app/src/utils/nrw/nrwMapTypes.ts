@@ -132,6 +132,32 @@ export interface EventAdminAreaData {
 // Data for all events, keyed by event ID
 export type AllEventsData = Record<string, EventOverviewData>;
 
+// GLOFAS station data
+export interface GlofasStationData {
+  // Name of the station, e.g. "G179 Station: ChungaRanch"
+   // TODO: get localized name if possible
+  stationName : string;
+
+  // Place name of the station
+  // Name must be localized
+  locationName : string;
+
+  // Point location on the map
+  // [lon, lat]
+  lonLat: [number, number];
+
+  // Peak discharge time, as ISO date strings with hours
+  // Note: We can get this from event data if needed
+  peakTime : string;
+
+  // Max river discharge at peak
+  maxDischarge : number;
+
+  // The values of discharge, ordered in the rarity of the event.
+  // Order: No alert, 1.5 year, 2 year, 5 year, 20 year
+  dischargeThresholds : number[];
+}
+
 // Country-level non-event data
 // This is a work in progress still and will either have more data added to it,
 // or merged into some other source.
