@@ -45,10 +45,10 @@ const zweGlofasStations: GlofasStationData[] = [
 ];
 
 const glofasStationsByCountry: Record<string, GlofasStationData[]> = {
-    mwi: mwiGlofasStations,
-    ken: kenGlofasStations,
-    zmb: zmbGlofasStations,
-    zwe: zweGlofasStations,
+    MWI: mwiGlofasStations,
+    KEN: kenGlofasStations,
+    ZMB: zmbGlofasStations,
+    ZWE: zweGlofasStations,
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

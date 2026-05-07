@@ -135,7 +135,7 @@ export type AllEventsData = Record<string, EventOverviewData>;
 // GLOFAS station data
 export interface GlofasStationData {
   // Name of the station, e.g. "G179 Station: ChungaRanch"
-   // TODO: get localized name if possible
+  // TODO: get localized name if possible
   stationName : string;
 
   // Place name of the station
@@ -157,7 +157,7 @@ export interface GlofasStationData {
   // Order: No alert, 1.5 year, 2 year, 5 year, 20 year
   // TODO: There are 5 thresholds, but only 5 categories.
   // This should be 4 thresholds then. We need more design clarity on this.
-  dischargeThresholds : number[];
+  dischargeThresholds : [number, number, number, number, number];
 }
 
 // Country-level non-event data
