@@ -13,24 +13,24 @@ import { noCountrySelectedValue } from './nrwConstants';
 describe('nrwSearchParamHelpers', () => {
     describe('sanitizeCountryCode', () => {
         test('should accept valid 3-letter uppercase country codes', () => {
-            expect(sanitizeCountryCode('USA')).toBe('USA');
-            expect(sanitizeCountryCode('GBR')).toBe('GBR');
+            expect(sanitizeCountryCode('KEN')).toBe('KEN');
+            expect(sanitizeCountryCode('MWI')).toBe('MWI');
             expect(sanitizeCountryCode('ZWE')).toBe('ZWE');
         });
 
         test('should convert lowercase to uppercase', () => {
-            expect(sanitizeCountryCode('usa')).toBe('USA');
-            expect(sanitizeCountryCode('gbr')).toBe('GBR');
+            expect(sanitizeCountryCode('ken')).toBe('KEN');
+            expect(sanitizeCountryCode('mwi')).toBe('MWI');
         });
 
         test('should trim whitespace before validating', () => {
-            expect(sanitizeCountryCode('  USA  ')).toBe('USA');
-            expect(sanitizeCountryCode('\tGBR\n')).toBe('GBR');
+            expect(sanitizeCountryCode('  KEN  ')).toBe('KEN');
+            expect(sanitizeCountryCode('\tMWI\n')).toBe('MWI');
         });
 
         test('should return noCountrySelectedValue for invalid codes', () => {
             expect(sanitizeCountryCode('US')).toBe(noCountrySelectedValue);
-            expect(sanitizeCountryCode('USAA')).toBe(noCountrySelectedValue);
+            expect(sanitizeCountryCode('KENA')).toBe(noCountrySelectedValue);
             expect(sanitizeCountryCode('1AB')).toBe(noCountrySelectedValue);
             expect(sanitizeCountryCode('ab#')).toBe(noCountrySelectedValue);
         });
