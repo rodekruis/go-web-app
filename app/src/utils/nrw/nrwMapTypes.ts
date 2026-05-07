@@ -155,6 +155,8 @@ export interface GlofasStationData {
 
   // The values of discharge, ordered in the rarity of the event.
   // Order: No alert, 1.5 year, 2 year, 5 year, 20 year
+  // TODO: There are 5 thresholds, but only 5 categories.
+  // This should be 4 thresholds then. We need more design clarity on this.
   dischargeThresholds : number[];
 }
 
