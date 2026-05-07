@@ -1,14 +1,19 @@
-import { expect, test, describe } from 'vitest';
 import {
+    describe,
+    expect,
+    test,
+} from 'vitest';
+
+import { noCountrySelectedValue } from './nrwConstants';
+import {
+    parseMapLayersParam,
+    sanitizeAdminCode,
     sanitizeCountryCode,
     sanitizeMapLatitudeParam,
     sanitizeMapLongitudeParam,
     sanitizeMapZoomParam,
-    sanitizeAdminCode,
-    parseMapLayersParam,
     serializeMapLayersParam,
 } from './nrwSearchParamHelpers';
-import { noCountrySelectedValue } from './nrwConstants';
 
 describe('nrwSearchParamHelpers', () => {
     describe('sanitizeCountryCode', () => {
