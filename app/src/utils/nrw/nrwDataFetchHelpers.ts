@@ -168,7 +168,7 @@ export async function getEventDetails(eventId: string): Promise<AllEventsData> {
 // Fetch Glofas station data for a specific event
 // TODO: Use the API instead of mock data. Pending IBF API
 export async function getEventGlofasData(country: string, eventId: string):
-Promise<GlofasStationData[]> {
+Promise<GlofasStationData | undefined> {
     return getMockGlofasStationData(country, eventId);
 }
 
