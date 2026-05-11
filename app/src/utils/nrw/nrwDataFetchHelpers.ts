@@ -168,9 +168,36 @@ export async function getEventDetails(eventId: string): Promise<AllEventsData> {
 // Fetch Glofas station data for a specific event
 // TODO: Use the API instead of mock data. Pending IBF API
 export async function getEventGlofasData(country: string, eventId: string):
-Promise<GlofasStationData[]> {
+Promise<GlofasStationData | undefined> {
     return getMockGlofasStationData(country, eventId);
 }
+
+// Make glofas station point layer
+// Tag this with `_layerKind: 'glofas'` to identify it when clicked on
+// TODO: Make this simpler if possible
+export const makeGlofasStationPointLayer = (
+    stationData: GlofasStationData,
+    style: Style,
+): VectorLayer => {
+    const [longitude, latitude] = stationData.lonLat;
+    if (!isValidCoordinatePair(longitude, latitude)) {
+        return makePointLayerFromFeatures([], style);
+    }
+
+    const feature: GeoJSON.Feature = {
+        type: 'Feature',
+        geometry: {
+            type: 'Point',
+            coordinates: [longitude, latitude],
+        },
+        properties: {
+            _layerKind: 'glofas',
+            ...stationData,
+        },
+    };
+
+    return makePointLayerFromFeatures([feature], style);
+};
 
 // Fetch country-level map layer data
 // TODO: Use the API instead of mock data. Pending IBF API

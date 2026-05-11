@@ -197,3 +197,16 @@ export const styleClinicPoint = new Style({
         }),
     }),
 });
+
+export const glofasMapPointStyle = new Style({
+    image: new Circle({
+        radius: 5,
+        fill: new Fill({
+            color: '#32cd32',
+        }),
+        stroke: new Stroke({
+            color: '#1e6bff',
+            width: 2,
+        }),
+    }),
+});

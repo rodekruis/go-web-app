@@ -196,8 +196,9 @@ export function getZIndexOffset(layerDetails: MapLayerDetails): number {
             // Give point data a higher offset
             return 1201;
         case 'clinics':
-            // Give point data a higher offset
             return 1202;
+        case 'glofas_station':
+            return 1203;
         default:
             // No need for a user facing error, but we should log this to correctly handle it later.
             console.error(

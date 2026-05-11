@@ -41,6 +41,7 @@ export enum MapLayerInfoType {
   EventExtent = 'event_extent',
   RedCrossBranches = 'red_cross_branches',
   Clinics = 'clinics',
+  GlofasStation = 'glofas_station',
 }
 
 export enum MapLayerDisplayType {
