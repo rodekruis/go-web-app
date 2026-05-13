@@ -18,7 +18,7 @@ The "Ol..." prefix stands for OpenLayers (the mapping front library used), and t
 
 ## Running Locally
 
-(Note:This is the temporary setup process and will change as dev progresses)
+(Note: This is the temporary setup process and will change as dev progresses)
 
 The NRW frontend can be launched either from this project, or from the [standalone NRW project in the IBF repo](https://github.com/rodekruis/IBF/blob/main/portal/nrw-standalone/README.md). For launching from this repo, see the setup steps below:
 
