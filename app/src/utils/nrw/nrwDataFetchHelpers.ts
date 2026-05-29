@@ -136,11 +136,11 @@ async function loadMockEventData(country: string): Promise<AllEventsData> {
     try {
         const response = await fetch(url);
         if (!response.ok) {
-            return {} as AllEventsData;
+            return [];
         }
         return await response.json() as AllEventsData;
     } catch {
-        return {} as AllEventsData;
+        return [];
     }
         */
 
@@ -149,7 +149,7 @@ async function loadMockEventData(country: string): Promise<AllEventsData> {
         MWI: mockAllEventsData_MW,
         ZMB: mockAllEventsData_ZM,
     };
-    return mockDataMap[country] ?? {} as AllEventsData;
+    return mockDataMap[country] ?? [];
 }
 
 // Fetch upcoming or ongoing events data for a country
@@ -171,13 +171,13 @@ export async function getEventDetails(eventId: number): Promise<AllEventsData> {
         if (country) {
             // eslint-disable-next-line no-await-in-loop
             const countryEvents = await loadMockEventData(country);
-            const eventData = countryEvents[eventId];
+            const eventData = countryEvents.find((event) => event.eventId === eventId);
             if (eventData) {
-                return { [eventId]: eventData };
+                return [eventData];
             }
         }
     }
-    return {} as AllEventsData;
+    return [];
 }
 
 // Fetch country-level map layer data

@@ -37,7 +37,7 @@ export function getSelectedEventMapDetails(
 ): SelectedEventMapDetails | null {
     if (!eventId) return null;
 
-    const event = eventData[eventId];
+    const event = eventData.find((e) => e.eventId === eventId);
     if (!event) return null;
 
     // Build affected regions map by admin level

@@ -12,8 +12,8 @@ import {
 import { HazardType } from '../shared-enums';
 
 // Mock data for testing - populations are made up, summed up the hierarchy
-export const mockAllEventsData_MW: AllEventsData = {
-    1001: {
+export const mockAllEventsData_MW: AllEventsData = [
+    {
         hazardTypes: [HazardType.floods],
         eventName: 'Flood - Malawi',
         eventId: 1001,
@@ -194,7 +194,7 @@ export const mockAllEventsData_MW: AllEventsData = {
         firstIssuedAt: '2026-04-01T08:30:00Z',
         lastUpdatedAt: '2026-04-02T00:00:00Z',
     },
-    1002: {
+    {
         hazardTypes: [HazardType.floods],
         eventName: 'Flood - Malawi',
         eventId: 1002,
@@ -356,7 +356,7 @@ export const mockAllEventsData_MW: AllEventsData = {
         firstIssuedAt: '2026-04-01T14:15:00Z',
         lastUpdatedAt: '2026-04-02T00:00:00Z',
     },
-    1003: {
+    {
         hazardTypes: [HazardType.floods],
         eventName: 'Flood - Malawi',
         eventId: 1003,
@@ -556,11 +556,11 @@ export const mockAllEventsData_MW: AllEventsData = {
         firstIssuedAt: '2026-04-01T19:45:00Z',
         lastUpdatedAt: '2026-04-02T00:00:00Z',
     },
-};
+];
 
 // Mock data for Zambia testing
-export const mockAllEventsData_ZM: AllEventsData = {
-    1001: {
+export const mockAllEventsData_ZM: AllEventsData = [
+    {
         hazardTypes: [HazardType.floods],
         eventName: 'Flood - Zambia',
         eventId: 1001,
@@ -684,7 +684,7 @@ export const mockAllEventsData_ZM: AllEventsData = {
         firstIssuedAt: '2026-04-01T10:00:00Z',
         lastUpdatedAt: '2026-04-02T00:00:00Z',
     },
-    1002: {
+    {
         hazardTypes: [HazardType.floods],
         eventName: 'Flood - Zambia',
         eventId: 1002,
@@ -808,4 +808,4 @@ export const mockAllEventsData_ZM: AllEventsData = {
         firstIssuedAt: '2026-04-01T16:30:00Z',
         lastUpdatedAt: '2026-04-02T00:00:00Z',
     },
-};
+];
