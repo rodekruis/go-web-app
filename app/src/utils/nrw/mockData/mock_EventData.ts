@@ -563,7 +563,7 @@ export const mockAllEventsData_ZM: AllEventsData = [
     {
         hazardTypes: [HazardType.floods],
         eventName: 'Flood - Zambia',
-        eventId: 1001,
+        eventId: 2001,
         alertClass: AlertClassType.Low,
         trigger: false,
         centroid: [24.8, -13.68], // Mufumbwe center
