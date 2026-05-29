@@ -364,8 +364,10 @@ export default function NrwControlPanel({
     countryCode,
     selectedAdminPlaceCode,
 }: NrwControlPanelProps) {
-    const events = Object.values(eventData);
-    const selectedEvent = activeEventId ? eventData[activeEventId] : null;
+    const events = eventData;
+    const selectedEvent = activeEventId
+        ? eventData.find((event) => event.eventId === activeEventId) ?? null
+        : null;
 
     const handleBack = () => {
         onDeselectEvent();

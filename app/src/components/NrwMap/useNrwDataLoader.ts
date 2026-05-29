@@ -208,9 +208,10 @@ export default function useNrwDataLoader(
     };
 
     // Get available layers for the currently selected event
-    const selectedEventLayers: MapLayerDetails[] = selectedEventId && eventData[selectedEventId]
-        ? eventData[selectedEventId].availableLayers
-        : [];
+    const selectedEvent = selectedEventId
+        ? eventData.find((event) => event.eventId === selectedEventId)
+        : null;
+    const selectedEventLayers: MapLayerDetails[] = selectedEvent?.availableLayers ?? [];
 
     return {
         eventData,
