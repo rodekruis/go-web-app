@@ -55,7 +55,7 @@ function getExposureLabel(type: ExposedItemType): string {
 
 interface EventButtonProps {
   event: EventOverviewData;
-  onEventClick: (eventId: string) => void;
+  onEventClick: (eventId: number) => void;
 }
 
 interface EventDetailViewProps {
@@ -343,8 +343,8 @@ function EventButton({ event, onEventClick }: EventButtonProps) {
 
 interface NrwControlPanelProps {
   eventData: AllEventsData;
-  activeEventId: string | null;
-  onEventClick: (eventId: string) => void;
+  activeEventId: number | null;
+  onEventClick: (eventId: number) => void;
   onRefreshAll: () => void;
   onDeselectEvent: () => void;
   countryCode: string;

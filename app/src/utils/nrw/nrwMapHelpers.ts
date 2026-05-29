@@ -33,7 +33,7 @@ import {
 // Returns null if no event is selected or event not found
 export function getSelectedEventMapDetails(
     eventData: AllEventsData,
-    eventId: string | null,
+    eventId: number | null,
 ): SelectedEventMapDetails | null {
     if (!eventId) return null;
 

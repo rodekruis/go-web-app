@@ -2,6 +2,10 @@ import type VectorLayer from 'ol/layer/Vector';
 import type Style from 'ol/style/Style';
 
 import {
+    mockAllEventsData_MW,
+    mockAllEventsData_ZM,
+} from './mockData/mock_EventData';
+import {
     ADMIN_LEVEL_FIELD_KEY,
     ADMIN1_PCODE_FIELD_KEY,
     ADMIN2_PCODE_FIELD_KEY,
@@ -20,7 +24,6 @@ import {
     getAdminAreaDetailsNoGeoUrl,
     getHealthLocsApiUrl,
     getRcLocsApiUrl,
-    getSeedRepoMockEventDataUrl,
     seedRepoMockCountryDataUrl,
 } from './nrwUrls';
 
@@ -121,9 +124,15 @@ export async function fetchAdminAreaDetails(
     }
 }
 
-// Load mock event data JSON for a given country from the seed data repo
+// Load mock event data for a given country from local mock data
+// TODO: Replace with API calls when available
+// TODO: Also set this to be able to load mock data from the seed repo.
+// This was disabled since the DB payload format is still changing, so the seed repo
+// data is out of date. Regenerating it each time takes effort (and a lot of LLM tokens)
 async function loadMockEventData(country: string): Promise<AllEventsData> {
-    const url = getSeedRepoMockEventDataUrl(country);
+    // Method to fetch from seed repo, but also can be used for the backend
+    /*
+    const url = getSeedRepoMockEventDataUrl(country); // Import from './nrwUrls'
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -133,6 +142,14 @@ async function loadMockEventData(country: string): Promise<AllEventsData> {
     } catch {
         return {} as AllEventsData;
     }
+        */
+
+    // Placeholder method using local mock data
+    const mockDataMap: Record<string, AllEventsData> = {
+        MWI: mockAllEventsData_MW,
+        ZMB: mockAllEventsData_ZM,
+    };
+    return mockDataMap[country] ?? {} as AllEventsData;
 }
 
 // Fetch upcoming or ongoing events data for a country
@@ -143,7 +160,7 @@ export async function getCurrentCountryEventData(country: string): Promise<AllEv
 }
 
 // Fetch a specific event's details, and only return that event
-export async function getEventDetails(eventId: string): Promise<AllEventsData> {
+export async function getEventDetails(eventId: number): Promise<AllEventsData> {
     // TODO: Use the API for fetching this for any country, and only use mock data
     // if set to do so in the env file.
     // For mock data, look for the event data with the matching eventId across all countries.

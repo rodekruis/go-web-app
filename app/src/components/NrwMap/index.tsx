@@ -166,7 +166,7 @@ export default function NrwMapContainer() {
     };
 
     // Handle event selection from control panel
-    const handleEventClick = (eventId: string) => {
+    const handleEventClick = (eventId: number) => {
         selectEvent(eventId);
         // Clear any user-selected admin area when changing events
         setSelectedAdminPlaceCode(null);

@@ -37,15 +37,15 @@ import {
 export default function useNrwDataLoader(
     selectedCountry: string,
     initialEventData: AllEventsData,
-    initialEventId: string,
+    initialEventId: number | null,
     initialLayerIds: string[],
 ) {
     const alert = useAlert();
 
     // Shared state: event data and selected event
     const [eventData, setEventData] = useState<AllEventsData>(initialEventData);
-    const [selectedEventId, setSelectedEventId] = useState<string | null>(
-        initialEventId || null,
+    const [selectedEventId, setSelectedEventId] = useState<number | null>(
+        initialEventId,
     );
 
     // Resource IDs of currently visible layers (population, event extent, etc.)
@@ -197,7 +197,7 @@ export default function useNrwDataLoader(
     };
 
     // Select an event by ID
-    const selectEvent = (eventId: string) => {
+    const selectEvent = (eventId: number) => {
         setSelectedEventId(eventId);
     };
 
