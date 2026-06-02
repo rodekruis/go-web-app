@@ -365,9 +365,7 @@ export default function NrwControlPanel({
     selectedAdminPlaceCode,
 }: NrwControlPanelProps) {
     const events = eventData;
-    const selectedEvent = activeEventId
-        ? eventData.find((event) => event.eventId === activeEventId) ?? null
-        : null;
+    const selectedEvent = eventData.find((event) => event.eventId === activeEventId) ?? null;
 
     const handleBack = () => {
         onDeselectEvent();
