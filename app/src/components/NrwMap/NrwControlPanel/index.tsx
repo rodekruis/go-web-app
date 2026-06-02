@@ -12,7 +12,6 @@ import {
 import { Button } from '@ifrc-go/ui';
 
 import {
-    type AllEventsData,
     type EventAdminAreaData,
     type EventOverviewData,
     ExposedItemType,
@@ -342,7 +341,7 @@ function EventButton({ event, onEventClick }: EventButtonProps) {
 }
 
 interface NrwControlPanelProps {
-  eventData: AllEventsData;
+  eventData: EventOverviewData[];
   activeEventId: number | null;
   onEventClick: (eventId: number) => void;
   onRefreshAll: () => void;

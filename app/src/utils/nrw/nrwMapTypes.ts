@@ -126,9 +126,6 @@ export interface EventAdminAreaData {
   exposure: ExposureCategory[];
 }
 
-// Data for all events
-export type AllEventsData = EventOverviewData[];
-
 // Country-level non-event data
 // This is a work in progress still and will either have more data added to it,
 // or merged into some other source.

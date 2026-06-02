@@ -19,7 +19,7 @@ import {
     styleRcBranchPoint,
 } from '#utils/nrw/nrwMapStyles';
 import {
-    type AllEventsData,
+    type EventOverviewData,
     type MapLayerDetails,
     MapLayerDisplayType,
     MapLayerInfoType,
@@ -36,14 +36,14 @@ import {
  */
 export default function useNrwDataLoader(
     selectedCountry: string,
-    initialEventData: AllEventsData,
+    initialEventData: EventOverviewData[],
     initialEventId: number | null,
     initialLayerIds: string[],
 ) {
     const alert = useAlert();
 
     // Shared state: event data and selected event
-    const [eventData, setEventData] = useState<AllEventsData>(initialEventData);
+    const [eventData, setEventData] = useState<EventOverviewData[]>(initialEventData);
     const [selectedEventId, setSelectedEventId] = useState<number | null>(
         initialEventId,
     );

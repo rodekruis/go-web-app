@@ -2,8 +2,8 @@
 
 import {
     AlertClassType,
-    type AllEventsData,
     DataSourceType,
+    type EventOverviewData,
     ExposedItemType,
     MapLayerDisplayType,
     MapLayerInfoType,
@@ -12,7 +12,7 @@ import {
 import { HazardType } from '../shared-enums';
 
 // Mock data for testing - populations are made up, summed up the hierarchy
-export const mockAllEventsData_MW: AllEventsData = [
+export const mockAllEventsData_MW: EventOverviewData[] = [
     {
         hazardTypes: [HazardType.floods],
         eventName: 'Flood - Malawi',
@@ -559,7 +559,7 @@ export const mockAllEventsData_MW: AllEventsData = [
 ];
 
 // Mock data for Zambia testing
-export const mockAllEventsData_ZM: AllEventsData = [
+export const mockAllEventsData_ZM: EventOverviewData[] = [
     {
         hazardTypes: [HazardType.floods],
         eventName: 'Flood - Zambia',
