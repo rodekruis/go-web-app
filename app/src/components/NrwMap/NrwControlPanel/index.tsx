@@ -363,7 +363,6 @@ export default function NrwControlPanel({
     countryCode,
     selectedAdminPlaceCode,
 }: NrwControlPanelProps) {
-    const events = eventData;
     const selectedEvent = eventData.find((event) => event.eventId === activeEventId) ?? null;
 
     const handleBack = () => {
@@ -386,7 +385,7 @@ export default function NrwControlPanel({
         );
     }
 
-    if (events.length === 0) {
+    if (eventData.length === 0) {
         return (
             <div className={styles.dataContainer}>
                 <p>
@@ -409,7 +408,7 @@ export default function NrwControlPanel({
                     Refresh All
                 </Button>
             </div>
-            {events.map((event) => (
+            {eventData.map((event) => (
                 <EventButton
                     key={event.eventId}
                     event={event}
