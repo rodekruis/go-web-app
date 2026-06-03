@@ -100,7 +100,7 @@ export const getNestedAdminUrl = (
 ): string => {
     const factor = getSimplificationFactor(adminLevel);
     const countryParam = `${COUNTRY_FIELD_KEY}=%27${countryIso3}%27`;
-    const levelParam = `${ADMIN_LEVEL_FIELD_KEY}=%27${adminLevel}%27`;
+    const levelParam = `${ADMIN_LEVEL_FIELD_KEY}=${adminLevel}`;
     const parentColumn = `placeCodeLevel${adminLevel - 1}`;
     const parentParam = `${parentColumn}=%27${parentCode}%27`;
     const limitParam = 'limit=10000';
