@@ -9,6 +9,8 @@ import {
     ADMIN1_PCODE_FIELD_KEY,
     ADMIN2_PCODE_FIELD_KEY,
     ADMIN3_PCODE_FIELD_KEY,
+    ATTRIBUTES_FIELD_KEY,
+    COUNTRY_FIELD_KEY,
     PLACE_CODE_FIELD_KEY,
 } from './nrwConstants';
 
@@ -67,23 +69,24 @@ const getSimplificationFactor = (adminLevel: number): number => {
 
 export const getGlobalAdmin0Url = (): string => {
     const factor = getSimplificationFactor(0);
-    const baseQuery = `${pgFeatureserv}/collections/debug.admin_areas/items?filter=`;
-    const levelParam = 'admin_level=%270%27';
+    const baseQuery = `${pgFeatureserv}/collections/api-service.admin-area/items?filter=`;
+    const levelParam = `${ADMIN_LEVEL_FIELD_KEY}=0`;
     const limitParam = 'limit=10000';
     const simplifyParam = `transform=simplify,${factor}`;
 
     return `${baseQuery}${levelParam}&${limitParam}&${simplifyParam}`;
 };
 
+const baseQuery = `${pgFeatureserv}collections/api-service.admin-area/items?filter=`;
+const and = '%20AND%20';
+
 export const getAdminRegionUrl = (
-    country: string,
+    countryIso3: string,
     adminLevel: number,
 ): string => {
     const factor = getSimplificationFactor(adminLevel);
-    const and = '%20AND%20';
-    const baseQuery = `${pgFeatureserv}/collections/debug.admin_areas/items?filter=`;
-    const countryParam = `country=%27${country}%27`;
-    const levelParam = `admin_level=%27${adminLevel}%27`;
+    const countryParam = `${COUNTRY_FIELD_KEY}=%27${countryIso3}%27`;
+    const levelParam = `${ADMIN_LEVEL_FIELD_KEY}=${adminLevel}`;
     const limitParam = 'limit=10000';
     const simplifyParam = `transform=simplify,${factor}`;
 
@@ -91,16 +94,14 @@ export const getAdminRegionUrl = (
 };
 
 export const getNestedAdminUrl = (
-    country: string,
+    countryIso3: string,
     parentCode: string,
     adminLevel: number,
 ): string => {
     const factor = getSimplificationFactor(adminLevel);
-    const and = '%20AND%20';
-    const baseQuery = `${pgFeatureserv}/collections/debug.admin_areas/items?filter=`;
-    const countryParam = `country=%27${country}%27`;
-    const levelParam = `admin_level=%27${adminLevel}%27`;
-    const parentColumn = `admin${adminLevel - 1}_pcode`;
+    const countryParam = `${COUNTRY_FIELD_KEY}=%27${countryIso3}%27`;
+    const levelParam = `${ADMIN_LEVEL_FIELD_KEY}=%27${adminLevel}%27`;
+    const parentColumn = `placeCodeLevel${adminLevel - 1}`;
     const parentParam = `${parentColumn}=%27${parentCode}%27`;
     const limitParam = 'limit=10000';
     const simplifyParam = `transform=simplify,${factor}`;
@@ -111,13 +112,11 @@ export const getNestedAdminUrl = (
 // Get a single admin area by its code (for initial selection from URL)
 // Excludes geometry to reduce payload size
 export const getAdminAreaDetailsNoGeoUrl = (
-    country: string,
+    countryIso3: string,
     code: string,
 ): string => {
-    const baseQuery = `${pgFeatureserv}/collections/debug.admin_areas/items?filter=`;
-    const and = '%20AND%20';
-    const countryParam = `country=%27${country}%27`;
-    const codeParam = `code=%27${code}%27`;
+    const countryParam = `${COUNTRY_FIELD_KEY}=%27${countryIso3}%27`;
+    const codeParam = `${PLACE_CODE_FIELD_KEY}=%27${code}%27`;
     const limitParam = 'limit=1';
     // Only fetch needed properties, exclude geom
     const propsParam = `properties=${[
@@ -126,6 +125,7 @@ export const getAdminAreaDetailsNoGeoUrl = (
         ADMIN1_PCODE_FIELD_KEY,
         ADMIN2_PCODE_FIELD_KEY,
         ADMIN3_PCODE_FIELD_KEY,
+        ATTRIBUTES_FIELD_KEY,
     ].join(',')}`;
 
     return `${baseQuery}${countryParam}${and}${codeParam}&${limitParam}&${propsParam}`;

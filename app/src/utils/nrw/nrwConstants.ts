@@ -5,9 +5,12 @@ export const noCountrySelectedValue = 'None';
 export const defaultMapZoom = 3;
 
 // Data field keys, for instance keys in the GeoJSON data.
-export const COUNTRY_FIELD_KEY = 'country';
-export const PLACE_CODE_FIELD_KEY = 'code';
-export const ADMIN_LEVEL_FIELD_KEY = 'admin_level';
-export const ADMIN1_PCODE_FIELD_KEY = 'admin1_pcode';
-export const ADMIN2_PCODE_FIELD_KEY = 'admin2_pcode';
-export const ADMIN3_PCODE_FIELD_KEY = 'admin3_pcode';
+// Top-level feature properties on api-service.admin-area
+export const COUNTRY_FIELD_KEY = 'countryCodeIso3';
+export const PLACE_CODE_FIELD_KEY = 'placeCode';
+export const ADMIN_LEVEL_FIELD_KEY = 'adminLevel';
+export const ATTRIBUTES_FIELD_KEY = 'attributes';
+
+export const ADMIN1_PCODE_FIELD_KEY = 'placeCodeLevel1';
+export const ADMIN2_PCODE_FIELD_KEY = 'placeCodeLevel2';
+export const ADMIN3_PCODE_FIELD_KEY = 'placeCodeLevel3';
