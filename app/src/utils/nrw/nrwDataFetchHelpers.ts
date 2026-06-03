@@ -115,9 +115,13 @@ export function getAdminAreaDetailsFromProperties(
     if (typeof code !== 'string' || !code) {
         return null;
     }
+    const adminLevel = Number(props[ADMIN_LEVEL_FIELD_KEY]);
+    if (!Number.isFinite(adminLevel)) {
+        return null;
+    }
     return {
         code,
-        adminLevel: Number(props[ADMIN_LEVEL_FIELD_KEY]),
+        adminLevel,
         admin1Pcode: (props[ADMIN1_PCODE_FIELD_KEY] as string | null) ?? null,
         admin2Pcode: (props[ADMIN2_PCODE_FIELD_KEY] as string | null) ?? null,
         admin3Pcode: (props[ADMIN3_PCODE_FIELD_KEY] as string | null) ?? null,
