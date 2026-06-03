@@ -98,7 +98,8 @@ export interface AdminAreaDetails {
     population: number | null;
 }
 
-function parseAttributes(rawAttributes: unknown): number | null {
+// Parse the population value from the attributes field
+function parsePopulation(rawAttributes: unknown): number | null {
     if (!rawAttributes || typeof rawAttributes !== 'object') {
         return null;
     }
@@ -125,7 +126,7 @@ export function getAdminAreaDetailsFromProperties(
         admin1Pcode: (props[ADMIN1_PCODE_FIELD_KEY] as string | null) ?? null,
         admin2Pcode: (props[ADMIN2_PCODE_FIELD_KEY] as string | null) ?? null,
         admin3Pcode: (props[ADMIN3_PCODE_FIELD_KEY] as string | null) ?? null,
-        population: parseAttributes(props[ATTRIBUTES_FIELD_KEY]),
+        population: parsePopulation(props[ATTRIBUTES_FIELD_KEY]),
     };
 }
 
