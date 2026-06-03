@@ -77,7 +77,7 @@ export const getGlobalAdmin0Url = (): string => {
     return `${baseQuery}${levelParam}&${limitParam}&${simplifyParam}`;
 };
 
-const baseQuery = `${pgFeatureserv}collections/api-service.admin-area/items?filter=`;
+const baseQuery = `${pgFeatureserv}/collections/api-service.admin-area/items?filter=`;
 const and = '%20AND%20';
 
 export const getAdminRegionUrl = (
