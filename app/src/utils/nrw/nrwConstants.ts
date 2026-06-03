@@ -14,3 +14,6 @@ export const ATTRIBUTES_FIELD_KEY = 'attributes';
 export const ADMIN1_PCODE_FIELD_KEY = 'placeCodeLevel1';
 export const ADMIN2_PCODE_FIELD_KEY = 'placeCodeLevel2';
 export const ADMIN3_PCODE_FIELD_KEY = 'placeCodeLevel3';
+
+// Keys within the `attributes` JSON payload on an admin-area feature
+export const POPULATION_ATTRIBUTE_KEY = 'POPULATION';

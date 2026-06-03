@@ -10,7 +10,9 @@ import {
     ADMIN1_PCODE_FIELD_KEY,
     ADMIN2_PCODE_FIELD_KEY,
     ADMIN3_PCODE_FIELD_KEY,
+    ATTRIBUTES_FIELD_KEY,
     PLACE_CODE_FIELD_KEY,
+    POPULATION_ATTRIBUTE_KEY,
 } from './nrwConstants';
 import {
     isValidCoordinatePair,
@@ -93,6 +95,34 @@ export interface AdminAreaDetails {
     admin1Pcode: string | null;
     admin2Pcode: string | null;
     admin3Pcode: string | null;
+    population: number | null;
+}
+
+function parseAttributes(rawAttributes: unknown): number | null {
+    if (!rawAttributes || typeof rawAttributes !== 'object') {
+        return null;
+    }
+    const attrs = rawAttributes as Record<string, unknown>;
+    const value = Number(attrs[POPULATION_ATTRIBUTE_KEY]);
+    return Number.isFinite(value) ? value : null;
+}
+
+// Build admin area details from feature properties
+export function getAdminAreaDetailsFromProperties(
+    props: Record<string, unknown>,
+): AdminAreaDetails | null {
+    const code = props[PLACE_CODE_FIELD_KEY];
+    if (typeof code !== 'string' || !code) {
+        return null;
+    }
+    return {
+        code,
+        adminLevel: Number(props[ADMIN_LEVEL_FIELD_KEY]),
+        admin1Pcode: (props[ADMIN1_PCODE_FIELD_KEY] as string | null) ?? null,
+        admin2Pcode: (props[ADMIN2_PCODE_FIELD_KEY] as string | null) ?? null,
+        admin3Pcode: (props[ADMIN3_PCODE_FIELD_KEY] as string | null) ?? null,
+        population: parseAttributes(props[ATTRIBUTES_FIELD_KEY]),
+    };
 }
 
 // Fetch admin area details directly
@@ -111,14 +141,7 @@ export async function fetchAdminAreaDetails(
         if (!features || features.length === 0) {
             return null;
         }
-        const props = features[0].properties;
-        return {
-            code: props[PLACE_CODE_FIELD_KEY],
-            adminLevel: Number(props[ADMIN_LEVEL_FIELD_KEY]),
-            admin1Pcode: props[ADMIN1_PCODE_FIELD_KEY] ?? null,
-            admin2Pcode: props[ADMIN2_PCODE_FIELD_KEY] ?? null,
-            admin3Pcode: props[ADMIN3_PCODE_FIELD_KEY] ?? null,
-        };
+        return getAdminAreaDetailsFromProperties(features[0].properties);
     } catch {
         return null;
     }
