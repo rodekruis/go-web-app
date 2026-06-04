@@ -7,11 +7,8 @@ import {
 } from './mockData/mock_EventData';
 import {
     ADMIN_LEVEL_FIELD_KEY,
-    ADMIN1_PCODE_FIELD_KEY,
-    ADMIN2_PCODE_FIELD_KEY,
-    ADMIN3_PCODE_FIELD_KEY,
+    ADMIN_PCODE_KEY_BASE,
     ATTRIBUTES_FIELD_KEY,
-    PLACE_CODE_FIELD_KEY,
     POPULATION_ATTRIBUTE_KEY,
 } from './nrwConstants';
 import {
@@ -95,6 +92,7 @@ export interface AdminAreaDetails {
     admin1Pcode: string | null;
     admin2Pcode: string | null;
     admin3Pcode: string | null;
+    admin4Pcode: string | null;
     population: number | null;
 }
 
@@ -112,20 +110,21 @@ function parsePopulation(rawAttributes: unknown): number | null {
 export function getAdminAreaDetailsFromProperties(
     props: Record<string, unknown>,
 ): AdminAreaDetails | null {
-    const code = props[PLACE_CODE_FIELD_KEY];
-    if (typeof code !== 'string' || !code) {
-        return null;
-    }
     const adminLevel = Number(props[ADMIN_LEVEL_FIELD_KEY]);
     if (!Number.isFinite(adminLevel)) {
+        return null;
+    }
+    const code = props[`${ADMIN_PCODE_KEY_BASE}${adminLevel}`];
+    if (typeof code !== 'string' || !code) {
         return null;
     }
     return {
         code,
         adminLevel,
-        admin1Pcode: (props[ADMIN1_PCODE_FIELD_KEY] as string | null) ?? null,
-        admin2Pcode: (props[ADMIN2_PCODE_FIELD_KEY] as string | null) ?? null,
-        admin3Pcode: (props[ADMIN3_PCODE_FIELD_KEY] as string | null) ?? null,
+        admin1Pcode: (props[`${ADMIN_PCODE_KEY_BASE}1`] as string | null) ?? null,
+        admin2Pcode: (props[`${ADMIN_PCODE_KEY_BASE}2`] as string | null) ?? null,
+        admin3Pcode: (props[`${ADMIN_PCODE_KEY_BASE}3`] as string | null) ?? null,
+        admin4Pcode: (props[`${ADMIN_PCODE_KEY_BASE}4`] as string | null) ?? null,
         population: parsePopulation(props[ATTRIBUTES_FIELD_KEY]),
     };
 }

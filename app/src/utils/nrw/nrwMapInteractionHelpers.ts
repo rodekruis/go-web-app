@@ -162,7 +162,7 @@ export function handleFeatureClick(
         console.log('Clicked feature properties:', properties);
     }
 
-    const newSelectedRegionCode = properties[PLACE_CODE_FIELD_KEY] || noCountrySelectedValue;
+    const newSelectedRegionCode = adminDetails?.code || noCountrySelectedValue;
 
     let processAdmin3Clicks = layer === adminLayers.get(3);
     if (processAdmin3Clicks && state.isEventSelected()) {

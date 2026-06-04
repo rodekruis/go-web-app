@@ -6,9 +6,7 @@ import {
 
 import {
     ADMIN_LEVEL_FIELD_KEY,
-    ADMIN1_PCODE_FIELD_KEY,
-    ADMIN2_PCODE_FIELD_KEY,
-    ADMIN3_PCODE_FIELD_KEY,
+    ADMIN_PCODE_KEY_BASE,
     ATTRIBUTES_FIELD_KEY,
     COUNTRY_FIELD_KEY,
     PLACE_CODE_FIELD_KEY,
@@ -101,7 +99,7 @@ export const getNestedAdminUrl = (
     const factor = getSimplificationFactor(adminLevel);
     const countryParam = `${COUNTRY_FIELD_KEY}=%27${countryIso3}%27`;
     const levelParam = `${ADMIN_LEVEL_FIELD_KEY}=${adminLevel}`;
-    const parentColumn = `placeCodeLevel${adminLevel - 1}`;
+    const parentColumn = `${ADMIN_PCODE_KEY_BASE}${adminLevel - 1}`;
     const parentParam = `${parentColumn}=%27${parentCode}%27`;
     const limitParam = 'limit=10000';
     const simplifyParam = `transform=simplify,${factor}`;
@@ -118,13 +116,16 @@ export const getAdminAreaDetailsNoGeoUrl = (
     const countryParam = `${COUNTRY_FIELD_KEY}=%27${countryIso3}%27`;
     const codeParam = `${PLACE_CODE_FIELD_KEY}=%27${code}%27`;
     const limitParam = 'limit=1';
-    // Only fetch needed properties, exclude geom
+    // Only fetch needed properties for the admin area. Exclude geometry.
+    // The per-level place code fields are needed so parent admin selections
+    // can be reconstructed from a deep-linked URL.
     const propsParam = `properties=${[
-        PLACE_CODE_FIELD_KEY,
         ADMIN_LEVEL_FIELD_KEY,
-        ADMIN1_PCODE_FIELD_KEY,
-        ADMIN2_PCODE_FIELD_KEY,
-        ADMIN3_PCODE_FIELD_KEY,
+        PLACE_CODE_FIELD_KEY,
+        `${ADMIN_PCODE_KEY_BASE}1`,
+        `${ADMIN_PCODE_KEY_BASE}2`,
+        `${ADMIN_PCODE_KEY_BASE}3`,
+        `${ADMIN_PCODE_KEY_BASE}4`,
         ATTRIBUTES_FIELD_KEY,
     ].join(',')}`;
 
