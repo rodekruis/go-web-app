@@ -65,18 +65,17 @@ const getSimplificationFactor = (adminLevel: number): number => {
     return factor;
 };
 
+const baseQuery = `${ibfApiBackend}admin-areas?filter=`;
+const and = '%20AND%20';
+
 export const getGlobalAdmin0Url = (): string => {
     const factor = getSimplificationFactor(0);
-    const baseQuery = `${ibfApiBackend}admin-areas?filter=`;
     const levelParam = `${ADMIN_LEVEL_FIELD_KEY}=0`;
     const limitParam = 'limit=10000';
     const simplifyParam = `transform=simplify,${factor}`;
 
     return `${baseQuery}${levelParam}&${limitParam}&${simplifyParam}`;
 };
-
-const baseQuery = `${ibfApiBackend}admin-areas?filter=`;
-const and = '%20AND%20';
 
 export const getAdminRegionUrl = (
     countryIso3: string,
