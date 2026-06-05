@@ -23,7 +23,7 @@ The "Ol..." prefix stands for OpenLayers (the mapping front library used), and t
 The NRW frontend can be launched either from this project, or from the [standalone NRW project in the IBF repo](https://github.com/rodekruis/IBF/blob/main/portal/nrw-standalone/README.md). For launching from this repo, see the setup steps below:
 
 1. Launch the [IBF back-end services](https://github.com/rodekruis/IBF/blob/main/services/docker-compose.yml) and populate the DB. See the readme [README](https://github.com/rodekruis/IBF/blob/main/README.md) for those steps.
-2. Set up this repo to run, following the readme in the base directory. Be sure to recopy `sample.env` into `.env` each time there were any changes in example.env.
+2. Set up this repo to run, following the readme in the base directory. Be sure to recopy and new `sample.env` changes `.env` and give them the needed values.
 3. Launch with `pnpm start` from `/go-web-app/app`.
 4. Navigate to `localhost:3000/nrw?c=<valid ISO_A3 country code>`, such as http://localhost:3000/nrw?c=mwi
 
