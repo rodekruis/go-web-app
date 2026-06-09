@@ -8,16 +8,17 @@
     position: relative;
     width: 95%;
     height: 800px;
-}
-
-.map {
-    width: 100%;
-    height: 100%;
     --control-border-color: #32323250;
     --control-bg: #ffffff;
     --control-bg-hover: #f4f4f4;
     --control-text: #323232;
     --control-border-radius: 0.7rem;
+    --control-shadow: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+}
+
+.map {
+    width: 100%;
+    height: 100%;
 }
 
 /* Restyle the OpenLayers zoom controls */
@@ -31,6 +32,7 @@
     padding: 0;
     border-radius: var(--control-border-radius);
     border: 3px solid var(--control-border-color);
+    filter: var(--control-shadow);
 }
 
 .map :global(.ol-zoom :is(.ol-zoom-in, .ol-zoom-out)) {
@@ -47,6 +49,11 @@
 
 .map :global(.ol-zoom :is(.ol-zoom-in, .ol-zoom-out):hover) {
     background-color: var(--control-bg-hover);
+    outline: none;
+}
+
+.map :global(.ol-zoom :is(.ol-zoom-in, .ol-zoom-out):focus),
+.map :global(.ol-zoom :is(.ol-zoom-in, .ol-zoom-out):focus-visible) {
     outline: none;
 }
 
@@ -74,6 +81,7 @@
     border-radius: var(--control-border-radius);
     border: 3.9px solid var(--control-border-color);
     cursor: pointer;
+    filter: var(--control-shadow);
 }
 
 .layersButton:hover {
