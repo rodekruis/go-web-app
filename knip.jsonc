@@ -12,6 +12,14 @@
         // TODO: need to fix issues before un-ignoring
         "packages/go-ui-storybook"
     ],
+    "ignore": [
+      // We don't care if this has unused exports.
+      "app/src/utils/nrw/shared-enums.ts",
+      // Not using this at the moment (2026-06-11) but may use in the future.
+      "app/src/components/NrwMap/OlGlobalMap/index.tsx",
+      // Will be used later when we add more tests. Not right now tho.
+      "app/src/utils/nrw/mockData/mock_CountryData.ts"
+    ],
     "workspaces": {
         "app": {
             "ignoreDependencies": [

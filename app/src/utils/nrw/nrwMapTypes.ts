@@ -2,7 +2,7 @@
 // The enums are shared values between the backend and frontend.
 // Do not change any values without first checking with the IBF backend team.
 
-import { type HazardType } from './shared-enums';
+import { type MapLayerDetailsDto } from './shared-dtos';
 
 // Enum to identify alert classes
 // These then point to the color/style/localized string in the front end.
@@ -31,91 +31,11 @@ export enum ExposedItemType {
   Clinics = 'clinics',
 }
 
-// Key to identify the type of map layer info being shown.
-// This is used to style/label it on the frontend.
-export enum MapLayerInfoType {
-  Population = 'population',
-  EventExtent = 'event_extent',
-  RedCrossBranches = 'red_cross_branches',
-  Clinics = 'clinics',
-}
-
-export enum MapLayerDisplayType {
-  // Image data, i.e. PNGs
-  Raster = 'raster',
-  // Vector shape data for lines and polygons, including admin areas
-  Shape = 'shape',
-  // Vector point data, such as for glofas locations
-  Point = 'point',
-  // Vector tiles, used for dense vector information such as many buildings and roads
-  VectorTile = 'vector_tile',
-}
-
 // Data for showing exposure of a given ExposedItemType
 export interface ExposureCategory {
   type: ExposedItemType;
   exposed: number;
   total: number;
-  unit: MeasurementUnits;
-}
-
-// Details for a data layer that can be added to a map
-export interface MapLayerDetails {
-  // ID that can be used to fetch the actual map layer data
-  resourceId: string;
-
-  // The type of data on this layer
-  // This can be used to label the layer in the UI, style it, etc.
-  dataType: MapLayerInfoType;
-
-  // The way this data will be displayed
-  displayType: MapLayerDisplayType;
-}
-
-// Data for an overview of an event
-export interface EventOverviewData {
-  hazardTypes: HazardType[];
-
-  // Translated, user-facing name for the event
-  eventName: string;
-
-  // ID to later reference the event, as well as for making other API calls for related resources
-  eventId: number;
-
-  alertClass: AlertClassType;
-
-  // Whether this is a triggering event or not.
-  trigger: boolean;
-
-  // affects where we zoom to, and where we place the icon on the map
-  // [lon, lat]
-  centroid: [number, number];
-
-  // Event time range, as ISO date strings with hours
-  startTime: string;
-  endTime: string;
-  reachesPeakAlertClassTime: string;
-
-  // Event creation/update times, as ISO date strings
-  firstIssuedAt: string;
-  lastUpdatedAt: string;
-
-  // List of lists of details for each exposed admin area.
-  // The first index is the admin level (0, 1, 2...)
-  exposedAdminAreas: EventAdminAreaData[][];
-
-  // Other data layers that can be added to the map for this event
-  availableLayers: MapLayerDetails[];
-
-  // sources used for the data (Glofas, etc.)
-  dataSources: DataSourceType[];
-
-}
-
-// Sources for the data used in events, map layers, etc.
-export enum DataSourceType {
-  Glofas = 'glofas',
-  Other = 'other',
 }
 
 // Event data specific to an admin area. Each admin area with exposure has one of these.
@@ -131,7 +51,7 @@ export interface EventAdminAreaData {
 // or merged into some other source.
 export interface CountryMapData {
   // Available map layers for the country that can be added
-  availableLayers: MapLayerDetails[];
+  availableLayers: MapLayerDetailsDto[];
 
   // The event data sources for forecasted events.
   // This can differentiate between supported event types as well as MRW/NRW data sources.
@@ -140,6 +60,7 @@ export interface CountryMapData {
 }
 
 // Supported event data sources for a country.
+/** @knipignore we'll use this for toggling between NRW and MRW data sources */
 export enum EventDataSources {
   Nrw = 'nrw',
   Mrw = 'mrw',

@@ -1,3 +1,6 @@
+// 2026-06-11 This file is not used right now, but we needed to compare existing
+// go worldmap with a new library.
+
 import 'ol/ol.css';
 
 import {

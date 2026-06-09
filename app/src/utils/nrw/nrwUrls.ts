@@ -27,6 +27,7 @@ export const seedRepoPopDataUrl = `${seedDataRepo}raster-data/population/rgba/`;
 
 // Mock backend JSON data from the seed repo
 export const seedRepoMockCountryDataUrl = `${seedDataRepo}mock-backend/country/nrwMockCountryData.json`;
+/** @knipignore until we actually talk to the backend */
 export const getSeedRepoMockEventDataUrl = (countryIso3: string) => `${seedDataRepo}mock-backend/events/nrwMockData_${countryIso3}.json`;
 
 // GO API URLs for local units data
@@ -73,6 +74,7 @@ const getSimplificationFactor = (adminLevel: number): number => {
 const baseQuery = `${ibfApiBackend}admin-areas?filter=`;
 const and = '%20AND%20';
 
+/** @knipignore OlGlobalMap needs this, but that's not being used right now.  */
 export const getGlobalAdmin0Url = (): string => {
     const factor = getSimplificationFactor(0);
     const levelParam = `${ADMIN_LEVEL_FIELD_KEY}=0`;
@@ -129,6 +131,9 @@ export const getAdminAreasByCodesUrl = (
 
     return `${baseQuery}${countryParam}${and}${levelParam}${and}${codesParam}&${limitParam}&${simplifyParam}`;
 };
+
+// Events API URL
+export const getActiveEventsApiUrl = (): string => `${ibfApiBackend}events?active=true`;
 
 // Get a single admin area by its code (for initial selection from URL)
 // Excludes geometry to reduce payload size

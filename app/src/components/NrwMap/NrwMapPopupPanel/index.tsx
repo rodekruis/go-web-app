@@ -11,6 +11,7 @@ import LocalUnitPopupContent, { type LocalUnitPopupData } from './LocalUnitPopup
 
 import styles from './styles.module.css';
 
+/** @knipignore design not finished, so not used right now */
 export interface MapPopupPanelControls {
     overlay: Overlay;
     show: (feature: FeatureLike, coordinate: Coordinate) => void;

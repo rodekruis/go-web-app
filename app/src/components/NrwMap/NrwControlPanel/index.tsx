@@ -12,54 +12,60 @@ import {
 import { Button } from '@ifrc-go/ui';
 
 import { alertColors } from '#utils/nrw/nrwMapStyles';
+import { AlertClassType } from '#utils/nrw/nrwMapTypes';
 import {
-    type EventAdminAreaData,
-    type EventOverviewData,
-    ExposedItemType,
-    type ExposureCategory,
-} from '#utils/nrw/nrwMapTypes';
+    type EventResponseDto,
+    type ExposedAdminAreaDto,
+} from '#utils/nrw/shared-dtos';
+import { LayerName } from '#utils/nrw/shared-enums';
 
 import styles from './styles.module.css';
 
 // Helper to get exposure value by type from the exposure array
 function getExposureByType(
-    exposure: ExposureCategory[] | undefined,
-    type: ExposedItemType,
-): ExposureCategory | undefined {
-    return exposure?.find((e) => e.type === type);
+    exposure: ExposedAdminAreaDto['exposure'] | undefined,
+    type: LayerName,
+): ExposedAdminAreaDto['exposure'][number] | undefined {
+    return exposure?.find((e) => e.layerName === type);
 }
 
 // Helper to get population exposure from admin area
 function getExposedPopulation(
-    adminArea: EventAdminAreaData | undefined,
+    adminArea: ExposedAdminAreaDto | undefined,
 ): number {
     const popExposure = getExposureByType(
         adminArea?.exposure,
-        ExposedItemType.Population,
+        LayerName.population,
     );
     return popExposure?.exposed ?? 0;
 }
 
 // Format label for exposure type - uses type value with _ID appended if no user-friendly label
 // TODO: move to loc file. See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41713
-function getExposureLabel(type: ExposedItemType): string {
-    const labels: Record<ExposedItemType, string> = {
-        [ExposedItemType.Population]: 'Population',
-        [ExposedItemType.Buildings]: 'Buildings',
-        [ExposedItemType.Roads]: 'Roads',
-        [ExposedItemType.Schools]: 'Schools',
-        [ExposedItemType.Clinics]: 'Health Clinics',
+function getExposureLabel(type: LayerName): string {
+    const labels: Record<LayerName, string> = {
+        [LayerName.alertExtent]: 'Alert extent',
+        [LayerName.clinics]: 'Clinics',
+        [LayerName.eventExtent]: 'Event extent',
+        [LayerName.glofasStations]: 'Glofas stations',
+        [LayerName.population]: 'Population',
+        [LayerName.populationExposed]: 'Population exposed',
+        [LayerName.redCrossBranches]: 'Red cross branches',
+        [LayerName.buildings]: 'Buildings',
+        [LayerName.schools]: 'Schools',
+        [LayerName.roads]: 'Roads',
+
     };
     return labels[type] ?? `${type}_ID`;
 }
 
 interface EventButtonProps {
-  event: EventOverviewData;
+  event: EventResponseDto;
   onEventClick: (eventId: number) => void;
 }
 
 interface EventDetailViewProps {
-  event: EventOverviewData;
+  event: EventResponseDto;
   onBack: () => void;
 }
 
@@ -142,17 +148,21 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
     // Get admin data at different levels
     // TODO: support multiple max admin levels
     // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41768
-    const admin0 = event.exposedAdminAreas[0]?.[0];
-    const admin1Areas = event.exposedAdminAreas[1] ?? [];
-    const admin3Areas = event.exposedAdminAreas[3] ?? [];
+    const admin0 = event.exposedAdminAreas.find((a) => a.adminLevel === 0);
+    const admin1Regions = event.exposedAdminAreas.filter((a) => a.adminLevel === 1);
+    const admin3Regions = event.exposedAdminAreas.filter((a) => a.adminLevel === 3);
 
     const totalPopulation = getExposedPopulation(admin0);
-    const exposedDistrictsCount = admin3Areas.length;
+    const exposedDistrictsCount = admin3Regions.length;
 
     // Get exposure categories for infrastructure (exclude population)
     const infraExposure = admin0?.exposure.filter(
-        (e) => e.type !== ExposedItemType.Population,
+        (e) => e.layerName !== LayerName.population,
     ) ?? [];
+
+    const eventAlertClass = event.alertClass;
+    const alertColorDefault = alertColors[AlertClassType.High];
+    const alertColor = alertColors[eventAlertClass] ?? alertColorDefault;
 
     return (
         <div className={styles.eventDetailView}>
@@ -169,8 +179,8 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
                 <span
                     className={styles.alertClassBadge}
                     style={{
-                        color: alertColors[event.alertClass][4],
-                        backgroundColor: alertColors[event.alertClass][0],
+                        color: alertColor[4],
+                        backgroundColor: alertColor[0],
                     }}
                 >
                     {event.alertClass}
@@ -182,18 +192,18 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
                 <div className={styles.infoRow}>
                     <span>
                         Started on:
-                        {formatStartDate(event.startTime)}
+                        {formatStartDate(event.startAt)}
                     </span>
                 </div>
                 <div className={styles.infoRow}>
                     <span>
                         Reach high threshold:
                         {' '}
-                        {formatPeakTime(event.reachesPeakAlertClassTime)}
+                        {formatPeakTime(event.reachesPeakAlertClassAt)}
                     </span>
                 </div>
                 <div className={styles.infoRow}>
-                    <span>{admin1Areas.map((r) => r.name).join(', ') || 'N/A'}</span>
+                    <span>{admin1Regions.map((r) => r.name).join(', ') || 'N/A'}</span>
                 </div>
             </div>
 
@@ -218,7 +228,7 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
                         <span>District name</span>
                         <span>Exposed Population</span>
                     </div>
-                    {admin3Areas.map((district) => (
+                    {admin3Regions.map((district) => (
                         <div key={district.placeCode} className={styles.districtTableRow}>
                             <span>{district.name}</span>
                             <span>{getExposedPopulation(district).toLocaleString()}</span>
@@ -232,20 +242,18 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
                 <CollapsibleSection title="Infrastructure Exposure">
                     <div className={styles.infraGrid}>
                         {infraExposure.map((item) => (
-                            <div key={item.type} className={styles.infraItem}>
+                            <div key={item.layerName} className={styles.infraItem}>
                                 <span className={styles.infraLabel}>
                                     Exposed
                                     {' '}
-                                    {getExposureLabel(item.type)}
+                                    {getExposureLabel(item.layerName)}
                                 </span>
                                 <span className={styles.infraValue}>
                                     {item.exposed.toLocaleString()}
-                                    {item.unit ? ` ${item.unit}` : ''}
                                     {' '}
                                     /
                                     {' '}
-                                    {item.total.toLocaleString()}
-                                    {item.unit ? ` ${item.unit}` : ''}
+                                    {item.total?.toLocaleString() ?? 'N/A'}
                                 </span>
                             </div>
                         ))}
@@ -255,7 +263,7 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
 
             {/* Data Sources Section */}
             <CollapsibleSection title="Data Sources">
-                {event.dataSources.map((source, index) => (
+                {event.forecastSources.map((source, index) => (
                     <div key={source} className={styles.sourceItem}>
                         <span className={styles.sourceLabel}>
                             {index === 0 ? 'Forecast Source' : 'Data Source'}
@@ -307,17 +315,17 @@ function formatStartTime(startTime: string): string {
  */
 function EventButton({ event, onEventClick }: EventButtonProps) {
     // Get admin0 (country level) for total population
-    const admin0 = event.exposedAdminAreas[0]?.[0];
+    const admin0 = event.exposedAdminAreas.find((a) => a.adminLevel === 0);
     const totalPopulation = getExposedPopulation(admin0);
 
-    // Get admin1 areas for affected areas
-    const admin1Areas = event.exposedAdminAreas[1] ?? [];
+    // Get admin1 regions for affected areas
+    const admin1Regions = event.exposedAdminAreas.filter((a) => a.adminLevel === 1);
 
     // Get admin3 count for exposed districts
-    const admin3Areas = event.exposedAdminAreas[3] ?? [];
-    const exposedDistrictsCount = admin3Areas.length;
+    const admin3Regions = event.exposedAdminAreas.filter((a) => a.adminLevel === 3);
+    const exposedDistrictsCount = admin3Regions.length;
 
-    const startTimeLabel = formatStartTime(event.startTime);
+    const startTimeLabel = formatStartTime(event.startAt);
 
     return (
         <div className={styles.eventCard}>
@@ -344,7 +352,7 @@ function EventButton({ event, onEventClick }: EventButtonProps) {
                 <div>
                     Affected areas:
                     <ul className={styles.areaList}>
-                        {admin1Areas.map((area) => (
+                        {admin1Regions.map((area) => (
                             <li key={area.placeCode}>{area.name}</li>
                         ))}
                     </ul>
@@ -358,7 +366,7 @@ function EventButton({ event, onEventClick }: EventButtonProps) {
 }
 
 interface NrwControlPanelProps {
-  eventData: EventOverviewData[];
+  eventData: EventResponseDto[];
   activeEventId: number | null;
   onEventClick: (eventId: number) => void;
   onRefreshAll: () => void;

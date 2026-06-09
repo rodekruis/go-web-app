@@ -203,5 +203,3 @@ export async function exportMapToPdf(
         throw error;
     }
 }
-
-export default exportMapToPdf;

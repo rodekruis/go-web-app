@@ -82,7 +82,7 @@ const getExposureColor = (
 
 // TODO: review the styling for perf in terms of what to render, and how to reduce
 // the number of features that must be looped through when styling
-
+/** @knipignore used for GlobalMap which is not currently used */
 export const styleAdmin0 = (
     feature: FeatureLike,
     selectedCountry: string,
@@ -100,6 +100,7 @@ export const styleAdmin0 = (
     });
 };
 
+/** @knipignore used for GlobalMap which is not currently used */
 export const styleAdmin1 = (
     feature: FeatureLike,
     selectedCountry: string,

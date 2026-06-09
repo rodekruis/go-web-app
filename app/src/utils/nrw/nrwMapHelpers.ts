@@ -19,21 +19,20 @@ import VectorTile from 'ol/source/VectorTile';
 import type Style from 'ol/style/Style';
 
 import { type MvtStyleCreator } from './nrwMapStyles';
-import type {
-    EventOverviewData,
-    MapLayerDetails,
-    SelectedEventDetails,
-} from './nrwMapTypes';
-import { ExposedItemType } from './nrwMapTypes';
+import type { SelectedEventDetails } from './nrwMapTypes';
 import {
     seedRepoEventDataUrl,
     seedRepoPopDataUrl,
 } from './nrwUrls';
+import {
+    type EventResponseDto,
+    type MapLayerDetailsDto,
+} from './shared-dtos';
 
 // Extract the map-relevant details from event data for a selected event
 // Returns null if no event is selected or event not found
-export function getSelectedEventDetails(
-    eventData: EventOverviewData[],
+export function getSelectedEventMapDetails(
+    eventData: EventResponseDto[],
     eventId: number | null,
 ): SelectedEventDetails | null {
     if (!eventId) return null;
@@ -47,36 +46,13 @@ export function getSelectedEventDetails(
     // Highest exposed population value per admin level
     const highestExposedPopulationByLevel: Record<number, number> = {};
 
-    if (event.exposedAdminAreas) {
-        // Parse the exposed admin area data by admin level
-        // to build the SelectedEventDetails
-        event.exposedAdminAreas.forEach((adminAreas, level) => {
-            if (!adminAreas || adminAreas.length === 0) {
-                return;
-            }
-
-            // Look in all admin areas for this level and extract both the exposed population,
-            // and the highest exposed population value for this level.
-            const populationByCode: Record<string, number> = {};
-            let highestExposedPopulationValue = 0;
-
-            adminAreas.forEach((area) => {
-                // Get the value of the exposed population for this admin area, if any
-                const eventPopulationData = area.exposure.find(
-                    (category) => category.type === ExposedItemType.Population,
-                );
-                const exposedPopulationValue = eventPopulationData?.exposed ?? 0;
-
-                // Store the value for this admin area, and update the highest value if needed
-                populationByCode[area.placeCode] = exposedPopulationValue;
-                if (exposedPopulationValue > highestExposedPopulationValue) {
-                    highestExposedPopulationValue = exposedPopulationValue;
-                }
-            });
-
-            // Set the data for this level
-            exposedPopulationPerAreaByLevel[level] = populationByCode;
-            highestExposedPopulationByLevel[level] = highestExposedPopulationValue;
+    // Build affected regions map by admin level
+    const exposedRegionsByLevel = new Map<number, string[]>();
+    if (event.exposedAdminAreas.length > 0) {
+        event.exposedAdminAreas.forEach((area) => {
+            const existing = exposedRegionsByLevel.get(area.adminLevel) ?? [];
+            existing.push(area.placeCode);
+            exposedRegionsByLevel.set(area.adminLevel, existing);
         });
     } else {
     // Log error and let caller handle the empty map.
@@ -101,6 +77,7 @@ export function getSelectedEventDetails(
  * @param getMapStyle A function for an MVT tile style creator
  * @returns A VectorTileLayer
  */
+/** @knipignore not for MVP */
 export const makeMvtLayerAsync = (
     selectedCountry: string,
     mapVectorTileUrl: string,
@@ -213,7 +190,7 @@ export function getAdminAreaZIndex(level: number): number {
 // Get the map layer z index offset on which the layer is drawn.
 // Higher numbers are drawn on top of other layers.
 // Change the numbers in this function to change the layering order. Use ints.
-export function getZIndexOffset(layerDetails: MapLayerDetails): number {
+export function getZIndexOffset(layerDetails: MapLayerDetailsDto): number {
     // Note: admin levels are handled by this function: getAdminAreaZIndex
     // Set the number below in relation to what the admin layer is drawn at.
 
@@ -260,7 +237,7 @@ export function getExtentForVectorData(
     return bufferExtent(extent, paddingAmount);
 }
 
-export interface InitialMapViewParams {
+interface InitialMapViewParams {
     zoom?: number;
     center?: {
         lon: number;
