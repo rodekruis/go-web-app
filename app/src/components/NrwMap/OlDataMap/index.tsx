@@ -441,7 +441,17 @@ export default function OlDataMap({
 
     return (
         <div className={styles.container}>
-            <div ref={mapRef} className={styles.map} />
+            <div className={styles.mapWrapper}>
+                <div ref={mapRef} className={styles.map} />
+                <button
+                    type="button"
+                    className={styles.layersButton}
+                    aria-label="Layers"
+                    // TODO: open layers panel
+                >
+                    〠
+                </button>
+            </div>
         </div>
     );
 }

@@ -4,7 +4,79 @@
     margin-top: 20px;
 }
 
-.map {
+.mapWrapper {
+    position: relative;
     width: 95%;
     height: 800px;
 }
+
+.map {
+    width: 100%;
+    height: 100%;
+    --control-border-color: #32323250;
+    --control-bg: #ffffff;
+    --control-bg-hover: #f4f4f4;
+    --control-text: #323232;
+    --control-border-radius: 0.7rem;
+}
+
+/* Restyle the OpenLayers zoom controls */
+.map :global(.ol-zoom) {
+    top: 1rem;
+    left: auto;
+    right: 1rem;
+    display: flex;
+    flex-direction: column;
+    background: none;
+    padding: 0;
+    border-radius: var(--control-border-radius);
+    border: 3px solid var(--control-border-color);
+}
+
+.map :global(.ol-zoom :is(.ol-zoom-in, .ol-zoom-out)) {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0;
+    background-color: var(--control-bg);
+    border: 1px solid var(--control-border-color);
+    color: var(--control-text);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.map :global(.ol-zoom :is(.ol-zoom-in, .ol-zoom-out):hover) {
+    background-color: var(--control-bg-hover);
+    outline: none;
+}
+
+.map :global(.ol-zoom .ol-zoom-in) {
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+
+.map :global(.ol-zoom .ol-zoom-out) {
+    border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* Layers button rendered below the zoom control */
+.layersButton {
+    position: absolute;
+    top: 7.5rem;
+    right: 1rem;
+    width: 2.85rem;
+    height: 2.85rem;
+    background-color: var(--control-bg);
+    color: var(--control-text);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: var(--control-border-radius);
+    border: 3.9px solid var(--control-border-color);
+    cursor: pointer;
+}
+
+.layersButton:hover {
+    background-color: var(--control-bg-hover);
+}
+

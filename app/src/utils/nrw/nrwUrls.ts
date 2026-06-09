@@ -65,6 +65,10 @@ const getSimplificationFactor = (adminLevel: number): number => {
     return factor;
 };
 
+// For debug, use this for the base query to directly call into the mpa server
+// This lets you access tables (such as debug.admin_areas) that are not wrapped by the API.
+// Note that the query structure is slightly different for this base url.
+// const baseQuery = 'http://localhost:9000/collections/debug.admin_areas/items?filter=';
 const baseQuery = `${ibfApiBackend}admin-areas?filter=`;
 const and = '%20AND%20';
 
