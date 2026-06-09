@@ -5,9 +5,10 @@
  * Source DTOs:
  * - services/api-service/src/events/dto/event-exposed-admin-area.dto.ts
  * - services/api-service/src/events/dto/event-response.dto.ts
+ * - services/api-service/src/events/dto/map-layer-details.dto.ts
  */
 
-import type { AlertClass, ForecastSource, HazardType, Layer } from './shared-enums';
+import type { AlertClass, ForecastSource, HazardType, Layer, MapLayerDisplayType, MapLayerInfoType } from './shared-enums';
 
 interface AdminAreaExposureDto {
     type: Layer;
@@ -42,4 +43,10 @@ export interface EventResponseDto {
     isOngoing: boolean;
     exposedAdminAreas: ExposedAdminAreaDto[];
     availableLayers: MapLayerDetailsDto[];
+}
+
+export interface MapLayerDetailsDto {
+    resourceId: string;
+    dataType: MapLayerInfoType;
+    displayType: MapLayerDisplayType;
 }

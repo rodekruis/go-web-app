@@ -11,26 +11,25 @@ import {
 } from '@ifrc-go/icons';
 import { Button } from '@ifrc-go/ui';
 
+import { ExposedItemType } from '#utils/nrw/nrwMapTypes';
 import {
-    type EventAdminAreaData,
-    type EventOverviewData,
-    ExposedItemType,
-    type ExposureCategory,
-} from '#utils/nrw/nrwMapTypes';
+    type EventResponseDto,
+    type ExposedAdminAreaDto,
+} from '#utils/nrw/shared-dtos';
 
 import styles from './styles.module.css';
 
 // Helper to get exposure value by type from the exposure array
 function getExposureByType(
-    exposure: ExposureCategory[] | undefined,
-    type: ExposedItemType,
-): ExposureCategory | undefined {
-    return exposure?.find((e) => e.type === type);
+    exposure: ExposedAdminAreaDto['exposure'] | undefined,
+    type: string,
+): ExposedAdminAreaDto['exposure'][number] | undefined {
+    return exposure?.find((e) => (e.type as string) === type);
 }
 
 // Helper to get population exposure from admin area
 function getExposedPopulation(
-    adminArea: EventAdminAreaData | undefined,
+    adminArea: ExposedAdminAreaDto | undefined,
 ): number {
     const popExposure = getExposureByType(
         adminArea?.exposure,
@@ -53,12 +52,12 @@ function getExposureLabel(type: ExposedItemType): string {
 }
 
 interface EventButtonProps {
-  event: EventOverviewData;
+  event: EventResponseDto;
   onEventClick: (eventId: number) => void;
 }
 
 interface EventDetailViewProps {
-  event: EventOverviewData;
+  event: EventResponseDto;
   onBack: () => void;
 }
 
@@ -141,16 +140,16 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
     // Get admin data at different levels
     // TODO: support multiple max admin levels
     // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41768
-    const admin0 = event.exposedAdminAreas[0]?.[0];
-    const admin1Regions = event.exposedAdminAreas[1] ?? [];
-    const admin3Regions = event.exposedAdminAreas[3] ?? [];
+    const admin0 = event.exposedAdminAreas.find((a) => a.adminLevel === 0);
+    const admin1Regions = event.exposedAdminAreas.filter((a) => a.adminLevel === 1);
+    const admin3Regions = event.exposedAdminAreas.filter((a) => a.adminLevel === 3);
 
     const totalPopulation = getExposedPopulation(admin0);
     const exposedDistrictsCount = admin3Regions.length;
 
     // Get exposure categories for infrastructure (exclude population)
     const infraExposure = admin0?.exposure.filter(
-        (e) => e.type !== ExposedItemType.Population,
+        (e) => (e.type as string) !== ExposedItemType.Population,
     ) ?? [];
 
     return (
@@ -173,14 +172,14 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
                 <div className={styles.infoRow}>
                     <span>
                         Started on:
-                        {formatStartDate(event.startTime)}
+                        {formatStartDate(event.startAt)}
                     </span>
                 </div>
                 <div className={styles.infoRow}>
                     <span>
                         Reach high threshold:
                         {' '}
-                        {formatPeakTime(event.reachesPeakAlertClassTime)}
+                        {formatPeakTime(event.reachesPeakAlertClassAt)}
                     </span>
                 </div>
                 <div className={styles.infoRow}>
@@ -227,16 +226,14 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
                                 <span className={styles.infraLabel}>
                                     Exposed
                                     {' '}
-                                    {getExposureLabel(item.type)}
+                                    {getExposureLabel(item.type as unknown as ExposedItemType)}
                                 </span>
                                 <span className={styles.infraValue}>
                                     {item.exposed.toLocaleString()}
-                                    {item.unit ? ` ${item.unit}` : ''}
                                     {' '}
                                     /
                                     {' '}
-                                    {item.total.toLocaleString()}
-                                    {item.unit ? ` ${item.unit}` : ''}
+                                    {item.total?.toLocaleString() ?? 'N/A'}
                                 </span>
                             </div>
                         ))}
@@ -246,7 +243,7 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
 
             {/* Data Sources Section */}
             <CollapsibleSection title="Data Sources">
-                {event.dataSources.map((source, index) => (
+                {event.forecastSources.map((source, index) => (
                     <div key={source} className={styles.sourceItem}>
                         <span className={styles.sourceLabel}>
                             {index === 0 ? 'Forecast Source' : 'Data Source'}
@@ -298,17 +295,17 @@ function formatStartTime(startTime: string): string {
  */
 function EventButton({ event, onEventClick }: EventButtonProps) {
     // Get admin0 (country level) for total population
-    const admin0 = event.exposedAdminAreas[0]?.[0];
+    const admin0 = event.exposedAdminAreas.find((a) => a.adminLevel === 0);
     const totalPopulation = getExposedPopulation(admin0);
 
     // Get admin1 regions for affected areas
-    const admin1Regions = event.exposedAdminAreas[1] ?? [];
+    const admin1Regions = event.exposedAdminAreas.filter((a) => a.adminLevel === 1);
 
     // Get admin3 count for exposed districts
-    const admin3Regions = event.exposedAdminAreas[3] ?? [];
+    const admin3Regions = event.exposedAdminAreas.filter((a) => a.adminLevel === 3);
     const exposedDistrictsCount = admin3Regions.length;
 
-    const startTimeLabel = formatStartTime(event.startTime);
+    const startTimeLabel = formatStartTime(event.startAt);
 
     return (
         <div className={styles.eventCard}>
@@ -341,7 +338,7 @@ function EventButton({ event, onEventClick }: EventButtonProps) {
 }
 
 interface NrwControlPanelProps {
-  eventData: EventOverviewData[];
+  eventData: EventResponseDto[];
   activeEventId: number | null;
   onEventClick: (eventId: number) => void;
   onRefreshAll: () => void;

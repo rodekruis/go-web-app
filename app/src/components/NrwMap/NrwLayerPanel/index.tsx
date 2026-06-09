@@ -16,15 +16,13 @@ import type MapOl from 'ol/Map';
 import useAlert from '#hooks/useAlert';
 import { getCountryMapData } from '#utils/nrw/nrwDataFetchHelpers';
 import { exportMapToPdf } from '#utils/nrw/nrwMapToPdfExporter';
-import {
-    type MapLayerDetails,
-    MapLayerInfoType,
-} from '#utils/nrw/nrwMapTypes';
+import { type MapLayerDetailsDto } from '#utils/nrw/shared-dtos';
+import { MapLayerInfoType } from '#utils/nrw/shared-enums';
 
 import styles from './styles.module.css';
 
 // TODO: move to loc file. See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41713
-function getLayerLabel(layer: MapLayerDetails): string {
+function getLayerLabel(layer: MapLayerDetailsDto): string {
     const labels: Record<string, string> = {
         [MapLayerInfoType.Population]: 'Population',
         [MapLayerInfoType.EventExtent]: 'Event Extent',
@@ -35,9 +33,9 @@ function getLayerLabel(layer: MapLayerDetails): string {
 }
 
 interface NrwLayerPanelProps {
-  eventLayers: MapLayerDetails[];
+  eventLayers: MapLayerDetailsDto[];
   countryCode: string;
-  onToggleMapLayer: (layerDetails: MapLayerDetails) => void;
+  onToggleMapLayer: (layerDetails: MapLayerDetailsDto) => void;
   onHideAllLayers: () => void;
   mapRef: React.RefObject<MapOl | null>;
   eventId?: number;
@@ -74,7 +72,7 @@ export default function NrwLayerPanel({
 
     // Get the list of country-level layers available for a country
     // TODO: use real data instead of mock. Pending IBF API
-    const [countryLayers, setCountryLayers] = useState<MapLayerDetails[]>([]);
+    const [countryLayers, setCountryLayers] = useState<MapLayerDetailsDto[]>([]);
 
     useEffect(() => {
         const loadCountryLayers = async () => {
@@ -105,7 +103,7 @@ export default function NrwLayerPanel({
     }, [isMapReady, eventLayers, countryLayers, onToggleMapLayer]);
 
     // Wrapper for the toggle callback that was passed in as a component prop
-    const handleToggleClick = useCallback((layer: MapLayerDetails) => {
+    const handleToggleClick = useCallback((layer: MapLayerDetailsDto) => {
         isInitialStateRef.current = false;
         onToggleMapLayer(layer);
     }, [onToggleMapLayer]);

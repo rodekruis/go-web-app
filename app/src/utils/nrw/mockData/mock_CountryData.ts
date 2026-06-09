@@ -1,9 +1,12 @@
 import {
     type CountryMapData,
     EventDataSources,
+} from '#utils/nrw/nrwMapTypes';
+
+import {
     MapLayerDisplayType,
     MapLayerInfoType,
-} from '#utils/nrw/nrwMapTypes';
+} from '../shared-enums';
 
 // Mock country map data for countries.
 export default {

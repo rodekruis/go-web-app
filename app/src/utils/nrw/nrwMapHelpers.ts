@@ -19,20 +19,20 @@ import VectorTile from 'ol/source/VectorTile';
 import type Style from 'ol/style/Style';
 
 import { type MvtStyleCreator } from './nrwMapStyles';
-import type {
-    EventOverviewData,
-    MapLayerDetails,
-    SelectedEventMapDetails,
-} from './nrwMapTypes';
+import type { SelectedEventMapDetails } from './nrwMapTypes';
 import {
     seedRepoEventDataUrl,
     seedRepoPopDataUrl,
 } from './nrwUrls';
+import {
+    type EventResponseDto,
+    type MapLayerDetailsDto,
+} from './shared-dtos';
 
 // Extract the map-relevant details from event data for a selected event
 // Returns null if no event is selected or event not found
 export function getSelectedEventMapDetails(
-    eventData: EventOverviewData[],
+    eventData: EventResponseDto[],
     eventId: number | null,
 ): SelectedEventMapDetails | null {
     if (!eventId) return null;
@@ -42,12 +42,11 @@ export function getSelectedEventMapDetails(
 
     // Build affected regions map by admin level
     const exposedRegionsByLevel = new Map<number, string[]>();
-    if (event.exposedAdminAreas) {
-        event.exposedAdminAreas.forEach((adminAreas, level) => {
-            if (adminAreas && adminAreas.length > 0) {
-                const codes = adminAreas.map((area) => area.placeCode);
-                exposedRegionsByLevel.set(level, codes);
-            }
+    if (event.exposedAdminAreas.length > 0) {
+        event.exposedAdminAreas.forEach((area) => {
+            const existing = exposedRegionsByLevel.get(area.adminLevel) ?? [];
+            existing.push(area.placeCode);
+            exposedRegionsByLevel.set(area.adminLevel, existing);
         });
     } else {
     // Log error and let caller handle the empty map.
@@ -183,7 +182,7 @@ export function getAdminAreaZIndex(level: number): number {
 // Get the map layer z index offset on which the layer is drawn.
 // Higher numbers are drawn on top of other layers.
 // Change the numbers in this function to change the layering order. Use ints.
-export function getZIndexOffset(layerDetails: MapLayerDetails): number {
+export function getZIndexOffset(layerDetails: MapLayerDetailsDto): number {
     // Note: admin levels are handled by this function: getAdminAreaZIndex
     // Set the number below in relation to what the admin layer is drawn at.
 
