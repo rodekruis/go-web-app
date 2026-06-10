@@ -1,4 +1,7 @@
-import { useCallback } from 'react';
+import {
+    type RefObject,
+    useCallback,
+} from 'react';
 import { Button } from '@ifrc-go/ui';
 import type MapOl from 'ol/Map';
 
@@ -11,7 +14,7 @@ import styles from './styles.module.css';
 interface NrwDataPanelProps {
     selectedCountry: string;
     adminDetails: AdminAreaDetails | null;
-    mapRef: React.RefObject<MapOl | null>;
+    mapRef: RefObject<MapOl | null>;
     eventId?: number;
     peakDay?: string;
 }
