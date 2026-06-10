@@ -1,12 +1,14 @@
 .container {
     background-color: #e0f7f7;
     padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .title {
     font-size: 14px;
     font-weight: 600;
-    margin-bottom: 12px;
     color: #333;
 }
 
@@ -14,8 +16,19 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    align-items: flex-start;
+}
+
+.layer-link {
+    border: none;
+    background: none;
+    padding: 0;
+    color: #000;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
 }
 
 .hide-all-button {
-    margin-top: 12px;
+    display: flex;
 }

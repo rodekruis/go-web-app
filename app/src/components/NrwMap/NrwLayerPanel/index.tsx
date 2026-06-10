@@ -10,7 +10,6 @@ import {
     useRef,
     useState,
 } from 'react';
-import { Button } from '@ifrc-go/ui';
 
 import { getCountryMapData } from '#utils/nrw/nrwDataFetchHelpers';
 import {
@@ -123,15 +122,17 @@ export default function NrwLayerPanel({
             {eventLayers.length > 0 && (
                 <div className={styles.buttonGroup}>
                     {eventLayers.map((layer) => (
-                        <Button
+                        <button
                             key={`${layer.dataType}_${layer.resourceId}`}
                             name={`toggle_${layer.dataType}_${layer.resourceId}`}
+                            type="button"
+                            className={styles.layerLink}
                             onClick={() => handleToggleClick(layer)}
                         >
                             Toggle
                             {' '}
                             {getLayerLabel(layer)}
-                        </Button>
+                        </button>
                     ))}
                 </div>
             )}
@@ -139,23 +140,30 @@ export default function NrwLayerPanel({
             {countryLayers.length > 0 && (
                 <div className={styles.buttonGroup}>
                     {countryLayers.map((layer) => (
-                        <Button
+                        <button
                             key={`${layer.dataType}_${layer.resourceId}`}
                             name={`toggle_country_${layer.dataType}`}
+                            type="button"
+                            className={styles.layerLink}
                             onClick={() => handleToggleClick(layer)}
                         >
                             Toggle
                             {' '}
                             {getLayerLabel(layer)}
-                        </Button>
+                        </button>
                     ))}
                 </div>
             )}
 
             <div className={styles.hideAllButton}>
-                <Button name="hide-all-layers" onClick={handleHideAllClick}>
+                <button
+                    name="hide-all-layers"
+                    type="button"
+                    className={styles.layerLink}
+                    onClick={handleHideAllClick}
+                >
                     Hide All Layers
-                </Button>
+                </button>
             </div>
         </div>
     );
