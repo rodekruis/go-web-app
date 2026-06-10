@@ -218,23 +218,13 @@ export default function NrwMapContainer() {
                 <NrwDataPanel
                     selectedCountry={selectedCountry}
                     adminDetails={adminDetails}
+                    mapRef={mapRef}
+                    eventId={activeEventId ?? undefined}
+                    peakDay={selectedEventPeakDay}
                 />
             </div>
             <div className={styles.mainContent}>
                 <div className={styles.controlPanelColumn}>
-                    <div id={PrintElementId.LayerPanel}>
-                        <NrwLayerPanel
-                            eventLayers={selectedEventLayers}
-                            countryCode={selectedCountry}
-                            onToggleMapLayer={toggleMapLayer}
-                            onHideAllLayers={hideAllLayers}
-                            mapRef={mapRef}
-                            eventId={activeEventId ?? undefined}
-                            peakDay={selectedEventPeakDay}
-                            initialLayerIds={initialLayerIds}
-                            isMapReady={isMapReady}
-                        />
-                    </div>
                     <div id={PrintElementId.ControlPanel}>
                         <NrwControlPanel
                             eventData={eventData}
@@ -257,6 +247,19 @@ export default function NrwMapContainer() {
                         onSelect={handleMapItemSelected}
                         onViewChange={handleMapViewChanged}
                         onMapReady={(map: MapOl) => { mapRef.current = map; }}
+                        layerPanel={(
+                            <div id={PrintElementId.LayerPanel}>
+                                <NrwLayerPanel
+                                    eventLayers={selectedEventLayers}
+                                    countryCode={selectedCountry}
+                                    onToggleMapLayer={toggleMapLayer}
+                                    onHideAllLayers={hideAllLayers}
+                                    initialLayerIds={initialLayerIds}
+                                    activeLayerIds={activeLayerIds}
+                                    isMapReady={isMapReady}
+                                />
+                            </div>
+                        )}
                     />
                 </div>
             </div>
