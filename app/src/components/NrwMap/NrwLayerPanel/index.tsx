@@ -11,11 +11,8 @@ import {
     useState,
 } from 'react';
 import { Button } from '@ifrc-go/ui';
-import type MapOl from 'ol/Map';
 
-import useAlert from '#hooks/useAlert';
 import { getCountryMapData } from '#utils/nrw/nrwDataFetchHelpers';
-import { exportMapToPdf } from '#utils/nrw/nrwMapToPdfExporter';
 import {
     type MapLayerDetails,
     MapLayerInfoType,
@@ -39,9 +36,6 @@ interface NrwLayerPanelProps {
   countryCode: string;
   onToggleMapLayer: (layerDetails: MapLayerDetails) => void;
   onHideAllLayers: () => void;
-  mapRef: React.RefObject<MapOl | null>;
-  eventId?: number;
-  peakDay?: string;
   // Resource IDs of layers that should be on on initial view
   initialLayerIds: string[];
   // Is the map setup complete
@@ -56,14 +50,9 @@ export default function NrwLayerPanel({
     countryCode,
     onToggleMapLayer,
     onHideAllLayers,
-    mapRef,
-    eventId,
-    peakDay,
     initialLayerIds,
     isMapReady,
 }: NrwLayerPanelProps) {
-    const alert = useAlert();
-
     // Whether the panel is still in its initial state (no user interaction yet).
     const isInitialStateRef = useRef(true);
 
@@ -116,38 +105,11 @@ export default function NrwLayerPanel({
         onHideAllLayers();
     }, [onHideAllLayers]);
 
-    const handleExportMapClick = useCallback(async () => {
-        isInitialStateRef.current = false;
-        if (mapRef.current) {
-            const filenameParts = [countryCode];
-            if (eventId) {
-                filenameParts.push(`event_${eventId}`);
-            }
-            if (peakDay) {
-                filenameParts.push(`peak_${peakDay}`);
-            }
-            try {
-                await exportMapToPdf(mapRef.current, filenameParts);
-            } catch (error) {
-                alert.show('Failed to export map. Please try again.', { variant: 'danger' });
-                console.error('Map export error:', error);
-            }
-        }
-    }, [mapRef, countryCode, eventId, peakDay, alert]);
-
     const hasAnyLayers = eventLayers.length > 0 || countryLayers.length > 0;
 
     if (!hasAnyLayers) {
         return (
             <div className={styles.container}>
-                <div className={styles.exportButtonRow}>
-                    <Button
-                        name="export-map"
-                        onClick={handleExportMapClick}
-                    >
-                        Export
-                    </Button>
-                </div>
                 <div className={styles.title}>Map Layers</div>
                 <p>No layers available</p>
             </div>
@@ -156,14 +118,6 @@ export default function NrwLayerPanel({
 
     return (
         <div className={styles.container}>
-            <div className={styles.exportButtonRow}>
-                <Button
-                    name="export-map"
-                    onClick={handleExportMapClick}
-                >
-                    Export
-                </Button>
-            </div>
             <div className={styles.title}>Map Layers</div>
 
             {eventLayers.length > 0 && (

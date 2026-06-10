@@ -88,3 +88,16 @@
     background-color: var(--control-bg-hover);
 }
 
+/* Layer panel overlay, opens to the left of the layers button */
+.layerPanelOverlay {
+    position: absolute;
+    top: 7.5rem;
+    right: 4.5rem;
+    z-index: 10;
+    max-width: 300px;
+    max-height: calc(100% - 9rem);
+    overflow-y: auto;
+    border-radius: var(--control-border-radius);
+    filter: var(--control-shadow);
+}
+

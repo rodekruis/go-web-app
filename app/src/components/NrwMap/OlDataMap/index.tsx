@@ -1,6 +1,8 @@
 import {
+    type ReactNode,
     useEffect,
     useRef,
+    useState,
 } from 'react';
 import { View } from 'ol';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
@@ -76,6 +78,9 @@ interface OlDataMapProps {
   // Callback when the map instance is ready
   // This is needed to pass references of the map for exporting to PDF
   onMapReady?: (map: MapOl) => void;
+
+  // Optional layer panel rendered as an overlay when the layers button is pressed
+  layerPanel?: ReactNode;
 }
 
 type AddAdminLayerFunction = (level: 1 | 2 | 3, country?: string, parentCode?: string) => void;
@@ -97,8 +102,10 @@ export default function OlDataMap({
     onSelect,
     onViewChange,
     onMapReady,
+    layerPanel,
 }: OlDataMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
+    const [isLayerPanelOpen, setIsLayerPanelOpen] = useState(false);
     const mapInstanceRef = useRef<MapOl | null>(null);
     const stateRef = useRef<MapViewState | null>(null);
     const adminLayersRef = useRef<Map<number, VectorLayer>>(new Map());
@@ -443,11 +450,22 @@ export default function OlDataMap({
         <div className={styles.container}>
             <div className={styles.mapWrapper}>
                 <div ref={mapRef} className={styles.map} />
+                {layerPanel && (
+                    <div
+                        className={styles.layerPanelOverlay}
+                        // Keep the panel mounted so deeplinked layers load on mount,
+                        // but hide it visually until the user opens it.
+                        hidden={!isLayerPanelOpen}
+                    >
+                        {layerPanel}
+                    </div>
+                )}
                 <button
                     type="button"
                     className={styles.layersButton}
                     aria-label="Layers"
-                    // TODO: open layers panel
+                    aria-expanded={isLayerPanelOpen}
+                    onClick={() => setIsLayerPanelOpen((prev) => !prev)}
                 >
                     〠
                 </button>
