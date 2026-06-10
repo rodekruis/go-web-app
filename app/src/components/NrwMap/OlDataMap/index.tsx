@@ -79,8 +79,8 @@ interface OlDataMapProps {
   // This is needed to pass references of the map for exporting to PDF
   onMapReady?: (map: MapOl) => void;
 
-  // Optional layer panel rendered as an overlay when the layers button is pressed
-  layerPanel?: ReactNode;
+  // Layer panel rendered as an overlay when the layers button is pressed
+  layerPanel: ReactNode;
 }
 
 type AddAdminLayerFunction = (level: 1 | 2 | 3, country?: string, parentCode?: string) => void;
@@ -450,16 +450,14 @@ export default function OlDataMap({
         <div className={styles.container}>
             <div className={styles.mapWrapper}>
                 <div ref={mapRef} className={styles.map} />
-                {layerPanel && (
-                    <div
-                        className={styles.layerPanelOverlay}
-                        // Keep the panel mounted so deeplinked layers load on mount,
-                        // but hide it visually until the user opens it.
-                        hidden={!isLayerPanelOpen}
-                    >
-                        {layerPanel}
-                    </div>
-                )}
+                <div
+                    className={styles.layerPanelOverlay}
+                    // Keep the panel mounted so deeplinked layers load on mount,
+                    // but hide it visually until the user opens it.
+                    hidden={!isLayerPanelOpen}
+                >
+                    {layerPanel}
+                </div>
                 <button
                     type="button"
                     className={styles.layersButton}
