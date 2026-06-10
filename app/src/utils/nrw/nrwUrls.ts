@@ -14,7 +14,8 @@ import {
 
 // Map URLs
 const maptilerBaseUrl = 'https://api.maptiler.com';
-const maptilerSimpleStylePath = '/maps/019c41d2-17c7-7e5e-9a47-d3b3f9515a5b/style.json';
+const maptilerSimpleStylePath = '/maps/019eb13e-4bbd-743d-995d-970d7c3a2633/style.json';
+
 // Simple, default IBF data map
 export const mapUrlSimpleStyleJson = `${maptilerBaseUrl}${maptilerSimpleStylePath}?key=${maptilerApiKey}`;
 

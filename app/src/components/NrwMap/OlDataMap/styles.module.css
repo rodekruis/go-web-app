@@ -13,7 +13,7 @@
     --control-bg-hover: #f4f4f4;
     --control-text: #323232;
     --control-border-radius: 0.7rem;
-    --control-shadow: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+    --control-shadow: drop-shadow(0 0 10px rgba(0, 0, 0, 0.08));
 }
 
 .map {
