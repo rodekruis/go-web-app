@@ -35,7 +35,7 @@ import type {
     SelectedEventMapDetails,
 } from '#utils/nrw/nrwMapTypes';
 import { MapLayerDisplayType } from '#utils/nrw/nrwMapTypes';
-import { mapUrlSimpleStyleJson } from '#utils/nrw/nrwUrls';
+import { mapUrlStyleJson } from '#utils/nrw/nrwUrls';
 
 import { createMapPopupPanel } from '../NrwMapPopupPanel';
 
@@ -254,7 +254,7 @@ export default function OlDataMap({
             });
 
             // Apply base map style
-            apply(mapInstanceRef.current, mapUrlSimpleStyleJson);
+            apply(mapInstanceRef.current, mapUrlStyleJson);
             mapInstanceRef.current.addOverlay(mapPopup.overlay);
 
             // Expose addLayer function to parent

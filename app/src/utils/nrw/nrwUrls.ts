@@ -12,12 +12,11 @@ import {
     PLACE_CODE_FIELD_KEY,
 } from './nrwConstants';
 
-// Map URLs
+// Base map URL
 const maptilerBaseUrl = 'https://api.maptiler.com';
-const maptilerSimpleStylePath = '/maps/019eb13e-4bbd-743d-995d-970d7c3a2633/style.json';
-
-// Simple, default IBF data map
-export const mapUrlSimpleStyleJson = `${maptilerBaseUrl}${maptilerSimpleStylePath}?key=${maptilerApiKey}`;
+// ID of the map style we created in Map Tiler.
+const mapGuid = '019eb13e-4bbd-743d-995d-970d7c3a2633';
+export const mapUrlStyleJson = `${maptilerBaseUrl}/maps/${mapGuid}/style.json?key=${maptilerApiKey}`;
 
 // Raw GitHub URLs for direct file access
 // TODO: Once we have working API, we'll need a conditional here to target either the
