@@ -255,6 +255,7 @@ export default function NrwMapContainer() {
                                     onToggleMapLayer={toggleMapLayer}
                                     onHideAllLayers={hideAllLayers}
                                     initialLayerIds={initialLayerIds}
+                                    activeLayerIds={activeLayerIds}
                                     isMapReady={isMapReady}
                                 />
                             </div>

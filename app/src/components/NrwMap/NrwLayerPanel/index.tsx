@@ -37,6 +37,8 @@ interface NrwLayerPanelProps {
   onHideAllLayers: () => void;
   // Resource IDs of layers that should be on on initial view
   initialLayerIds: string[];
+  // Resource IDs of currently visible layers
+  activeLayerIds: string[];
   // Is the map setup complete
   isMapReady: boolean;
 }
@@ -50,6 +52,7 @@ export default function NrwLayerPanel({
     onToggleMapLayer,
     onHideAllLayers,
     initialLayerIds,
+    activeLayerIds,
     isMapReady,
 }: NrwLayerPanelProps) {
     // Whether the panel is still in its initial state (no user interaction yet).
@@ -64,10 +67,8 @@ export default function NrwLayerPanel({
     // TODO: use real data instead of mock. Pending IBF API
     const [countryLayers, setCountryLayers] = useState<MapLayerDetails[]>([]);
 
-    // Track displayed layers by resource ID
-    const [shownLayerIds, setShownLayerIds] = useState<Set<string>>(
-        () => new Set(initialLayerIds),
-    );
+    // Which layers are shown, passed in from useNrwDataLoader.
+    const shownLayerIds = new Set(activeLayerIds);
 
     useEffect(() => {
         const loadCountryLayers = async () => {
@@ -100,22 +101,12 @@ export default function NrwLayerPanel({
     // Wrapper for the toggle callback that was passed in as a component prop
     const handleToggleClick = useCallback((layer: MapLayerDetails) => {
         isInitialStateRef.current = false;
-        setShownLayerIds((prev) => {
-            const next = new Set(prev);
-            if (next.has(layer.resourceId)) {
-                next.delete(layer.resourceId);
-            } else {
-                next.add(layer.resourceId);
-            }
-            return next;
-        });
         onToggleMapLayer(layer);
     }, [onToggleMapLayer]);
 
     // Wrapper for the hide all callback that was passed in as a component prop
     const handleHideAllClick = useCallback(() => {
         isInitialStateRef.current = false;
-        setShownLayerIds(new Set());
         onHideAllLayers();
     }, [onHideAllLayers]);
 
