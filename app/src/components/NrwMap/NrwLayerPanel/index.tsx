@@ -64,6 +64,11 @@ export default function NrwLayerPanel({
     // TODO: use real data instead of mock. Pending IBF API
     const [countryLayers, setCountryLayers] = useState<MapLayerDetails[]>([]);
 
+    // Track displayed layers by resource ID
+    const [shownLayerIds, setShownLayerIds] = useState<Set<string>>(
+        () => new Set(initialLayerIds),
+    );
+
     useEffect(() => {
         const loadCountryLayers = async () => {
             const data = await getCountryMapData();
@@ -95,12 +100,22 @@ export default function NrwLayerPanel({
     // Wrapper for the toggle callback that was passed in as a component prop
     const handleToggleClick = useCallback((layer: MapLayerDetails) => {
         isInitialStateRef.current = false;
+        setShownLayerIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(layer.resourceId)) {
+                next.delete(layer.resourceId);
+            } else {
+                next.add(layer.resourceId);
+            }
+            return next;
+        });
         onToggleMapLayer(layer);
     }, [onToggleMapLayer]);
 
     // Wrapper for the hide all callback that was passed in as a component prop
     const handleHideAllClick = useCallback(() => {
         isInitialStateRef.current = false;
+        setShownLayerIds(new Set());
         onHideAllLayers();
     }, [onHideAllLayers]);
 
@@ -129,7 +144,7 @@ export default function NrwLayerPanel({
                             className={styles.layerLink}
                             onClick={() => handleToggleClick(layer)}
                         >
-                            Toggle
+                            {shownLayerIds.has(layer.resourceId) ? '🌈' : '☁️'}
                             {' '}
                             {getLayerLabel(layer)}
                         </button>
@@ -147,7 +162,7 @@ export default function NrwLayerPanel({
                             className={styles.layerLink}
                             onClick={() => handleToggleClick(layer)}
                         >
-                            Toggle
+                            {shownLayerIds.has(layer.resourceId) ? '🌈' : '☁️'}
                             {' '}
                             {getLayerLabel(layer)}
                         </button>
@@ -162,6 +177,8 @@ export default function NrwLayerPanel({
                     className={styles.layerLink}
                     onClick={handleHideAllClick}
                 >
+                    ✖️
+                    {' '}
                     Hide All Layers
                 </button>
             </div>
