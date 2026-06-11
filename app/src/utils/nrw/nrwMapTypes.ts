@@ -4,30 +4,6 @@
 
 import { type MapLayerDetailsDto } from './shared-dtos';
 
-// The types of items with exposure data
-export enum ExposedItemType {
-  Population = 'population',
-  Buildings = 'buildings',
-  Roads = 'roads',
-  Schools = 'schools',
-  Clinics = 'clinics',
-}
-
-// Data for showing exposure of a given ExposedItemType
-export interface ExposureCategory {
-  type: ExposedItemType;
-  exposed: number;
-  total: number;
-}
-
-// Event data specific to an admin area. Each admin area with exposure has one of these.
-export interface EventAdminAreaData {
-  placeCode: string;
-  adminLevel: number;
-  name: string;
-  exposure: ExposureCategory[];
-}
-
 // Country-level non-event data
 // This is a work in progress still and will either have more data added to it,
 // or merged into some other source.

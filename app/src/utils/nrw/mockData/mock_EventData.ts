@@ -1,7 +1,7 @@
-import { ExposedItemType } from '../nrwMapTypes';
 import { type EventResponseDto } from '../shared-dtos';
 import {
     AlertClass,
+    ExposedItemType,
     ForecastSource,
     HazardType,
     MapLayerDisplayType,
