@@ -1,3 +1,7 @@
+// 2026-06-11: Not used right now; because we're using JSON from the seed repo.
+// However, this file will help when we change the format when the backend is
+// hooked up. After that: this will be part of tests.
+
 import {
     type CountryMapData,
     EventDataSources,

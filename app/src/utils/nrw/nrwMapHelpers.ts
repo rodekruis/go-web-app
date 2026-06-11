@@ -70,6 +70,7 @@ export function getSelectedEventMapDetails(
  * @param getMapStyle A function for an MVT tile style creator
  * @returns A VectorTileLayer
  */
+/** @knipignore not for MVP */
 export const makeMvtLayerAsync = (
     selectedCountry: string,
     mapVectorTileUrl: string,
@@ -229,7 +230,7 @@ export function getExtentForVectorData(
     return bufferExtent(extent, paddingAmount);
 }
 
-export interface InitialMapViewParams {
+interface InitialMapViewParams {
     zoom?: number;
     center?: {
         lon: number;

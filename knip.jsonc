@@ -12,6 +12,11 @@
         // TODO: need to fix issues before un-ignoring
         "packages/go-ui-storybook"
     ],
+    "ignore": [
+      "app/src/utils/nrw/shared-enums.ts",
+      "app/src/components/NrwMap/OlGlobalMap/index.tsx",
+      "app/src/utils/nrw/mockData/mock_CountryData.ts"
+    ],
     "workspaces": {
         "app": {
             "ignoreDependencies": [

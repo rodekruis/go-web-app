@@ -18,6 +18,7 @@ export interface CountryMapData {
 }
 
 // Supported event data sources for a country.
+/** @knipignore we'll use this for toggling between NRW and MRW data sources */
 export enum EventDataSources {
   Nrw = 'nrw',
   Mrw = 'mrw',
