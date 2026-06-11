@@ -22,6 +22,8 @@ interface NrwDataPanelProps {
 /**
  * Debug component for showing country data. *
  * This will change once we have a design. *
+ * This panel will be deleted once other panels are in place *
+ * The export button will be moved to a header or somewhere else *
  * @param selectedCountry - ISO_A3 code of the selected country
  * @param adminDetails - details of the selected admin area, if any
  * @returns A component that is intended to be nested within a NrwMapContainer.
