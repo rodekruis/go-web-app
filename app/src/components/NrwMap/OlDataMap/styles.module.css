@@ -82,6 +82,7 @@
     line-height: 1;
     border-radius: var(--control-border-radius);
     border: 3.9px solid var(--control-border-color);
+    background-clip: padding-box;
     cursor: pointer;
     filter: var(--control-shadow);
 }
