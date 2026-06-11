@@ -269,7 +269,7 @@ jobs:
     defaults:
       run:
         working-directory: app
-    needs: [lint, lint-css, test, ui]
+    needs: [lint, lint-css, test, unused, ui]
     steps:
       - uses: actions/checkout@v4
       - name: Install pnpm
