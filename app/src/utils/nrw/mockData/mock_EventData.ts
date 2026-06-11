@@ -4,7 +4,6 @@ import {
     AlertClass,
     ForecastSource,
     HazardType,
-    type Layer,
     MapLayerDisplayType,
     MapLayerInfoType,
 } from '../shared-enums';
@@ -35,22 +34,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Malawi',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 48400,
                         total: 48400,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 3200,
                         total: 12000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 8,
                         total: 32,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 3,
                         total: 15,
                     },
@@ -63,22 +62,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Central',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 48400,
                         total: 48400,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 3200,
                         total: 12000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 8,
                         total: 32,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 3,
                         total: 15,
                     },
@@ -91,22 +90,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Lilongwe City',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 48400,
                         total: 48400,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 3200,
                         total: 12000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 8,
                         total: 32,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 3,
                         total: 15,
                     },
@@ -119,22 +118,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Area 16',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 3200,
                         total: 3200,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 400,
                         total: 2000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 1,
                         total: 5,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 0,
                         total: 2,
                     },
@@ -146,22 +145,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Area 13',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 8500,
                         total: 8500,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 800,
                         total: 3000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 2,
                         total: 8,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 4,
                     },
@@ -173,22 +172,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Area 12',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 12400,
                         total: 12400,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 1000,
                         total: 3500,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 2,
                         total: 8,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 4,
                     },
@@ -200,22 +199,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Area 10',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 18700,
                         total: 18700,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 700,
                         total: 2500,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 2,
                         total: 7,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 3,
                     },
@@ -227,22 +226,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Area 1',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 5600,
                         total: 5600,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 300,
                         total: 1000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 1,
                         total: 4,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 0,
                         total: 2,
                     },
@@ -278,22 +277,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Malawi',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 44600,
                         total: 44600,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 5600,
                         total: 15000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 15,
                         total: 48,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 6,
                         total: 22,
                     },
@@ -306,22 +305,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Southern',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 44600,
                         total: 44600,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 5600,
                         total: 15000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 15,
                         total: 48,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 6,
                         total: 22,
                     },
@@ -334,22 +333,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Zomba',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 44600,
                         total: 44600,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 5600,
                         total: 15000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 15,
                         total: 48,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 6,
                         total: 22,
                     },
@@ -362,22 +361,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'SC Mkumbira',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 2100,
                         total: 2100,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 700,
                         total: 2500,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 2,
                         total: 8,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 4,
                     },
@@ -389,22 +388,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'TA Mwambo',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 15800,
                         total: 15800,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 2000,
                         total: 5000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 5,
                         total: 15,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 2,
                         total: 7,
                     },
@@ -416,22 +415,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'TA Mlumbe',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 19500,
                         total: 19500,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 2100,
                         total: 5500,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 6,
                         total: 17,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 2,
                         total: 8,
                     },
@@ -443,22 +442,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'TA Kuntumanji',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 7200,
                         total: 7200,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 800,
                         total: 2000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 2,
                         total: 8,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 3,
                     },
@@ -490,22 +489,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Malawi',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 29600,
                         total: 29600,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 2100,
                         total: 10500,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 5,
                         total: 28,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 2,
                         total: 12,
                     },
@@ -518,22 +517,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Central',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 11700,
                         total: 11700,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 1000,
                         total: 5500,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 2,
                         total: 14,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 6,
                     },
@@ -545,22 +544,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Southern',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 17900,
                         total: 17900,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 1100,
                         total: 5000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 3,
                         total: 14,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 6,
                     },
@@ -573,22 +572,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Lilongwe City',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 11700,
                         total: 11700,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 1000,
                         total: 5500,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 2,
                         total: 14,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 6,
                     },
@@ -600,22 +599,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Zomba',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 17900,
                         total: 17900,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 1100,
                         total: 5000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 3,
                         total: 14,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 6,
                     },
@@ -628,22 +627,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Area 16',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 3200,
                         total: 3200,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 400,
                         total: 2500,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 1,
                         total: 6,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 0,
                         total: 3,
                     },
@@ -655,22 +654,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'Area 13',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 8500,
                         total: 8500,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 600,
                         total: 3000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 1,
                         total: 8,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 3,
                     },
@@ -682,22 +681,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'SC Mkumbira',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 2100,
                         total: 2100,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 300,
                         total: 1500,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 1,
                         total: 4,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 0,
                         total: 2,
                     },
@@ -709,22 +708,22 @@ export const mockAllEventsData_MW: EventResponseDto[] = [
                 name: 'TA Mwambo',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 15800,
                         total: 15800,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 800,
                         total: 3500,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 2,
                         total: 10,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 4,
                     },
@@ -764,22 +763,22 @@ export const mockAllEventsData_ZM: EventResponseDto[] = [
                 name: 'Zambia',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 13100,
                         total: 13100,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 1800,
                         total: 11000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 3,
                         total: 18,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 8,
                     },
@@ -792,22 +791,22 @@ export const mockAllEventsData_ZM: EventResponseDto[] = [
                 name: 'Northwestern',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 13100,
                         total: 13100,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 1800,
                         total: 11000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 3,
                         total: 18,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 8,
                     },
@@ -820,22 +819,22 @@ export const mockAllEventsData_ZM: EventResponseDto[] = [
                 name: 'Mufumbwe',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 13100,
                         total: 13100,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 1800,
                         total: 11000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 3,
                         total: 18,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 8,
                     },
@@ -848,22 +847,22 @@ export const mockAllEventsData_ZM: EventResponseDto[] = [
                 name: 'Shukwe',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 4200,
                         total: 4200,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 700,
                         total: 5000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 1,
                         total: 8,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 0,
                         total: 4,
                     },
@@ -875,22 +874,22 @@ export const mockAllEventsData_ZM: EventResponseDto[] = [
                 name: 'Kalambu',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 8900,
                         total: 8900,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 1100,
                         total: 6000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 2,
                         total: 10,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 4,
                     },
@@ -926,22 +925,22 @@ export const mockAllEventsData_ZM: EventResponseDto[] = [
                 name: 'Zambia',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 18800,
                         total: 18800,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 4500,
                         total: 18000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 7,
                         total: 25,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 4,
                         total: 14,
                     },
@@ -954,22 +953,22 @@ export const mockAllEventsData_ZM: EventResponseDto[] = [
                 name: 'Northwestern',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 18800,
                         total: 18800,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 4500,
                         total: 18000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 7,
                         total: 25,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 4,
                         total: 14,
                     },
@@ -982,22 +981,22 @@ export const mockAllEventsData_ZM: EventResponseDto[] = [
                 name: 'Mufumbwe',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 18800,
                         total: 18800,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 4500,
                         total: 18000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 7,
                         total: 25,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 4,
                         total: 14,
                     },
@@ -1010,22 +1009,22 @@ export const mockAllEventsData_ZM: EventResponseDto[] = [
                 name: 'Kashima West',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 12500,
                         total: 12500,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 3000,
                         total: 12000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 5,
                         total: 16,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 3,
                         total: 9,
                     },
@@ -1037,22 +1036,22 @@ export const mockAllEventsData_ZM: EventResponseDto[] = [
                 name: 'Kashima East',
                 exposure: [
                     {
-                        type: ExposedItemType.Population as unknown as Layer,
+                        type: ExposedItemType.Population,
                         exposed: 6300,
                         total: 6300,
                     },
                     {
-                        type: ExposedItemType.Roads as unknown as Layer,
+                        type: ExposedItemType.Roads,
                         exposed: 1500,
                         total: 6000,
                     },
                     {
-                        type: ExposedItemType.Schools as unknown as Layer,
+                        type: ExposedItemType.Schools,
                         exposed: 2,
                         total: 9,
                     },
                     {
-                        type: ExposedItemType.Clinics as unknown as Layer,
+                        type: ExposedItemType.Clinics,
                         exposed: 1,
                         total: 5,
                     },

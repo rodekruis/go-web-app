@@ -1,8 +1,7 @@
 import {
     type CountryMapData,
     EventDataSources,
-} from '#utils/nrw/nrwMapTypes';
-
+} from '../nrwMapTypes';
 import {
     MapLayerDisplayType,
     MapLayerInfoType,

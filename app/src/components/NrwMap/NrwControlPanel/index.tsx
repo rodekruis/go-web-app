@@ -22,9 +22,9 @@ import styles from './styles.module.css';
 // Helper to get exposure value by type from the exposure array
 function getExposureByType(
     exposure: ExposedAdminAreaDto['exposure'] | undefined,
-    type: string,
+    type: ExposedItemType,
 ): ExposedAdminAreaDto['exposure'][number] | undefined {
-    return exposure?.find((e) => (e.type as string) === type);
+    return exposure?.find((e) => e.type === type);
 }
 
 // Helper to get population exposure from admin area
@@ -149,7 +149,7 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
 
     // Get exposure categories for infrastructure (exclude population)
     const infraExposure = admin0?.exposure.filter(
-        (e) => (e.type as string) !== ExposedItemType.Population,
+        (e) => e.type !== ExposedItemType.Population,
     ) ?? [];
 
     return (
@@ -226,7 +226,7 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
                                 <span className={styles.infraLabel}>
                                     Exposed
                                     {' '}
-                                    {getExposureLabel(item.type as unknown as ExposedItemType)}
+                                    {getExposureLabel(item.type)}
                                 </span>
                                 <span className={styles.infraValue}>
                                     {item.exposed.toLocaleString()}

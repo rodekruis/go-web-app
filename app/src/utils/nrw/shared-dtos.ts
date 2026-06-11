@@ -8,10 +8,10 @@
  * - services/api-service/src/events/dto/map-layer-details.dto.ts
  */
 
-import type { AlertClass, ForecastSource, HazardType, Layer, MapLayerDisplayType, MapLayerInfoType } from './shared-enums';
+import type { AlertClass, ExposedItemType, ForecastSource, HazardType, MapLayerDisplayType, MapLayerInfoType } from './shared-enums';
 
 interface AdminAreaExposureDto {
-    type: Layer;
+    type: ExposedItemType;
     total: number | null;
     exposed: number;
 }

@@ -51,6 +51,14 @@ export enum SeverityKey {
   percentile = 'percentile',
 }
 
+export enum ExposedItemType {
+  Population = 'population',
+  Buildings = 'buildings',
+  Roads = 'roads',
+  Schools = 'schools',
+  Clinics = 'clinics',
+}
+
 // ---------------------------------------------
 // Alert classification related enums - START
 // ---------------------------------------------
