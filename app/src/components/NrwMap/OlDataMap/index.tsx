@@ -23,7 +23,6 @@ import {
     getExtentForVectorData,
     getZIndexOffset,
     initializeMapView,
-    type InitialMapViewParams,
 } from '#utils/nrw/nrwMapHelpers';
 import {
     createAdminLayer,
