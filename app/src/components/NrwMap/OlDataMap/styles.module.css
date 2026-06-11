@@ -41,10 +41,28 @@
     margin: 0;
     background-color: var(--control-bg);
     border: none;
-    color: var(--control-text);
-    font-size: 1.5rem;
+    color: transparent;
+    font-size: 0;
     font-weight: 700;
     line-height: 1;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 1.25rem 1.25rem;
+}
+
+/* The plus/minus icons from FontAwesome are placed here as SVG directly in the CSS
+   to override the default OpenLayers icons.
+   Doing this in code means we'd need to disable the zoom controls and recreate it through
+   an animation callback. */
+
+/* Plus icon for zoom in */
+.map :global(.ol-zoom .ol-zoom-in) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%23323232' d='M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z'/%3E%3C/svg%3E");
+}
+
+/* Minus icon for zoom out */
+.map :global(.ol-zoom .ol-zoom-out) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%23323232' d='M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z'/%3E%3C/svg%3E");
 }
 
 .map :global(.ol-zoom :is(.ol-zoom-in, .ol-zoom-out):hover) {
