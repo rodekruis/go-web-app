@@ -4,6 +4,8 @@ import {
     useRef,
     useState,
 } from 'react';
+import { byPrefixAndName } from '@awesome.me/kit-92f09b5225/icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { View } from 'ol';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
 import type { EventsKey } from 'ol/events';
@@ -465,7 +467,7 @@ export default function OlDataMap({
                     aria-expanded={isLayerPanelOpen}
                     onClick={() => setIsLayerPanelOpen((prev) => !prev)}
                 >
-                    〠
+                    <FontAwesomeIcon icon={byPrefixAndName.far!['layer-group']!} />
                 </button>
             </div>
         </div>

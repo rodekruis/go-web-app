@@ -10,6 +10,8 @@ import {
     useRef,
     useState,
 } from 'react';
+import { byPrefixAndName } from '@awesome.me/kit-92f09b5225/icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { getCountryMapData } from '#utils/nrw/nrwDataFetchHelpers';
 import {
@@ -135,7 +137,9 @@ export default function NrwLayerPanel({
                             className={styles.layerLink}
                             onClick={() => handleToggleClick(layer)}
                         >
-                            {shownLayerIds.has(layer.resourceId) ? '🌈' : '☁️'}
+                            {shownLayerIds.has(layer.resourceId)
+                                ? <FontAwesomeIcon icon={byPrefixAndName.fas!['square-check']!} />
+                                : <FontAwesomeIcon icon={byPrefixAndName.far!.square!} />}
                             {' '}
                             {getLayerLabel(layer)}
                         </button>
@@ -153,7 +157,9 @@ export default function NrwLayerPanel({
                             className={styles.layerLink}
                             onClick={() => handleToggleClick(layer)}
                         >
-                            {shownLayerIds.has(layer.resourceId) ? '🌈' : '☁️'}
+                            {shownLayerIds.has(layer.resourceId)
+                                ? <FontAwesomeIcon icon={byPrefixAndName.fas!['square-check']!} />
+                                : <FontAwesomeIcon icon={byPrefixAndName.far!.square!} />}
                             {' '}
                             {getLayerLabel(layer)}
                         </button>
