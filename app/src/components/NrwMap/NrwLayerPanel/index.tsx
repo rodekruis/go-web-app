@@ -40,7 +40,7 @@ interface NrwLayerPanelProps {
   // Resource IDs of layers that should be on on initial view
   initialLayerIds: string[];
   // Resource IDs of currently visible layers
-  activeLayerIds: string[];
+  visibleLayerResourceIds: string[];
   // Is the map setup complete
   isMapReady: boolean;
 }
@@ -54,7 +54,7 @@ export default function NrwLayerPanel({
     onToggleMapLayer,
     onHideAllLayers,
     initialLayerIds,
-    activeLayerIds,
+    visibleLayerResourceIds,
     isMapReady,
 }: NrwLayerPanelProps) {
     // Whether the panel is still in its initial state (no user interaction yet).
@@ -69,8 +69,8 @@ export default function NrwLayerPanel({
     // TODO: use real data instead of mock. Pending IBF API
     const [countryLayers, setCountryLayers] = useState<MapLayerDetails[]>([]);
 
-    // Which layers are shown, passed in from useNrwDataLoader.
-    const shownLayerIds = new Set(activeLayerIds);
+    // Visible layers, passed in from useNrwDataLoader.
+    const visibleLayerIds = new Set(visibleLayerResourceIds);
 
     useEffect(() => {
         const loadCountryLayers = async () => {
@@ -137,7 +137,7 @@ export default function NrwLayerPanel({
                             className={styles.layerLink}
                             onClick={() => handleToggleClick(layer)}
                         >
-                            {shownLayerIds.has(layer.resourceId)
+                            {visibleLayerIds.has(layer.resourceId)
                                 ? <FontAwesomeIcon icon={byPrefixAndName.fas!['square-check']!} />
                                 : <FontAwesomeIcon icon={byPrefixAndName.far!.square!} />}
                             {' '}
@@ -152,12 +152,12 @@ export default function NrwLayerPanel({
                     {countryLayers.map((layer) => (
                         <button
                             key={`${layer.dataType}_${layer.resourceId}`}
-                            name={`toggle_country_${layer.dataType}`}
+                            name={`toggle_country_${layer.dataType}_${layer.resourceId}`}
                             type="button"
                             className={styles.layerLink}
                             onClick={() => handleToggleClick(layer)}
                         >
-                            {shownLayerIds.has(layer.resourceId)
+                            {visibleLayerIds.has(layer.resourceId)
                                 ? <FontAwesomeIcon icon={byPrefixAndName.fas!['square-check']!} />
                                 : <FontAwesomeIcon icon={byPrefixAndName.far!.square!} />}
                             {' '}

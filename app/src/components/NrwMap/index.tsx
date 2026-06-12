@@ -93,7 +93,7 @@ export default function NrwMapContainer() {
         registerMapAddLayer,
         toggleMapLayer,
         hideAllLayers,
-        activeLayerIds,
+        activeLayerIds: visibleLayerIds,
         isMapReady,
     } = useNrwDataLoader(selectedCountry, [], selectedEventId, initialLayerIds);
 
@@ -147,8 +147,8 @@ export default function NrwMapContainer() {
 
     // Sync the active layer IDs to the URL
     useEffect(() => {
-        syncLayerIds(activeLayerIds);
-    }, [activeLayerIds, syncLayerIds]);
+        syncLayerIds(visibleLayerIds);
+    }, [visibleLayerIds, syncLayerIds]);
 
     // Refresh page and put in a default start state
     const handleRefreshAll = async () => {
@@ -181,7 +181,7 @@ export default function NrwMapContainer() {
         setEventParams({
             country: selectedCountry,
             eventId,
-            layerIds: activeLayerIds,
+            layerIds: visibleLayerIds,
         });
     };
 
@@ -198,7 +198,7 @@ export default function NrwMapContainer() {
             eventId: activeEventId,
             adminCode: placeCode,
             mapView,
-            layerIds: activeLayerIds,
+            layerIds: visibleLayerIds,
         });
     };
 
@@ -208,7 +208,7 @@ export default function NrwMapContainer() {
             eventId: activeEventId,
             adminCode: selectedAdminPlaceCode ?? undefined,
             mapView,
-            layerIds: activeLayerIds,
+            layerIds: visibleLayerIds,
         });
     };
 
@@ -255,7 +255,7 @@ export default function NrwMapContainer() {
                                     onToggleMapLayer={toggleMapLayer}
                                     onHideAllLayers={hideAllLayers}
                                     initialLayerIds={initialLayerIds}
-                                    activeLayerIds={activeLayerIds}
+                                    visibleLayerResourceIds={visibleLayerIds}
                                     isMapReady={isMapReady}
                                 />
                             </div>

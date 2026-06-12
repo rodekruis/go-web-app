@@ -14,7 +14,7 @@ import {
 
 // Base map URL
 const maptilerBaseUrl = 'https://api.maptiler.com';
-// ID of the map style we created in Map Tiler.
+// ID of the map we created in Map Tiler.
 const mapGuid = '019eb13e-4bbd-743d-995d-970d7c3a2633';
 export const mapUrlStyleJson = `${maptilerBaseUrl}/maps/${mapGuid}/style.json?key=${maptilerApiKey}`;
 
