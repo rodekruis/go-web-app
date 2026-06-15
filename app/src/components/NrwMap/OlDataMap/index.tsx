@@ -407,7 +407,7 @@ export default function OlDataMap({
             if (exposedAdmin2 && exposedAdmin2.length > 0) {
                 // If we have one or more admin2 exposed regions,
                 // load admin 2 and all it's childed admin3 regions.
-                // TODO: revist this logic after more designs are done
+                // TODO: revisit this logic after more designs are done
                 const parentCode = exposedAdmin2[0]!;
                 addAdminLayer(2, selectedCountry, parentCode);
                 addAdminLayer(3, selectedCountry, parentCode);
