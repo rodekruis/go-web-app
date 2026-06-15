@@ -49,7 +49,7 @@ The CI workflow needs to build the UI library. To do this, you must set the `FON
 
 ### Adding spellchecker corrections
 
-The spell checker is easily confused by acronyms and country codes. You can add exceptions in `typos.toml`
+The spell checker is easily confused by acronyms and country codes. You can add exceptions in `typos.toml` under `[default.extend-words]`. These are case-sensitive.
 
 ### NRW Portal
 
