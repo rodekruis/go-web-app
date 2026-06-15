@@ -46,7 +46,8 @@ jobs:
       - name: Install dependencies
         run: (export FONTAWESOME_API_KEY=${{ secrets.FONTAWESOME_API_KEY }}; pnpm install)
       - name: Lint CSS
-        run: pnpm lint:css
+        run: pnpm exec stylelint "src/components/NrwMap/**/*.css" "src/utils/nrw/**/*.css"
+        working-directory: app
 
   unused:
     name: Identify unused files
