@@ -6,6 +6,7 @@ const __dirname = path.dirname(__filename);
 const cssPaths = [
     path.resolve(__dirname, './src/index.css'),
     path.resolve(__dirname, './node_modules/@ifrc-go/ui/dist/index.css'),
+    path.resolve(__dirname, './src/components/NrwMap/OlDataMap/styles.module.css'),
 ];
 
 /** @type {import('stylelint').Config} */
