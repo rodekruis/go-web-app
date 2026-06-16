@@ -4,6 +4,9 @@ on:
   push:
     branches: [ibf-main]
 
+permissions:
+  contents: read
+
 jobs:
   dispatch:
     runs-on: ubuntu-latest
