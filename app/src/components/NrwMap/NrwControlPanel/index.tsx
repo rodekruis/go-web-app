@@ -11,6 +11,7 @@ import {
 } from '@ifrc-go/icons';
 import { Button } from '@ifrc-go/ui';
 
+import { alertColors } from '#utils/nrw/nrwMapStyles';
 import {
     type EventAdminAreaData,
     type EventOverviewData,
@@ -165,7 +166,15 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
                 <div className={styles.headerLeft}>
                     <span className={styles.headerTitle}>{event.eventName}</span>
                 </div>
-                <span className={styles.severityBadge}>{event.alertClass}</span>
+                <span
+                    className={styles.severityBadge}
+                    style={{
+                        color: alertColors[event.alertClass][4],
+                        backgroundColor: alertColors[event.alertClass][0],
+                    }}
+                >
+                    {event.alertClass}
+                </span>
             </div>
 
             {/* Event Info */}
@@ -313,7 +322,15 @@ function EventButton({ event, onEventClick }: EventButtonProps) {
     return (
         <div className={styles.eventCard}>
             <div className={styles.eventTitle}>{event.eventName}</div>
-            <div className={styles.eventAlert}>{event.alertClass}</div>
+            <div
+                className={styles.eventAlert}
+                style={{
+                    color: alertColors[event.alertClass][4],
+                    backgroundColor: alertColors[event.alertClass][0],
+                }}
+            >
+                {event.alertClass}
+            </div>
             <div className={styles.eventDetails}>
                 <div>{startTimeLabel}</div>
                 <div>

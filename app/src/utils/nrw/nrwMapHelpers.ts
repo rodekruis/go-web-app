@@ -24,6 +24,7 @@ import type {
     MapLayerDetails,
     SelectedEventMapDetails,
 } from './nrwMapTypes';
+import { ExposedItemType } from './nrwMapTypes';
 import {
     seedRepoEventDataUrl,
     seedRepoPopDataUrl,
@@ -40,13 +41,34 @@ export function getSelectedEventMapDetails(
     const event = eventData.find((e) => e.eventId === eventId);
     if (!event) return null;
 
-    // Build affected regions map by admin level
+    // Values needed for building the SelectedEventMapDetails:
+    // Exposed regions map by admin level
     const exposedRegionsByLevel = new Map<number, string[]>();
+    // Exposed population total map by admin level, keyed by place code
+    const exposedPopulationByLevel = new Map<number, Map<string, number>>();
+    // Max exposed population per admin level
+    const maxExposedPopulationByLevel = new Map<number, number>();
+
     if (event.exposedAdminAreas) {
         event.exposedAdminAreas.forEach((adminAreas, level) => {
             if (adminAreas && adminAreas.length > 0) {
                 const codes = adminAreas.map((area) => area.placeCode);
                 exposedRegionsByLevel.set(level, codes);
+
+                const populationByCode = new Map<string, number>();
+                let maxPopulation = 0;
+                adminAreas.forEach((area) => {
+                    const populationExposure = area.exposure.find(
+                        (category) => category.type === ExposedItemType.Population,
+                    );
+                    const total = populationExposure?.total ?? 0;
+                    populationByCode.set(area.placeCode, total);
+                    if (total > maxPopulation) {
+                        maxPopulation = total;
+                    }
+                });
+                exposedPopulationByLevel.set(level, populationByCode);
+                maxExposedPopulationByLevel.set(level, maxPopulation);
             }
         });
     } else {
@@ -54,12 +76,13 @@ export function getSelectedEventMapDetails(
         console.error('No exposedAdminAreas found for event:', eventId);
     }
 
-    // TODO: Return extents (of all exposed admin areas)
-    // TODO: Return zoom level based on extents
     return {
         eventId,
         centroid: event.centroid,
+        alertClass: event.alertClass,
         exposedRegionsByLevel,
+        exposedPopulationByLevel,
+        maxExposedPopulationByLevel,
     };
 }
 

@@ -150,6 +150,14 @@ export enum EventDataSources {
 export interface SelectedEventMapDetails {
   eventId: number;
   centroid: [number, number];
-  // Admin area codes affected by this event, keyed by admin level
+  // Alert class of the parent event, used to pick the color ramp for exposed areas
+  alertClass: AlertClassType;
+  // Exposed Admin area codes for this event, keyed by admin level
   exposedRegionsByLevel: Map<number, string[]>;
+  // Exposed population total per admin area, keyed by admin level then place code.
+  // Used to color admin areas relative to the most-exposed area at each level.
+  exposedPopulationByLevel: Map<number, Map<string, number>>;
+  // Max exposed population per admin level
+  // This is precomputed so we don't need to find the max again for every feature render.
+  maxExposedPopulationByLevel: Map<number, number>;
 }

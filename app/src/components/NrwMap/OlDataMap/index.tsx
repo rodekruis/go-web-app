@@ -142,12 +142,7 @@ export default function OlDataMap({
                 [3, null],
                 [4, null],
             ]),
-            selectedEventId: selectedEventDetails?.eventId ?? null,
-            exposedRegionsByLevel:
-        selectedEventDetails?.exposedRegionsByLevel ?? new Map(),
-            isEventSelected() {
-                return state.selectedEventId !== null;
-            },
+            selectedEvent: selectedEventDetails ?? null,
         };
         stateRef.current = state;
 
@@ -390,14 +385,13 @@ export default function OlDataMap({
         if (!state || !map || !addAdminLayer) return;
 
         // Update state with new event details
-        state.selectedEventId = selectedEventDetails?.eventId ?? null;
-        state.exposedRegionsByLevel = selectedEventDetails?.exposedRegionsByLevel ?? new Map();
+        state.selectedEvent = selectedEventDetails ?? null;
 
         // If event selected with exposed regions, drill down to admin3
         if (selectedEventDetails) {
             // Get the first exposed admin1 region as parent for drilling down
-            const exposedAdmin1 = state.exposedRegionsByLevel.get(1);
-            const exposedAdmin2 = state.exposedRegionsByLevel.get(2);
+            const exposedAdmin1 = selectedEventDetails.exposedRegionsByLevel.get(1);
+            const exposedAdmin2 = selectedEventDetails.exposedRegionsByLevel.get(2);
 
             // Set admin1 selection to match the event's admin1 region
             if (exposedAdmin1 && exposedAdmin1.length > 0) {

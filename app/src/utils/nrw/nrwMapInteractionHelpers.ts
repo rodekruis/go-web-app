@@ -24,6 +24,10 @@ import {
     styleAdmin3Region,
 } from './nrwMapStyles';
 import {
+    AlertClassType,
+    type SelectedEventMapDetails,
+} from './nrwMapTypes';
+import {
     getAdminRegionUrl,
     getNestedAdminUrl,
 } from './nrwUrls';
@@ -46,12 +50,9 @@ export interface MapViewState {
   // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41768
   selectedAdminCodes: Map<number, string | null>;
 
-  selectedEventId: number | null;
-
-  // Affected region codes by admin level. This is populated when an event is selected.
-  exposedRegionsByLevel: Map<number, string[]>;
-
-  isEventSelected(): boolean;
+  // Details for the currently selected event (exposed regions/populations, alert class).
+  // Null when no event is selected.
+  selectedEvent: SelectedEventMapDetails | null;
 }
 
 export interface MapSelectionView {
@@ -106,27 +107,30 @@ export function createAdminLayer(
         }),
         style: (feature) => {
             const code = feature.get(PLACE_CODE_FIELD_KEY);
+            const event = state.selectedEvent;
+            const isEventSelected = event !== null;
             if (adminLevel === 3) {
-                const affectedRegions = state.exposedRegionsByLevel.get(3) ?? [];
-
                 return styleAdmin3Region(
                     code,
                     state.selectedAdminCodes.get(3) ?? null,
-                    affectedRegions,
-                    state.isEventSelected(),
+                    event?.exposedRegionsByLevel.get(3) ?? [],
+                    isEventSelected,
+                    event?.exposedPopulationByLevel.get(3) ?? null,
+                    event?.maxExposedPopulationByLevel.get(3) ?? 0,
+                    event?.alertClass ?? AlertClassType.High,
                 );
             }
             if (adminLevel === 2) {
                 return styleAdmin2region(
                     code,
                     state.selectedAdminCodes.get(2) ?? null,
-                    state.isEventSelected(),
+                    isEventSelected,
                 );
             }
             return styleAdmin1region(
                 code,
                 state.selectedAdminCodes.get(1) ?? null,
-                state.isEventSelected(),
+                isEventSelected,
             );
         },
     });
@@ -165,9 +169,9 @@ export function handleFeatureClick(
     const newSelectedRegionCode = adminDetails?.code || noCountrySelectedValue;
 
     let processAdmin3Clicks = layer === adminLayers.get(3);
-    if (processAdmin3Clicks && state.isEventSelected()) {
-        const affectedRegions = state.exposedRegionsByLevel.get(3) ?? [];
-        if (!affectedRegions.includes(newSelectedRegionCode)) {
+    if (processAdmin3Clicks && state.selectedEvent) {
+        const exposedRegions = state.selectedEvent.exposedRegionsByLevel.get(3) ?? [];
+        if (!exposedRegions.includes(newSelectedRegionCode)) {
             processAdmin3Clicks = false;
         }
     }
@@ -184,7 +188,7 @@ export function handleFeatureClick(
 
     // Handle clicks for admin1 and 2
     // For current design, the user can't interact with these is an event is selected.
-    if (!state.isEventSelected()) {
+    if (!state.selectedEvent) {
         let selectedLayer: VectorLayer | null = null;
         let level = 1;
         // Only 2 and 3 are valid child levels
