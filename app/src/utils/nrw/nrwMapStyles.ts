@@ -11,7 +11,7 @@ import { AlertClassType } from './nrwMapTypes';
 
 export type MvtStyleCreator = (feature: FeatureLike, selected: string) => Style;
 const deselectedColor = 'rgba(0, 0, 0, 0.07)';
-const defaultAdminAreaBorderWidth = 2;
+const defaultAdminAreaBorderWidth = 1;
 const defaultPointWidth = 2;
 
 type AdminLevel = 1 | 2 | 3 | 4;
@@ -35,9 +35,9 @@ const exposedAreaFillAlphaHexLight = '33'; // 0.2
 
 // Color steps for each alert class
 export const alertColors: Record<AlertClassType, string[]> = {
-    [AlertClassType.Low]: ['#FFF1CC', '#FFDF8A', '#FFC635', '#D99A00', '#8F6200'],
+    [AlertClassType.Low]: ['#FFF1C7', '#FFDF8A', '#FFC635', '#D99A00', '#8F6200'],
     [AlertClassType.Medium]: ['#FFE6CC', '#FFB066', '#FF6B00', '#C24E00', '#803300'],
-    [AlertClassType.High]: ['#FDD6D9', '#FA969B', '#F5333F', '#C01825', '#800F16'],
+    [AlertClassType.High]: ['#FDD6D9', '#FA999F', '#F5333F', '#C01825', '#800F16'],
 };
 
 // Get the color string for an exposed area
