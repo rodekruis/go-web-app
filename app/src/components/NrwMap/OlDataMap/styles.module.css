@@ -88,6 +88,9 @@
   border-radius: var(--control-border-radius);
   background-clip: padding-box;
   background-color: var(--control-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   width: 2.85rem;
   height: 2.85rem;
