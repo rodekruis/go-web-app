@@ -113,13 +113,15 @@ export function createAdminLayer(
             const isEventSelected = event !== null;
             const selectedCode = state.selectedAdminCodes.get(adminLevel) ?? null;
             if (isEventSelected) {
+                const isDeepestLevel = adminLevel === event.exposedRegionsByLevel.size;
                 return styleAdminForEvent(
                     code,
-                    selectedCode,
+                    isDeepestLevel ? selectedCode : null,
                     event?.exposedRegionsByLevel.get(adminLevel) ?? [],
                     event?.exposedPopulationByLevel.get(adminLevel) ?? null,
                     event?.maxExposedPopulationByLevel.get(adminLevel) ?? 0,
                     event?.alertClass ?? AlertClassType.High,
+                    isDeepestLevel,
                 );
             }
             return styleAdminNoEvent(code, selectedCode, adminLevel);
