@@ -23,12 +23,12 @@
 
 /* Restyle the OpenLayers zoom controls */
 .map :global(.ol-zoom) {
+  box-sizing: border-box;
   display: flex;
   top: 1rem;
   right: 1rem;
   left: auto;
   flex-direction: column;
-  box-sizing: border-box;
   border: 2px solid var(--control-border-color);
   border-radius: var(--control-border-radius);
   background: none;
@@ -83,16 +83,16 @@
 
 /* Layers button rendered below the zoom control */
 .layersButton {
+  display: flex;
   position: absolute;
   top: calc(1rem + 60px + 8px);
   right: 1rem;
+  align-items: center;
+  justify-content: center;
   border: 2px solid var(--control-border-color);
   border-radius: var(--control-border-radius);
   background-clip: padding-box;
   background-color: var(--control-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
   width: 28px;
   height: 28px;
