@@ -19,9 +19,8 @@ import {
 } from './nrwDataFetchHelpers';
 import { getAdminAreaZIndex } from './nrwMapHelpers';
 import {
-    styleAdmin1region,
-    styleAdmin2region,
-    styleAdmin3Region,
+    styleAdminForEvent,
+    styleAdminNoEvent,
 } from './nrwMapStyles';
 import {
     AlertClassType,
@@ -50,7 +49,10 @@ export interface MapViewState {
   // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41768
   selectedAdminCodes: Map<number, string | null>;
 
-  // Details for the currently selected event (exposed regions/populations, alert class).
+  // Deepest admin level of the current view
+  currentViewLevel: number;
+
+  // Details for the currently selected event.
   // Null when no event is selected.
   selectedEvent: SelectedEventMapDetails | null;
 }
@@ -109,29 +111,18 @@ export function createAdminLayer(
             const code = feature.get(PLACE_CODE_FIELD_KEY);
             const event = state.selectedEvent;
             const isEventSelected = event !== null;
-            if (adminLevel === 3) {
-                return styleAdmin3Region(
+            const selectedCode = state.selectedAdminCodes.get(adminLevel) ?? null;
+            if (isEventSelected) {
+                return styleAdminForEvent(
                     code,
-                    state.selectedAdminCodes.get(3) ?? null,
-                    event?.exposedRegionsByLevel.get(3) ?? [],
-                    isEventSelected,
-                    event?.exposedPopulationByLevel.get(3) ?? null,
-                    event?.maxExposedPopulationByLevel.get(3) ?? 0,
+                    selectedCode,
+                    event?.exposedRegionsByLevel.get(adminLevel) ?? [],
+                    event?.exposedPopulationByLevel.get(adminLevel) ?? null,
+                    event?.maxExposedPopulationByLevel.get(adminLevel) ?? 0,
                     event?.alertClass ?? AlertClassType.High,
                 );
             }
-            if (adminLevel === 2) {
-                return styleAdmin2region(
-                    code,
-                    state.selectedAdminCodes.get(2) ?? null,
-                    isEventSelected,
-                );
-            }
-            return styleAdmin1region(
-                code,
-                state.selectedAdminCodes.get(1) ?? null,
-                isEventSelected,
-            );
+            return styleAdminNoEvent(code, selectedCode, adminLevel);
         },
     });
 

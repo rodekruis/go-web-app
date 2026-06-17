@@ -142,6 +142,7 @@ export default function OlDataMap({
                 [3, null],
                 [4, null],
             ]),
+            currentViewLevel: 1,
             selectedEvent: selectedEventDetails ?? null,
         };
         stateRef.current = state;
@@ -179,6 +180,7 @@ export default function OlDataMap({
             const newLayer = createAdminLayer(state, level, country, parentCode);
             mapInstanceRef.current?.addLayer(newLayer);
             adminLayers.set(level, newLayer);
+            state.currentViewLevel = Math.max(...adminLayers.keys());
             return newLayer;
         }
 
