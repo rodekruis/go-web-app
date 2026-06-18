@@ -31,13 +31,14 @@ const getExposureLegend = (
     return colors.map((color, index) => {
         let label: string;
         if (index === 0) {
-            // First item uses the second item's value with a less-than symbol.
+            // First item uses a less-than symbol, plus the value of the 2nd tier
+            // (since the first tier base value is 0).
             label = `<${getValue(1).toLocaleString()}`;
         } else if (index === colors.length - 1) {
-            // Last item is unchanged: greater-than its own value.
+            // Last item uses a greater-than symbol, plus the value of the top tier.
             label = `>${getValue(index).toLocaleString()}`;
         } else {
-            // Middle items show the range from this value to the next.
+            // Middle items show the range from this tier value to the next.
             label = `${getValue(index).toLocaleString()} to ${getValue(index + 1).toLocaleString()}`;
         }
         return {
