@@ -35,9 +35,9 @@ const exposedAreaFillAlphaHexLight = '33'; // 0.2
 
 // Color steps for each alert class
 export const alertColors: Record<AlertClassType, string[]> = {
-    [AlertClassType.Low]: ['#FFF1C7', '#FFDF8A', '#FFC635', '#D99A00', '#8F6200'],
-    [AlertClassType.Medium]: ['#FFE6CC', '#FFB066', '#FF6B00', '#C24E00', '#803300'],
-    [AlertClassType.High]: ['#FDD6D9', '#FA999F', '#F5333F', '#C01825', '#800F16'],
+    [AlertClassType.Low]: ['#FFF9EA', '#FFEDBC', '#FFDF8A', '#FFC635', '#D99A00'],
+    [AlertClassType.Medium]: ['#FFF5EA', '#FFD3AA', '#FFB066', '#FF6E00', '#C24E00'],
+    [AlertClassType.High]: ['#FEF1F2', '#FCC6CA', '#FA999F', '#F5333F', '#C01825'],
 };
 
 // Get the color string for an exposed area
