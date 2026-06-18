@@ -24,20 +24,25 @@ const getExposureLegend = (
     alertClass: AlertClassType,
 ): LegendEntry[] => {
     const colors = alertColors[alertClass];
-    return colors.map((color, index) => {
-        // Convert tier index to a value based on the maxValue, rounded to the nearest 100.
-        const value = Math.round(((index / 5) * maxValue) / 100) * 100;
 
-        // Set greater-than or less-than symbols for first and last items.
-        let prefix = '';
+    // Convert a tier index to a value based on the maxValue, rounded to the nearest 100.
+    const getValue = (index: number) => Math.round(((index / 5) * maxValue) / 100) * 100;
+
+    return colors.map((color, index) => {
+        let label: string;
         if (index === 0) {
-            prefix = '<';
+            // First item uses the second item's value with a less-than symbol.
+            label = `<${getValue(1).toLocaleString()}`;
         } else if (index === colors.length - 1) {
-            prefix = '>';
+            // Last item is unchanged: greater-than its own value.
+            label = `>${getValue(index).toLocaleString()}`;
+        } else {
+            // Middle items show the range from this value to the next.
+            label = `${getValue(index).toLocaleString()} to ${getValue(index + 1).toLocaleString()}`;
         }
         return {
             color,
-            label: `${prefix}${value.toLocaleString()}`,
+            label,
         };
     });
 };
