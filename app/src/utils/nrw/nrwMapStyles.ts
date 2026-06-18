@@ -10,7 +10,6 @@ import { COUNTRY_FIELD_KEY } from './nrwConstants';
 import { AlertClassType } from './nrwMapTypes';
 
 export type MvtStyleCreator = (feature: FeatureLike, selected: string) => Style;
-const deselectedColor = 'rgba(0, 0, 0, 0.07)';
 const defaultAdminAreaBorderWidth = 1;
 const defaultPointWidth = 2;
 
@@ -108,17 +107,9 @@ export const styleAdminForEvent = (
         return new Style({});
     }
 
-    // Unaffected areas are greyed out (same as previous debug UI code)
+    // Unaffected areas not displayed
     if (!exposedPopulation || exposedPopulation[pCode] === undefined) {
-        return new Style({
-            fill: new Fill({
-                color: deselectedColor,
-            }),
-            stroke: new Stroke({
-                color: deselectedColor,
-                width: defaultAdminAreaBorderWidth,
-            }),
-        });
+        return new Style({});
     }
 
     // Color based on exposed population

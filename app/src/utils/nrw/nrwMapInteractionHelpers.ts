@@ -27,6 +27,7 @@ import {
     type SelectedEventMapDetails,
 } from './nrwMapTypes';
 import {
+    getAdminAreasByCodesUrl,
     getAdminRegionUrl,
     getNestedAdminUrl,
 } from './nrwUrls';
@@ -89,19 +90,12 @@ function getCurrentMapSelectionView(state: MapViewState): MapSelectionView | und
     };
 }
 
-// Create a VectorLayer for the given admin level.
-export function createAdminLayer(
+// Create a styled VectorLayer for an admin level, loading its geometry from the given url
+function createAdminLayerFromUrl(
     state: MapViewState,
     adminLevel: 1 | 2 | 3 | 4,
-    country?: string,
-    parentCode?: string,
+    url: string,
 ): VectorLayer {
-    // Create the admin area url.
-    // Admin level 1 has a different format than nested admin levels.
-    const url = adminLevel === 1
-        ? getAdminRegionUrl(country ?? '', 1)
-        : getNestedAdminUrl(country!, parentCode!, adminLevel);
-
     const layer = new VectorLayer({
         source: new VectorSource({
             url,
@@ -131,6 +125,36 @@ export function createAdminLayer(
 
     layer.setZIndex(getAdminAreaZIndex(adminLevel));
     return layer;
+}
+
+// Create a VectorLayer for the given admin level
+export function createAdminLayer(
+    state: MapViewState,
+    adminLevel: 1 | 2 | 3 | 4,
+    country: string,
+    parentCode?: string,
+): VectorLayer {
+    // For admin level 1, get all admin areas for that level.
+    // For others, just get children of a given parent code.
+    const url = adminLevel === 1
+        ? getAdminRegionUrl(country, 1)
+        : getNestedAdminUrl(country!, parentCode!, adminLevel);
+
+    return createAdminLayerFromUrl(state, adminLevel, url);
+}
+
+// Create a VectorLayer for a specific set of admin areas.
+// This can batch together multiple areas into one request for when
+// they don't have a shared parent code.
+export function createAdminLayerForPlaceCodes(
+    state: MapViewState,
+    adminLevel: 1 | 2 | 3 | 4,
+    country: string,
+    placeCodes: string[],
+): VectorLayer {
+    const url = getAdminAreasByCodesUrl(country, adminLevel, placeCodes);
+
+    return createAdminLayerFromUrl(state, adminLevel, url);
 }
 
 // Handle a click on a map feature (admin region or event).
