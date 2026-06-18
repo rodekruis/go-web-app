@@ -164,7 +164,7 @@ export default function OlDataMap({
             );
         }
 
-        // Remove any layers at this level and below, then add and track the new layer.
+        // Remove any layers at this level and below
         function placeAdminLayer(level: 1 | 2 | 3 | 4, newLayer: VectorLayer) {
             for (let l = 4; l >= level; l -= 1) {
                 const existing = adminLayers.get(l);
@@ -181,7 +181,7 @@ export default function OlDataMap({
             return newLayer;
         }
 
-        // Add an admin layer covering a whole country (level 1) or nested under a parent.
+        // Add an admin layer for a given level.
         function addAdminLayer(
             level: 1 | 2 | 3 | 4,
             country: string,
