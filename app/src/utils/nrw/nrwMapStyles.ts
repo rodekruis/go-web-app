@@ -50,7 +50,7 @@ const getExposureColor = (
     const normalizedValue = maxValue > 0 ? Math.min(value / maxValue, 1) : 0;
     // Get index of 0 to 4 based on a 0 to 1 normalized value.
     // 5 is simplified from (n*10)/2
-    // 10 = make it convertable to an int, and 2 = width of color steps
+    // 10 = make it convertible to an int, and 2 = width of color steps
     const tier = Math.floor(normalizedValue * 5);
     // Group the highest value (1.0) into the lower tier
     const index = Math.min(tier, 4);
@@ -98,8 +98,7 @@ export const styleAdmin1 = (
 export const styleAdminForEvent = (
     pCode: string,
     selectedChildCode: string | null,
-    exposedRegions: string[],
-    exposedPopulation: Map<string, number> | null,
+    exposedPopulation: Record<string, number> | null,
     maxExposedPopulation: number,
     alertClass: AlertClassType,
     isDeepestAdminLevel: boolean,
@@ -110,7 +109,7 @@ export const styleAdminForEvent = (
     }
 
     // Unaffected areas are greyed out (same as previous debug UI code)
-    if (!exposedRegions.includes(pCode)) {
+    if (!exposedPopulation || exposedPopulation[pCode] === undefined) {
         return new Style({
             fill: new Fill({
                 color: deselectedColor,
@@ -123,7 +122,7 @@ export const styleAdminForEvent = (
     }
 
     // Color based on exposed population
-    const population = exposedPopulation?.get(pCode) ?? 0;
+    const population = exposedPopulation[pCode] ?? 0;
     const baseColor = getExposureColor(population, maxExposedPopulation, alertClass);
 
     // If nothing selected at the deepest level is selected, or if the current area is selected,

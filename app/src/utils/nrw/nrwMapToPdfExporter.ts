@@ -109,7 +109,7 @@ export async function exportMapToPdf(
             captureElement(PrintElementId.ControlPanel),
         ]);
 
-        // The map panel needs te be captured with special handling,
+        // The map panel needs to be captured with special handling,
         // using OpenLayers rendercomplete event
         const mapElement = await captureMap(mapInstance, PrintElementId.Map);
 

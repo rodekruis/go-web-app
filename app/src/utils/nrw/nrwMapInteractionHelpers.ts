@@ -113,14 +113,14 @@ export function createAdminLayer(
             const isEventSelected = event !== null;
             const selectedCode = state.selectedAdminCodes.get(adminLevel) ?? null;
             if (isEventSelected) {
-                const deepestExposedLevel = event.exposedRegionsByLevel.size - 1;
+                const levelKeys = Object.keys(event.exposedPopulationByLevel).map(Number);
+                const deepestExposedLevel = levelKeys.at(-1);
                 const isDeepestLevel = adminLevel === deepestExposedLevel;
                 return styleAdminForEvent(
                     code,
                     isDeepestLevel ? selectedCode : null,
-                    event?.exposedRegionsByLevel.get(adminLevel) ?? [],
-                    event?.exposedPopulationByLevel.get(adminLevel) ?? null,
-                    event?.maxExposedPopulationByLevel.get(adminLevel) ?? 0,
+                    event?.exposedPopulationByLevel[adminLevel] ?? null,
+                    event?.highestExposedPopulationByLevel[adminLevel] ?? 0,
                     event?.alertClass ?? AlertClassType.High,
                     isDeepestLevel,
                 );
@@ -164,8 +164,8 @@ export function handleFeatureClick(
 
     let processAdmin3Clicks = layer === adminLayers.get(3);
     if (processAdmin3Clicks && state.selectedEvent) {
-        const exposedRegions = state.selectedEvent.exposedRegionsByLevel.get(3) ?? [];
-        if (!exposedRegions.includes(newSelectedRegionCode)) {
+        const exposedRegions = state.selectedEvent.exposedPopulationByLevel[3] ?? {};
+        if (!(newSelectedRegionCode in exposedRegions)) {
             processAdmin3Clicks = false;
         }
     }

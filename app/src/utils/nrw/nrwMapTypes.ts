@@ -152,12 +152,14 @@ export interface SelectedEventMapDetails {
   centroid: [number, number];
   // Alert class of the parent event, used to pick the color ramp for exposed areas
   alertClass: AlertClassType;
-  // Exposed Admin area codes for this event, keyed by admin level
-  exposedRegionsByLevel: Map<number, string[]>;
-  // Exposed population total per admin area, keyed by admin level then place code.
-  // Used to color admin areas relative to the most-exposed area at each level.
-  exposedPopulationByLevel: Map<number, Map<string, number>>;
-  // Max exposed population per admin level
-  // This is precomputed so we don't need to find the max again for every feature render.
-  maxExposedPopulationByLevel: Map<number, number>;
+
+  // Exposure data for the current event, keyed by admin level,
+  // and sorted from lowest to highest (which is a byproduct of being a Record type).
+
+  // Exposed admin areas with their exposed population,
+  // keyed by admin level then place code.
+  exposedPopulationByLevel: Record<number, Record<string, number>>;
+  // Highest exposed population value per whole admin level.
+  // This is precomputed so we don't need to find the highest value for every feature render.
+  highestExposedPopulationByLevel: Record<number, number>;
 }

@@ -42,33 +42,28 @@ export function getSelectedEventMapDetails(
     if (!event) return null;
 
     // Values needed for building the SelectedEventMapDetails:
-    // Exposed regions map by admin level
-    const exposedRegionsByLevel = new Map<number, string[]>();
-    // Exposed population total map by admin level, keyed by place code
-    const exposedPopulationByLevel = new Map<number, Map<string, number>>();
-    // Max exposed population per admin level
-    const maxExposedPopulationByLevel = new Map<number, number>();
+    // Exposed admin areas with their exposed population, per admin level.
+    const exposedPopulationByLevel: Record<number, Record<string, number>> = {};
+    // Highest exposed population value per admin level
+    const highestExposedPopulationByLevel: Record<number, number> = {};
 
     if (event.exposedAdminAreas) {
         event.exposedAdminAreas.forEach((adminAreas, level) => {
             if (adminAreas && adminAreas.length > 0) {
-                const codes = adminAreas.map((area) => area.placeCode);
-                exposedRegionsByLevel.set(level, codes);
-
-                const populationByCode = new Map<string, number>();
+                const populationByCode: Record<string, number> = {};
                 let maxPopulation = 0;
                 adminAreas.forEach((area) => {
                     const populationExposure = area.exposure.find(
                         (category) => category.type === ExposedItemType.Population,
                     );
-                    const total = populationExposure?.total ?? 0;
-                    populationByCode.set(area.placeCode, total);
-                    if (total > maxPopulation) {
-                        maxPopulation = total;
+                    const exposedPop = populationExposure?.exposed ?? 0;
+                    populationByCode[area.placeCode] = exposedPop;
+                    if (exposedPop > maxPopulation) {
+                        maxPopulation = exposedPop;
                     }
                 });
-                exposedPopulationByLevel.set(level, populationByCode);
-                maxExposedPopulationByLevel.set(level, maxPopulation);
+                exposedPopulationByLevel[level] = populationByCode;
+                highestExposedPopulationByLevel[level] = maxPopulation;
             }
         });
     } else {
@@ -80,9 +75,8 @@ export function getSelectedEventMapDetails(
         eventId,
         centroid: event.centroid,
         alertClass: event.alertClass,
-        exposedRegionsByLevel,
         exposedPopulationByLevel,
-        maxExposedPopulationByLevel,
+        highestExposedPopulationByLevel,
     };
 }
 

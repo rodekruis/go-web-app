@@ -391,9 +391,14 @@ export default function OlDataMap({
 
         // If event selected with exposed regions, drill down to admin3
         if (selectedEventDetails) {
-            // Get the first exposed admin1 region as parent for drilling down
-            const exposedAdmin1 = selectedEventDetails.exposedRegionsByLevel.get(1);
-            const exposedAdmin2 = selectedEventDetails.exposedRegionsByLevel.get(2);
+            // Get the first exposed admin1 region as parent for drilling down.
+            // The keys of exposedPopulationByLevel are the exposed place codes per level.
+            const exposedAdmin1 = Object.keys(
+                selectedEventDetails.exposedPopulationByLevel[1] ?? {},
+            );
+            const exposedAdmin2 = Object.keys(
+                selectedEventDetails.exposedPopulationByLevel[2] ?? {},
+            );
 
             // Set admin1 selection to match the event's admin1 region
             if (exposedAdmin1 && exposedAdmin1.length > 0) {

@@ -137,7 +137,8 @@ export default function NrwMapContainer() {
 
     // Show alert when no exposed regions found in a selected event
     useEffect(() => {
-        if (selectedEventMapDetails && selectedEventMapDetails.exposedRegionsByLevel.size === 0) {
+        if (selectedEventMapDetails
+             && Object.keys(selectedEventMapDetails.exposedPopulationByLevel).length === 0) {
             alert.show('No exposed regions', {
                 variant: 'danger',
                 description: `No exposed regions found for event "${activeEventId}".`,
