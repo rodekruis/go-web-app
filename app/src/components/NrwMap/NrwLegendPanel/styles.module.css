@@ -1,0 +1,39 @@
+.legendPanel {
+    display: flex;
+    align-items: center;
+    margin: 12px 20px 0;
+    border: 1px solid rgba(255, 0, 251, 0.866);
+    border-radius: 4px;
+    background: rgb(131, 199, 255);
+    padding: 8px;
+    gap: 16px;
+}
+
+.legendTitle {
+    font-weight: 700;
+}
+
+.legendEntries {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.legendEntry {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legendSwatch {
+    display: inline-block;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+}
+
+.legendValue {
+    white-space: nowrap;
+}
