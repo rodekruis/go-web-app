@@ -127,19 +127,24 @@ function createAdminLayerFromUrl(
     return layer;
 }
 
-// Create a VectorLayer for the given admin level
-export function createAdminLayer(
+// Create a VectorLayer for all admin areas at the given level for a country
+export function createFullAdminLayer(
     state: MapViewState,
     adminLevel: 1 | 2 | 3 | 4,
     country: string,
-    parentCode?: string,
 ): VectorLayer {
-    // For admin level 1, get all admin areas for that level.
-    // For others, just get children of a given parent code.
-    const url = adminLevel === 1
-        ? getAdminRegionUrl(country, 1)
-        : getNestedAdminUrl(country!, parentCode!, adminLevel);
+    const url = getAdminRegionUrl(country, adminLevel);
+    return createAdminLayerFromUrl(state, adminLevel, url);
+}
 
+// Create a VectorLayer for child admin areas nested under a parent code
+export function createNestedAdminLayer(
+    state: MapViewState,
+    adminLevel: 1 | 2 | 3 | 4,
+    country: string,
+    parentCode: string,
+): VectorLayer {
+    const url = getNestedAdminUrl(country, parentCode, adminLevel);
     return createAdminLayerFromUrl(state, adminLevel, url);
 }
 

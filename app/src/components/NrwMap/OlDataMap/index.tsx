@@ -16,6 +16,7 @@ import { unByKey } from 'ol/Observable';
 import { toLonLat } from 'ol/proj';
 import { apply } from 'ol-mapbox-style';
 
+import useAlert from '#hooks/useAlert';
 import {
     type AdminAreaDetails,
     fetchAdminAreaDetails,
@@ -26,8 +27,9 @@ import {
     initializeMapView,
 } from '#utils/nrw/nrwMapHelpers';
 import {
-    createAdminLayer,
     createAdminLayerForPlaceCodes,
+    createFullAdminLayer,
+    createNestedAdminLayer,
     handleFeatureClick,
     type MapSelectionView,
     type MapViewState,
@@ -108,6 +110,7 @@ export default function OlDataMap({
     onMapReady,
     layerPanel,
 }: OlDataMapProps) {
+    const alert = useAlert();
     const mapRef = useRef<HTMLDivElement>(null);
     const [isLayerPanelOpen, setIsLayerPanelOpen] = useState(false);
     const mapInstanceRef = useRef<MapOl | null>(null);
@@ -187,7 +190,21 @@ export default function OlDataMap({
             country: string,
             parentCode?: string,
         ) {
-            return placeAdminLayer(level, createAdminLayer(state, level, country, parentCode));
+            // For admin level 1, get all admin areas for that level.
+            if (level === 1) {
+                return placeAdminLayer(level, createFullAdminLayer(state, level, country));
+            }
+
+            // For admin levels, just get child areas of a given parent code.
+            if (parentCode === undefined) {
+                alert.show(`Parent code is required for admin level ${level}`, { variant: 'danger' });
+                return undefined;
+            }
+
+            return placeAdminLayer(
+                level,
+                createNestedAdminLayer(state, level, country, parentCode),
+            );
         }
 
         // Init the admin map layers based on the initial map view from the search params
@@ -237,7 +254,7 @@ export default function OlDataMap({
             }
 
             // Set initial zoom/pan
-            if (mapInstanceRef.current) {
+            if (mapInstanceRef.current && newLayer) {
                 const map = mapInstanceRef.current;
                 const source = newLayer.getSource();
                 if (source) {
@@ -399,6 +416,13 @@ export default function OlDataMap({
 
         // If event selected with exposed regions, show the lowest affected admin level
         if (selectedEventDetails) {
+            // Guard against missing/invalid exposed population data
+            if (!selectedEventDetails.exposedPopulationByLevel
+                || Object.keys(selectedEventDetails.exposedPopulationByLevel).length === 0) {
+                alert.show('Event has no exposed population data', { variant: 'danger' });
+                return;
+            }
+
             // Find the deepest (lowest) admin level that has exposed areas.
             const deepestExposedLevel = Number(
                 Object.keys(selectedEventDetails.exposedPopulationByLevel).at(-1),
