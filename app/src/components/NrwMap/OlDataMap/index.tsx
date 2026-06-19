@@ -167,14 +167,16 @@ export default function OlDataMap({
             );
         }
 
-        // Remove any layers at this level and below
+        // Place a new admin layer
         function placeAdminLayer(level: 1 | 2 | 3 | 4, newLayer: VectorLayer) {
-            for (let l = 4; l >= level; l -= 1) {
-                const existing = adminLayers.get(l);
+            // Remove any layers at this level and below
+            for (let n = 4; n >= level; n -= 1) {
+                // if a layer exists at this level, remove it
+                const existing = adminLayers.get(n);
                 if (existing) {
                     mapInstanceRef.current?.removeLayer(existing);
-                    adminLayers.delete(l);
-                    state.selectedAdminCodes.set(l, null);
+                    adminLayers.delete(n);
+                    state.selectedAdminCodes.set(n, null);
                 }
             }
 
@@ -428,13 +430,13 @@ export default function OlDataMap({
                 Object.keys(selectedEventDetails.exposedPopulationByLevel).at(-1),
             );
 
-            // Clear all other admin area layers
-            for (let l = 4; l > 0; l -= 1) {
-                const existing = adminLayers.get(l);
+            // Clear all existing admin area layers
+            for (let n = 4; n > 0; n -= 1) {
+                const existing = adminLayers.get(n);
                 if (existing) {
                     map.removeLayer(existing);
-                    adminLayers.delete(l);
-                    state.selectedAdminCodes.set(l, null);
+                    adminLayers.delete(n);
+                    state.selectedAdminCodes.set(n, null);
                 }
             }
 
@@ -468,16 +470,16 @@ export default function OlDataMap({
                 }
             }
         } else {
-            // No event selected: reset admin layers back to level 1 only
-            for (let l = 4; l > 1; l -= 1) {
-                const existing = adminLayers.get(l);
+            // No event selected: keep admin layer for level 1, but clear all deeper admin layers
+            for (let n = 4; n > 1; n -= 1) {
+                const existing = adminLayers.get(n);
                 if (existing) {
                     map.removeLayer(existing);
-                    adminLayers.delete(l);
-                    state.selectedAdminCodes.set(l as 2 | 3 | 4, null);
+                    adminLayers.delete(n);
+                    state.selectedAdminCodes.set(n as 2 | 3 | 4, null);
                 }
             }
-            // Layer 1 remains, but clear any admin area selection on it
+            // Admin layer for level 1 remains, but clear any admin area selection on it
             state.selectedAdminCodes.set(1, null);
         }
 
