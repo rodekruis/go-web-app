@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 
-import { alertColors } from '#utils/nrw/nrwMapStyles';
+import {
+    alertColors,
+    tierLevelToNumber,
+} from '#utils/nrw/nrwMapStyles';
 import {
     type AlertClassType,
     type SelectedEventMapDetails,
@@ -25,21 +28,23 @@ const getExposureLegend = (
 ): LegendEntry[] => {
     const colors = alertColors[alertClass];
 
-    // Convert a tier index to a value based on the maxValue, rounded to the nearest 100.
-    const getValue = (index: number) => Math.round(((index / 5) * maxValue) / 100) * 100;
+    // Convert a tier level to a value based on the maxValue, rounded to the nearest 100.
+    const getValue = (
+        tierLevel: number,
+    ) => tierLevelToNumber(tierLevel, colors.length, maxValue, 100);
 
-    return colors.map((color, index) => {
+    return colors.map((color, tierLevel) => {
         let label: string;
-        if (index === 0) {
+        if (tierLevel === 0) {
             // First item uses a less-than symbol, plus the value of the 2nd tier
             // (since the first tier base value is 0).
             label = `<${getValue(1).toLocaleString()}`;
-        } else if (index === colors.length - 1) {
+        } else if (tierLevel === colors.length - 1) {
             // Last item uses a greater-than symbol, plus the value of the top tier.
-            label = `>${getValue(index).toLocaleString()}`;
+            label = `>${getValue(tierLevel).toLocaleString()}`;
         } else {
             // Middle items show the range from this tier value to the next.
-            label = `${getValue(index).toLocaleString()} to ${getValue(index + 1).toLocaleString()}`;
+            label = `${getValue(tierLevel).toLocaleString()} to ${getValue(tierLevel + 1).toLocaleString()}`;
         }
         return {
             color,
