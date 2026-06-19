@@ -167,7 +167,7 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
                     <span className={styles.headerTitle}>{event.eventName}</span>
                 </div>
                 <span
-                    className={styles.severityBadge}
+                    className={styles.alertClassBadge}
                     style={{
                         color: alertColors[event.alertClass][4],
                         backgroundColor: alertColors[event.alertClass][0],
