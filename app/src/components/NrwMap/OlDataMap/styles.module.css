@@ -7,7 +7,6 @@
 .mapWrapper {
   position: relative;
   width: 95%;
-  height: 800px;
   --control-border-color: #32323250;
   --control-bg: #ffffff;
   --control-bg-hover: #f4f4f4;
@@ -18,7 +17,7 @@
 
 .map {
   width: 100%;
-  height: 100%;
+  height: 600px;
 }
 
 /* Restyle the OpenLayers zoom controls */

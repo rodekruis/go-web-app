@@ -25,6 +25,7 @@ import { PrintElementId } from '#utils/nrw/nrwMapToPdfExporter';
 import NrwControlPanel from './NrwControlPanel';
 import NrwDataPanel from './NrwDataPanel';
 import NrwLayerPanel from './NrwLayerPanel';
+import NrwLegendPanel from './NrwLegendPanel';
 import OlDataMap from './OlDataMap';
 import useNrwDataLoader from './useNrwDataLoader';
 import useNrwMapSearchParams from './useNrwMapSearchParams';
@@ -261,6 +262,9 @@ export default function NrwMapContainer() {
                                 />
                             </div>
                         )}
+                    />
+                    <NrwLegendPanel
+                        selectedEventDetails={selectedEventMapDetails}
                     />
                 </div>
             </div>

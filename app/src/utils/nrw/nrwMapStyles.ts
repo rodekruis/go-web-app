@@ -10,7 +10,6 @@ import { COUNTRY_FIELD_KEY } from './nrwConstants';
 import { AlertClassType } from './nrwMapTypes';
 
 export type MvtStyleCreator = (feature: FeatureLike, selected: string) => Style;
-const deselectedColor = 'rgba(0, 0, 0, 0.07)';
 const defaultAdminAreaBorderWidth = 1;
 const defaultPointWidth = 2;
 
@@ -40,6 +39,36 @@ export const alertColors: Record<AlertClassType, string[]> = {
     [AlertClassType.High]: ['#FEF1F2', '#FCC6CA', '#FA999F', '#F5333F', '#C01825'],
 };
 
+// Convert a tier level to a number based on the max value the tier may represent
+export const tierLevelToNumber = (
+    tierLevel: number,
+    tierCount: number,
+    highestNumberValue: number,
+    roundToNearest: number,
+) : number => {
+    const rawNumber = (tierLevel / tierCount) * highestNumberValue;
+    return Math.round((rawNumber / roundToNearest) * roundToNearest);
+};
+
+// Convert a number to a tier level, but group the highest value into one tier lower.
+// This is so the top tier is not just a value equal to the highest value.
+export const numberToTierLevel = (
+    value: number,
+    highestNumberValue: number,
+    tierCount: number,
+): number => {
+    // Get the normalized value between 0 and 1 compared to the highest value
+    let normalizedValue = 0;
+    if (highestNumberValue > 0) {
+        normalizedValue = Math.min(value / highestNumberValue, 1);
+    }
+    // Scale this to the number of tiers
+    const tier = Math.floor(normalizedValue * tierCount);
+    // If this is the highest value (so if this is the highest value), set it in one tier lower
+    const adjustedTier = Math.min(tier, tierCount - 1);
+    return adjustedTier;
+};
+
 // Get the color string for an exposed area
 const getExposureColor = (
     value: number,
@@ -47,13 +76,7 @@ const getExposureColor = (
     alertClass: AlertClassType,
 ): string => {
     const colors = alertColors[alertClass];
-    const normalizedValue = maxValue > 0 ? Math.min(value / maxValue, 1) : 0;
-    // Get index of 0 to 4 based on a 0 to 1 normalized value.
-    // 5 is simplified from (n*10)/2
-    // 10 = make it convertible to an int, and 2 = width of color steps
-    const tier = Math.floor(normalizedValue * 5);
-    // Group the highest value (1.0) into the lower tier
-    const index = Math.min(tier, 4);
+    const index = numberToTierLevel(value, maxValue, colors.length);
     return colors[index]!;
 };
 
@@ -108,17 +131,9 @@ export const styleAdminForEvent = (
         return new Style({});
     }
 
-    // Unaffected areas are greyed out (same as previous debug UI code)
+    // Unexposed areas not displayed
     if (!exposedPopulation || exposedPopulation[pCode] === undefined) {
-        return new Style({
-            fill: new Fill({
-                color: deselectedColor,
-            }),
-            stroke: new Stroke({
-                color: deselectedColor,
-                width: defaultAdminAreaBorderWidth,
-            }),
-        });
+        return new Style({});
     }
 
     // Color based on exposed population
