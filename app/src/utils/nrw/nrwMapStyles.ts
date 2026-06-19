@@ -39,7 +39,7 @@ export const alertColors: Record<AlertClassType, string[]> = {
     [AlertClassType.High]: ['#FEF1F2', '#FCC6CA', '#FA999F', '#F5333F', '#C01825'],
 };
 
-// Convert a tier level to a number based on the max value the tier may represent
+// Convert a tier level to a number based on the highest value the tier may represent
 export const tierLevelToNumber = (
     tierLevel: number,
     tierCount: number,
@@ -72,11 +72,11 @@ export const numberToTierLevel = (
 // Get the color string for an exposed area
 const getExposureColor = (
     value: number,
-    maxValue: number,
+    highestValue: number,
     alertClass: AlertClassType,
 ): string => {
     const colors = alertColors[alertClass];
-    const index = numberToTierLevel(value, maxValue, colors.length);
+    const index = numberToTierLevel(value, highestValue, colors.length);
     return colors[index]!;
 };
 
@@ -119,10 +119,10 @@ export const styleAdmin1 = (
 
 // Style for an admin area when an event is selected
 export const styleAdminForEvent = (
-    pCode: string,
+    placeCode: string,
     selectedChildCode: string | null,
     exposedPopulation: Record<string, number> | null,
-    maxExposedPopulation: number,
+    highestExposedPopulationNumber: number,
     alertClass: AlertClassType,
     isDeepestAdminLevel: boolean,
 ): Style => {
@@ -132,18 +132,18 @@ export const styleAdminForEvent = (
     }
 
     // Unexposed areas not displayed
-    if (!exposedPopulation || exposedPopulation[pCode] === undefined) {
+    if (!exposedPopulation || exposedPopulation[placeCode] === undefined) {
         return new Style({});
     }
 
     // Color based on exposed population
-    const population = exposedPopulation[pCode] ?? 0;
-    const baseColor = getExposureColor(population, maxExposedPopulation, alertClass);
+    const population = exposedPopulation[placeCode] ?? 0;
+    const baseColor = getExposureColor(population, highestExposedPopulationNumber, alertClass);
 
     // If nothing selected at the deepest level is selected, or if the current area is selected,
     // render at standard opacity.
     // Else, render at a lighter opacity.
-    const isStandardOpacity = selectedChildCode === null || selectedChildCode === pCode;
+    const isStandardOpacity = selectedChildCode === null || selectedChildCode === placeCode;
     const alphaHex = isStandardOpacity ? exposedAreaFillAlphaHex : exposedAreaFillAlphaHexLight;
 
     return new Style({
@@ -162,11 +162,11 @@ export const styleAdminForEvent = (
 // Note: Selected areas are not rendered, even at the lowest level.
 // This is part of the debug UI while we wait for design.
 export const styleAdminNoEvent = (
-    pCode: string,
+    placeCode: string,
     selectedCode: string | null,
     adminLevel: AdminLevel,
 ): Style => {
-    if (selectedCode && selectedCode.startsWith(pCode)) {
+    if (selectedCode && selectedCode.startsWith(placeCode)) {
         return new Style({});
     }
     return new Style({

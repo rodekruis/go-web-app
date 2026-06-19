@@ -82,7 +82,7 @@ export const getGlobalAdmin0Url = (): string => {
     return `${baseQuery}${levelParam}&${limitParam}&${simplifyParam}`;
 };
 
-export const getAdminRegionUrl = (
+export const getAdminAreaUrl = (
     countryIso3: string,
     adminLevel: number,
 ): string => {

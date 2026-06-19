@@ -6,13 +6,13 @@ import {
 } from '#utils/nrw/nrwMapStyles';
 import {
     type AlertClassType,
-    type SelectedEventMapDetails,
+    type SelectedEventDetails,
 } from '#utils/nrw/nrwMapTypes';
 
 import styles from './styles.module.css';
 
 interface NrwLegendPanelProps {
-    selectedEventDetails: SelectedEventMapDetails | null;
+    selectedEventDetails: SelectedEventDetails | null;
 }
 
 // a color and its lower-bound value.
@@ -23,15 +23,15 @@ interface LegendEntry {
 
 // Debug. Awaiting design.
 const getExposureLegend = (
-    maxValue: number,
+    highestValue: number,
     alertClass: AlertClassType,
 ): LegendEntry[] => {
     const colors = alertColors[alertClass];
 
-    // Convert a tier level to a value based on the maxValue, rounded to the nearest 100.
+    // Convert a tier level to a value based on the highestValue, rounded to the nearest 100.
     const getValue = (
         tierLevel: number,
-    ) => tierLevelToNumber(tierLevel, colors.length, maxValue, 100);
+    ) => tierLevelToNumber(tierLevel, colors.length, highestValue, 100);
 
     return colors.map((color, tierLevel) => {
         let label: string;
@@ -71,10 +71,10 @@ export default function NrwLegendPanel({
             return null;
         }
         const deepestLevel = Math.max(...levels);
-        const maxValue = selectedEventDetails
+        const highestValue = selectedEventDetails
             .highestExposedPopulationByLevel[deepestLevel] ?? 0;
 
-        return getExposureLegend(maxValue, selectedEventDetails.alertClass);
+        return getExposureLegend(highestValue, selectedEventDetails.alertClass);
     }, [selectedEventDetails]);
 
     if (!legend) {

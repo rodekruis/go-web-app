@@ -24,11 +24,11 @@ import {
 } from './nrwMapStyles';
 import {
     AlertClassType,
-    type SelectedEventMapDetails,
+    type SelectedEventDetails,
 } from './nrwMapTypes';
 import {
     getAdminAreasByCodesUrl,
-    getAdminRegionUrl,
+    getAdminAreaUrl,
     getNestedAdminUrl,
 } from './nrwUrls';
 
@@ -51,11 +51,11 @@ export interface MapViewState {
   selectedAdminCodes: Map<number, string | null>;
 
   // Deepest admin level of the current view
-  currentViewLevel: number;
+  currentViewAdminLevel: number;
 
   // Details for the currently selected event.
   // Null when no event is selected.
-  selectedEvent: SelectedEventMapDetails | null;
+  selectedEventDetails: SelectedEventDetails | null;
 }
 
 export interface MapSelectionView {
@@ -103,17 +103,17 @@ function createAdminLayerFromUrl(
         }),
         style: (feature) => {
             const code = feature.get(PLACE_CODE_FIELD_KEY);
-            const event = state.selectedEvent;
+            const event = state.selectedEventDetails;
             const isEventSelected = event !== null;
             const selectedCode = state.selectedAdminCodes.get(adminLevel) ?? null;
             if (isEventSelected) {
-                const levelKeys = Object.keys(event.exposedPopulationByLevel).map(Number);
+                const levelKeys = Object.keys(event.exposedPopulationPerAreaByLevel).map(Number);
                 const deepestExposedLevel = levelKeys.at(-1);
                 const isDeepestLevel = adminLevel === deepestExposedLevel;
                 return styleAdminForEvent(
                     code,
                     isDeepestLevel ? selectedCode : null,
-                    event?.exposedPopulationByLevel[adminLevel] ?? null,
+                    event?.exposedPopulationPerAreaByLevel[adminLevel] ?? null,
                     event?.highestExposedPopulationByLevel[adminLevel] ?? 0,
                     event?.alertClass ?? AlertClassType.High,
                     isDeepestLevel,
@@ -133,7 +133,7 @@ export function createFullAdminLayer(
     adminLevel: 1 | 2 | 3 | 4,
     country: string,
 ): VectorLayer {
-    const url = getAdminRegionUrl(country, adminLevel);
+    const url = getAdminAreaUrl(country, adminLevel);
     return createAdminLayerFromUrl(state, adminLevel, url);
 }
 
@@ -162,7 +162,7 @@ export function createAdminLayerForPlaceCodes(
     return createAdminLayerFromUrl(state, adminLevel, url);
 }
 
-// Handle a click on a map feature (admin region or event).
+// Handle a click on a map feature (admin area or event).
 // Returns an object describing what happened so the caller can
 // manage layers and animations.
 export function handleFeatureClick(
@@ -192,8 +192,8 @@ export function handleFeatureClick(
     const newSelectedRegionCode = adminDetails?.code || noCountrySelectedValue;
 
     let processAdmin3Clicks = layer === adminLayers.get(3);
-    if (processAdmin3Clicks && state.selectedEvent) {
-        const exposedRegions = state.selectedEvent.exposedPopulationByLevel[3] ?? {};
+    if (processAdmin3Clicks && state.selectedEventDetails) {
+        const exposedRegions = state.selectedEventDetails.exposedPopulationPerAreaByLevel[3] ?? {};
         if (!(newSelectedRegionCode in exposedRegions)) {
             processAdmin3Clicks = false;
         }
@@ -211,7 +211,7 @@ export function handleFeatureClick(
 
     // Handle clicks for admin1 and 2
     // For current design, the user can't interact with these is an event is selected.
-    if (!state.selectedEvent) {
+    if (!state.selectedEventDetails) {
         let selectedLayer: VectorLayer | null = null;
         let level = 1;
         // Only 2 and 3 are valid child levels

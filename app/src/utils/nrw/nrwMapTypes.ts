@@ -147,7 +147,7 @@ export enum EventDataSources {
 
 // Details needed by the map when an event is selected
 // This is derived from EventOverviewData and passed to the map component
-export interface SelectedEventMapDetails {
+export interface SelectedEventDetails {
   eventId: number;
   centroid: [number, number];
   // Alert class of the parent event, used to pick the color ramp for exposed areas
@@ -158,7 +158,7 @@ export interface SelectedEventMapDetails {
 
   // Exposed admin areas with their exposed population,
   // keyed by admin level then place code.
-  exposedPopulationByLevel: Record<number, Record<string, number>>;
+  exposedPopulationPerAreaByLevel: Record<number, Record<string, number>>;
   // Highest exposed population value per whole admin level.
   // This is precomputed so we don't need to find the highest value for every feature render.
   highestExposedPopulationByLevel: Record<number, number>;

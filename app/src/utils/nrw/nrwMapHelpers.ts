@@ -22,7 +22,7 @@ import { type MvtStyleCreator } from './nrwMapStyles';
 import type {
     EventOverviewData,
     MapLayerDetails,
-    SelectedEventMapDetails,
+    SelectedEventDetails,
 } from './nrwMapTypes';
 import { ExposedItemType } from './nrwMapTypes';
 import {
@@ -32,50 +32,63 @@ import {
 
 // Extract the map-relevant details from event data for a selected event
 // Returns null if no event is selected or event not found
-export function getSelectedEventMapDetails(
+export function getSelectedEventDetails(
     eventData: EventOverviewData[],
     eventId: number | null,
-): SelectedEventMapDetails | null {
+): SelectedEventDetails | null {
     if (!eventId) return null;
 
     const event = eventData.find((e) => e.eventId === eventId);
     if (!event) return null;
 
-    // Values needed for building the SelectedEventMapDetails:
+    // Values needed for building the SelectedEventDetails:
     // Exposed admin areas with their exposed population, per admin level.
-    const exposedPopulationByLevel: Record<number, Record<string, number>> = {};
+    const exposedPopulationPerAreaByLevel: Record<number, Record<string, number>> = {};
     // Highest exposed population value per admin level
     const highestExposedPopulationByLevel: Record<number, number> = {};
 
     if (event.exposedAdminAreas) {
+        // Parse the exposed admin area data by admin level
+        // to build the SelectedEventDetails
         event.exposedAdminAreas.forEach((adminAreas, level) => {
-            if (adminAreas && adminAreas.length > 0) {
-                const populationByCode: Record<string, number> = {};
-                let maxPopulation = 0;
-                adminAreas.forEach((area) => {
-                    const populationExposure = area.exposure.find(
-                        (category) => category.type === ExposedItemType.Population,
-                    );
-                    const exposedPop = populationExposure?.exposed ?? 0;
-                    populationByCode[area.placeCode] = exposedPop;
-                    if (exposedPop > maxPopulation) {
-                        maxPopulation = exposedPop;
-                    }
-                });
-                exposedPopulationByLevel[level] = populationByCode;
-                highestExposedPopulationByLevel[level] = maxPopulation;
+            if (!adminAreas || adminAreas.length === 0) {
+                return;
             }
+
+            // Look in all admin areas for this level and extract both the exposed population,
+            // and the highest exposed population value for this level.
+            const populationByCode: Record<string, number> = {};
+            let highestExposedPopulationValue = 0;
+
+            adminAreas.forEach((area) => {
+                // Get the value of the exposed population for this admin area, if any
+                const eventPopulationData = area.exposure.find(
+                    (category) => category.type === ExposedItemType.Population,
+                );
+                const exposedPopulationValue = eventPopulationData?.exposed ?? 0;
+
+                // Store the value for this admin area, and update the highest value if needed
+                populationByCode[area.placeCode] = exposedPopulationValue;
+                if (exposedPopulationValue > highestExposedPopulationValue) {
+                    highestExposedPopulationValue = exposedPopulationValue;
+                }
+            });
+
+            // Set the data for this level
+            exposedPopulationPerAreaByLevel[level] = populationByCode;
+            highestExposedPopulationByLevel[level] = highestExposedPopulationValue;
         });
     } else {
     // Log error and let caller handle the empty map.
         console.error('No exposedAdminAreas found for event:', eventId);
     }
 
+    // Return a SelectedEventDetails object with the extracted data
     return {
         eventId,
         centroid: event.centroid,
         alertClass: event.alertClass,
-        exposedPopulationByLevel,
+        exposedPopulationPerAreaByLevel,
         highestExposedPopulationByLevel,
     };
 }

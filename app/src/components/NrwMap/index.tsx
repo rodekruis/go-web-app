@@ -18,7 +18,7 @@ import {
     getCurrentCountryEventData,
     getEventDetails,
 } from '#utils/nrw/nrwDataFetchHelpers';
-import { getSelectedEventMapDetails } from '#utils/nrw/nrwMapHelpers';
+import { getSelectedEventDetails } from '#utils/nrw/nrwMapHelpers';
 import type { MapSelectionView } from '#utils/nrw/nrwMapInteractionHelpers';
 import { PrintElementId } from '#utils/nrw/nrwMapToPdfExporter';
 
@@ -119,8 +119,8 @@ export default function NrwMapContainer() {
     }, []);
 
     // Derive map details for the selected event (centroid, affected regions)
-    const selectedEventMapDetails = useMemo(
-        () => getSelectedEventMapDetails(eventData, activeEventId),
+    const selectedEventDetails = useMemo(
+        () => getSelectedEventDetails(eventData, activeEventId),
         [eventData, activeEventId],
     );
 
@@ -138,14 +138,14 @@ export default function NrwMapContainer() {
 
     // Show alert when no exposed regions found in a selected event
     useEffect(() => {
-        if (selectedEventMapDetails
-             && Object.keys(selectedEventMapDetails.exposedPopulationByLevel).length === 0) {
+        if (selectedEventDetails
+             && Object.keys(selectedEventDetails.exposedPopulationPerAreaByLevel).length === 0) {
             alert.show('No exposed regions', {
                 variant: 'danger',
                 description: `No exposed regions found for event "${activeEventId}".`,
             });
         }
-    }, [selectedEventMapDetails, activeEventId, alert]);
+    }, [selectedEventDetails, activeEventId, alert]);
 
     // Sync the active layer IDs to the URL
     useEffect(() => {
@@ -242,7 +242,7 @@ export default function NrwMapContainer() {
                 <div className={styles.mapColumn} id={PrintElementId.Map}>
                     <OlDataMap
                         selectedCountry={selectedCountry}
-                        selectedEventDetails={selectedEventMapDetails}
+                        selectedEventDetails={selectedEventDetails}
                         initialMapView={initialMapView()}
                         initialAdminCode={initialAdminCode}
                         addLayerFunction={registerMapAddLayer}
@@ -264,7 +264,7 @@ export default function NrwMapContainer() {
                         )}
                     />
                     <NrwLegendPanel
-                        selectedEventDetails={selectedEventMapDetails}
+                        selectedEventDetails={selectedEventDetails}
                     />
                 </div>
             </div>

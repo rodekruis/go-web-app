@@ -36,7 +36,7 @@ import {
 } from '#utils/nrw/nrwMapInteractionHelpers';
 import type {
     MapLayerDetails,
-    SelectedEventMapDetails,
+    SelectedEventDetails,
 } from '#utils/nrw/nrwMapTypes';
 import { MapLayerDisplayType } from '#utils/nrw/nrwMapTypes';
 import { mapUrlStyleJson } from '#utils/nrw/nrwUrls';
@@ -51,7 +51,7 @@ interface OlDataMapProps {
 
   // Details for the currently selected event (centroid, exposed regions)
   // Pass null when no event is selected
-  selectedEventDetails?: SelectedEventMapDetails | null;
+  selectedEventDetails?: SelectedEventDetails | null;
 
   // Optional arg to expose a method for adding a layer
   // It is a function that takes the add-layer function as an argument.
@@ -147,8 +147,8 @@ export default function OlDataMap({
                 [3, null],
                 [4, null],
             ]),
-            currentViewLevel: 1,
-            selectedEvent: selectedEventDetails ?? null,
+            currentViewAdminLevel: 1,
+            selectedEventDetails: selectedEventDetails ?? null,
         };
         stateRef.current = state;
 
@@ -182,7 +182,7 @@ export default function OlDataMap({
 
             mapInstanceRef.current?.addLayer(newLayer);
             adminLayers.set(targetLevel, newLayer);
-            state.currentViewLevel = Math.max(...adminLayers.keys());
+            state.currentViewAdminLevel = Math.max(...adminLayers.keys());
             return newLayer;
         }
 
@@ -417,20 +417,20 @@ export default function OlDataMap({
         if (!state || !map) return;
 
         // Update state with new event details
-        state.selectedEvent = selectedEventDetails ?? null;
+        state.selectedEventDetails = selectedEventDetails ?? null;
 
         // If event selected with exposed regions, show the lowest affected admin level
         if (selectedEventDetails) {
             // Guard against missing/invalid exposed population data
-            if (!selectedEventDetails.exposedPopulationByLevel
-                || Object.keys(selectedEventDetails.exposedPopulationByLevel).length === 0) {
+            if (!selectedEventDetails.exposedPopulationPerAreaByLevel
+                || Object.keys(selectedEventDetails.exposedPopulationPerAreaByLevel).length === 0) {
                 alert.show('Event has no exposed population data', { variant: 'danger' });
                 return;
             }
 
             // Find the deepest (lowest) admin level that has exposed areas.
             const deepestExposedLevel = Number(
-                Object.keys(selectedEventDetails.exposedPopulationByLevel).at(-1),
+                Object.keys(selectedEventDetails.exposedPopulationPerAreaByLevel).at(-1),
             );
 
             // Clear all existing admin area layers
@@ -446,7 +446,7 @@ export default function OlDataMap({
             // Load all exposed admin areas on the lowest admin level
             if (deepestExposedLevel) {
                 const exposedCodes = Object.keys(
-                    selectedEventDetails.exposedPopulationByLevel[deepestExposedLevel] ?? {},
+                    selectedEventDetails.exposedPopulationPerAreaByLevel[deepestExposedLevel] ?? {},
                 );
                 const level = deepestExposedLevel as 1 | 2 | 3;
                 const newLayer = createAdminLayerForPlaceCodes(
@@ -457,7 +457,7 @@ export default function OlDataMap({
                 );
                 map.addLayer(newLayer);
                 adminLayers.set(level, newLayer);
-                state.currentViewLevel = Math.max(...adminLayers.keys());
+                state.currentViewAdminLevel = Math.max(...adminLayers.keys());
             }
 
             // Fit view to exposed admin areas extent
