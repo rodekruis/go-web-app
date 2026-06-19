@@ -107,7 +107,7 @@ export const styleAdminForEvent = (
         return new Style({});
     }
 
-    // Unaffected areas not displayed
+    // Unexposed areas not displayed
     if (!exposedPopulation || exposedPopulation[pCode] === undefined) {
         return new Style({});
     }
