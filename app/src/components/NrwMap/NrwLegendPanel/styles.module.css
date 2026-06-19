@@ -1,4 +1,4 @@
-.legendPanel {
+.legend-panel {
     display: flex;
     align-items: center;
     margin: 12px 20px 0;
@@ -9,24 +9,24 @@
     gap: 16px;
 }
 
-.legendTitle {
+.legend-title {
     font-weight: 700;
 }
 
-.legendEntries {
+.legend-entries {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
 }
 
-.legendEntry {
+.legend-entry {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.legendSwatch {
+.legend-swatch {
     display: inline-block;
     border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: 4px;
@@ -34,6 +34,6 @@
     height: 24px;
 }
 
-.legendValue {
+.legend-value {
     white-space: nowrap;
 }
