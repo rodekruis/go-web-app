@@ -167,8 +167,8 @@ export default function OlDataMap({
             );
         }
 
-        // Place a new admin layer
-        function placeAdminLayer(targetLevel: 1 | 2 | 3 | 4, newLayer: VectorLayer) {
+        // Logic wrapper for adding a new admin layer
+        function handleAddAdminLayerCommand(targetLevel: 1 | 2 | 3 | 4, newLayer: VectorLayer) {
             // Remove any layers at this level and below
             for (let level = 4; level >= targetLevel; level -= 1) {
                 // if a layer exists at this level, remove it
@@ -192,21 +192,21 @@ export default function OlDataMap({
             country: string,
             parentCode?: string,
         ) {
-            // For admin level 1, get all admin areas for that level.
+            // For admin level 1, add all admin areas for that level.
             if (targetLevel === 1) {
-                return placeAdminLayer(
+                return handleAddAdminLayerCommand(
                     targetLevel,
                     createFullAdminLayer(state, targetLevel, country),
                 );
             }
 
-            // For admin deeper levels, just get child areas of a given parent code.
+            // For deeper admin levels, just add child areas of a given parent code.
             if (parentCode === undefined) {
                 alert.show(`Parent code is required for admin level ${targetLevel}`, { variant: 'danger' });
                 return undefined;
             }
 
-            return placeAdminLayer(
+            return handleAddAdminLayerCommand(
                 targetLevel,
                 createNestedAdminLayer(state, targetLevel, country, parentCode),
             );
