@@ -197,7 +197,7 @@ export default function OlDataMap({
                 return placeAdminLayer(level, createFullAdminLayer(state, level, country));
             }
 
-            // For admin levels, just get child areas of a given parent code.
+            // For admin deeper levels, just get child areas of a given parent code.
             if (parentCode === undefined) {
                 alert.show(`Parent code is required for admin level ${level}`, { variant: 'danger' });
                 return undefined;
