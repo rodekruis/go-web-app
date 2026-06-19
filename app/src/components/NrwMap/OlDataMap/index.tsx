@@ -168,44 +168,47 @@ export default function OlDataMap({
         }
 
         // Place a new admin layer
-        function placeAdminLayer(level: 1 | 2 | 3 | 4, newLayer: VectorLayer) {
+        function placeAdminLayer(targetLevel: 1 | 2 | 3 | 4, newLayer: VectorLayer) {
             // Remove any layers at this level and below
-            for (let n = 4; n >= level; n -= 1) {
+            for (let level = 4; level >= targetLevel; level -= 1) {
                 // if a layer exists at this level, remove it
-                const existing = adminLayers.get(n);
+                const existing = adminLayers.get(level);
                 if (existing) {
                     mapInstanceRef.current?.removeLayer(existing);
-                    adminLayers.delete(n);
-                    state.selectedAdminCodes.set(n, null);
+                    adminLayers.delete(level);
+                    state.selectedAdminCodes.set(level, null);
                 }
             }
 
             mapInstanceRef.current?.addLayer(newLayer);
-            adminLayers.set(level, newLayer);
+            adminLayers.set(targetLevel, newLayer);
             state.currentViewLevel = Math.max(...adminLayers.keys());
             return newLayer;
         }
 
         // Add an admin layer for a given level.
         function addAdminLayer(
-            level: 1 | 2 | 3 | 4,
+            targetLevel: 1 | 2 | 3 | 4,
             country: string,
             parentCode?: string,
         ) {
             // For admin level 1, get all admin areas for that level.
-            if (level === 1) {
-                return placeAdminLayer(level, createFullAdminLayer(state, level, country));
+            if (targetLevel === 1) {
+                return placeAdminLayer(
+                    targetLevel,
+                    createFullAdminLayer(state, targetLevel, country),
+                );
             }
 
             // For admin deeper levels, just get child areas of a given parent code.
             if (parentCode === undefined) {
-                alert.show(`Parent code is required for admin level ${level}`, { variant: 'danger' });
+                alert.show(`Parent code is required for admin level ${targetLevel}`, { variant: 'danger' });
                 return undefined;
             }
 
             return placeAdminLayer(
-                level,
-                createNestedAdminLayer(state, level, country, parentCode),
+                targetLevel,
+                createNestedAdminLayer(state, targetLevel, country, parentCode),
             );
         }
 
@@ -276,7 +279,7 @@ export default function OlDataMap({
             }
         }
 
-        // Store ref for use in async initial-admin callback
+        // Store this ref for use in the async initialization callback
         addAdminLayerFunctionRef.current = addAdminLayer;
 
         if (mapRef.current && !mapInstanceRef.current) {
@@ -431,12 +434,12 @@ export default function OlDataMap({
             );
 
             // Clear all existing admin area layers
-            for (let n = 4; n > 0; n -= 1) {
-                const existing = adminLayers.get(n);
+            for (let level = 4; level > 0; level -= 1) {
+                const existing = adminLayers.get(level);
                 if (existing) {
                     map.removeLayer(existing);
-                    adminLayers.delete(n);
-                    state.selectedAdminCodes.set(n, null);
+                    adminLayers.delete(level);
+                    state.selectedAdminCodes.set(level, null);
                 }
             }
 
@@ -471,12 +474,12 @@ export default function OlDataMap({
             }
         } else {
             // No event selected: keep admin layer for level 1, but clear all deeper admin layers
-            for (let n = 4; n > 1; n -= 1) {
-                const existing = adminLayers.get(n);
+            for (let level = 4; level > 1; level -= 1) {
+                const existing = adminLayers.get(level);
                 if (existing) {
                     map.removeLayer(existing);
-                    adminLayers.delete(n);
-                    state.selectedAdminCodes.set(n as 2 | 3 | 4, null);
+                    adminLayers.delete(level);
+                    state.selectedAdminCodes.set(level as 2 | 3 | 4, null);
                 }
             }
             // Admin layer for level 1 remains, but clear any admin area selection on it
