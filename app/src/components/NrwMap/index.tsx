@@ -118,7 +118,7 @@ export default function NrwMapContainer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Derive map details for the selected event (centroid, affected regions)
+    // Derive map details for the selected event (centroid, affected areas)
     const selectedEventDetails = useMemo(
         () => getSelectedEventDetails(eventData, activeEventId),
         [eventData, activeEventId],
@@ -136,13 +136,13 @@ export default function NrwMapContainer() {
         return peakTime ? peakTime.split('T')[0] : undefined;
     }, [eventData, activeEventId]);
 
-    // Show alert when no exposed regions found in a selected event
+    // Show alert when no exposed areas found in a selected event
     useEffect(() => {
         if (selectedEventDetails
              && Object.keys(selectedEventDetails.exposedPopulationPerAreaByLevel).length === 0) {
-            alert.show('No exposed regions', {
+            alert.show('No exposed areas', {
                 variant: 'danger',
-                description: `No exposed regions found for event "${activeEventId}".`,
+                description: `No exposed areas found for event "${activeEventId}".`,
             });
         }
     }, [selectedEventDetails, activeEventId, alert]);

@@ -49,7 +49,7 @@ interface OlDataMapProps {
   // ISO_A3 code of the selected country
   selectedCountry: string;
 
-  // Details for the currently selected event (centroid, exposed regions)
+  // Details for the currently selected event (centroid, exposed areas)
   // Pass null when no event is selected
   selectedEventDetails?: SelectedEventDetails | null;
 
@@ -419,7 +419,7 @@ export default function OlDataMap({
         // Update state with new event details
         state.selectedEventDetails = selectedEventDetails ?? null;
 
-        // If event selected with exposed regions, show the lowest affected admin level
+        // If event selected with exposed areas, show the lowest affected admin level
         if (selectedEventDetails) {
             // Guard against missing/invalid exposed population data
             if (!selectedEventDetails.exposedPopulationPerAreaByLevel

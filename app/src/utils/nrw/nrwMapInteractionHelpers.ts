@@ -189,20 +189,20 @@ export function handleFeatureClick(
         console.log('Clicked feature properties:', properties);
     }
 
-    const newSelectedRegionCode = adminDetails?.code || noCountrySelectedValue;
+    const newSelectedAreaCode = adminDetails?.code || noCountrySelectedValue;
 
     let processAdmin3Clicks = layer === adminLayers.get(3);
     if (processAdmin3Clicks && state.selectedEventDetails) {
-        const exposedRegions = state.selectedEventDetails.exposedPopulationPerAreaByLevel[3] ?? {};
-        if (!(newSelectedRegionCode in exposedRegions)) {
+        const exposedAreas = state.selectedEventDetails.exposedPopulationPerAreaByLevel[3] ?? {};
+        if (!(newSelectedAreaCode in exposedAreas)) {
             processAdmin3Clicks = false;
         }
     }
 
     // Clicked on admin3 layer
     if (processAdmin3Clicks) {
-        onSelect(newSelectedRegionCode, adminDetails, getCurrentMapSelectionView(state));
-        state.selectedAdminCodes.set(3, newSelectedRegionCode);
+        onSelect(newSelectedAreaCode, adminDetails, getCurrentMapSelectionView(state));
+        state.selectedAdminCodes.set(3, newSelectedAreaCode);
         adminLayers.forEach((adminLayer) => adminLayer.changed());
 
         fitToFeature(state, feature);
@@ -228,18 +228,18 @@ export function handleFeatureClick(
         }
 
         if (selectedLayer) {
-            onSelect(newSelectedRegionCode, adminDetails, getCurrentMapSelectionView(state));
-            state.selectedAdminCodes.set(level, newSelectedRegionCode);
+            onSelect(newSelectedAreaCode, adminDetails, getCurrentMapSelectionView(state));
+            state.selectedAdminCodes.set(level, newSelectedAreaCode);
             selectedLayer.changed();
             fitToFeature(state, feature);
 
             // eslint-disable-next-line consistent-return
             return {
                 showChildLevel: childLevel,
-                parentCode: newSelectedRegionCode,
+                parentCode: newSelectedAreaCode,
             };
         }
     }
 
-    state.selectedAdminCodes.set(0, newSelectedRegionCode);
+    state.selectedAdminCodes.set(0, newSelectedAreaCode);
 }

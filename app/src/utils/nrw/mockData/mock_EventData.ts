@@ -47,7 +47,7 @@ export const mockAllEventsData_MW: EventOverviewData[] = [
                     ],
                 },
             ],
-            // ADM1 - Regions (MW1: 51407, MW2: 45300)
+            // ADM1 - Areas (MW1: 51407, MW2: 45300)
             [
                 {
                     placeCode: 'MW1',
@@ -399,7 +399,7 @@ export const mockAllEventsData_MW: EventOverviewData[] = [
                     ],
                 },
             ],
-            // ADM1 - Region (same sum, all in Central)
+            // ADM1 - Area (same sum, all in Central)
             [
                 {
                     placeCode: 'MW2',
@@ -580,7 +580,7 @@ export const mockAllEventsData_MW: EventOverviewData[] = [
                     ],
                 },
             ],
-            // ADM1 - Region (same sum, all in Southern)
+            // ADM1 - Area (same sum, all in Southern)
             [
                 {
                     placeCode: 'MW3',
