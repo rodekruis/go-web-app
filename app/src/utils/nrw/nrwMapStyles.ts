@@ -47,7 +47,7 @@ export const tierLevelToNumber = (
     roundToNearest: number,
 ) : number => {
     const rawNumber = (tierLevel / tierCount) * highestNumberValue;
-    return Math.round((rawNumber / roundToNearest) * roundToNearest);
+    return Math.round(rawNumber / roundToNearest) * roundToNearest;
 };
 
 // Convert a number to a tier level, but group the highest value into one tier lower.
@@ -118,7 +118,7 @@ export const styleAdmin1 = (
 };
 
 // Style for an admin area when an event is selected
-export const styleAdminForEvent = (
+export const styleAdminAreaForEvent = (
     placeCode: string,
     selectedChildCode: string | null,
     exposedPopulation: Record<string, number> | null,

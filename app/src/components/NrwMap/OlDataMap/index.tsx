@@ -421,16 +421,18 @@ export default function OlDataMap({
 
         // If event selected with exposed areas, show the lowest affected admin level
         if (selectedEventDetails) {
+            const { exposedPopulationPerAreaByLevel } = selectedEventDetails;
+
             // Guard against missing/invalid exposed population data
-            if (!selectedEventDetails.exposedPopulationPerAreaByLevel
-                || Object.keys(selectedEventDetails.exposedPopulationPerAreaByLevel).length === 0) {
+            if (!exposedPopulationPerAreaByLevel
+                || Object.keys(exposedPopulationPerAreaByLevel).length === 0) {
                 alert.show('Event has no exposed population data', { variant: 'danger' });
                 return;
             }
 
             // Find the deepest (lowest) admin level that has exposed areas.
             const deepestExposedLevel = Number(
-                Object.keys(selectedEventDetails.exposedPopulationPerAreaByLevel).at(-1),
+                Object.keys(exposedPopulationPerAreaByLevel).at(-1),
             );
 
             // Clear all existing admin area layers
@@ -444,9 +446,10 @@ export default function OlDataMap({
             }
 
             // Load all exposed admin areas on the lowest admin level
+            // and fit view to their extent.
             if (deepestExposedLevel) {
                 const exposedCodes = Object.keys(
-                    selectedEventDetails.exposedPopulationPerAreaByLevel[deepestExposedLevel] ?? {},
+                    exposedPopulationPerAreaByLevel[deepestExposedLevel] ?? {},
                 );
                 const level = deepestExposedLevel as 1 | 2 | 3;
                 const newLayer = createAdminLayerForPlaceCodes(
@@ -458,10 +461,8 @@ export default function OlDataMap({
                 map.addLayer(newLayer);
                 adminLayers.set(level, newLayer);
                 state.currentViewAdminLevel = Math.max(...adminLayers.keys());
-            }
 
-            // Fit view to exposed admin areas extent
-            if (deepestExposedLevel) {
+                // Fit view to exposed admin areas extent
                 const source = adminLayers.get(deepestExposedLevel as 1 | 2 | 3)?.getSource();
                 if (source) {
                     source.once('featuresloadend', () => {

@@ -158,6 +158,8 @@ export interface SelectedEventDetails {
 
   // Exposed admin areas with their exposed population,
   // keyed by admin level then place code.
+  // If new data is needed to be passed to the map for rendering, add that data
+  // to this object.
   exposedPopulationPerAreaByLevel: Record<number, Record<string, number>>;
   // Highest exposed population value per whole admin level.
   // This is precomputed so we don't need to find the highest value for every feature render.

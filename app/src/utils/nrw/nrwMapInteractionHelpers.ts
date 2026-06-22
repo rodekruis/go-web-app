@@ -19,7 +19,7 @@ import {
 } from './nrwDataFetchHelpers';
 import { getAdminAreaZIndex } from './nrwMapHelpers';
 import {
-    styleAdminForEvent,
+    styleAdminAreaForEvent,
     styleAdminNoEvent,
 } from './nrwMapStyles';
 import {
@@ -110,7 +110,7 @@ function createAdminLayerFromUrl(
                 const levelKeys = Object.keys(event.exposedPopulationPerAreaByLevel).map(Number);
                 const deepestExposedLevel = levelKeys.at(-1);
                 const isDeepestLevel = adminLevel === deepestExposedLevel;
-                return styleAdminForEvent(
+                return styleAdminAreaForEvent(
                     code,
                     isDeepestLevel ? selectedCode : null,
                     event?.exposedPopulationPerAreaByLevel[adminLevel] ?? null,
