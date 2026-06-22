@@ -263,6 +263,9 @@ export default function NrwMapContainer() {
                     />
                 </div>
             </div>
+            {import.meta.env.APP_NRW_PORTAL_MODE !== 'STANDALONE' && (
+                <div>__</div>
+            )}
         </div>
     );
 }
