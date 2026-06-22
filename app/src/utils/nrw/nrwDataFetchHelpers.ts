@@ -2,10 +2,6 @@ import type VectorLayer from 'ol/layer/Vector';
 import type Style from 'ol/style/Style';
 
 import {
-    mockAllEventsData_MW,
-    mockAllEventsData_ZM,
-} from './mockData/mock_EventData';
-import {
     ADMIN_LEVEL_FIELD_KEY,
     ADMIN_PCODE_KEY_BASE,
     ATTRIBUTES_FIELD_KEY,
@@ -16,15 +12,54 @@ import {
     makePointLayerFromFeatures,
 } from './nrwMapHelpers';
 import {
+    AlertClassType,
+    EventAdminAreaData,
+    ExposedItemType,
+    MeasurementUnits,
     type CountryMapData,
     type EventOverviewData,
+    type ExposureCategory,
 } from './nrwMapTypes';
 import {
+    getActiveEventsApiUrl,
     getAdminAreaDetailsNoGeoUrl,
     getHealthLocsApiUrl,
     getRcLocsApiUrl,
     seedRepoMockCountryDataUrl,
 } from './nrwUrls';
+import { AlertClass, Layer } from './shared-enums';
+import { EventResponseDto } from './shared-dtos';
+
+function mapAlertClass(alertClass: AlertClass): AlertClassType {
+    const mapping: Record<AlertClass, AlertClassType> = {
+        [AlertClass.Low]: AlertClassType.Low,
+        [AlertClass.Medium]: AlertClassType.Medium,
+        [AlertClass.High]: AlertClassType.High,
+    };
+    return mapping[alertClass];
+}
+
+function mapLayerToExposedItemType(layer: Layer): ExposedItemType {
+    switch (layer) {
+        case Layer.populationExposed:
+            return ExposedItemType.Population;
+        default:
+            return ExposedItemType.Population;
+    }
+}
+
+function getExposureUnit(type: ExposedItemType): MeasurementUnits {
+    switch (type) {
+        case ExposedItemType.Population:
+            return MeasurementUnits.People;
+        case ExposedItemType.Roads:
+            return MeasurementUnits.Km;
+        case ExposedItemType.Buildings:
+            return MeasurementUnits.Buildings;
+        default:
+            return MeasurementUnits.None;
+    }
+}
 
 // Format of GO API result for Red Cross locations
 type RcLocResult = {
@@ -151,39 +186,74 @@ export async function fetchAdminAreaDetails(
     }
 }
 
-// Load mock event data for a given country from local mock data
-// TODO: Replace with API calls when available
-// TODO: Also set this to be able to load mock data from the seed repo.
-// This was disabled since the DB payload format is still changing, so the seed repo
-// data is out of date. Regenerating it each time takes effort (and a lot of LLM tokens)
-async function loadMockEventData(country: string): Promise<EventOverviewData[]> {
-    // Method to fetch from seed repo, but also can be used for the backend
-    /*
-    const url = getSeedRepoMockEventDataUrl(country); // Import from './nrwUrls'
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            return [];
-        }
-        return await response.json() as EventOverviewData[];
-    } catch {
-        return [];
+export async function getCurrentCountryEventData(country?: string): Promise<EventOverviewData[]> {
+    const response = await fetch(getActiveEventsApiUrl());
+    if (!response.ok) {
+        throw new Error(
+            `Failed to load event data: HTTP ${response.status} ${response.statusText}`,
+        );
     }
-        */
+    const allEvents = await response.json() as EventResponseDto[];
 
-    // Placeholder method using local mock data
-    const mockDataMap: Record<string, EventOverviewData[]> = {
-        MWI: mockAllEventsData_MW,
-        ZMB: mockAllEventsData_ZM,
-    };
-    return mockDataMap[country] ?? [];
-}
+    const allEventsOld: EventOverviewData[] = allEvents.map((event) => {
+        const areasByLevel: Record<number, EventAdminAreaData[]> = event.exposedAdminAreas.reduce(
+            (acc, area) => {
+                const level = area.adminLevel;
+                if (!acc[level]) {
+                    acc[level] = [];
+                }
+                acc[level].push({
+                    placeCode: area.placeCode,
+                    adminLevel: area.adminLevel,
+                    name: area.name,
+                    exposure: area.exposure.map((exp): ExposureCategory => {
+                        const mappedType = mapLayerToExposedItemType(exp.type);
+                        return {
+                            type: mappedType,
+                            total: exp.total ?? 0,
+                            exposed: exp.exposed,
+                            unit: getExposureUnit(mappedType),
+                        };
+                    }),
+                });
+                return acc;
+            },
+            {} as Record<number, EventAdminAreaData[]>,
+        );
+        const maxLevel = Object.keys(areasByLevel).reduce(
+            (max, k) => Math.max(max, Number(k)),
+            -1,
+        );
+        const exposedAdminAreas: EventAdminAreaData[][] = Array.from(
+            { length: maxLevel + 1 },
+            (_, i) => areasByLevel[i] ?? [],
+        );
 
-// Fetch upcoming or ongoing events data for a country
-export async function getCurrentCountryEventData(country: string): Promise<EventOverviewData[]> {
-    // TODO: Use the API for fetching this for any country, and only use mock data
-    // if set to do so in the env file.
-    return loadMockEventData(country);
+        return {
+            eventId: event.eventId,
+            eventName: event.eventName,
+            hazardTypes: [event.hazardType],
+            alertClass: mapAlertClass(event.alertClass),
+            trigger: event.trigger,
+            centroid: [event.centroid.longitude, event.centroid.latitude] as [number, number],
+            startTime: event.startAt,
+            endTime: event.endAt,
+            reachesPeakAlertClassTime: event.reachesPeakAlertClassAt,
+            firstIssuedAt: event.firstIssuedAt,
+            lastUpdatedAt: event.lastUpdatedAt,
+            exposedAdminAreas,
+            availableLayers: event.availableLayers.map((layer) => ({
+                resourceId: layer.resourceId,
+                dataType: layer.dataType,
+                displayType: layer.displayType,
+            })),
+            dataSources: [],
+        };
+    });
+    if (country) {
+        return allEventsOld.filter((event) => event.eventName.startsWith(`${country}_`));
+    }
+    return allEventsOld;
 }
 
 // Fetch a specific event's details, and only return that event
@@ -192,17 +262,10 @@ export async function getEventDetails(eventId: number): Promise<EventOverviewDat
     // if set to do so in the env file.
     // For mock data, look for the event data with the matching eventId across all countries.
     // TODO: When the API is available, this will be a single call to the API.
-    const countries = ['MWI', 'ZMB'];
-    for (let i = 0; i < countries.length; i += 1) {
-        const country = countries[i];
-        if (country) {
-            // eslint-disable-next-line no-await-in-loop
-            const countryEvents = await loadMockEventData(country);
-            const eventData = countryEvents.find((event) => event.eventId === eventId);
-            if (eventData) {
-                return [eventData];
-            }
-        }
+    const countryEvents = await getCurrentCountryEventData();
+    const eventData = countryEvents.find((event) => event.eventId === eventId);
+    if (eventData) {
+        return [eventData];
     }
     return [];
 }

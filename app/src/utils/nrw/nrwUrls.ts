@@ -130,6 +130,9 @@ export const getAdminAreasByCodesUrl = (
     return `${baseQuery}${countryParam}${and}${levelParam}${and}${codesParam}&${limitParam}&${simplifyParam}`;
 };
 
+// Events API URL
+export const getActiveEventsApiUrl = (): string => `${ibfApiBackend}events?active=true`;
+
 // Get a single admin area by its code (for initial selection from URL)
 // Excludes geometry to reduce payload size
 export const getAdminAreaDetailsNoGeoUrl = (
