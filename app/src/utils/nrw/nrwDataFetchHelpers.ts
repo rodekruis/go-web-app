@@ -152,16 +152,21 @@ export async function fetchAdminAreaDetails(
 
 // Fetch events from the IBF API
 async function fetchEventsFromApi(): Promise<EventOverviewData[]> {
-    const url = getEventsApiUrl();
-    const response = await fetch(url);
-    if (!response.ok) {
+    try {
+        const url = getEventsApiUrl();
+        const response = await fetch(url);
+        if (!response.ok) {
+            return [];
+        }
+        const dtos = await response.json() as EventResponseDto[];
+        return mapEventResponsesToOverviews(dtos);
+    } catch {
         return [];
     }
-    const dtos = await response.json() as EventResponseDto[];
-    return mapEventResponsesToOverviews(dtos);
 }
 
 // Fetch upcoming or ongoing events data for a country
+// TODO: add country-param to API and implement use here
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getCurrentCountryEventData(_country: string): Promise<EventOverviewData[]> {
     return fetchEventsFromApi();

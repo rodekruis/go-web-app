@@ -18,6 +18,9 @@ import {
     type HazardType,
 } from './shared-enums';
 
+// This file makes any necessary mappings from BE to FE data structures.
+// TODO: align the data structures better, thereby removing the need for this file.
+
 function mapForecastSourceToDataSource(source: string): DataSourceType {
     if (source === ForecastSource.glofas) {
         return DataSourceType.Glofas;
@@ -53,7 +56,7 @@ function mapLayerToExposureCategory(
         type: mapping.itemType,
         unit: mapping.unit,
         exposed,
-        total: total ?? 0,
+        total: total ?? 0, // TODO: handle null total values better
     };
 }
 
