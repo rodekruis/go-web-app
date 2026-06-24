@@ -1,6 +1,5 @@
 import {
     type AlertClassType,
-    DataSourceType,
     type EventAdminAreaData,
     type EventOverviewData,
     ExposedItemType,
@@ -14,19 +13,12 @@ import {
     type ExposedAdminAreaDto,
 } from './shared-dtos';
 import {
-    ForecastSource,
+    type ForecastSource,
     type HazardType,
 } from './shared-enums';
 
 // This file makes any necessary mappings from BE to FE data structures.
 // TODO: align the data structures better, thereby removing the need for this file.
-
-function mapForecastSourceToDataSource(source: string): DataSourceType {
-    if (source === ForecastSource.glofas) {
-        return DataSourceType.Glofas;
-    }
-    return DataSourceType.Other;
-}
 
 function mapLayerToExposureCategory(
     type: MapLayerInfoType,
@@ -107,8 +99,9 @@ function mapAvailableLayers(
 
 export function mapEventResponseToOverview(dto: EventResponseDto): EventOverviewData {
     return {
-        hazardTypes: [dto.hazardType as HazardType],
+        hazardType: dto.hazardType as HazardType,
         eventName: dto.eventName,
+        eventLabel: dto.eventLabel,
         eventId: dto.eventId,
         alertClass: dto.alertClass as AlertClassType,
         trigger: dto.trigger,
@@ -120,7 +113,8 @@ export function mapEventResponseToOverview(dto: EventResponseDto): EventOverview
         lastUpdatedAt: dto.lastUpdatedAt,
         exposedAdminAreas: mapExposedAdminAreas(dto.exposedAdminAreas),
         availableLayers: mapAvailableLayers(dto.availableLayers),
-        dataSources: dto.forecastSources.map(mapForecastSourceToDataSource),
+        forecastSources: dto.forecastSources as ForecastSource[],
+        isOngoing: dto.isOngoing,
     };
 }
 
