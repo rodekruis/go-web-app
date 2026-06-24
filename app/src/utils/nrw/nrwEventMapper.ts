@@ -97,7 +97,7 @@ function mapAvailableLayers(
     }));
 }
 
-function mapEventResponseToOverview(dto: EventResponseDto): EventOverviewData {
+export function mapEventResponseToOverview(dto: EventResponseDto): EventOverviewData {
     return {
         hazardType: dto.hazardType as HazardType,
         eventName: dto.eventName,
