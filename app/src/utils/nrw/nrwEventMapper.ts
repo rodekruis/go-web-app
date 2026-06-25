@@ -1,6 +1,4 @@
-import {
-    type EventOverviewData,
-} from './nrwMapTypes';
+import { type EventOverviewData } from './nrwMapTypes';
 import {
     type AdminAreaExposureDto,
     type EventResponseDto,
@@ -8,13 +6,9 @@ import {
     type MapLayerDetailsDto,
 } from './shared-dtos';
 import {
-    type AlertClass,
     type ForecastSource,
-    type HazardType,
     MapLayerInfoType,
-} from './shared-enums';
-
-// This file makes any necessary mappings from BE to FE data structures.
+} from './shared-enums';// This file makes any necessary mappings from BE to FE data structures.
 // TODO: align the data structures better, thereby removing the need for this file.
 
 function mapLayerToExposureCategory(
@@ -72,13 +66,13 @@ function mapAvailableLayers(
 
 export function mapEventResponseToOverview(dto: EventResponseDto): EventOverviewData {
     return {
-        hazardType: dto.hazardType as HazardType,
+        hazardType: dto.hazardType,
         eventName: dto.eventName,
         eventLabel: dto.eventLabel,
         eventId: dto.eventId,
-        alertClass: dto.alertClass as AlertClass,
+        alertClass: dto.alertClass,
         trigger: dto.trigger,
-        centroid: [dto.centroid.longitude, dto.centroid.latitude],
+        centroid: dto.centroid,
         startAt: dto.startAt,
         endAt: dto.endAt,
         reachesPeakAlertClassAt: dto.reachesPeakAlertClassAt,

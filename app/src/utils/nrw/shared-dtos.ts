@@ -9,6 +9,8 @@
  */
 
 import type {
+    AlertClass,
+    HazardType,
     MapLayerDisplayType,
     MapLayerInfoType,
 } from './shared-enums';
@@ -37,8 +39,8 @@ export interface EventResponseDto {
     eventName: string;
     eventLabel: string;
 
-    hazardType: string; // enum
-    alertClass: string; // enum, but not shared yet
+    hazardType: HazardType; // enum
+    alertClass: AlertClass; // enum
 
     forecastSources: string[];
     trigger: boolean;

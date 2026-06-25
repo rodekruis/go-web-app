@@ -22,10 +22,8 @@ export interface EventOverviewData {
   // User-friendly label for display
   eventLabel: string;
 
-  // ############# ok
   hazardType: HazardType;
 
-  // ############# switch to new enum
   alertClass: AlertClass;
 
   // Whether this is a triggering event or not.
@@ -35,7 +33,10 @@ export interface EventOverviewData {
   forecastSources: ForecastSource[];
 
   // ########### fix to new struct
-  centroid: [number, number];
+  centroid: {
+    latitude: number;
+    longitude: number;
+  };
 
   // Event time range, as ISO date strings with hours
   startAt: string;
@@ -81,7 +82,10 @@ export enum EventDataSources {
 // This is derived from EventOverviewData and passed to the map component
 export interface SelectedEventDetails {
   eventId: number;
-  centroid: [number, number];
+  centroid: {
+    latitude: number;
+    longitude: number;
+  };
   // Alert class of the parent event, used to pick the color ramp for exposed areas
   alertClass: AlertClass;
 
