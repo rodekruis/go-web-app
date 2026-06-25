@@ -34,12 +34,10 @@ import {
     type MapSelectionView,
     type MapViewState,
 } from '#utils/nrw/nrwMapInteractionHelpers';
-import type {
-    SelectedEventDetails,
-} from '#utils/nrw/nrwMapTypes';
-import { MapLayerDisplayType } from '#utils/nrw/nrwMapTypes';
-import { type MapLayerDetailsDto } from '#utils/nrw/shared-dtos';
+import type { SelectedEventDetails } from '#utils/nrw/nrwMapTypes';
 import { mapUrlStyleJson } from '#utils/nrw/nrwUrls';
+import { type MapLayerDetailsDto } from '#utils/nrw/shared-dtos';
+import { MapLayerDisplayType } from '#utils/nrw/shared-enums';
 
 import { createMapPopupPanel } from '../NrwMapPopupPanel';
 
