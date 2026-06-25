@@ -77,47 +77,47 @@ export interface MapLayerDetails {
 
 // Data for an overview of an event
 export interface EventOverviewData {
-  hazardType: HazardType;
-
-  // Internal event name (used as identifier)
-  eventName: string;
-
-  // User-friendly label for display
-  eventLabel: string;
-
   // ID to later reference the event, as well as for making other API calls for related resources
   eventId: number;
 
+  // Internal event name (used as identifier)
+  eventName: string;
+  // User-friendly label for display
+  eventLabel: string;
+
+  // ############# ok
+  hazardType: HazardType;
+
+  // ############# switch to new enum
   alertClass: AlertClassType;
 
   // Whether this is a triggering event or not.
   trigger: boolean;
 
-  // affects where we zoom to, and where we place the icon on the map
-  // [lon, lat]
+  // sources used for the data (Glofas, etc.)
+  forecastSources: ForecastSource[];
+
+  // ########### fix to new struct
   centroid: [number, number];
 
   // Event time range, as ISO date strings with hours
-  startTime: string;
-  endTime: string;
-  reachesPeakAlertClassTime: string;
+  startAt: string;
+  reachesPeakAlertClassAt: string;
+  endAt: string;
 
   // Event creation/update times, as ISO date strings
   firstIssuedAt: string;
   lastUpdatedAt: string;
 
-  // List of lists of details for each exposed admin area.
-  // The first index is the admin level (0, 1, 2...)
-  exposedAdminAreas: EventAdminAreaData[][];
+  // TODO: use this to show an event as ongoing vs upcoming
+  isOngoing: boolean;
+
+  // List of details for all exposed admin areas of all levels.
+  // The admin level is a property of each.
+  exposedAdminAreas: EventAdminAreaData[];
 
   // Other data layers that can be added to the map for this event
   availableLayers: MapLayerDetails[];
-
-  // sources used for the data (Glofas, etc.)
-  forecastSources: ForecastSource[];
-
-  // TODO: use this to show an event as ongoing vs upcoming
-  isOngoing: boolean;
 
 }
 

@@ -48,35 +48,29 @@ export function getSelectedEventDetails(
     const highestExposedPopulationByLevel: Record<number, number> = {};
 
     if (event.exposedAdminAreas) {
-        // Parse the exposed admin area data by admin level
-        // to build the SelectedEventDetails
-        event.exposedAdminAreas.forEach((adminAreas, level) => {
-            if (!adminAreas || adminAreas.length === 0) {
-                return;
+        // Parse the list of exposed admin areas, grouping by admin level
+        // to build the SelectedEventDetails.
+        event.exposedAdminAreas.forEach((area) => {
+            const { adminLevel: level } = area;
+
+            // Get the value of the exposed population for this admin area, if any
+            const eventPopulationData = area.exposure.find(
+                (category) => category.type === ExposedItemType.Population,
+            );
+            const exposedPopulationValue = eventPopulationData?.exposed ?? 0;
+
+            // Store the value for this admin area, keyed by level then place code
+            if (!exposedPopulationPerAreaByLevel[level]) {
+                exposedPopulationPerAreaByLevel[level] = {};
+                highestExposedPopulationByLevel[level] = 0;
             }
+            exposedPopulationPerAreaByLevel[level][area.placeCode] = exposedPopulationValue;
 
-            // Look in all admin areas for this level and extract both the exposed population,
-            // and the highest exposed population value for this level.
-            const populationByCode: Record<string, number> = {};
-            let highestExposedPopulationValue = 0;
-
-            adminAreas.forEach((area) => {
-                // Get the value of the exposed population for this admin area, if any
-                const eventPopulationData = area.exposure.find(
-                    (category) => category.type === ExposedItemType.Population,
-                );
-                const exposedPopulationValue = eventPopulationData?.exposed ?? 0;
-
-                // Store the value for this admin area, and update the highest value if needed
-                populationByCode[area.placeCode] = exposedPopulationValue;
-                if (exposedPopulationValue > highestExposedPopulationValue) {
-                    highestExposedPopulationValue = exposedPopulationValue;
-                }
-            });
-
-            // Set the data for this level
-            exposedPopulationPerAreaByLevel[level] = populationByCode;
-            highestExposedPopulationByLevel[level] = highestExposedPopulationValue;
+            // Update the highest exposed population value for this level if needed
+            const currentHighest = highestExposedPopulationByLevel[level] ?? 0;
+            if (exposedPopulationValue > currentHighest) {
+                highestExposedPopulationByLevel[level] = exposedPopulationValue;
+            }
         });
     } else {
     // Log error and let caller handle the empty map.

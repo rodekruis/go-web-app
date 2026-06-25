@@ -36,9 +36,11 @@ export interface EventResponseDto {
     eventId: number;
     eventName: string;
     eventLabel: string;
-    hazardType: string;
+
+    hazardType: string; // enum
+    alertClass: string; // enum, but not shared yet
+
     forecastSources: string[];
-    alertClass: string;
     trigger: boolean;
     centroid: {
         latitude: number;

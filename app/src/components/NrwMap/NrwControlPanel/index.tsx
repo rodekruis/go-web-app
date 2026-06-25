@@ -21,6 +21,23 @@ import {
 
 import styles from './styles.module.css';
 
+// Helper to group the flat list of exposed admin areas into a
+// [adminLevel][items] structure, which is easier to parse in this component.
+function groupAdminAreasByLevel(
+    areas: EventAdminAreaData[],
+): EventAdminAreaData[][] {
+    const grouped: EventAdminAreaData[][] = [];
+    areas.forEach((area) => {
+        if (area) {
+            if (!grouped[area.adminLevel]) {
+                grouped[area.adminLevel] = [];
+            }
+            grouped[area.adminLevel]?.push(area);
+        }
+    });
+    return grouped;
+}
+
 // Helper to get exposure value by type from the exposure array
 function getExposureByType(
     exposure: ExposureCategory[] | undefined,
@@ -142,9 +159,10 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
     // Get admin data at different levels
     // TODO: support multiple max admin levels
     // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41768
-    const admin0 = event.exposedAdminAreas[0]?.[0];
-    const admin1Areas = event.exposedAdminAreas[1] ?? [];
-    const admin3Areas = event.exposedAdminAreas[3] ?? [];
+    const adminAreasByLevel = groupAdminAreasByLevel(event.exposedAdminAreas);
+    const admin0 = adminAreasByLevel[0]?.[0];
+    const admin1Areas = adminAreasByLevel[1] ?? [];
+    const admin3Areas = adminAreasByLevel[3] ?? [];
 
     const totalPopulation = getExposedPopulation(admin0);
     const exposedDistrictsCount = admin3Areas.length;
@@ -182,14 +200,14 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
                 <div className={styles.infoRow}>
                     <span>
                         Started on:
-                        {formatStartDate(event.startTime)}
+                        {formatStartDate(event.startAt)}
                     </span>
                 </div>
                 <div className={styles.infoRow}>
                     <span>
                         Reach high threshold:
                         {' '}
-                        {formatPeakTime(event.reachesPeakAlertClassTime)}
+                        {formatPeakTime(event.reachesPeakAlertClassAt)}
                     </span>
                 </div>
                 <div className={styles.infoRow}>
@@ -307,17 +325,18 @@ function formatStartTime(startTime: string): string {
  */
 function EventButton({ event, onEventClick }: EventButtonProps) {
     // Get admin0 (country level) for total population
-    const admin0 = event.exposedAdminAreas[0]?.[0];
+    const adminAreasByLevel = groupAdminAreasByLevel(event.exposedAdminAreas);
+    const admin0 = adminAreasByLevel[0]?.[0];
     const totalPopulation = getExposedPopulation(admin0);
 
     // Get admin1 areas for affected areas
-    const admin1Areas = event.exposedAdminAreas[1] ?? [];
+    const admin1Areas = adminAreasByLevel[1] ?? [];
 
     // Get admin3 count for exposed districts
-    const admin3Areas = event.exposedAdminAreas[3] ?? [];
+    const admin3Areas = adminAreasByLevel[3] ?? [];
     const exposedDistrictsCount = admin3Areas.length;
 
-    const startTimeLabel = formatStartTime(event.startTime);
+    const startTimeLabel = formatStartTime(event.startAt);
 
     return (
         <div className={styles.eventCard}>

@@ -52,39 +52,19 @@ function mapLayerToExposureCategory(
     };
 }
 
-function mapExposedAdminAreas(areas: ExposedAdminAreaDto[]): EventAdminAreaData[][] {
-    const grouped = new Map<number, EventAdminAreaData[]>();
-
-    areas.forEach((area) => {
-        const mapped: EventAdminAreaData = {
-            placeCode: area.placeCode,
-            adminLevel: area.adminLevel,
-            name: area.name,
-            exposure: area.exposure.map(
-                (exp) => mapLayerToExposureCategory(
-                    exp.type,
-                    exp.exposed,
-                    exp.total,
-                ),
+function mapExposedAdminAreas(areas: ExposedAdminAreaDto[]): EventAdminAreaData[] {
+    return areas.map((area) => ({
+        placeCode: area.placeCode,
+        adminLevel: area.adminLevel,
+        name: area.name,
+        exposure: area.exposure.map(
+            (exp) => mapLayerToExposureCategory(
+                exp.type,
+                exp.exposed,
+                exp.total,
             ),
-        };
-
-        const existing = grouped.get(area.adminLevel);
-        if (existing) {
-            existing.push(mapped);
-        } else {
-            grouped.set(area.adminLevel, [mapped]);
-        }
-    });
-
-    const maxLevel = grouped.size > 0
-        ? Math.max(...grouped.keys())
-        : -1;
-    const result: EventAdminAreaData[][] = [];
-    for (let level = 0; level <= maxLevel; level += 1) {
-        result.push(grouped.get(level) ?? []);
-    }
-    return result;
+        ),
+    }));
 }
 
 function mapAvailableLayers(
@@ -106,9 +86,9 @@ export function mapEventResponseToOverview(dto: EventResponseDto): EventOverview
         alertClass: dto.alertClass as AlertClassType,
         trigger: dto.trigger,
         centroid: [dto.centroid.longitude, dto.centroid.latitude],
-        startTime: dto.startAt,
-        endTime: dto.endAt,
-        reachesPeakAlertClassTime: dto.reachesPeakAlertClassAt,
+        startAt: dto.startAt,
+        endAt: dto.endAt,
+        reachesPeakAlertClassAt: dto.reachesPeakAlertClassAt,
         firstIssuedAt: dto.firstIssuedAt,
         lastUpdatedAt: dto.lastUpdatedAt,
         exposedAdminAreas: mapExposedAdminAreas(dto.exposedAdminAreas),
