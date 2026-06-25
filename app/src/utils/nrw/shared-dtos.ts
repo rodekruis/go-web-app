@@ -10,6 +10,7 @@
 
 import type {
     AlertClass,
+    ForecastSource,
     HazardType,
     MapLayerDisplayType,
     MapLayerInfoType,
@@ -42,7 +43,7 @@ export interface EventResponseDto {
     hazardType: HazardType; // enum
     alertClass: AlertClass; // enum
 
-    forecastSources: string[];
+    forecastSources: ForecastSource[]; // enum
     trigger: boolean;
     centroid: {
         latitude: number;

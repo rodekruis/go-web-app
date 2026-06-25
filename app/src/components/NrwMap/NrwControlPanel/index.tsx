@@ -12,9 +12,9 @@ import {
 import { Button } from '@ifrc-go/ui';
 
 import { alertColors } from '#utils/nrw/nrwMapStyles';
-import { type EventOverviewData } from '#utils/nrw/nrwMapTypes';
 import {
     type AdminAreaExposureDto,
+    type EventResponseDto,
     type ExposedAdminAreaDto,
 } from '#utils/nrw/shared-dtos';
 import { MapLayerInfoType } from '#utils/nrw/shared-enums';
@@ -70,12 +70,12 @@ function getExposureLabel(type: MapLayerInfoType): string {
 }
 
 interface EventButtonProps {
-  event: EventOverviewData;
+  event: EventResponseDto;
   onEventClick: (eventId: number) => void;
 }
 
 interface EventDetailViewProps {
-  event: EventOverviewData;
+  event: EventResponseDto;
   onBack: () => void;
 }
 
@@ -374,7 +374,7 @@ function EventButton({ event, onEventClick }: EventButtonProps) {
 }
 
 interface NrwControlPanelProps {
-  eventData: EventOverviewData[];
+  eventData: EventResponseDto[];
   activeEventId: number | null;
   onEventClick: (eventId: number) => void;
   onRefreshAll: () => void;

@@ -20,20 +20,22 @@ import type Style from 'ol/style/Style';
 
 import { type MvtStyleCreator } from './nrwMapStyles';
 import type {
-    EventOverviewData,
     SelectedEventDetails,
 } from './nrwMapTypes';
 import {
     seedRepoEventDataUrl,
     seedRepoPopDataUrl,
 } from './nrwUrls';
-import { type MapLayerDetailsDto } from './shared-dtos';
+import type {
+    EventResponseDto,
+    MapLayerDetailsDto,
+} from './shared-dtos';
 import { MapLayerInfoType } from './shared-enums';
 
 // Extract the map-relevant details from event data for a selected event
 // Returns null if no event is selected or event not found
 export function getSelectedEventDetails(
-    eventData: EventOverviewData[],
+    eventData: EventResponseDto[],
     eventId: number | null,
 ): SelectedEventDetails | null {
     if (!eventId) return null;

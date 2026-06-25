@@ -7,15 +7,11 @@ import {
     ATTRIBUTES_FIELD_KEY,
     POPULATION_ATTRIBUTE_KEY,
 } from './nrwConstants';
-import { mapEventResponsesToOverviews } from './nrwEventMapper';
 import {
     isValidCoordinatePair,
     makePointLayerFromFeatures,
 } from './nrwMapHelpers';
-import {
-    type CountryMapData,
-    type EventOverviewData,
-} from './nrwMapTypes';
+import { type CountryMapData } from './nrwMapTypes';
 import {
     getAdminAreaDetailsNoGeoUrl,
     getEventsApiUrl,
@@ -151,15 +147,14 @@ export async function fetchAdminAreaDetails(
 }
 
 // Fetch events from the IBF API
-async function fetchEventsFromApi(): Promise<EventOverviewData[]> {
+async function fetchEventsFromApi(): Promise<EventResponseDto[]> {
     try {
         const url = getEventsApiUrl();
         const response = await fetch(url);
         if (!response.ok) {
             return [];
         }
-        const dtos = await response.json() as EventResponseDto[];
-        return mapEventResponsesToOverviews(dtos);
+        return await response.json() as EventResponseDto[];
     } catch {
         return [];
     }
@@ -168,12 +163,12 @@ async function fetchEventsFromApi(): Promise<EventOverviewData[]> {
 // Fetch upcoming or ongoing events data for a country
 // TODO: add country-param to API and implement use here
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function getCurrentCountryEventData(_country: string): Promise<EventOverviewData[]> {
+export async function getCurrentCountryEventData(_country: string): Promise<EventResponseDto[]> {
     return fetchEventsFromApi();
 }
 
 // Fetch a specific event's details, and only return that event
-export async function getEventDetails(eventId: number): Promise<EventOverviewData[]> {
+export async function getEventDetails(eventId: number): Promise<EventResponseDto[]> {
     const allEvents = await fetchEventsFromApi();
     const event = allEvents.find((e) => e.eventId === eventId);
     return event ? [event] : [];

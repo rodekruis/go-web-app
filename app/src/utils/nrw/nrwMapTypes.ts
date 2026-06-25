@@ -2,62 +2,8 @@
 // The enums are shared values between the backend and frontend.
 // Do not change any values without first checking with the IBF backend team.
 
-import {
-    type ExposedAdminAreaDto,
-    type MapLayerDetailsDto,
-} from './shared-dtos';
-import type {
-    AlertClass,
-    ForecastSource,
-    HazardType,
-} from './shared-enums';
-
-// Data for an overview of an event
-export interface EventOverviewData {
-  // ID to later reference the event, as well as for making other API calls for related resources
-  eventId: number;
-
-  // Internal event name (used as identifier)
-  eventName: string;
-  // User-friendly label for display
-  eventLabel: string;
-
-  hazardType: HazardType;
-
-  alertClass: AlertClass;
-
-  // Whether this is a triggering event or not.
-  trigger: boolean;
-
-  // sources used for the data (Glofas, etc.)
-  forecastSources: ForecastSource[];
-
-  // ########### fix to new struct
-  centroid: {
-    latitude: number;
-    longitude: number;
-  };
-
-  // Event time range, as ISO date strings with hours
-  startAt: string;
-  reachesPeakAlertClassAt: string;
-  endAt: string;
-
-  // Event creation/update times, as ISO date strings
-  firstIssuedAt: string;
-  lastUpdatedAt: string;
-
-  // TODO: use this to show an event as ongoing vs upcoming
-  isOngoing: boolean;
-
-  // List of details for all exposed admin areas of all levels.
-  // The admin level is a property of each.
-  exposedAdminAreas: ExposedAdminAreaDto[];
-
-  // Other data layers that can be added to the map for this event
-  availableLayers: MapLayerDetailsDto[];
-
-}
+import { type MapLayerDetailsDto } from './shared-dtos';
+import type { AlertClass } from './shared-enums';
 
 // Country-level non-event data
 // This is a work in progress still and will either have more data added to it,
@@ -79,7 +25,7 @@ export enum EventDataSources {
 }
 
 // Details needed by the map when an event is selected
-// This is derived from EventOverviewData and passed to the map component
+// This is derived from EventResponseDto and passed to the map component
 export interface SelectedEventDetails {
   eventId: number;
   centroid: {
