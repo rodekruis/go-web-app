@@ -17,7 +17,7 @@ import type {
     MapLayerInfoType,
 } from './shared-enums';
 
-interface AdminAreaExposureDto {
+export interface AdminAreaExposureDto {
     type: Layer;
     total: number | null;
     exposed: number;
