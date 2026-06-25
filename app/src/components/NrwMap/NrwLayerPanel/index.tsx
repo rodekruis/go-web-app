@@ -23,7 +23,7 @@ import styles from './styles.module.css';
 function getLayerLabel(layer: MapLayerDetailsDto): string {
     const labels: Record<string, string> = {
         [MapLayerInfoType.Population]: 'Population',
-        [MapLayerInfoType.FloodDepth]: 'Event Extent',
+        [MapLayerInfoType.FloodDepth]: 'Flood Depth',
         [MapLayerInfoType.RedCrossBranches]: 'Red Cross Branches',
         [MapLayerInfoType.Clinics]: 'Clinics',
     };

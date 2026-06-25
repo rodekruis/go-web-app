@@ -50,7 +50,7 @@ export default function useNrwDataLoader(
         initialEventId,
     );
 
-    // Resource IDs of currently visible layers (population, event extent, etc.)
+    // Resource IDs of currently visible layers (population, flood depth, etc.)
     // The starting value is any layer IDs in the deeplink.
     const [visibleLayerIds, setVisibleLayerIds] = useState<string[]>(initialLayerIds);
 
