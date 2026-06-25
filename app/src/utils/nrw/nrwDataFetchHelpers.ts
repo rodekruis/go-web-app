@@ -1,6 +1,7 @@
 import type VectorLayer from 'ol/layer/Vector';
 import type Style from 'ol/style/Style';
 
+import { mockKenyaEvents } from './mockData/mock_eventData';
 import {
     ADMIN_LEVEL_FIELD_KEY,
     ADMIN_PCODE_KEY_BASE,
@@ -166,7 +167,8 @@ async function fetchEventsFromApi(
 export async function getCurrentCountryEventData(
     country: string,
 ): Promise<EventResponseDto[]> {
-    return fetchEventsFromApi(country);
+    return mockKenyaEvents; // TODO: replace with API call when available
+    // return fetchEventsFromApi();
 }
 
 // Fetch a specific event's details, and only return that event
