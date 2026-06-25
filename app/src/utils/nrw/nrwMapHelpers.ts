@@ -19,9 +19,7 @@ import VectorTile from 'ol/source/VectorTile';
 import type Style from 'ol/style/Style';
 
 import { type MvtStyleCreator } from './nrwMapStyles';
-import type {
-    SelectedEventDetails,
-} from './nrwMapTypes';
+import type { SelectedEventDetails } from './nrwMapTypes';
 import {
     seedRepoEventDataUrl,
     seedRepoPopDataUrl,
