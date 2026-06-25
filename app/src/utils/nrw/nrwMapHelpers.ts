@@ -28,7 +28,10 @@ import type {
     EventResponseDto,
     MapLayerDetailsDto,
 } from './shared-dtos';
-import { MapLayerInfoType } from './shared-enums';
+import {
+    Layer,
+    MapLayerInfoType,
+} from './shared-enums';
 
 // Extract the map-relevant details from event data for a selected event
 // Returns null if no event is selected or event not found
@@ -55,7 +58,7 @@ export function getSelectedEventDetails(
 
             // Get the value of the exposed population for this admin area, if any
             const eventPopulationData = area.exposure.find(
-                (category) => category.type === MapLayerInfoType.Population,
+                (category) => category.type === Layer.populationExposed,
             );
             const exposedPopulationValue = eventPopulationData?.exposed ?? 0;
 
