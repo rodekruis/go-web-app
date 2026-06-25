@@ -12,11 +12,11 @@ import {
 import { Button } from '@ifrc-go/ui';
 
 import { alertColors } from '#utils/nrw/nrwMapStyles';
+import { type EventOverviewData } from '#utils/nrw/nrwMapTypes';
 import {
-    type EventOverviewData,
-    type ExposureCategory,
-} from '#utils/nrw/nrwMapTypes';
-import { type ExposedAdminAreaDto } from '#utils/nrw/shared-dtos';
+    type AdminAreaExposureDto,
+    type ExposedAdminAreaDto,
+} from '#utils/nrw/shared-dtos';
 import { MapLayerInfoType } from '#utils/nrw/shared-enums';
 
 import styles from './styles.module.css';
@@ -40,9 +40,9 @@ function groupAdminAreasByLevel(
 
 // Helper to get exposure value by type from the exposure array
 function getExposureByType(
-    exposure: ExposureCategory[] | undefined,
+    exposure: AdminAreaExposureDto[] | undefined,
     type: MapLayerInfoType,
-): ExposureCategory | undefined {
+): AdminAreaExposureDto | undefined {
     return exposure?.find((e) => e.type === type);
 }
 

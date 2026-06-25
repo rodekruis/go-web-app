@@ -20,8 +20,8 @@ import {
 } from '#utils/nrw/nrwMapStyles';
 import {
     type EventOverviewData,
-    type MapLayerDetails,
 } from '#utils/nrw/nrwMapTypes';
+import { type MapLayerDetailsDto } from '#utils/nrw/shared-dtos';
 import {
     MapLayerDisplayType,
     MapLayerInfoType,
@@ -60,19 +60,19 @@ export default function useNrwDataLoader(
 
     // Reference to the function (passed in by the map component) for adding layers to the map.
     const addLayerToMapFunction = useRef<(
-      (layer: BaseLayer, layerInfo: MapLayerDetails) => void) | null
+      (layer: BaseLayer, layerInfo: MapLayerDetailsDto) => void) | null
         >(null,
         );
 
     // Cache of all loaded layers.
     // The key is fixed based on the layer details.
     const layersCache = useRef(new Map<string, BaseLayer>());
-    const getLayerKey = (layerDetails: MapLayerDetails): string => `${layerDetails.dataType}_${selectedCountry}_${layerDetails.resourceId}`;
+    const getLayerKey = (layerDetails: MapLayerDetailsDto): string => `${layerDetails.dataType}_${selectedCountry}_${layerDetails.resourceId}`;
 
     // Register the map's addLayer function.
     // Called by OlDataMap when the map is ready.
     const registerMapAddLayer = useCallback(
-        (addLayer: (layer: BaseLayer, layerInfo: MapLayerDetails) => void) => {
+        (addLayer: (layer: BaseLayer, layerInfo: MapLayerDetailsDto) => void) => {
             addLayerToMapFunction.current = addLayer;
             setIsMapReady(true);
         },
@@ -102,7 +102,7 @@ export default function useNrwDataLoader(
     // Otherwise, load it with the passed in loadLayer function.
     const toggleLayer = async (
         key: string,
-        layerDetails: MapLayerDetails,
+        layerDetails: MapLayerDetailsDto,
         loadLayer: () => Promise<BaseLayer>,
     ) => {
         if (!addLayerToMapFunction.current) {
@@ -134,7 +134,7 @@ export default function useNrwDataLoader(
 
     // Exposed function to toggle a map layer
     // If the layer is not cached, it will be loaded.
-    const toggleMapLayer = (layerDetails: MapLayerDetails) => {
+    const toggleMapLayer = (layerDetails: MapLayerDetailsDto) => {
         const { dataType, displayType, resourceId } = layerDetails;
 
         switch (displayType) {
@@ -211,7 +211,7 @@ export default function useNrwDataLoader(
 
     // Get available layers for the currently selected event
     const selectedEvent = eventData.find((event) => event.eventId === selectedEventId) ?? null;
-    const selectedEventLayers: MapLayerDetails[] = selectedEvent?.availableLayers ?? [];
+    const selectedEventLayers: MapLayerDetailsDto[] = selectedEvent?.availableLayers ?? [];
 
     return {
         eventData,

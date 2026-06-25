@@ -21,13 +21,13 @@ import type Style from 'ol/style/Style';
 import { type MvtStyleCreator } from './nrwMapStyles';
 import type {
     EventOverviewData,
-    MapLayerDetails,
     SelectedEventDetails,
 } from './nrwMapTypes';
 import {
     seedRepoEventDataUrl,
     seedRepoPopDataUrl,
 } from './nrwUrls';
+import { type MapLayerDetailsDto } from './shared-dtos';
 import { MapLayerInfoType } from './shared-enums';
 
 // Extract the map-relevant details from event data for a selected event
@@ -207,7 +207,7 @@ export function getAdminAreaZIndex(level: number): number {
 // Get the map layer z index offset on which the layer is drawn.
 // Higher numbers are drawn on top of other layers.
 // Change the numbers in this function to change the layering order. Use ints.
-export function getZIndexOffset(layerDetails: MapLayerDetails): number {
+export function getZIndexOffset(layerDetails: MapLayerDetailsDto): number {
     // Note: admin levels are handled by this function: getAdminAreaZIndex
     // Set the number below in relation to what the admin layer is drawn at.
 

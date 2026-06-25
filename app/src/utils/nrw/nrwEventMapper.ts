@@ -1,11 +1,11 @@
 import {
     type EventOverviewData,
-    type ExposureCategory,
-    type MapLayerDetails,
 } from './nrwMapTypes';
 import {
+    type AdminAreaExposureDto,
     type EventResponseDto,
     type ExposedAdminAreaDto,
+    type MapLayerDetailsDto,
 } from './shared-dtos';
 import {
     type AlertClass,
@@ -21,7 +21,7 @@ function mapLayerToExposureCategory(
     type: MapLayerInfoType,
     exposed: number,
     total: number | null,
-): ExposureCategory {
+): AdminAreaExposureDto {
     const layerMapping: Partial<Record<
         MapLayerInfoType,
         { itemType: MapLayerInfoType }
@@ -62,7 +62,7 @@ function mapExposedAdminAreas(areas: ExposedAdminAreaDto[]): ExposedAdminAreaDto
 
 function mapAvailableLayers(
     layers: EventResponseDto['availableLayers'],
-): MapLayerDetails[] {
+): MapLayerDetailsDto[] {
     return layers.map((layer) => ({
         resourceId: layer.resourceId,
         dataType: layer.dataType,

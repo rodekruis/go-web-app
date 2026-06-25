@@ -2,34 +2,15 @@
 // The enums are shared values between the backend and frontend.
 // Do not change any values without first checking with the IBF backend team.
 
-import { type ExposedAdminAreaDto } from './shared-dtos';
+import {
+    type ExposedAdminAreaDto,
+    type MapLayerDetailsDto,
+} from './shared-dtos';
 import type {
     AlertClass,
     ForecastSource,
     HazardType,
-    MapLayerDisplayType,
-    MapLayerInfoType,
 } from './shared-enums';
-
-// Data for showing exposure of a given ExposedItemType
-export interface ExposureCategory {
-  type: MapLayerInfoType;
-  total: number | null;
-  exposed: number;
-}
-
-// Details for a data layer that can be added to a map
-export interface MapLayerDetails {
-  // ID that can be used to fetch the actual map layer data
-  resourceId: string;
-
-  // The type of data on this layer
-  // This can be used to label the layer in the UI, style it, etc.
-  dataType: MapLayerInfoType;
-
-  // The way this data will be displayed
-  displayType: MapLayerDisplayType;
-}
 
 // Data for an overview of an event
 export interface EventOverviewData {
@@ -73,7 +54,7 @@ export interface EventOverviewData {
   exposedAdminAreas: ExposedAdminAreaDto[];
 
   // Other data layers that can be added to the map for this event
-  availableLayers: MapLayerDetails[];
+  availableLayers: MapLayerDetailsDto[];
 
 }
 
@@ -82,7 +63,7 @@ export interface EventOverviewData {
 // or merged into some other source.
 export interface CountryMapData {
   // Available map layers for the country that can be added
-  availableLayers: MapLayerDetails[];
+  availableLayers: MapLayerDetailsDto[];
 
   // The event data sources for forecasted events.
   // This can differentiate between supported event types as well as MRW/NRW data sources.
