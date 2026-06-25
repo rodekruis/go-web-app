@@ -14,10 +14,8 @@ import { byPrefixAndName } from '@awesome.me/kit-92f09b5225/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { getCountryMapData } from '#utils/nrw/nrwDataFetchHelpers';
-import {
-    type MapLayerDetails,
-    MapLayerInfoType,
-} from '#utils/nrw/nrwMapTypes';
+import { type MapLayerDetails } from '#utils/nrw/nrwMapTypes';
+import { MapLayerInfoType } from '#utils/nrw/shared-enums';
 
 import styles from './styles.module.css';
 
@@ -25,7 +23,7 @@ import styles from './styles.module.css';
 function getLayerLabel(layer: MapLayerDetails): string {
     const labels: Record<string, string> = {
         [MapLayerInfoType.Population]: 'Population',
-        [MapLayerInfoType.EventExtent]: 'Event Extent',
+        [MapLayerInfoType.FloodDepth]: 'Event Extent',
         [MapLayerInfoType.RedCrossBranches]: 'Red Cross Branches',
         [MapLayerInfoType.Clinics]: 'Clinics',
     };

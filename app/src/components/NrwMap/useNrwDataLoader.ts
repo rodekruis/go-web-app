@@ -21,9 +21,11 @@ import {
 import {
     type EventOverviewData,
     type MapLayerDetails,
+} from '#utils/nrw/nrwMapTypes';
+import {
     MapLayerDisplayType,
     MapLayerInfoType,
-} from '#utils/nrw/nrwMapTypes';
+} from '#utils/nrw/shared-enums';
 
 /**
  * Hook used to manage and share data for the NRW map components.
@@ -145,7 +147,7 @@ export default function useNrwDataLoader(
                             () => makePopulationImageLayer(selectedCountry),
                         );
                         break;
-                    case MapLayerInfoType.EventExtent:
+                    case MapLayerInfoType.FloodDepth:
                         toggleLayer(
                             getLayerKey(layerDetails),
                             layerDetails,

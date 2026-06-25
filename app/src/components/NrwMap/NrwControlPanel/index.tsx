@@ -13,20 +13,20 @@ import { Button } from '@ifrc-go/ui';
 
 import { alertColors } from '#utils/nrw/nrwMapStyles';
 import {
-    type EventAdminAreaData,
     type EventOverviewData,
-    ExposedItemType,
     type ExposureCategory,
 } from '#utils/nrw/nrwMapTypes';
+import { type ExposedAdminAreaDto } from '#utils/nrw/shared-dtos';
+import { MapLayerInfoType } from '#utils/nrw/shared-enums';
 
 import styles from './styles.module.css';
 
 // Helper to group the flat list of exposed admin areas into a
 // [adminLevel][items] structure, which is easier to parse in this component.
 function groupAdminAreasByLevel(
-    areas: EventAdminAreaData[],
-): EventAdminAreaData[][] {
-    const grouped: EventAdminAreaData[][] = [];
+    areas: ExposedAdminAreaDto[],
+): ExposedAdminAreaDto[][] {
+    const grouped: ExposedAdminAreaDto[][] = [];
     areas.forEach((area) => {
         if (area) {
             if (!grouped[area.adminLevel]) {
@@ -41,31 +41,30 @@ function groupAdminAreasByLevel(
 // Helper to get exposure value by type from the exposure array
 function getExposureByType(
     exposure: ExposureCategory[] | undefined,
-    type: ExposedItemType,
+    type: MapLayerInfoType,
 ): ExposureCategory | undefined {
     return exposure?.find((e) => e.type === type);
 }
 
 // Helper to get population exposure from admin area
 function getExposedPopulation(
-    adminArea: EventAdminAreaData | undefined,
+    adminArea: ExposedAdminAreaDto | undefined,
 ): number {
     const popExposure = getExposureByType(
         adminArea?.exposure,
-        ExposedItemType.Population,
+        MapLayerInfoType.Population,
     );
     return popExposure?.exposed ?? 0;
 }
 
 // Format label for exposure type - uses type value with _ID appended if no user-friendly label
 // TODO: move to loc file. See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41713
-function getExposureLabel(type: ExposedItemType): string {
-    const labels: Record<ExposedItemType, string> = {
-        [ExposedItemType.Population]: 'Population',
-        [ExposedItemType.Buildings]: 'Buildings',
-        [ExposedItemType.Roads]: 'Roads',
-        [ExposedItemType.Schools]: 'Schools',
-        [ExposedItemType.Clinics]: 'Health Clinics',
+function getExposureLabel(type: MapLayerInfoType): string {
+    const labels: Record<MapLayerInfoType, string> = {
+        [MapLayerInfoType.Population]: 'Population',
+        [MapLayerInfoType.RedCrossBranches]: 'Red Cross Branches',
+        [MapLayerInfoType.Clinics]: 'Health Clinics',
+        [MapLayerInfoType.FloodDepth]: 'Flood Depth',
     };
     return labels[type] ?? `${type}_ID`;
 }
@@ -169,7 +168,7 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
 
     // Get exposure categories for infrastructure (exclude population)
     const infraExposure = admin0?.exposure.filter(
-        (e) => e.type !== ExposedItemType.Population,
+        (e) => e.type !== MapLayerInfoType.Population,
     ) ?? [];
 
     return (
@@ -258,12 +257,10 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
                                 </span>
                                 <span className={styles.infraValue}>
                                     {item.exposed.toLocaleString()}
-                                    {item.unit ? ` ${item.unit}` : ''}
                                     {' '}
                                     /
                                     {' '}
-                                    {item.total.toLocaleString()}
-                                    {item.unit ? ` ${item.unit}` : ''}
+                                    {item.total?.toLocaleString()}
                                 </span>
                             </div>
                         ))}

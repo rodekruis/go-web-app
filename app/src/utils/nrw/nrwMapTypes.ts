@@ -2,64 +2,20 @@
 // The enums are shared values between the backend and frontend.
 // Do not change any values without first checking with the IBF backend team.
 
-import {
-    type ForecastSource,
-    type HazardType,
+import { type ExposedAdminAreaDto } from './shared-dtos';
+import type {
+    AlertClass,
+    ForecastSource,
+    HazardType,
+    MapLayerDisplayType,
+    MapLayerInfoType,
 } from './shared-enums';
-
-// Enum to identify alert classes
-// These then point to the color/style/localized string in the front end.
-// A given country may support only a subset of these.
-export enum AlertClassType {
-  High = 'high',
-  Medium = 'medium',
-  Low = 'low',
-}
-
-// Units for labelling values in the UI
-export enum MeasurementUnits {
-  Km = 'km',
-  Buildings = 'buildings',
-  People = 'people',
-  Locations = 'locations',
-  None = '',
-}
-
-// The types of items with exposure data
-export enum ExposedItemType {
-  Population = 'population',
-  Buildings = 'buildings',
-  Roads = 'roads',
-  Schools = 'schools',
-  Clinics = 'clinics',
-}
-
-// Key to identify the type of map layer info being shown.
-// This is used to style/label it on the frontend.
-export enum MapLayerInfoType {
-  Population = 'population',
-  EventExtent = 'event_extent',
-  RedCrossBranches = 'red_cross_branches',
-  Clinics = 'clinics',
-}
-
-export enum MapLayerDisplayType {
-  // Image data, i.e. PNGs
-  Raster = 'raster',
-  // Vector shape data for lines and polygons, including admin areas
-  Shape = 'shape',
-  // Vector point data, such as for glofas locations
-  Point = 'point',
-  // Vector tiles, used for dense vector information such as many buildings and roads
-  VectorTile = 'vector_tile',
-}
 
 // Data for showing exposure of a given ExposedItemType
 export interface ExposureCategory {
-  type: ExposedItemType;
+  type: MapLayerInfoType;
+  total: number | null;
   exposed: number;
-  total: number;
-  unit: MeasurementUnits;
 }
 
 // Details for a data layer that can be added to a map
@@ -89,7 +45,7 @@ export interface EventOverviewData {
   hazardType: HazardType;
 
   // ############# switch to new enum
-  alertClass: AlertClassType;
+  alertClass: AlertClass;
 
   // Whether this is a triggering event or not.
   trigger: boolean;
@@ -114,19 +70,11 @@ export interface EventOverviewData {
 
   // List of details for all exposed admin areas of all levels.
   // The admin level is a property of each.
-  exposedAdminAreas: EventAdminAreaData[];
+  exposedAdminAreas: ExposedAdminAreaDto[];
 
   // Other data layers that can be added to the map for this event
   availableLayers: MapLayerDetails[];
 
-}
-
-// Event data specific to an admin area. Each admin area with exposure has one of these.
-export interface EventAdminAreaData {
-  placeCode: string;
-  adminLevel: number;
-  name: string;
-  exposure: ExposureCategory[];
 }
 
 // Country-level non-event data
@@ -154,7 +102,7 @@ export interface SelectedEventDetails {
   eventId: number;
   centroid: [number, number];
   // Alert class of the parent event, used to pick the color ramp for exposed areas
-  alertClass: AlertClassType;
+  alertClass: AlertClass;
 
   // Exposure data for the current event, keyed by admin level,
   // and sorted from lowest to highest (which is a byproduct of being a Record type).

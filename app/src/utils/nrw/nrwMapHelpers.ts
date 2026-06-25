@@ -24,11 +24,11 @@ import type {
     MapLayerDetails,
     SelectedEventDetails,
 } from './nrwMapTypes';
-import { ExposedItemType } from './nrwMapTypes';
 import {
     seedRepoEventDataUrl,
     seedRepoPopDataUrl,
 } from './nrwUrls';
+import { MapLayerInfoType } from './shared-enums';
 
 // Extract the map-relevant details from event data for a selected event
 // Returns null if no event is selected or event not found
@@ -55,7 +55,7 @@ export function getSelectedEventDetails(
 
             // Get the value of the exposed population for this admin area, if any
             const eventPopulationData = area.exposure.find(
-                (category) => category.type === ExposedItemType.Population,
+                (category) => category.type === MapLayerInfoType.Population,
             );
             const exposedPopulationValue = eventPopulationData?.exposed ?? 0;
 
@@ -212,14 +212,14 @@ export function getZIndexOffset(layerDetails: MapLayerDetails): number {
     // Set the number below in relation to what the admin layer is drawn at.
 
     switch (layerDetails.dataType) {
-        case 'population':
+        case MapLayerInfoType.Population:
             return 500;
-        case 'event_extent':
+        case MapLayerInfoType.FloodDepth:
             return 1100;
-        case 'red_cross_branches':
+        case MapLayerInfoType.RedCrossBranches:
             // Give point data a higher offset
             return 1201;
-        case 'clinics':
+        case MapLayerInfoType.Clinics:
             // Give point data a higher offset
             return 1202;
         default:

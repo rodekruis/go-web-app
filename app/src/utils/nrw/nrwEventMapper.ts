@@ -1,20 +1,17 @@
 import {
-    type AlertClassType,
-    type EventAdminAreaData,
     type EventOverviewData,
-    ExposedItemType,
     type ExposureCategory,
     type MapLayerDetails,
-    MapLayerInfoType,
-    MeasurementUnits,
 } from './nrwMapTypes';
 import {
     type EventResponseDto,
     type ExposedAdminAreaDto,
 } from './shared-dtos';
 import {
+    type AlertClass,
     type ForecastSource,
     type HazardType,
+    MapLayerInfoType,
 } from './shared-enums';
 
 // This file makes any necessary mappings from BE to FE data structures.
@@ -27,32 +24,28 @@ function mapLayerToExposureCategory(
 ): ExposureCategory {
     const layerMapping: Partial<Record<
         MapLayerInfoType,
-        { itemType: ExposedItemType; unit: MeasurementUnits }
+        { itemType: MapLayerInfoType }
     >> = {
         [MapLayerInfoType.Population]: {
-            itemType: ExposedItemType.Population,
-            unit: MeasurementUnits.None,
+            itemType: MapLayerInfoType.Population,
         },
         [MapLayerInfoType.Clinics]: {
-            itemType: ExposedItemType.Clinics,
-            unit: MeasurementUnits.Locations,
+            itemType: MapLayerInfoType.Clinics,
         },
     };
 
     const mapping = layerMapping[type] ?? {
-        itemType: ExposedItemType.Population,
-        unit: MeasurementUnits.None,
+        itemType: MapLayerInfoType.Population,
     };
 
     return {
         type: mapping.itemType,
-        unit: mapping.unit,
         exposed,
         total: total ?? 0, // TODO: handle null total values better
     };
 }
 
-function mapExposedAdminAreas(areas: ExposedAdminAreaDto[]): EventAdminAreaData[] {
+function mapExposedAdminAreas(areas: ExposedAdminAreaDto[]): ExposedAdminAreaDto[] {
     return areas.map((area) => ({
         placeCode: area.placeCode,
         adminLevel: area.adminLevel,
@@ -83,7 +76,7 @@ export function mapEventResponseToOverview(dto: EventResponseDto): EventOverview
         eventName: dto.eventName,
         eventLabel: dto.eventLabel,
         eventId: dto.eventId,
-        alertClass: dto.alertClass as AlertClassType,
+        alertClass: dto.alertClass as AlertClass,
         trigger: dto.trigger,
         centroid: [dto.centroid.longitude, dto.centroid.latitude],
         startAt: dto.startAt,

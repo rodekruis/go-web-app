@@ -11,7 +11,7 @@
 import type {
     MapLayerDisplayType,
     MapLayerInfoType,
-} from './nrwMapTypes';
+} from './shared-enums';
 
 interface AdminAreaExposureDto {
     type: MapLayerInfoType;
