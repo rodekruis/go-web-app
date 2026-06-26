@@ -1,6 +1,4 @@
-// Data types and structures for the IBF map backend and NRW frontend.
-// The enums are shared values between the backend and frontend.
-// Do not change any values without first checking with the IBF backend team.
+// Data types and structures use for the Nrw Map components
 
 import { type MapLayerDetailsDto } from './shared-dtos';
 import type { AlertClass } from './shared-enums';
