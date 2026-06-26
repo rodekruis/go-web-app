@@ -160,6 +160,7 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
     const adminAreasByLevel = groupAdminAreasByLevel(event.exposedAdminAreas);
     const admin0 = adminAreasByLevel[0]?.[0];
     const admin1Areas = adminAreasByLevel[1] ?? [];
+    // TODO: fix this based on design. Note: admin 2 is missing
     const admin3Areas = adminAreasByLevel[3] ?? [];
 
     const totalPopulation = getExposedPopulation(admin0);
@@ -327,7 +328,7 @@ function EventButton({ event, onEventClick }: EventButtonProps) {
 
     // Get admin1 areas for affected areas
     const admin1Areas = adminAreasByLevel[1] ?? [];
-
+    // TODO: fix this based on design. Note: admin 2 is missing
     // Get admin3 count for exposed districts
     const admin3Areas = adminAreasByLevel[3] ?? [];
     const exposedDistrictsCount = admin3Areas.length;
