@@ -22,7 +22,7 @@ The "Ol..." prefix stands for OpenLayers (the mapping front library used), and t
 - `OlDataMap` is the map component for NRW. It handles admin area rendering/selection and displays data from the `useNrwDataLoader` hook. It also loads/displays data directly for data that does not need to be shared with other components, such as the base map layer and admin area geometry.
 - `NrwControlPanel` and `NrwLayerPanel` are the UI interaction layers.
 - `NrwLegendPanel` displays map legend information
-- `NrwMapPopupPanel` this replaces the Go map popup panel, since that component is an extended MapBox UI element, and can't be reused. This is the popup when an item on the map is clicked.
+- The `NrwMapPopupPanel` replaces the Go map popup panel, since that component is an extended MapBox UI element and can't be reused. This is the popup shown when an item on the map is clicked.
 
 ### Prototype components
 
