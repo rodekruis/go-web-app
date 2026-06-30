@@ -1,0 +1,11 @@
+.container {
+    block-size: 100%;
+    inline-size: 100%;
+    min-block-size: 24rem;
+}
+
+.map {
+    block-size: 100%;
+    inline-size: 100%;
+    min-block-size: 24rem;
+}
