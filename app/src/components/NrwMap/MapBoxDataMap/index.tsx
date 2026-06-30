@@ -1,6 +1,7 @@
 import 'mapbox-gl-v3/dist/mapbox-gl.css';
 
 import {
+    useCallback,
     useEffect,
     useRef,
     useState,
@@ -11,7 +12,9 @@ import {
     ibfApiBackend,
     mbtoken,
 } from '#config';
+import useAlert from '#hooks/useAlert';
 import { getCountryMapData } from '#utils/nrw/nrwDataFetchHelpers';
+import { exportMapboxToPdf } from '#utils/nrw/nrwMapboxToPdfExporter';
 import { isValidCoordinatePair } from '#utils/nrw/nrwMapHelpers';
 import type { MapSelectionView } from '#utils/nrw/nrwMapInteractionHelpers';
 import {
@@ -173,11 +176,15 @@ async function loadRasterLayer(
         ],
     });
 
+    // Use 'nearest' resampling to avoid blurring the raster when zoomed in
     map.addLayer({
         id: layerId,
         type: 'raster',
         source: sourceId,
-        paint: { 'raster-opacity': 0.8 },
+        paint: {
+            'raster-opacity': 0.8,
+            'raster-resampling': 'nearest',
+        },
     });
 }
 
@@ -206,6 +213,7 @@ export default function MapBoxDataMap({
     visibleLayerIds = [],
     availableEventLayers = [],
 }: MapBoxDataMapProps) {
+    const alert = useAlert();
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<MapboxGLMap | null>(null);
     const [isMapLoaded, setIsMapLoaded] = useState(false);
@@ -229,6 +237,7 @@ export default function MapBoxDataMap({
             center,
             zoom,
             attributionControl: true,
+            preserveDrawingBuffer: true,
         });
 
         map.addControl(new mapboxgl.NavigationControl(), 'top-right');
@@ -305,8 +314,33 @@ export default function MapBoxDataMap({
         });
     }, [visibleLayerIds, isMapLoaded, countryLayers, availableEventLayers, selectedCountry]);
 
+    const handleDebugExport = useCallback(async () => {
+        const mapInstance = mapInstanceRef.current;
+        if (!mapInstance) {
+            alert.show('Map is not ready yet.', { variant: 'warning' });
+            return;
+        }
+
+        try {
+            await exportMapboxToPdf(mapInstance, [selectedCountry]);
+        } catch (error) {
+            alert.show('Failed to export Mapbox PDF. Please try again.', { variant: 'danger' });
+            console.error('[MapBoxDataMap] Export failed:', error);
+        }
+    }, [alert, selectedCountry]);
+
     return (
         <div className={styles.container}>
+            <div className={styles.debugToolbar}>
+                <button
+                    type="button"
+                    className={styles.debugExportButton}
+                    onClick={handleDebugExport}
+                    disabled={!isMapLoaded}
+                >
+                    Debug Export PDF (Mapbox)
+                </button>
+            </div>
             <div
                 ref={mapContainerRef}
                 className={styles.map}
