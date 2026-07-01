@@ -17,7 +17,7 @@ import {
 import {
     getSelectedEventDetails,
     makeEventImageLayer,
-    makePopulationImageLayer,
+    makeStaticImageLayer,
 } from '#utils/nrw/nrwMapHelpers';
 import {
     styleClinicPoint,
@@ -159,7 +159,7 @@ export default function useNrwDataLoader(
                         toggleLayer(
                             getLayerKey(layerDetails),
                             layerDetails,
-                            () => makePopulationImageLayer(selectedCountry),
+                            () => makeStaticImageLayer(selectedCountry, layerName),
                         );
                         break;
                     case LayerName.floodDepth:
