@@ -2,6 +2,7 @@
 // When adding enums here, follow the full updating flow.
 // See `Updating Shared Enums` in the README for details.
 
+// Not used by FE
 export enum EnsembleMemberType {
   median = 'median',
   run = 'run',
@@ -17,64 +18,46 @@ export enum HazardType {
   drought = 'drought',
 }
 
-export enum Layer {
-  // --- generic layers (cross-hazard) ---
+export enum LayerName {
+  // --- generic (cross-hazard) ---
+  population = 'population',
   populationExposed = 'population_exposed',
+  redCrossBranches = 'red_cross_branches',
+  clinics = 'clinics',
 
-  // --- floods-specific layers ---
+  // --- floods-specific ---
   floodDepth = 'flood_depth',
   glofasStations = 'glofas_stations',
 }
 
-// Key to identify the type of map layer info being shown.
-// This is used to style/label it on the frontend.
-export enum MapLayerInfoType {
-  // --- generic (cross-hazard) ---
-  Population = 'population',
-  RedCrossBranches = 'red_cross_branches',
-  Clinics = 'clinics',
-
-  // --- floods-specific ---
-  FloodDepth = 'flood_depth',
+export enum LayerType {
+  raster = 'raster',
+  shape = 'shape',
+  point = 'point',
+  vectorTile = 'vector_tile',
 }
 
-export enum MapLayerDisplayType {
-  // Image data, i.e. PNGs
-  Raster = 'raster',
-  // Vector shape data for lines and polygons, including admin areas
-  Shape = 'shape',
-  // Vector point data, such as for glofas locations
-  Point = 'point',
-  // Vector tiles, used for dense vector information such as many buildings and roads
-  VectorTile = 'vector_tile',
-}
-
+// Not used by FE
 export enum SeverityKey {
   returnPeriod = 'return_period',
   percentile = 'percentile',
 }
 
-// ---------------------------------------------
-// Alert classification related enums - START
-// ---------------------------------------------
-
-// Allowed classification levels for: severityClass and probabilityClass
+// START: Alert classification related enums
+// Allowed classification levels for: severityClass and probabilityClass - Not used by FE
 export enum AlertClassificationLevel {
-  SingleThreshold = 'single_threshold',
-  Low = 'low',
-  Medium = 'medium',
-  High = 'high',
+  singleThreshold = 'single_threshold',
+  low = 'low',
+  medium = 'medium',
+  high = 'high',
 }
 
 // Allowed classification levels for alertClass
 // (derived from severityClass and probabilityClass according to ALERT_CLASS_MATRIX)
 // NOTE: do not change order, as this is used functionally
 export enum AlertClass {
-  Low = 'low',
-  Medium = 'medium',
-  High = 'high',
+  low = 'low',
+  medium = 'medium',
+  high = 'high',
 }
-
-// ---------------------------------------------
-// Alert classification related enums - END
-// ---------------------------------------------
+// END: Alert classification related enums

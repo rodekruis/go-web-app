@@ -25,11 +25,11 @@ import {
 } from '#utils/nrw/nrwMapStyles';
 import {
     type EventResponseDto,
-    type MapLayerDetailsDto,
+    type LayerDto,
 } from '#utils/nrw/shared-dtos';
 import {
-    MapLayerDisplayType,
-    MapLayerInfoType,
+    LayerName,
+    LayerType,
 } from '#utils/nrw/shared-enums';
 
 /**
@@ -75,19 +75,19 @@ export default function useNrwDataLoader(
 
     // Reference to the function (passed in by the map component) for adding layers to the map.
     const addLayerToMapFunction = useRef<(
-      (layer: BaseLayer, layerInfo: MapLayerDetailsDto) => void) | null
+      (layer: BaseLayer, layerInfo: LayerDto) => void) | null
         >(null,
         );
 
     // Cache of all loaded layers.
     // The key is fixed based on the layer details.
     const layersCache = useRef(new Map<string, BaseLayer>());
-    const getLayerKey = (layerDetails: MapLayerDetailsDto): string => `${layerDetails.dataType}_${selectedCountry}_${layerDetails.resourceId}`;
+    const getLayerKey = (layerDetails: LayerDto): string => `${layerDetails.layerName}_${selectedCountry}_${layerDetails.resourceId}`;
 
     // Register the map's addLayer function.
     // Called by OlDataMap when the map is ready.
     const registerMapAddLayer = useCallback(
-        (addLayer: (layer: BaseLayer, layerInfo: MapLayerDetailsDto) => void) => {
+        (addLayer: (layer: BaseLayer, layerInfo: LayerDto) => void) => {
             addLayerToMapFunction.current = addLayer;
             setIsMapReady(true);
         },
@@ -117,7 +117,7 @@ export default function useNrwDataLoader(
     // Otherwise, load it with the passed in loadLayer function.
     const toggleLayer = async (
         key: string,
-        layerDetails: MapLayerDetailsDto,
+        layerDetails: LayerDto,
         loadLayer: () => Promise<BaseLayer>,
     ) => {
         if (!addLayerToMapFunction.current) {
@@ -149,20 +149,20 @@ export default function useNrwDataLoader(
 
     // Exposed function to toggle a map layer
     // If the layer is not cached, it will be loaded.
-    const toggleMapLayer = (layerDetails: MapLayerDetailsDto) => {
-        const { dataType, displayType, resourceId } = layerDetails;
+    const toggleMapLayer = (layerDetails: LayerDto) => {
+        const { layerName, layerType, resourceId } = layerDetails;
 
-        switch (displayType) {
-            case MapLayerDisplayType.Raster:
-                switch (dataType) {
-                    case MapLayerInfoType.Population:
+        switch (layerType) {
+            case LayerType.raster:
+                switch (layerName) {
+                    case LayerName.population:
                         toggleLayer(
                             getLayerKey(layerDetails),
                             layerDetails,
                             () => makePopulationImageLayer(selectedCountry),
                         );
                         break;
-                    case MapLayerInfoType.FloodDepth:
+                    case LayerName.floodDepth:
                         toggleLayer(
                             getLayerKey(layerDetails),
                             layerDetails,
@@ -171,20 +171,20 @@ export default function useNrwDataLoader(
                         break;
                     default:
                         console.error(
-                            `[useNrwDataLoader] Unsupported raster layer type: ${dataType}`,
+                            `[useNrwDataLoader] Unsupported raster layer type: ${layerName}`,
                         );
                 }
                 break;
-            case MapLayerDisplayType.Point:
-                switch (dataType) {
-                    case MapLayerInfoType.RedCrossBranches:
+            case LayerType.point:
+                switch (layerName) {
+                    case LayerName.redCrossBranches:
                         toggleLayer(
                             getLayerKey(layerDetails),
                             layerDetails,
                             () => makeRcBranchesPointLayer(selectedCountry, styleRcBranchPoint),
                         );
                         break;
-                    case MapLayerInfoType.Clinics:
+                    case LayerName.clinics:
                         toggleLayer(
                             getLayerKey(layerDetails),
                             layerDetails,
@@ -193,14 +193,14 @@ export default function useNrwDataLoader(
                         break;
                     default:
                         console.error(
-                            `[useNrwDataLoader] Unsupported point layer type: ${dataType}`,
+                            `[useNrwDataLoader] Unsupported point layer type: ${layerName}`,
                         );
                 }
                 break;
             default:
                 // TODO: Handle other display types (Shape, VectorTile)
                 console.error(
-                    `[useNrwDataLoader] Unsupported display type: ${displayType}`,
+                    `[useNrwDataLoader] Unsupported display type: ${layerType}`,
                 );
         }
     };
@@ -221,7 +221,7 @@ export default function useNrwDataLoader(
 
     // Get available layers for the currently selected event
     const selectedEvent = eventData.find((event) => event.eventId === selectedEventId) ?? null;
-    const selectedEventLayers: MapLayerDetailsDto[] = selectedEvent?.availableLayers ?? [];
+    const selectedEventLayers: LayerDto[] = selectedEvent?.availableLayers ?? [];
 
     // Get details for the selected event
     const selectedEventDetails = useMemo(
