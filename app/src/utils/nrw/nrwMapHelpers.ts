@@ -123,7 +123,7 @@ export const makeEventImageLayer = async (resourceId: string) => {
     return new ImageLayer({
         source: new ImageStatic({
             url: imageUrl,
-            projection: 'EPSG:3857',
+            projection: 'EPSG:3857', // TODO: switch to shared enum
             interpolate: false,
             imageExtent: [xmin, ymin, xmax, ymax],
             crossOrigin: 'anonymous',
@@ -131,19 +131,19 @@ export const makeEventImageLayer = async (resourceId: string) => {
     });
 };
 
-export const makeStaticImageLayer = async (countryCodeIso3: string, layer: string) => {
+export const makeStaticImageLayer = async (countryCodeIso3: string, layerName: string) => {
     const baseUrl = `${ibfApiBackend}rasters/static`;
-    const metadataUrl = `${baseUrl}/${countryCodeIso3}/${layer}`;
+    const metadataUrl = `${baseUrl}/${countryCodeIso3}/${layerName}`;
     const metadataResponse = await fetch(metadataUrl);
     if (!metadataResponse.ok) {
-        throw new Error(`Failed to fetch population raster metadata: ${metadataResponse.status}`);
+        throw new Error(`Failed to fetch ${layerName} raster metadata: ${metadataResponse.status}`);
     }
     const metadata = await metadataResponse.json();
     const {
         xmin, ymin, xmax, ymax,
     } = metadata.extent;
 
-    const imageUrl = `${baseUrl}/${countryCodeIso3}/${layer}/image`;
+    const imageUrl = `${baseUrl}/${countryCodeIso3}/${layerName}/image`;
     return new ImageLayer({
         source: new ImageStatic({
             url: imageUrl,
