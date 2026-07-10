@@ -190,7 +190,7 @@ export const exposedAreasDrawOrder = 0;
 
 // Get the map layer draw order to decide what is drawn above what.
 // Lower numbers are drawn on the bottom of the stack. Other than that,
-// the actual values used are arbitrarty.
+// the actual values used are arbitrary.
 export function getDrawOrder(layerName: LayerName): number {
     switch (layerName) {
         case LayerName.population:
