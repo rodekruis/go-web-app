@@ -11,15 +11,15 @@ import {
     exposedAreasDrawOrder,
     makeExposedAreasFillLayerFromFeatures,
 } from './nrwMapHelpers';
-import {
-    getBoundsFromFeatures,
-    getZoomToFitBounds,
-} from './nrwMapViewHelpers';
 import { getExposureColor } from './nrwMapStyles';
 import type {
     OrderedMapLayer,
     SelectedEventDetails,
 } from './nrwMapTypes';
+import {
+    getBoundsFromFeatures,
+    getZoomToFitBounds,
+} from './nrwMapViewHelpers';
 import type { EventResponseDto } from './shared-dtos';
 import { LayerName } from './shared-enums';
 
