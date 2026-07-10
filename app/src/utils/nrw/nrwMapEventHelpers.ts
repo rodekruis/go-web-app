@@ -101,7 +101,7 @@ export const setExposureColorsOnFeatures = (
         Object.keys(exposedPopulationPerAreaByLevel).at(-1),
     );
     const exposedPopulationByPlaceCode = exposedPopulationPerAreaByLevel[deepestExposedLevel];
-    if (!deepestExposedLevel || !exposedPopulationByPlaceCode) {
+    if (!Number.isFinite(deepestExposedLevel) || exposedPopulationByPlaceCode === undefined) {
         throw new Error(`Event ${eventId} has no exposed population data`);
     }
     const highestExposedPopulation = highestExposedPopulationByLevel[deepestExposedLevel] ?? 0;
