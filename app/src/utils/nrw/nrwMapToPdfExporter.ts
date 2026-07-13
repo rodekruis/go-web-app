@@ -48,45 +48,66 @@ function captureMapCanvas(containerId: string): CapturedElement | null {
     };
 }
 
-// Captures the Mapbox map and other tagged elements, and exports them in a pdf
+// Convert a captured element to a valid PNG data URL, or null if it fails
+function toPngDataUrl(element: CapturedElement | null, label: string): string | null {
+    if (!element || element.width <= 0 || element.height <= 0) {
+        return null;
+    }
+
+    try {
+        const dataUrl = element.canvas.toDataURL('image/png');
+        if (!dataUrl.startsWith('data:image/png')) {
+            console.error(`[MapboxPdfExport] ${label} PNG conversion produced invalid data`);
+            return null;
+        }
+        return dataUrl;
+    } catch (error) {
+        console.error(`[MapboxPdfExport] Failed to convert ${label} to PNG:`, error);
+        return null;
+    }
+}
+
+// Captures the Mapbox map and other tagged elements, and exports them in a pdf.
+// Always saves a PDF (blank if the map cannot be captured) rather than throwing.
 export default async function exportNrwDataMapToPdf(
     filenameSections: string[] = [],
 ): Promise<void> {
-    let filename = `nrw-mapbox-map-${filenameSections.join('-')}.pdf`;
-    filename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const filename = `nrw-mapbox-map-${filenameSections.join('-')}.pdf`.replace(/[^a-zA-Z0-9._-]/g, '_');
 
-    try {
-        const mapElement = captureMapCanvas(MAP_CONTAINER_ELEMENT_ID);
-        if (!mapElement) {
-            throw new Error('Map canvas not found');
-        }
+    // Set PDF size and page properties
+    const pdf = new JsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+    });
 
-        // Grab other elements to include by DOM id
-        const [legendPanel, eventsPanel] = await Promise.all([
-            captureElement(LEGEND_PANEL_ELEMENT_ID),
-            captureElement(EVENTS_PANEL_ELEMENT_ID),
-        ]);
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    const contentWidth = pageWidth - 2 * margin;
+    const contentHeight = pageHeight - 2 * margin;
 
-        // Set PDF size and page properties
-        const pdf = new JsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4',
-        });
+    const mapElement = captureMapCanvas(MAP_CONTAINER_ELEMENT_ID);
+    const mapImageData = toPngDataUrl(mapElement, 'Map canvas');
 
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const margin = 10;
-        const contentWidth = pageWidth - 2 * margin;
-        const contentHeight = pageHeight - 2 * margin;
+    // Grab optional elements by DOM id.
+    const [legendResult, eventsResult] = await Promise.allSettled([
+        captureElement(LEGEND_PANEL_ELEMENT_ID),
+        captureElement(EVENTS_PANEL_ELEMENT_ID),
+    ]);
 
+    const legendPanel = legendResult.status === 'fulfilled' ? legendResult.value : null;
+    const eventsPanel = eventsResult.status === 'fulfilled' ? eventsResult.value : null;
+
+    if (mapImageData && mapElement) {
         // Set up the first page: map and legend panel.
         // This is debug design and will be covered by a design item later
-        const legendSpacing = legendPanel ? 5 : 0;
+        const legendImageData = toPngDataUrl(legendPanel, 'Legend canvas');
+        const legendSpacing = legendImageData ? 5 : 0;
         let legendWidth = 0;
         let legendHeight = 0;
 
-        if (legendPanel) {
+        if (legendImageData && legendPanel) {
             const legendAspectRatio = legendPanel.width / legendPanel.height;
             legendWidth = contentWidth;
             legendHeight = legendWidth / legendAspectRatio;
@@ -105,54 +126,30 @@ export default async function exportNrwDataMapToPdf(
         const mapX = margin + (contentWidth - mapWidth) / 2;
         const mapY = margin;
 
-        pdf.addImage(
-            mapElement.canvas.toDataURL('image/png'),
-            'PNG',
-            mapX,
-            mapY,
-            mapWidth,
-            mapHeight,
-        );
+        pdf.addImage(mapImageData, 'PNG', mapX, mapY, mapWidth, mapHeight);
 
-        if (legendPanel) {
+        if (legendImageData && legendWidth > 0 && legendHeight > 0) {
             const legendX = margin + (contentWidth - legendWidth) / 2;
             const legendY = mapY + mapHeight + legendSpacing;
-
-            pdf.addImage(
-                legendPanel.canvas.toDataURL('image/png'),
-                'PNG',
-                legendX,
-                legendY,
-                legendWidth,
-                legendHeight,
-            );
+            pdf.addImage(legendImageData, 'PNG', legendX, legendY, legendWidth, legendHeight);
         }
-
-        // Second page: events panel.
-        if (eventsPanel) {
-            pdf.addPage();
-            const panelAspectRatio = eventsPanel.width / eventsPanel.height;
-            let panelWidth = contentWidth;
-            let panelHeight = panelWidth / panelAspectRatio;
-
-            if (panelHeight > contentHeight) {
-                panelHeight = contentHeight;
-                panelWidth = panelHeight * panelAspectRatio;
-            }
-
-            pdf.addImage(
-                eventsPanel.canvas.toDataURL('image/png'),
-                'PNG',
-                margin,
-                margin,
-                panelWidth,
-                panelHeight,
-            );
-        }
-
-        pdf.save(filename);
-    } catch (error) {
-        console.error('[MapboxPdfExport] Error generating PDF:', error);
-        throw error;
     }
+
+    // Second page: events panel.
+    const eventsImageData = toPngDataUrl(eventsPanel, 'Events panel canvas');
+    if (eventsImageData && eventsPanel) {
+        pdf.addPage();
+        const panelAspectRatio = eventsPanel.width / eventsPanel.height;
+        let panelWidth = contentWidth;
+        let panelHeight = panelWidth / panelAspectRatio;
+
+        if (panelHeight > contentHeight) {
+            panelHeight = contentHeight;
+            panelWidth = panelHeight * panelAspectRatio;
+        }
+
+        pdf.addImage(eventsImageData, 'PNG', margin, margin, panelWidth, panelHeight);
+    }
+
+    pdf.save(filename);
 }
