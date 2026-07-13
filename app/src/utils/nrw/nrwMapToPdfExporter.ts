@@ -1,33 +1,28 @@
 import html2canvas from 'html2canvas';
 import JsPDF from 'jspdf';
-import type MapOl from 'ol/Map';
 
-// IDs to identify the elements that should be captured for the PDF.
-export enum PrintElementId {
-    DataPanel = 'nrw-data-panel',
-    LayerPanel = 'nrw-layer-panel',
-    ControlPanel = 'nrw-control-panel',
-    Map = 'nrw-map',
-}
+import {
+    EVENTS_PANEL_ELEMENT_ID,
+    LEGEND_PANEL_ELEMENT_ID,
+    MAP_CONTAINER_ELEMENT_ID,
+} from '#utils/nrw/nrwConstants';
 
-// Properties of a captured element, including the canvas and its dimensions
 interface CapturedElement {
     canvas: HTMLCanvasElement;
     width: number;
     height: number;
 }
 
-// Capture the content of a DOM element as a canvas using html2canvas
 async function captureElement(elementId: string): Promise<CapturedElement | null> {
     const element = document.getElementById(elementId);
     if (!element) {
-        console.error(`Element with id "${elementId}" not found`);
+        console.error(`[MapboxPdfExport] Element with id "${elementId}" not found`);
         return null;
     }
 
     const canvas = await html2canvas(element, {
-        // Needed to handle map layers from external sources
         useCORS: true,
+        allowTaint: false,
     });
 
     return {
@@ -37,171 +32,127 @@ async function captureElement(elementId: string): Promise<CapturedElement | null
     };
 }
 
-/**
- * Captures the OpenLayers map
- * This ensures all map layers are fully rendered.
- */
-async function captureMap(
-    mapInstance: MapOl,
-    mapElementId: string,
-): Promise<CapturedElement | null> {
-    const mapElement = document.getElementById(mapElementId);
-    if (!mapElement) {
-        console.error(`Map element with id "${mapElementId}" not found`);
+// Grab the Mapbox WebGL canvas straight from the DOM by its container id
+function captureMapCanvas(containerId: string): CapturedElement | null {
+    const container = document.getElementById(containerId);
+    const canvas = container?.querySelector('canvas') ?? null;
+    if (!canvas) {
+        console.error(`[MapboxPdfExport] Map canvas not found in "${containerId}"`);
         return null;
     }
 
-    return new Promise((resolve) => {
-        mapInstance.once('rendercomplete', () => {
-            // Get the map's viewport which contains the canvas
-            const mapCanvas = mapInstance.getViewport().querySelector('canvas');
-
-            if (mapCanvas) {
-                // Use the OpenLayers canvas directly - it's already rendered
-                resolve({
-                    canvas: mapCanvas as HTMLCanvasElement,
-                    width: mapCanvas.width,
-                    height: mapCanvas.height,
-                });
-            } else {
-                // Fallback: capture the element with html2canvas
-                html2canvas(mapElement, {
-                    useCORS: true,
-                    allowTaint: false,
-                    ignoreElements: (element) => element.classList.contains('ol-control'),
-                }).then((canvas) => {
-                    resolve({
-                        canvas,
-                        width: canvas.width,
-                        height: canvas.height,
-                    });
-                }).catch((error) => {
-                    console.error('Error capturing map:', error);
-                    resolve(null);
-                });
-            }
-        });
-
-        // Trigger a render to ensure 'rendercomplete' fires
-        mapInstance.renderSync();
-    });
+    return {
+        canvas,
+        width: canvas.width,
+        height: canvas.height,
+    };
 }
 
-/**
- * Captures the NRW map and associated panels and generates a PDF.
- * TODO: there is no PDF export style design, so the exported layout will change
- * @param mapInstance - The OpenLayers map instance
- * @param filenameSections - List of strings to include in the filename
- */
-export async function exportMapToPdf(
-    mapInstance: MapOl,
+// Captures the Mapbox map and other tagged elements, and exports them in a pdf
+export default async function exportNrwDataMapToPdf(
     filenameSections: string[] = [],
 ): Promise<void> {
-    let filename = `nrw-map-${filenameSections.join('-')}.pdf`;
-
-    // Sanitize filename by replacing invalid characters with underscores
+    let filename = `nrw-mapbox-map-${filenameSections.join('-')}.pdf`;
     filename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
 
     try {
-        // Capture the non-map panels in parallel
-        const [dataPanel, controlPanel] = await Promise.all([
-            captureElement(PrintElementId.DataPanel),
-            captureElement(PrintElementId.ControlPanel),
+        const mapElement = captureMapCanvas(MAP_CONTAINER_ELEMENT_ID);
+        if (!mapElement) {
+            throw new Error('Map canvas not found');
+        }
+
+        // Grab other elements to include by DOM id
+        const [legendPanel, eventsPanel] = await Promise.all([
+            captureElement(LEGEND_PANEL_ELEMENT_ID),
+            captureElement(EVENTS_PANEL_ELEMENT_ID),
         ]);
 
-        // The map panel needs to be captured with special handling,
-        // using OpenLayers rendercomplete event
-        const mapElement = await captureMap(mapInstance, PrintElementId.Map);
-
-        // Create PDF
+        // Set PDF size and page properties
         const pdf = new JsPDF({
             orientation: 'portrait',
             unit: 'mm',
-            // A4 size (supports multiple pages)
             format: 'a4',
         });
 
-        const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm for A4
-        const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm for A4
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
         const margin = 10;
         const contentWidth = pageWidth - 2 * margin;
-        const gap = 5;
+        const contentHeight = pageHeight - 2 * margin;
 
-        let currentY = margin;
+        // Set up the first page: map and legend panel.
+        // This is debug design and will be covered by a design item later
+        const legendSpacing = legendPanel ? 5 : 0;
+        let legendWidth = 0;
+        let legendHeight = 0;
 
-        // Add the data panel
-        if (dataPanel) {
-            const dataPanelMaxHeight = 30;
-            const aspectRatio = dataPanel.width / dataPanel.height;
-            let scaledWidth = contentWidth;
-            let scaledHeight = contentWidth / aspectRatio;
-
-            if (scaledHeight > dataPanelMaxHeight) {
-                scaledHeight = dataPanelMaxHeight;
-                scaledWidth = dataPanelMaxHeight * aspectRatio;
-            }
-
-            pdf.addImage(
-                dataPanel.canvas.toDataURL('image/png'),
-                'PNG',
-                margin,
-                currentY,
-                scaledWidth,
-                scaledHeight,
-            );
-            currentY += scaledHeight + gap;
+        if (legendPanel) {
+            const legendAspectRatio = legendPanel.width / legendPanel.height;
+            legendWidth = contentWidth;
+            legendHeight = legendWidth / legendAspectRatio;
         }
 
-        // Calculate available height for the map based on remaining page space
-        const mapMaxHeight = pageHeight - currentY - margin;
+        const mapAspectRatio = mapElement.width / mapElement.height;
+        let mapWidth = contentWidth;
+        let mapHeight = mapWidth / mapAspectRatio;
 
-        // Add map
-        if (mapElement) {
-            const aspectRatio = mapElement.width / mapElement.height;
-            let scaledWidth = contentWidth;
-            let scaledHeight = contentWidth / aspectRatio;
+        const availableMapHeight = contentHeight - legendHeight - legendSpacing;
+        if (mapHeight > availableMapHeight) {
+            mapHeight = availableMapHeight;
+            mapWidth = mapHeight * mapAspectRatio;
+        }
 
-            if (scaledHeight > mapMaxHeight) {
-                scaledHeight = mapMaxHeight;
-                scaledWidth = mapMaxHeight * aspectRatio;
-            }
+        const mapX = margin + (contentWidth - mapWidth) / 2;
+        const mapY = margin;
 
-            // Center the map horizontally if it's narrower than content width
-            const mapX = margin + (contentWidth - scaledWidth) / 2;
+        pdf.addImage(
+            mapElement.canvas.toDataURL('image/png'),
+            'PNG',
+            mapX,
+            mapY,
+            mapWidth,
+            mapHeight,
+        );
+
+        if (legendPanel) {
+            const legendX = margin + (contentWidth - legendWidth) / 2;
+            const legendY = mapY + mapHeight + legendSpacing;
 
             pdf.addImage(
-                mapElement.canvas.toDataURL('image/png'),
+                legendPanel.canvas.toDataURL('image/png'),
                 'PNG',
-                mapX,
-                currentY,
-                scaledWidth,
-                scaledHeight,
+                legendX,
+                legendY,
+                legendWidth,
+                legendHeight,
             );
         }
 
-        // Add second page for the control panel
-        if (controlPanel) {
+        // Second page: events panel.
+        if (eventsPanel) {
             pdf.addPage();
-            const aspectRatio = controlPanel.width / controlPanel.height;
-            const scaledWidth = contentWidth;
-            const scaledHeight = contentWidth / aspectRatio;
+            const panelAspectRatio = eventsPanel.width / eventsPanel.height;
+            let panelWidth = contentWidth;
+            let panelHeight = panelWidth / panelAspectRatio;
+
+            if (panelHeight > contentHeight) {
+                panelHeight = contentHeight;
+                panelWidth = panelHeight * panelAspectRatio;
+            }
 
             pdf.addImage(
-                controlPanel.canvas.toDataURL('image/png'),
+                eventsPanel.canvas.toDataURL('image/png'),
                 'PNG',
                 margin,
                 margin,
-                scaledWidth,
-                scaledHeight,
+                panelWidth,
+                panelHeight,
             );
         }
 
-        // Save the PDF locally
         pdf.save(filename);
     } catch (error) {
-        console.error('Error generating PDF:', error);
+        console.error('[MapboxPdfExport] Error generating PDF:', error);
         throw error;
     }
 }
-
-export default exportMapToPdf;

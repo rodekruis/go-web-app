@@ -1,22 +1,25 @@
-import 'ol/ol.css';
-
 import {
     useEffect,
-    useRef,
     useState,
 } from 'react';
-import type MapOl from 'ol/Map';
 
 import { nrwPortalMode } from '#config';
-import { type AdminAreaDetails } from '#utils/nrw/nrwDataFetchHelpers';
-import type { MapSelectionView } from '#utils/nrw/nrwMapInteractionHelpers';
-import { PrintElementId } from '#utils/nrw/nrwMapToPdfExporter';
+import useAlert from '#hooks/useAlert';
+import {
+    EVENTS_PANEL_ELEMENT_ID,
+    LEGEND_PANEL_ELEMENT_ID,
+} from '#utils/nrw/nrwConstants';
+import {
+    type AdminAreaDetails,
+    fetchAdminAreaDetails,
+} from '#utils/nrw/nrwDataFetchHelpers';
+import exportNrwDataMapToPdf from '#utils/nrw/nrwMapToPdfExporter';
+import type { MapViewParameters } from '#utils/nrw/nrwMapTypes';
 
-import NrwDataPanel from './NrwDataPanel';
+import MapboxDataMap from './MapboxDataMap';
 import NrwEventsPanel from './NrwEventsPanel';
 import NrwLayerPanel from './NrwLayerPanel';
 import NrwLegendPanel from './NrwLegendPanel';
-import OlDataMap from './OlDataMap';
 import useNrwDataLoader from './useNrwDataLoader';
 import useNrwMapSearchParams from './useNrwMapSearchParams';
 
@@ -28,28 +31,30 @@ import styles from './styles.module.css';
  * @returns A standalone component
  */
 export default function NrwMapContainer() {
+    const alert = useAlert();
+
     // All URL search param handling lives in this hook.
     const {
         initialParams: {
             scopedCountries,
-            selectedEventId: initialEventId,
+            initialEventId,
             initialAdminCode,
             initialLayerKeys,
             initialMapView,
         },
-        syncLayerIds,
-        resetToCountries,
+        resetToCountryParamsOnly,
+        setLayerIds,
         setEventParams,
         setMapViewParams,
     } = useNrwMapSearchParams();
 
-    // Selection / view state owned by the container.
+    // Selected items states owned by the container.
     const [selectedEventId, setSelectedEventId] = useState<number | null>(initialEventId);
-
-    const [selectedAdminPlaceCode, setSelectedAdminPlaceCode] = useState<
-    string | null
-    >(initialAdminCode);
-    const [adminDetails, setAdminDetails] = useState<AdminAreaDetails | null>(null);
+    const [selectedAdminPlaceCode, setSelectedAdminPlaceCode] = useState<string | null>(
+        initialAdminCode ?? null,
+    );
+    const [selectedAdminAreaDetails,
+        setSelectedAdminAreaDetails] = useState<AdminAreaDetails | null>(null);
 
     // Data loader hook - manages layer loading, caching, and shared event data state
     const {
@@ -57,50 +62,36 @@ export default function NrwMapContainer() {
         reloadCountryEventData,
         selectedEventLayers,
         nonEventLayers,
-        registerMapAddLayer,
+        registerMapLayerFunctions,
         toggleMapLayer,
         hideAllLayers,
         visibleLayerNames,
         selectedEventDetails,
     } = useNrwDataLoader(scopedCountries, [], selectedEventId, initialLayerKeys);
 
-    // Store map instance for PDF export
-    const mapRef = useRef<MapOl | null>(null);
-
-    // Sync the visible layer keys to the URL
-    useEffect(() => {
-        syncLayerIds(visibleLayerNames);
-    }, [visibleLayerNames, syncLayerIds]);
-
-    // Refresh page and put in a default start state
+    // Clear all selections and reload event data
     const handleRefreshAll = async () => {
-        resetToCountries(scopedCountries);
-
         // Deselect current event and admin areas
         setSelectedEventId(null);
         hideAllLayers();
         setSelectedAdminPlaceCode(null);
-        setAdminDetails(null);
+        setSelectedAdminAreaDetails(null);
+
+        // Reset search params
+        resetToCountryParamsOnly(scopedCountries);
 
         // Reload event data
         await reloadCountryEventData();
     };
 
-    // Handle event deselection (e.g. user goes back to all events view)
-    const handleDeselectEvent = () => {
-        setSelectedEventId(null);
-        hideAllLayers();
-        setSelectedAdminPlaceCode(null);
-        setAdminDetails(null);
-    };
-
-    // Handle event selection from control panel
-    const handleEventClick = (eventId: number) => {
-        setSelectedEventId(eventId);
+    // Set event selection and related search params when user selects and event.
+    const handleEventSelection = (eventId: number) => {
         // Clear any user-selected admin area when changing events
         setSelectedAdminPlaceCode(null);
-        setAdminDetails(null);
-        // Set search params for URL sharing only - does not reload data
+        setSelectedAdminAreaDetails(null);
+        // Select the event
+        setSelectedEventId(eventId);
+        // Update the search params
         setEventParams({
             countries: scopedCountries,
             eventId,
@@ -108,14 +99,14 @@ export default function NrwMapContainer() {
         });
     };
 
-    // Callback to update search params based on user interactions.
-    const handleMapItemSelected = (
+    // Callback to handle the user selecting an admin area on the map.
+    const handleAdminAreaSelected = (
         placeCode: string,
         details: AdminAreaDetails | null,
-        mapView?: MapSelectionView,
+        mapView?: MapViewParameters,
     ) => {
         setSelectedAdminPlaceCode(placeCode);
-        setAdminDetails(details);
+        setSelectedAdminAreaDetails(details);
         setMapViewParams({
             countries: scopedCountries,
             eventId: selectedEventId,
@@ -125,7 +116,8 @@ export default function NrwMapContainer() {
         });
     };
 
-    const handleMapViewChanged = (mapView: MapSelectionView) => {
+    // Callback to set search params with any map interaction, such as panning or zooming.
+    const handleMapViewChanged = (mapView: MapViewParameters) => {
         setMapViewParams({
             countries: scopedCountries,
             eventId: selectedEventId,
@@ -135,42 +127,84 @@ export default function NrwMapContainer() {
         });
     };
 
+    // Export to PDF button handler
+    const handlePdfExportClicked = async () => {
+        try {
+            await exportNrwDataMapToPdf(scopedCountries);
+        } catch (error) {
+            alert.show('Failed to export Mapbox PDF. Please try again.', { variant: 'danger' });
+            console.error('[NrwMapContainer] Export failed:', error);
+        }
+    };
+
+    // When the admin area is deeplinked via URL, fetch its details once on mount.
+    useEffect(() => {
+        if (!initialAdminCode) {
+            return undefined;
+        }
+
+        let isCancelled = false;
+
+        fetchAdminAreaDetails(initialAdminCode)
+            .then((details) => {
+                if (!isCancelled) {
+                    setSelectedAdminAreaDetails(details);
+                }
+            })
+            .catch(() => {
+                if (!isCancelled) {
+                    setSelectedAdminAreaDetails(null);
+                }
+            });
+
+        return () => {
+            isCancelled = true;
+        };
+    // Mount-only: the deeplinked admin details are resolved a single time.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Update the layer search params when the visible layers change
+    useEffect(() => {
+        setLayerIds(visibleLayerNames);
+    }, [visibleLayerNames, setLayerIds]);
+
     return (
         <div className={styles.container}>
-            <div id={PrintElementId.DataPanel}>
-                <NrwDataPanel
-                    scopedCountries={scopedCountries}
-                    adminDetails={adminDetails}
-                    mapRef={mapRef}
-                    eventId={selectedEventId ?? undefined}
-                />
-            </div>
             <div className={styles.mainContent}>
                 <div className={styles.controlPanelColumn}>
-                    <div id={PrintElementId.ControlPanel}>
+                    <div id={EVENTS_PANEL_ELEMENT_ID}>
                         <NrwEventsPanel
                             eventData={eventData}
                             activeEventId={selectedEventId}
-                            onEventClick={handleEventClick}
+                            onEventClick={handleEventSelection}
                             onRefreshAll={handleRefreshAll}
-                            onDeselectEvent={handleDeselectEvent}
+                            onDeselectEvent={handleRefreshAll}
                             countryCodes={scopedCountries}
                             selectedAdminPlaceCode={selectedAdminPlaceCode}
+                            adminDetails={selectedAdminAreaDetails}
                         />
                     </div>
                 </div>
-                <div className={styles.mapColumn} id={PrintElementId.Map}>
-                    <OlDataMap
+                <div className={styles.mapColumn}>
+                    <div className={styles.debugToolbar}>
+                        <button
+                            type="button"
+                            className={styles.debugExportButton}
+                            onClick={handlePdfExportClicked}
+                        >
+                            Debug Export PDF (Mapbox)
+                        </button>
+                    </div>
+                    <MapboxDataMap
                         scopedCountries={scopedCountries}
                         selectedEventDetails={selectedEventDetails}
                         initialMapView={initialMapView}
-                        initialAdminCode={initialAdminCode}
-                        addLayerFunction={registerMapAddLayer}
-                        onSelect={handleMapItemSelected}
+                        registerMapLayerFunctions={registerMapLayerFunctions}
+                        onSelect={handleAdminAreaSelected}
                         onViewChange={handleMapViewChanged}
-                        onMapReady={(map: MapOl) => { mapRef.current = map; }}
                         layerPanel={(
-                            <div id={PrintElementId.LayerPanel}>
+                            <div>
                                 <NrwLayerPanel
                                     eventLayers={selectedEventLayers}
                                     nonEventLayers={nonEventLayers}
@@ -181,9 +215,11 @@ export default function NrwMapContainer() {
                             </div>
                         )}
                     />
-                    <NrwLegendPanel
-                        selectedEventDetails={selectedEventDetails}
-                    />
+                    <div id={LEGEND_PANEL_ELEMENT_ID}>
+                        <NrwLegendPanel
+                            selectedEventDetails={selectedEventDetails}
+                        />
+                    </div>
                 </div>
             </div>
             {nrwPortalMode === 'STANDALONE' && (

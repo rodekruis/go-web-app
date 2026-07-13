@@ -11,7 +11,7 @@ import {
 } from '@ifrc-go/icons';
 import { Button } from '@ifrc-go/ui';
 
-import { noCountrySelectedValue } from '#utils/nrw/nrwConstants';
+import { type AdminAreaDetails } from '#utils/nrw/nrwDataFetchHelpers';
 import { alertColors } from '#utils/nrw/nrwMapStyles';
 import {
     type AdminAreaExposureDto,
@@ -383,10 +383,11 @@ interface NrwEventsPanelProps {
   onDeselectEvent: () => void;
     countryCodes: string[];
   selectedAdminPlaceCode: string | null;
+  adminDetails: AdminAreaDetails | null;
 }
 
 /**
- * Control panel showing upcoming events for the selected country.
+ * Control panel showing upcoming events for the scoped country.
  * Each event displays affected admin1 areas and total population.
  */
 export default function NrwEventsPanel({
@@ -397,8 +398,10 @@ export default function NrwEventsPanel({
     onDeselectEvent,
     countryCodes,
     selectedAdminPlaceCode,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    adminDetails,
 }: NrwEventsPanelProps) {
-    const countryCode = countryCodes[0] ?? noCountrySelectedValue;
+    const countryCode = countryCodes[0] ?? '';
     const selectedEvent = eventData.find((event) => event.eventId === activeEventId) ?? null;
 
     const handleBack = () => {

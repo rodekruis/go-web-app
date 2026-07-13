@@ -4,11 +4,8 @@ import {
 } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import {
-    defaultMapZoom,
-    noCountrySelectedValue,
-} from '#utils/nrw/nrwConstants';
-import type { MapSelectionView } from '#utils/nrw/nrwMapInteractionHelpers';
+import { defaultMapZoom } from '#utils/nrw/nrwConstants';
+import type { MapViewParameters } from '#utils/nrw/nrwMapTypes';
 import {
     adminParamsKey,
     countryParamsKey,
@@ -30,17 +27,17 @@ import {
 
 interface InitialParams {
     scopedCountries: string[];
-    selectedEventId: number | null;
+    initialEventId: number | null;
     initialAdminCode: string | null;
     initialLayerKeys: string[];
-    initialMapView: MapSelectionView | null;
+    initialMapView: MapViewParameters | null;
 }
 
 interface MapViewParams {
     countries: string[];
     eventId?: number | null;
     adminCode?: string;
-    mapView?: MapSelectionView;
+    mapView?: MapViewParameters;
     layerIds: string[];
 }
 
@@ -77,7 +74,7 @@ export default function useNrwMapSearchParams() {
 
         return {
             scopedCountries: parseAndSanitizeCountryCodesParam(searchParams.get(countryParamsKey)),
-            selectedEventId: sanitizeEventIdParam(searchParams.get(eventIdParamsKey)),
+            initialEventId: sanitizeEventIdParam(searchParams.get(eventIdParamsKey)),
             initialAdminCode: sanitizeAdminCode(searchParams.get(adminParamsKey)) || null,
             initialLayerKeys: parseMapLayersParam(searchParams.get(mapLayersParamsKey)),
             initialMapView,
@@ -85,7 +82,7 @@ export default function useNrwMapSearchParams() {
     });
 
     // Sync the active layer IDs into the existing URL params.
-    const syncLayerIds = useCallback((layerIds: string[]) => {
+    const setLayerIds = useCallback((layerIds: string[]) => {
         setSearchParams((prev) => {
             const next = new URLSearchParams(prev);
             const value = serializeMapLayersParam(layerIds);
@@ -98,11 +95,11 @@ export default function useNrwMapSearchParams() {
         }, { replace: true });
     }, [setSearchParams]);
 
-    // Reset URL to only contain the countries (used by "refresh all").
-    const resetToCountries = useCallback((countries: string[]) => {
+    // Reset URL to only contain the countries.
+    const resetToCountryParamsOnly = useCallback((countries: string[]) => {
         const serializedCountries = serializeCountryCodesParam(countries);
         setSearchParams({
-            [countryParamsKey]: serializedCountries || noCountrySelectedValue,
+            [countryParamsKey]: serializedCountries,
         });
     }, [setSearchParams]);
 
@@ -110,7 +107,7 @@ export default function useNrwMapSearchParams() {
     const setEventParams = useCallback(({ countries, eventId, layerIds }: EventParams) => {
         const serializedCountries = serializeCountryCodesParam(countries);
         const nextParams: Record<string, string> = {
-            [countryParamsKey]: serializedCountries || noCountrySelectedValue,
+            [countryParamsKey]: serializedCountries,
             [eventIdParamsKey]: String(eventId),
         };
         const layersValue = serializeMapLayersParam(layerIds);
@@ -130,7 +127,7 @@ export default function useNrwMapSearchParams() {
     }: MapViewParams) => {
         const serializedCountries = serializeCountryCodesParam(countries);
         const nextParams: Record<string, string> = {
-            [countryParamsKey]: serializedCountries || noCountrySelectedValue,
+            [countryParamsKey]: serializedCountries,
         };
 
         if (eventId) {
@@ -159,9 +156,9 @@ export default function useNrwMapSearchParams() {
 
     return {
         initialParams,
-        syncLayerIds,
-        resetToCountries,
+        resetToCountryParamsOnly,
         setEventParams,
         setMapViewParams,
+        setLayerIds,
     };
 }
