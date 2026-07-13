@@ -54,3 +54,14 @@ The `.env` var must be set to match the API key of your MapTiler account (MapTil
 
 - Unit testing is under development, but will be added as part of this repo.
 - End-to-end testing for IBF backend integration will be carried out in the [IBF repo](https://github.com/rodekruis/IBF).
+
+________▄▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▄______
+_______█░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░█_____
+_______█░▒▒▒▒▒▒▒▒▒▒▄▀▀▄▒▒▒░░█▄▀▀▄_
+__▄▄___█░▒▒▒▒▒▒▒▒▒▒█▓▓▓▀▄▄▄▄▀▓▓▓█_
+█▓▓█▄▄█░▒▒▒▒▒▒▒▒▒▄▀▓▓▓▓▓▓▓▓▓▓▓▓▀▄_
+_▀▄▄▓▓█░▒▒▒▒▒▒▒▒▒█▓▓▓▄█▓▓▓▄▓▄█▓▓█_
+_____▀▀█░▒▒▒▒▒▒▒▒▒█▓▒▒▓▄▓▓▄▓▓▄▓▒▒█
+______▄█░░▒▒▒▒▒▒▒▒▒▀▄▓▓▀▀▀▀▀▀▀▓▄▀_
+____▄▀▓▀█▄▄▄▄▄▄▄▄▄▄▄▄██████▀█▀▀___
+____█▄▄▀_█▄▄▀_______█▄▄▀_▀▄▄█_____

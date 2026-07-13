@@ -61,3 +61,5 @@ export enum AlertClass {
   high = 'high',
 }
 // END: Alert classification related enums
+
+// Wow, such a nice edit.
