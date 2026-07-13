@@ -11,6 +11,7 @@ export enum EnsembleMemberType {
 export enum ForecastSource {
   glofas = 'glofas',
   ecmwf = 'ECMWF',
+  ecmwfee = 'ECMWF',
 }
 
 export enum HazardType {
