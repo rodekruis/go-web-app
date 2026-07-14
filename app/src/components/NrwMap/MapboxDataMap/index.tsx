@@ -84,7 +84,7 @@ export default function MapboxDataMap({
     onViewChange,
     layerPanel,
 }: MapboxDataMapProps) {
-    const alert = useAlert();
+    const notification = useAlert();
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<MapboxGLMap | null>(null);
     const [isMapLoaded, setIsMapLoaded] = useState(false);
@@ -134,7 +134,7 @@ export default function MapboxDataMap({
             drawScopedCountriesAdmin0Layer(map, scopedCountries, initialMapView)
                 .then((latLonBounds) => {
                     if (!latLonBounds) {
-                        alert.show('Failed to load country boundaries for the map.', {
+                        notification.show('Failed to load country boundaries for the map.', {
                             variant: 'danger',
                         });
                     }
@@ -238,7 +238,7 @@ export default function MapboxDataMap({
                 }
 
                 if (!result) {
-                    alert.show('No exposed areas data available for this event.', { variant: 'danger' });
+                    notification.show('No exposed areas data available for this event.', { variant: 'danger' });
                     return;
                 }
 
@@ -251,7 +251,7 @@ export default function MapboxDataMap({
             // hit before the fetch promise resolves, so we know we can ignore the result.
             isOutdated = true;
         };
-    }, [selectedEventDetails, scopedCountries, isMapLoaded, alert]);
+    }, [selectedEventDetails, scopedCountries, isMapLoaded, notification]);
 
     return (
         <div className={styles.container}>

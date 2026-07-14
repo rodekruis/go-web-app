@@ -52,7 +52,7 @@ export default function useNrwDataLoader(
     selectedEventId: number | null,
     initialVisibleLayerNames: string[],
 ) {
-    const alert = useAlert();
+    const notification = useAlert();
 
     // ----- States -----
 
@@ -119,7 +119,7 @@ export default function useNrwDataLoader(
             mapLayerFunctions.setLayerVisibility(layer, targetVisible);
         } catch (error) {
             console.error(`[useNrwDataLoader] Failed to load layer ${layerDetails.layerName}:`, error);
-            alert.show('Failed to load map layer', {
+            notification.show('Failed to load map layer', {
                 variant: 'danger',
                 description: 'The map layer could not be loaded. Please try again.',
             });
@@ -332,12 +332,12 @@ export default function useNrwDataLoader(
     useEffect(() => {
         if (selectedEventDetails
             && Object.keys(selectedEventDetails.exposedPopulationPerAreaByLevel).length === 0) {
-            alert.show('No exposed areas', {
+            notification.show('No exposed areas', {
                 variant: 'danger',
                 description: `No exposed areas found for event "${selectedEventId}".`,
             });
         }
-    }, [selectedEventDetails, selectedEventId, alert]);
+    }, [selectedEventDetails, selectedEventId, notification]);
 
     // ----- Init -----
 
@@ -365,7 +365,7 @@ export default function useNrwDataLoader(
                 setIsInitialDataLoaded(true);
             } catch (error) {
                 console.error('[useNrwDataLoader] Failed to load initial map data:', error);
-                alert.show('Failed to load map data', {
+                notification.show('Failed to load map data', {
                     variant: 'danger',
                     description: 'The map data could not be loaded. Please try again.',
                 });

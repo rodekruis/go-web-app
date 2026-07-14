@@ -31,7 +31,7 @@ import styles from './styles.module.css';
  * @returns A standalone component
  */
 export default function NrwMapContainer() {
-    const alert = useAlert();
+    const notification = useAlert();
 
     // All URL search param handling lives in this hook.
     const {
@@ -132,7 +132,7 @@ export default function NrwMapContainer() {
         try {
             await exportNrwDataMapToPdf(scopedCountries);
         } catch (error) {
-            alert.show('Failed to export Mapbox PDF. Please try again.', { variant: 'danger' });
+            notification.show('Failed to export Mapbox PDF. Please try again.', { variant: 'danger' });
             console.error('[NrwMapContainer] Export failed:', error);
         }
     };
