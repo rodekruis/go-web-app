@@ -126,7 +126,7 @@ export default function MapboxDataMap({
             preserveDrawingBuffer: true,
         });
 
-        map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
 
         map.on('load', () => {
             setIsMapLoaded(true);
