@@ -52,7 +52,7 @@ The spell checker is easily confused by acronyms and country codes. You can add 
 
 ### NRW Portal
 
-For running the NRW portal, see [the NRW readme.](app/src/components/NrwMap/readme.md)
+For running the NRW portal, see [the NRW readme.](app/src/components/Nrw/readme.md)
 
 ### .vscode settings
 

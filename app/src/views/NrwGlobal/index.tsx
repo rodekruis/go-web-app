@@ -1,4 +1,4 @@
-import NrwMapContainer from '#components/NrwMap';
+import NrwMapContainer from '#components/Nrw';
 
 /** @knipignore */
 // eslint-disable-next-line import/prefer-default-export

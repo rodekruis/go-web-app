@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: (export FONTAWESOME_API_KEY=${{ secrets.FONTAWESOME_API_KEY }}; pnpm install)
       - name: Lint JS
-        run: pnpm exec eslint src/components/NrwMap src/utils/nrw
+        run: pnpm exec eslint src/components/Nrw src/utils/nrw
         working-directory: app
 
   lint-css:
@@ -46,7 +46,7 @@ jobs:
       - name: Install dependencies
         run: (export FONTAWESOME_API_KEY=${{ secrets.FONTAWESOME_API_KEY }}; pnpm install)
       - name: Lint CSS
-        run: pnpm exec stylelint "src/components/NrwMap/**/*.css" "src/utils/nrw/**/*.css"
+        run: pnpm exec stylelint "src/components/Nrw/**/*.css" "src/utils/nrw/**/*.css"
         working-directory: app
 
   unused:

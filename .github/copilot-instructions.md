@@ -9,7 +9,7 @@ We control the backend for NRW and generally run it locally during development, 
 
 Directories that relate to NRW:
 
-- `app/src/components/NrwMap`: NRW components
+- `app/src/components/Nrw`: NRW components
 - `app/src/utils/nrw`: NRW helper files
 
 ---

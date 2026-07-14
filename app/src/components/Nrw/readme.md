@@ -8,7 +8,7 @@ The "Nrw..." prefix naming of the files and components is to help tell the new c
 
 ## Basic Architecture
 
-- The `NrwMap` component is the main parent for all NRW mapping components. It creates the NRW components and the callbacks needed to communicate between them. It holds the state for the selected event. Data loading and other state management logic is handled by hooks.
+- The `Nrw` component is the main parent for all NRW mapping components. It creates the NRW components and the callbacks needed to communicate between them. It holds the state for the selected event. Data loading and other state management logic is handled by hooks.
 
 ### Hooks
 
