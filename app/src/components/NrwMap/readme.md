@@ -6,8 +6,6 @@ This component will be the shared NRW map component.
 
 The "Nrw..." prefix naming of the files and components is to help tell the new changes apart from existing GO components. More general components will be derived from these after working more with the TC team.
 
-The "Ol..." prefix stands for OpenLayers (the mapping front library used), and this naming is also subject to change (once we work with the ToggleCorp team more).
-
 ## Basic Architecture
 
 - The `NrwMap` component is the main parent for all NRW mapping components. It creates the NRW components and the callbacks needed to communicate between them. It holds the state for the selected event. Data loading and other state management logic is handled by hooks.
@@ -19,17 +17,9 @@ The "Ol..." prefix stands for OpenLayers (the mapping front library used), and t
 
 ### Components
 
-- `OlDataMap` is the map component for NRW. It handles admin area rendering/selection and displays data from the `useNrwDataLoader` hook. It also loads/displays data directly for data that does not need to be shared with other components, such as the base map layer and admin area geometry.
-- `NrwControlPanel` and `NrwLayerPanel` are the UI interaction layers.
+- `MapboxDataMap` is the map component for NRW. It displays data from the `useNrwDataLoader` hook via the layer functions it registers with that hook. Map click interactions (admin area selection/rendering, feature popups) are not implemented yet; see the git history of `OlDataMap` and `NrwMapPopupPanel` for the previous OpenLayers implementations.
+- `NrwEventsPanel` and `NrwLayerPanel` are the UI interaction layers.
 - `NrwLegendPanel` displays map legend information
-- The `NrwMapPopupPanel` replaces the Go map popup panel, since that component is an extended MapBox UI element and can't be reused. This is the popup shown when an item on the map is clicked.
-
-### Prototype components
-
-These are not being brought out of the prototype branch.
-
-- `OlGlobalMap` is a general global view component that can be used for global map interaction. It's for demoing how a global map could look using OpenLayers without any MapBox components or data.
-- `NrwDataPanel`: This is just a debug panel used while the `NrwControlPanel` design was being worked out.
 
 ## Running Locally
 
@@ -46,11 +36,11 @@ The NRW frontend can be launched either from this project, or from the [standalo
 
 ## Base Map
 
-The base map is provided through [MapTiler](https://www.maptiler.com/). You can modify or create a map there. For the NLRC MapTiler account credentials, see BitWarden. Once created or if you wish to change the map, you can get the map guid from the MapTiler website (MapTiler > Maps > Your map, and then see the sample code there). Set the `mapGuid` to match your map in `nrwUrls.ts`.
+The base map is provided through [MapBox](https://www.mapbox.com/). You can modify the existing map or create a map there. For the NLRC MapBox account credentials, see BitWarden. The map 'style' url is set in `nrwConstants.ts`.
 
-The `.env` var must be set to match the API key of your MapTiler account (MapTiler > API Keys).
+The `.env` var must be set to match the API key of either the NLRC or IFRC Mapbox account (Mapbox > API Keys).
 
 ## Testing
 
-- Unit testing is under development, but will be added as part of this repo.
+- Unit testing is under development, but will be added later.
 - End-to-end testing for IBF backend integration will be carried out in the [IBF repo](https://github.com/rodekruis/IBF).

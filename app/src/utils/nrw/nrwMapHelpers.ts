@@ -1,307 +1,338 @@
-import { View } from 'ol';
-import {
-    buffer as bufferExtent,
-    type Extent,
-    getHeight,
-    getWidth,
-    isEmpty,
-} from 'ol/extent';
-import GeoJSON from 'ol/format/GeoJSON';
-import MVT from 'ol/format/MVT';
-import ImageLayer from 'ol/layer/Image';
-import VectorLayer from 'ol/layer/Vector';
-import VectorTileLayer from 'ol/layer/VectorTile';
-import type MapOl from 'ol/Map';
-import { fromLonLat } from 'ol/proj';
-import ImageStatic from 'ol/source/ImageStatic';
-import VectorSource from 'ol/source/Vector';
-import VectorTile from 'ol/source/VectorTile';
-import type Style from 'ol/style/Style';
+import type {
+    CircleLayerSpecification,
+    Map as MapboxGLMap,
+} from 'mapbox-gl-v3';
 
 import { ibfApiBackend } from '#config';
 
-import { type MvtStyleCreator } from './nrwMapStyles';
-import type { SelectedEventDetails } from './nrwMapTypes';
+import fetchJson from './nrwDataFetchHelpers';
+import {
+    exposedAreasFillPaint,
+    scopedCountriesAdmin0BorderPaint,
+} from './nrwMapStyles';
 import type {
-    EventResponseDto,
-    LayerDto,
-} from './shared-dtos';
+    MapViewParameters,
+    NrwMapboxLayer,
+    OrderedMapLayer,
+    RasterExtent,
+    RasterMetadataResponse,
+} from './nrwMapTypes';
+import type { LonLatBounds } from './nrwMapViewHelpers';
+import {
+    getBoundsFromFeatures,
+    getPaddedSquareBounds,
+    getZoomToFitBounds,
+} from './nrwMapViewHelpers';
+import { getAdminAreaUrl } from './nrwUrls';
 import { LayerName } from './shared-enums';
 
-// Extract the map-relevant details from event data for a selected event
-// Returns null if no event is selected or event not found
-export function getSelectedEventDetails(
-    eventData: EventResponseDto[],
-    eventId: number | null,
-): SelectedEventDetails | null {
-    if (!eventId) return null;
+// Time in ms for map panning and zooming animations
+export const animationDurationMs = 500;
+// Extent padding ratio for constraining the panning/zooming to the scoped countries
+const constraintPaddingRatio = 2;
 
-    const event = eventData.find((e) => e.eventId === eventId);
-    if (!event) return null;
+// Mapbox renders in EPSG:3857, but takes lon/lat coordinates in WGS84
+// Because of this, image data is stored in EPSG:3857, but
+// The API still needs WGS84 coordinates to define the image extent.
+// Half of the earth's circumference in meters at the equator (EPSG:3857 bound)
+const webMercatorHalfCircumference = 20037508.34;
 
-    // Values needed for building the SelectedEventDetails:
-    // Exposed admin areas with their exposed population, per admin level.
-    const exposedPopulationPerAreaByLevel: Record<number, Record<string, number>> = {};
-    // Highest exposed population value per admin level
-    const highestExposedPopulationByLevel: Record<number, number> = {};
+// Convert EPSG:3857 meters to WGS84 longitude degrees
+function webMercatorToLongitude(x: number): number {
+    return (x / webMercatorHalfCircumference) * 180;
+}
 
-    if (event.exposedAdminAreas) {
-        // Parse the list of exposed admin areas, grouping by admin level
-        // to build the SelectedEventDetails.
-        event.exposedAdminAreas.forEach((area) => {
-            const { adminLevel: level } = area;
+// Convert EPSG:3857 meters to WGS84 latitude degrees
+function webMercatorToLatitude(y: number): number {
+    return (
+        (Math.atan(Math.exp((y / webMercatorHalfCircumference) * Math.PI)) * 360) / Math.PI - 90
+    );
+}
 
-            // Get the value of the exposed population for this admin area, if any
-            const eventPopulationData = area.exposure.find(
-                (layer) => layer.layerName === LayerName.populationExposed,
-            );
-            const exposedPopulationValue = eventPopulationData?.exposed ?? 0;
-
-            // Store the value for this admin area, keyed by level then place code
-            if (!exposedPopulationPerAreaByLevel[level]) {
-                exposedPopulationPerAreaByLevel[level] = {};
-                highestExposedPopulationByLevel[level] = 0;
-            }
-            exposedPopulationPerAreaByLevel[level][area.placeCode] = exposedPopulationValue;
-
-            // Update the highest exposed population value for this level if needed
-            const currentHighest = highestExposedPopulationByLevel[level] ?? 0;
-            if (exposedPopulationValue > currentHighest) {
-                highestExposedPopulationByLevel[level] = exposedPopulationValue;
-            }
-        });
-    } else {
-    // Log error and let caller handle the empty map.
-        console.error('No exposedAdminAreas found for event:', eventId);
-    }
-
-    // Return a SelectedEventDetails object with the extracted data
+// Generate the paired Mapbox source/layer ids for an NRW layer key
+function makeLayerIds(layerKey: string): { sourceId: string; layerId: string } {
     return {
-        eventId,
-        centroid: event.centroid,
-        alertClass: event.alertClass,
-        exposedPopulationPerAreaByLevel,
-        highestExposedPopulationByLevel,
+        sourceId: `nrw-source-${layerKey}`,
+        layerId: `nrw-layer-${layerKey}`,
     };
 }
 
-/**
- * Create a vector tile layer for the map.
- * @param selectedCountry The ISO_A3 code of the selected country,
- * or noCountrySelectedValue for none.
- * @param mapVectorTileUrl The URL template for the vector tiles
- * @param getMapStyle A function for an MVT tile style creator
- * @returns A VectorTileLayer
- */
-export const makeMvtLayerAsync = (
-    selectedCountry: string,
-    mapVectorTileUrl: string,
-    getMapStyle: MvtStyleCreator,
-) => new VectorTileLayer({
-    source: new VectorTile({
-        url: mapVectorTileUrl,
-        format: new MVT(),
-        maxZoom: 2,
-    }),
-    style: (feature) => getMapStyle(feature, selectedCountry),
-});
+// Build a mapbox image raster layer from an image URL and its EPSG:3857 extent
+function makeImageRasterLayer(
+    layerKey: string,
+    imageUrl: string,
+    extent: RasterExtent
+    ,
+): NrwMapboxLayer {
+    const west = webMercatorToLongitude(extent.xmin);
+    const south = webMercatorToLatitude(extent.ymin);
+    const east = webMercatorToLongitude(extent.xmax);
+    const north = webMercatorToLatitude(extent.ymax);
 
-// Raster layer functions
-export const makeEventImageLayer = async (resourceId: string) => {
-    const baseUrl = `${ibfApiBackend}rasters/alert`;
-    const metadataUrl = `${baseUrl}/${resourceId}`;
-    const metadataResponse = await fetch(metadataUrl);
-    if (!metadataResponse.ok) {
-        throw new Error(`Failed to fetch event raster metadata: ${metadataResponse.status}`);
-    }
-    const metadataJson = await metadataResponse.json();
-    const {
-        xmin, ymin, xmax, ymax,
-    } = metadataJson.metadata.coloured.extent;
+    const { sourceId, layerId } = makeLayerIds(layerKey);
 
-    const imageUrl = `${baseUrl}/${resourceId}/image`;
-    return new ImageLayer({
-        source: new ImageStatic({
+    return {
+        sourceId,
+        renderLayerId: layerId,
+        source: {
+            type: 'image',
             url: imageUrl,
-            projection: 'EPSG:3857', // TODO: switch to shared enum
-            interpolate: false,
-            imageExtent: [xmin, ymin, xmax, ymax],
-            crossOrigin: 'anonymous',
-        }),
-    });
+            coordinates: [
+                [west, north],
+                [east, north],
+                [east, south],
+                [west, south],
+            ],
+        },
+        layer: {
+            id: layerId,
+            type: 'raster',
+            source: sourceId,
+            paint: {
+                'raster-opacity': 0.8,
+                // Use 'nearest' resampling to avoid blurring the raster when zoomed in
+                'raster-resampling': 'nearest',
+            },
+        },
+    };
+}
+
+// Fetch raster metadata from the IBF API and build an image raster layer.
+// The API serves metadata at `{baseResourceUrl}` and the image at `{baseResourceUrl}/image`.
+const makeRasterLayerFromApi = async (
+    layerKey: string,
+    baseResourceUrl: string,
+    layerDescription: string,
+): Promise<NrwMapboxLayer> => {
+    const metadataJson = await fetchJson<RasterMetadataResponse>(
+        baseResourceUrl,
+        `${layerDescription} raster metadata`,
+    );
+    const { extent } = metadataJson.metadata.coloured;
+
+    return makeImageRasterLayer(layerKey, `${baseResourceUrl}/image`, extent);
 };
 
-export const makeStaticImageLayer = async (countryCodeIso3: string, layerName: string) => {
-    const baseUrl = `${ibfApiBackend}rasters/static`;
-    const metadataUrl = `${baseUrl}/${countryCodeIso3}/${layerName}`;
-    const metadataResponse = await fetch(metadataUrl);
-    if (!metadataResponse.ok) {
-        throw new Error(`Failed to fetch ${layerName} raster metadata: ${metadataResponse.status}`);
-    }
-    const metadataJson = await metadataResponse.json();
-    const {
-        xmin, ymin, xmax, ymax,
-    } = metadataJson.metadata.coloured.extent;
+export const makeEventImageLayer = (
+    resourceId: string,
+): Promise<NrwMapboxLayer> => makeRasterLayerFromApi(
+    `event-${resourceId}`,
+    `${ibfApiBackend}rasters/alert/${resourceId}`,
+    'event',
+);
 
-    const imageUrl = `${baseUrl}/${countryCodeIso3}/${layerName}/image`;
-    return new ImageLayer({
-        source: new ImageStatic({
-            url: imageUrl,
-            projection: 'EPSG:3857',
-            interpolate: false,
-            imageExtent: [xmin, ymin, xmax, ymax],
-            crossOrigin: 'anonymous',
-        }),
-    });
-};
+export const makeStaticImageLayer = (
+    countryCodeIso3: string,
+    layerName: string,
+): Promise<NrwMapboxLayer> => makeRasterLayerFromApi(
+    `static-${countryCodeIso3}-${layerName}`,
+    `${ibfApiBackend}rasters/static/${countryCodeIso3}/${layerName}`,
+    layerName,
+);
 
-export const isValidCoordinatePair = (
-    longitude: number,
-    latitude: number,
-): boolean => Number.isFinite(longitude)
-    && Number.isFinite(latitude)
-    && Math.abs(longitude) <= 180
-    && Math.abs(latitude) <= 90;
-
+// Build a mapbox circle point layer from GeoJSON point features (WGS84 coordinates)
 export const makePointLayerFromFeatures = (
+    layerKey: string,
     features: GeoJSON.Feature[],
-    style: Style,
-): VectorLayer => {
-    const source = new VectorSource({
-        features: new GeoJSON().readFeatures(
-            {
+    paint: CircleLayerSpecification['paint'],
+): NrwMapboxLayer => {
+    const { sourceId, layerId } = makeLayerIds(layerKey);
+
+    return {
+        sourceId,
+        renderLayerId: layerId,
+        source: {
+            type: 'geojson',
+            data: {
                 type: 'FeatureCollection',
                 features,
             },
-            {
-                dataProjection: 'EPSG:4326',
-                featureProjection: 'EPSG:3857',
-            },
-        ),
-    });
-
-    return new VectorLayer({
-        source,
-        style,
-    });
+        },
+        layer: {
+            id: layerId,
+            type: 'circle',
+            source: sourceId,
+            paint,
+        },
+    };
 };
 
-// Get the z index offset to make sure lower-level admin layers are not hidden by their parents
-export function getAdminAreaZIndex(level: number): number {
-    // Start with a base offset of 1000, and add the level
-    return 1000 + level;
-}
+// Create a mapbox fill layer for exposed admin areas from GeoJSON polygon features.
+// The fill color is the precomputed exposure color property.
+export const makeExposedAreasFillLayerFromFeatures = (
+    layerKey: string,
+    features: GeoJSON.Feature[],
+): NrwMapboxLayer => {
+    const { sourceId, layerId } = makeLayerIds(layerKey);
 
-// Get the map layer z index offset on which the layer is drawn.
-// Higher numbers are drawn on top of other layers.
-// Change the numbers in this function to change the layering order. Use ints.
-export function getZIndexOffset(layerDetails: LayerDto): number {
-    // Note: admin levels are handled by this function: getAdminAreaZIndex
-    // Set the number below in relation to what the admin layer is drawn at.
+    return {
+        sourceId,
+        renderLayerId: layerId,
+        source: {
+            type: 'geojson',
+            data: {
+                type: 'FeatureCollection',
+                features,
+            },
+        },
+        layer: {
+            id: layerId,
+            type: 'fill',
+            source: sourceId,
+            paint: exposedAreasFillPaint,
+        },
+    };
+};
 
-    switch (layerDetails.layerName) {
+// Draw order for exposed admin area fills: below all other data layers,
+// which all have a draw order of at least 1 (see getDrawOrder).
+export const exposedAreasDrawOrder = 0;
+
+// Get the map layer draw order to decide what is drawn above what.
+// Lower numbers are drawn on the bottom of the stack. Other than that,
+// the actual values used are arbitrary.
+export function getDrawOrder(layerName: LayerName): number {
+    switch (layerName) {
         case LayerName.population:
-            return 500;
+            return 10;
         case LayerName.floodDepth:
-            return 1100;
+            return 100;
         case LayerName.redCrossBranches:
-            // Give point data a higher offset
-            return 1201;
+            return 200;
         case LayerName.clinics:
-            // Give point data a higher offset
-            return 1202;
+            return 201;
         default:
             // No need for a user facing error, but we should log this to correctly handle it later.
             console.error(
                 'Unknown layer data type for z-indexing:',
-                layerDetails.layerName,
+                layerName,
             );
-            return 1; // draw on the lowest layer above the base map
+            return 1; // draw on the lowest layer above exposed areas
     }
 }
 
-// Get the extents that fits all the supplied vector data, with added padding
-export function getExtentForVectorData(
-    source: VectorSource,
-): Extent | null {
-    const extent = source.getExtent();
-
-    if (!extent || isEmpty(extent)) {
-        return null;
+// Add a layer to the map, inserting it into a list sorted by draw order.
+// Returns the updated ordered layer list.
+export function addOrderedLayer(
+    map: MapboxGLMap,
+    newLayer: NrwMapboxLayer,
+    drawOrder: number,
+    orderedLayers: OrderedMapLayer[],
+): OrderedMapLayer[] {
+    if (map.getLayer(newLayer.renderLayerId)) {
+        return orderedLayers;
     }
 
-    // Padding ratio for all sides.
-    // 0.1 = 10%
-    const paddingRatio = 0.1;
+    if (!map.getSource(newLayer.sourceId)) {
+        map.addSource(newLayer.sourceId, newLayer.source);
+    }
 
-    // Set the padding amount by the larger of the two dimensions
-    const extentWidth = getWidth(extent);
-    const extentHeight = getHeight(extent);
-    const paddingAmount = Math.max(extentWidth, extentHeight) * paddingRatio;
+    const layerAbove = orderedLayers.find((entry) => entry.drawOrder > drawOrder);
+    map.addLayer(newLayer.layer, layerAbove?.renderLayerId);
 
-    return bufferExtent(extent, paddingAmount);
+    return [
+        ...orderedLayers,
+        { renderLayerId: newLayer.renderLayerId, drawOrder },
+    ].sort((a, b) => a.drawOrder - b.drawOrder);
 }
 
-export interface InitialMapViewParams {
-    zoom?: number;
-    center?: {
-        lon: number;
-        lat: number;
-    };
+// Remove a tracked layer and its source if present, and remove it from
+// ordered layer bookkeeping.
+export function removeLayerAndSource(
+    map: MapboxGLMap,
+    layer: NrwMapboxLayer,
+    orderedLayers: OrderedMapLayer[],
+): OrderedMapLayer[] {
+    if (map.getLayer(layer.renderLayerId)) {
+        map.removeLayer(layer.renderLayerId);
+    }
+    if (map.getSource(layer.sourceId)) {
+        map.removeSource(layer.sourceId);
+    }
+
+    return orderedLayers.filter((entry) => entry.renderLayerId !== layer.renderLayerId);
 }
 
-/**
- * Initialize the map view with extent constraint and optional initial position.
- *
- * Behavior:
- * - Always constrains panning to the given extent
- * - If valid center coords provided, centers there
- * - If valid zoom provided with center, applies that zoom
- * - If no valid center, fits the view to the extent
- *
- * @param map - The OpenLayers map instance
- * @param extent - The extent to constrain panning to
- * @param initialView - Optional initial view params (center, zoom) from URL
- */
-export function initializeMapView(
-    map: MapOl,
-    extent: Extent,
-    initialView?: InitialMapViewParams | null,
-): void {
-    const currentView = map.getView();
-
-    // Create constrained view that limits panning to the extent
-    const constrainedView = new View({
-        center: currentView.getCenter(),
-        resolution: currentView.getResolution(),
-        rotation: currentView.getRotation(),
-        projection: currentView.getProjection(),
-        extent,
-        constrainOnlyCenter: true,
-    });
-    map.setView(constrainedView);
-
-    const hasValidCenter = initialView?.center
-        && Number.isFinite(initialView.center.lon)
-        && Number.isFinite(initialView.center.lat);
-
-    if (hasValidCenter) {
-        // Apply center from URL params
-        constrainedView.setCenter(
-            fromLonLat([
-                initialView!.center!.lon,
-                initialView!.center!.lat,
-            ]),
+// Draw the admin0 borders for the scoped countries and constrain the map
+// view to them. Never rejects: returns null when the features cannot be
+// fetched or their bounds computed.
+export async function drawScopedCountriesAdmin0Layer(
+    map: MapboxGLMap,
+    scopedCountries: string[],
+    initialMapView?: MapViewParameters | null,
+): Promise<LonLatBounds | null> {
+    try {
+        const admin0GeoJson = await Promise.allSettled(
+            scopedCountries.map((countryCodeIso3) => fetchJson<GeoJSON.FeatureCollection>(
+                getAdminAreaUrl(countryCodeIso3, 0),
+                `admin0 for ${countryCodeIso3}`,
+            )),
         );
 
-        // Apply zoom if valid
-        if (initialView?.zoom !== undefined && Number.isFinite(initialView.zoom)) {
-            constrainedView.setZoom(initialView.zoom);
+        const features = admin0GeoJson.flatMap((result) => (
+            result.status === 'fulfilled'
+                ? (result.value.features ?? [])
+                : []
+        ));
+
+        if (features.length === 0) {
+            throw new Error('Failed to load scoped countries admin0 features');
         }
-    } else {
-        // No valid center - fit to extent (default behavior)
-        constrainedView.fit(extent, {
-            duration: 500,
+
+        // Mapbox requires unique names for every layer.
+        // If you have the source data, the polygon fill, and the polygon outline,
+        // Mapbox treats these as 3 layers, so each would need a unique id.
+        // If we add too many layers, consider using a function for name generation.
+        const scopedCountriesAdminSourceId = 'nrw-source-scoped-countries-admin0';
+        const scopedCountriesAdminBorderLayerId = 'nrw-layer-scoped-countries-admin0-border';
+
+        if (map.getLayer(scopedCountriesAdminBorderLayerId)) {
+            map.removeLayer(scopedCountriesAdminBorderLayerId);
+        }
+        if (map.getSource(scopedCountriesAdminSourceId)) {
+            map.removeSource(scopedCountriesAdminSourceId);
+        }
+
+        map.addSource(scopedCountriesAdminSourceId, {
+            type: 'geojson',
+            data: {
+                type: 'FeatureCollection',
+                features,
+            },
         });
+
+        map.addLayer({
+            id: scopedCountriesAdminBorderLayerId,
+            type: 'line',
+            source: scopedCountriesAdminSourceId,
+            paint: scopedCountriesAdmin0BorderPaint,
+        });
+
+        const bounds = getBoundsFromFeatures(features);
+        if (!bounds) {
+            throw new Error('Failed to compute bounds for scoped countries admin0 features');
+        }
+
+        // Create bounds to constrain panning and zooming
+        const constraintBounds = getPaddedSquareBounds(bounds, constraintPaddingRatio);
+        map.setMaxBounds(constraintBounds);
+
+        // If there is not deeplinked view, fit the map to scoped countries on load
+        const hasValidInitialMapCenter = (
+            initialMapView
+            && Number.isFinite(initialMapView.center.lon)
+            && Number.isFinite(initialMapView.center.lat)
+        );
+
+        if (!hasValidInitialMapCenter) {
+            map.fitBounds(getZoomToFitBounds(bounds), {
+                duration: animationDurationMs,
+            });
+        }
+
+        return bounds;
+    } catch (error) {
+        console.error('[drawScopedCountriesAdmin0Layer] Failed to draw scoped countries admin0:', error);
+        return null;
     }
 }

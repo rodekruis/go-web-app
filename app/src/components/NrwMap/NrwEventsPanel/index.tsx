@@ -11,6 +11,7 @@ import {
 } from '@ifrc-go/icons';
 import { Button } from '@ifrc-go/ui';
 
+import { type AdminAreaDetails } from '#utils/nrw/nrwDataFetchHelpers';
 import { alertColors } from '#utils/nrw/nrwMapStyles';
 import {
     type AdminAreaExposureDto,
@@ -247,7 +248,10 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
                 <CollapsibleSection title="Infrastructure Exposure">
                     <div className={styles.infraGrid}>
                         {infraExposure.map((item) => (
-                            <div key={item.layerName} className={styles.infraItem}>
+                            <div
+                                key={`${item.layerName}-${item.exposed}-${item.total ?? 'null'}`}
+                                className={styles.infraItem}
+                            >
                                 <span className={styles.infraLabel}>
                                     Exposed
                                     {' '}
@@ -268,7 +272,7 @@ function EventDetailView({ event, onBack }: EventDetailViewProps) {
 
             {/* Data Sources Section */}
             <CollapsibleSection title="Data Sources">
-                {event.forecastSources.map((source, index) => (
+                {Array.from(new Set(event.forecastSources)).map((source, index) => (
                     <div key={source} className={styles.sourceItem}>
                         <span className={styles.sourceLabel}>
                             {index === 0 ? 'Forecast Source' : 'Data Source'}
@@ -371,29 +375,33 @@ function EventButton({ event, onEventClick }: EventButtonProps) {
     );
 }
 
-interface NrwControlPanelProps {
+interface NrwEventsPanelProps {
   eventData: EventResponseDto[];
   activeEventId: number | null;
   onEventClick: (eventId: number) => void;
   onRefreshAll: () => void;
   onDeselectEvent: () => void;
-  countryCode: string;
+    countryCodes: string[];
   selectedAdminPlaceCode: string | null;
+  adminDetails: AdminAreaDetails | null;
 }
 
 /**
- * Control panel showing upcoming events for the selected country.
+ * Control panel showing upcoming events for the scoped country.
  * Each event displays affected admin1 areas and total population.
  */
-export default function NrwControlPanel({
+export default function NrwEventsPanel({
     eventData,
     activeEventId,
     onEventClick,
     onRefreshAll,
     onDeselectEvent,
-    countryCode,
+    countryCodes,
     selectedAdminPlaceCode,
-}: NrwControlPanelProps) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    adminDetails,
+}: NrwEventsPanelProps) {
+    const countryCode = countryCodes[0] ?? '';
     const selectedEvent = eventData.find((event) => event.eventId === activeEventId) ?? null;
 
     const handleBack = () => {
@@ -404,7 +412,7 @@ export default function NrwControlPanel({
     // TODO: change the view based on this
         // eslint-disable-next-line no-console
         console.debug(
-            `TODO: [NrwControlPanel] Selected admin area: ${selectedAdminPlaceCode}`,
+            `TODO: [NrwEventsPanel] Selected admin area: ${selectedAdminPlaceCode}`,
         );
     }
 

@@ -1,6 +1,3 @@
-import type VectorLayer from 'ol/layer/Vector';
-import type Style from 'ol/style/Style';
-
 import mockCountryData from './mockData/mock_CountryData';
 import {
     ADMIN_LEVEL_FIELD_KEY,
@@ -9,24 +6,38 @@ import {
     POPULATION_ATTRIBUTE_KEY,
 } from './nrwConstants';
 import {
-    isValidCoordinatePair,
-    makePointLayerFromFeatures,
-} from './nrwMapHelpers';
-import { type CountryMapData } from './nrwMapTypes';
+    type CountryMapData,
+    type SelectedEventDetails,
+} from './nrwMapTypes';
 import {
     getAdminAreaDetailsNoGeoUrl,
+    getAdminAreasByCodesUrl,
     getEventsApiUrl,
     getHealthLocsApiUrl,
     getRcLocsApiUrl,
 } from './nrwUrls';
 import type { EventResponseDto } from './shared-dtos';
 
-// Format of GO API result for Red Cross locations
-type RcLocResult = {
+// Fetch a URL and parse the response body as JSON.
+// Throws when the request fails or the response is not OK.
+export default async function fetchJson<T>(
+    url: string,
+    description: string,
+    signal?: AbortSignal,
+): Promise<T> {
+    const response = await fetch(url, { signal });
+    if (!response.ok) {
+        throw new Error(
+            `Failed to fetch ${description}: HTTP ${response.status} ${response.statusText}`,
+        );
+    }
+    return response.json() as Promise<T>;
+}
+
+// Fields shared by GO API local unit results (RC branches and clinics)
+// that are mapped onto map feature properties.
+type LocalUnitResult = {
     id?: number;
-    country_details?: {
-        iso3?: string;
-    };
     local_branch_name?: string;
     english_branch_name?: string;
     address_loc?: string;
@@ -34,17 +45,24 @@ type RcLocResult = {
     modified_at?: string;
     status?: number;
     status_details?: string;
-    type?: number;
     type_details?: {
         name?: string;
     };
+    link?: string;
+};
+
+// Format of GO API result for Red Cross locations
+type RcLocResult = LocalUnitResult & {
+    country_details?: {
+        iso3?: string;
+    };
+    type?: number;
     health_details?: {
         health_facility_type?: number;
         health_facility_type_details?: {
             name?: string;
         };
     };
-    link?: string;
     location_geojson?: {
         type?: string;
         coordinates?: [number, number] | number[];
@@ -52,23 +70,11 @@ type RcLocResult = {
 };
 
 // Format of GO API result for Clinic locations
-type ClinicLocResult = {
-    id?: number;
+type ClinicLocResult = LocalUnitResult & {
     country_iso3?: string;
-    local_branch_name?: string;
-    english_branch_name?: string;
-    address_loc?: string;
-    address_en?: string;
-    modified_at?: string;
-    status?: number;
-    status_details?: string;
-    type_details?: {
-        name?: string;
-    };
     health_facility_type_details?: {
         name?: string;
     };
-    link?: string;
     location?: {
         lat?: number;
         lng?: number;
@@ -103,8 +109,12 @@ function parsePopulation(rawAttributes: unknown): number | null {
 
 // Build admin area details from feature properties
 export function getAdminAreaDetailsFromProperties(
-    props: Record<string, unknown>,
+    properties: GeoJSON.GeoJsonProperties,
 ): AdminAreaDetails | null {
+    if (!properties) {
+        return null;
+    }
+    const props = properties as Record<string, unknown>;
     const adminLevel = Number(props[ADMIN_LEVEL_FIELD_KEY]);
     if (!Number.isFinite(adminLevel)) {
         return null;
@@ -126,21 +136,16 @@ export function getAdminAreaDetailsFromProperties(
 
 // Fetch admin area details directly
 export async function fetchAdminAreaDetails(
-    country: string,
     code: string,
 ): Promise<AdminAreaDetails | null> {
-    const url = getAdminAreaDetailsNoGeoUrl(country, code);
+    const url = getAdminAreaDetailsNoGeoUrl(code);
     try {
-        const response = await fetch(url);
-        if (!response.ok) {
+        const data = await fetchJson<GeoJSON.FeatureCollection>(url, 'admin area details');
+        const firstFeature = data.features[0];
+        if (!firstFeature) {
             return null;
         }
-        const data = await response.json();
-        const features = data?.features;
-        if (!features || features.length === 0) {
-            return null;
-        }
-        return getAdminAreaDetailsFromProperties(features[0].properties);
+        return getAdminAreaDetailsFromProperties(firstFeature.properties);
     } catch {
         return null;
     }
@@ -152,139 +157,159 @@ async function fetchEventsFromApi(
 ): Promise<EventResponseDto[]> {
     try {
         const url = getEventsApiUrl(countryCodeIso3);
-        const response = await fetch(url);
-        if (!response.ok) {
-            return [];
-        }
-        return (await response.json()) as EventResponseDto[];
+        const data = await fetchJson<EventResponseDto[]>(
+            url,
+            `events for ${countryCodeIso3}`,
+        );
+        return data;
     } catch {
         return [];
     }
 }
 
 // Fetch upcoming or ongoing events data for a country
-export async function getCurrentCountryEventData(
-    country: string,
+export async function getAllEventData(
+    countries: string[],
 ): Promise<EventResponseDto[]> {
-    return fetchEventsFromApi(country);
-}
-
-// Fetch a specific event's details, and only return that event
-export async function getEventDetails(
-    country: string,
-    eventId: number,
-): Promise<EventResponseDto[]> {
-    const allEvents = await fetchEventsFromApi(country);
-    const event = allEvents.find((e) => e.eventId === eventId);
-    return event ? [event] : [];
+    const eventsByCountry = await Promise.all(
+        countries.map((country) => fetchEventsFromApi(country)),
+    );
+    return eventsByCountry.flat();
 }
 
 // Fetch country-level map layer data
 // TODO: Use the API instead of mock data. Pending IBF API
-export async function getCountryMapData(): Promise<
-  Record<string, CountryMapData>
-  > {
-    return mockCountryData;
+// This now just filters the results of the mock data, but the actual API would probably
+// just return the countries we query for.
+export async function getCountryMapData(
+    scopedCountries: string[],
+): Promise<Record<string, CountryMapData>> {
+    return Object.fromEntries(
+        Object.entries(mockCountryData).filter(
+            ([countryCode]) => scopedCountries.includes(countryCode),
+        ),
+    );
 }
 
-export const makeRcBranchesPointLayer = async (
-    selectedCountry: string,
-    style: Style,
-): Promise<VectorLayer> => {
-    const apiUrl = getRcLocsApiUrl(selectedCountry);
-    const response = await fetch(apiUrl);
-    if (!response.ok) {
-        throw new Error(
-            `Failed to load RC branches data: HTTP ${response.status} ${response.statusText}`,
-        );
+// Fetch the exposed admin areas for the selected event and return their GeoJSON features.
+// The areas are the deepest (lowest) admin level that has exposure data.
+// Geometry is fetched for each scoped country and the features are merged.
+export const fetchExposedAdminAreasFeatures = async (
+    scopedCountries: string[],
+    selectedEventDetails: SelectedEventDetails,
+    signal?: AbortSignal,
+): Promise<GeoJSON.Feature[]> => {
+    const {
+        eventId,
+        exposedPopulationPerAreaByLevel,
+    } = selectedEventDetails;
+
+    // Find the deepest (lowest) admin level that has exposed areas.
+    const deepestExposedLevel = Number(
+        Object.keys(exposedPopulationPerAreaByLevel).at(-1),
+    );
+    const exposedPopulationByPlaceCode = exposedPopulationPerAreaByLevel[deepestExposedLevel];
+    if (!Number.isFinite(deepestExposedLevel) || exposedPopulationByPlaceCode === undefined) {
+        throw new Error(`Event ${eventId} has no exposed population data`);
     }
 
-    const data: GoDataResults<RcLocResult> = await response.json();
-    const filteredFeatures: GeoJSON.Feature[] = (data.results ?? [])
+    // Fetch the geometry for only the exposed admin areas, per scoped country.
+    const placeCodes = Object.keys(exposedPopulationByPlaceCode);
+    const results = await Promise.allSettled(
+        scopedCountries.map(async (countryIso3) => {
+            const url = getAdminAreasByCodesUrl(countryIso3, deepestExposedLevel, placeCodes);
+            const data = await fetchJson<GeoJSON.FeatureCollection>(
+                url,
+                `exposed admin areas for ${countryIso3}`,
+                signal,
+            );
+            return data.features ?? [];
+        }),
+    );
+
+    return results.flatMap((result) => (
+        result.status === 'fulfilled' ? result.value : []
+    ));
+};
+
+const isValidCoordinatePair = (
+    longitude: number,
+    latitude: number,
+): boolean => Number.isFinite(longitude)
+    && Number.isFinite(latitude)
+    && Math.abs(longitude) <= 180
+    && Math.abs(latitude) <= 90;
+
+// Build the GeoJSON point feature for a GO API local unit (RC branch or clinic).
+// Returns an empty array when the coordinates are invalid, so callers can flatMap.
+function makeLocalUnitFeatures(
+    item: LocalUnitResult,
+    longitude: number,
+    latitude: number,
+    healthFacilityTypeName: string | undefined,
+    country: string,
+): GeoJSON.Feature[] {
+    if (!isValidCoordinatePair(longitude, latitude)) {
+        return [];
+    }
+
+    return [{
+        type: 'Feature',
+        geometry: {
+            type: 'Point',
+            coordinates: [longitude, latitude],
+        },
+        properties: {
+            id: item.id,
+            name: item.local_branch_name,
+            local_branch_name: item.local_branch_name,
+            english_branch_name: item.english_branch_name,
+            address_loc: item.address_loc,
+            address_en: item.address_en,
+            modified_at: item.modified_at,
+            status: item.status,
+            status_display: item.status_details,
+            type_name: item.type_details?.name,
+            health_facility_type_name: healthFacilityTypeName,
+            link: item.link,
+            country,
+        },
+    }];
+}
+
+export const fetchRcBranchesFeatures = async (
+    selectedCountry: string,
+): Promise<GeoJSON.Feature[]> => {
+    const apiUrl = getRcLocsApiUrl(selectedCountry);
+    const data = await fetchJson<GoDataResults<RcLocResult>>(apiUrl, 'RC branches data');
+    return (data.results ?? [])
         .flatMap((item) => {
             const coordinates = item.location_geojson?.coordinates;
             if (!coordinates || coordinates.length < 2) {
                 return [];
             }
 
-            const longitude = Number(coordinates[0]);
-            const latitude = Number(coordinates[1]);
-            if (!isValidCoordinatePair(longitude, latitude)) {
-                return [];
-            }
-
-            return [{
-                type: 'Feature',
-                geometry: {
-                    type: 'Point',
-                    coordinates: [longitude, latitude],
-                },
-                properties: {
-                    id: item.id,
-                    name: item.local_branch_name,
-                    local_branch_name: item.local_branch_name,
-                    english_branch_name: item.english_branch_name,
-                    address_loc: item.address_loc,
-                    address_en: item.address_en,
-                    modified_at: item.modified_at,
-                    status: item.status,
-                    status_display: item.status_details,
-                    type_name: item.type_details?.name,
-                    health_facility_type_name:
-                        item.health_details?.health_facility_type_details?.name,
-                    link: item.link,
-                    country: selectedCountry,
-                },
-            } as GeoJSON.Feature];
+            return makeLocalUnitFeatures(
+                item,
+                Number(coordinates[0]),
+                Number(coordinates[1]),
+                item.health_details?.health_facility_type_details?.name,
+                selectedCountry,
+            );
         });
-
-    return makePointLayerFromFeatures(filteredFeatures, style);
 };
 
-export const makeClinicPointLayer = async (
+export const fetchClinicFeatures = async (
     selectedCountry: string,
-    style: Style,
-): Promise<VectorLayer> => {
+): Promise<GeoJSON.Feature[]> => {
     const apiUrl = getHealthLocsApiUrl(selectedCountry);
-    const response = await fetch(apiUrl);
-    if (!response.ok) {
-        throw new Error(
-            `Failed to load clinic data: HTTP ${response.status} ${response.statusText}`,
-        );
-    }
-
-    const data: GoDataResults<ClinicLocResult> = await response.json();
-    const filteredFeatures: GeoJSON.Feature[] = (data.results ?? [])
-        .flatMap((item) => {
-            const longitude = Number(item.location?.lng);
-            const latitude = Number(item.location?.lat);
-            if (!isValidCoordinatePair(longitude, latitude)) {
-                return [];
-            }
-
-            return [{
-                type: 'Feature',
-                geometry: {
-                    type: 'Point',
-                    coordinates: [longitude, latitude],
-                },
-                properties: {
-                    id: item.id,
-                    name: item.local_branch_name,
-                    local_branch_name: item.local_branch_name,
-                    english_branch_name: item.english_branch_name,
-                    address_loc: item.address_loc,
-                    address_en: item.address_en,
-                    modified_at: item.modified_at,
-                    status: item.status,
-                    status_display: item.status_details,
-                    type_name: item.type_details?.name,
-                    health_facility_type_name: item.health_facility_type_details?.name,
-                    link: item.link,
-                    country: selectedCountry,
-                },
-            } as GeoJSON.Feature];
-        });
-
-    return makePointLayerFromFeatures(filteredFeatures, style);
+    const data = await fetchJson<GoDataResults<ClinicLocResult>>(apiUrl, 'clinic data');
+    return (data.results ?? [])
+        .flatMap((item) => makeLocalUnitFeatures(
+            item,
+            Number(item.location?.lng),
+            Number(item.location?.lat),
+            item.health_facility_type_details?.name,
+            selectedCountry,
+        ));
 };

@@ -1,8 +1,4 @@
-import {
-    ibfApiBackend,
-    maptilerApiKey,
-    seedDataRepo,
-} from '#config';
+import { ibfApiBackend } from '#config';
 
 import {
     ADMIN_LEVEL_FIELD_KEY,
@@ -11,19 +7,6 @@ import {
     COUNTRY_FIELD_KEY,
     PLACE_CODE_FIELD_KEY,
 } from './nrwConstants';
-
-// Base map URL
-const maptilerBaseUrl = 'https://api.maptiler.com';
-// ID of the map we created in Map Tiler.
-const mapGuid = '019eb13e-4bbd-743d-995d-970d7c3a2633';
-export const mapUrlStyleJson = `${maptilerBaseUrl}/maps/${mapGuid}/style.json?key=${maptilerApiKey}`;
-
-// Raw GitHub URLs for direct file access
-// TODO: Once we have working API, we'll need a conditional here to target either the
-// seed repo or the API
-// depending on the environment or another setting.
-export const seedRepoEventDataUrl = `${seedDataRepo}raster-data/mock-events/rgba/`;
-export const seedRepoPopDataUrl = `${seedDataRepo}raster-data/population/rgba/`;
 
 // IBF API events endpoint
 export const getEventsApiUrl = (countryIso3: string) => `${ibfApiBackend}events?countryCodeIso3=${countryIso3}&active=true`;
@@ -40,12 +23,13 @@ export const getRcLocsApiUrl = (countryIso3: string) => `${goApiBaseUrl}/public-
 export const getHealthLocsApiUrl = (countryIso3: string) => `${goApiBaseUrl}/health-local-units/?iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
 
 // Simplification algorithm factor for simplifying vector data
+// A larger factor returns a smaller, more simplified vector shape.
 // Example of factor values on vector object size:
 //    full vector size: 300kb
 //    .0005 = 279kb
 //    .001 = 188kb
-//    .05 = 53kb
-//    .01 = 30kb
+//    .01 = 53kb
+//    .05 = 30kb
 const adminLevelToSimplificationFactor: number[] = [0.05, 0.01, 0.005, 0.004];
 
 // Get the vector simplification factor (for the query algorithm)
@@ -71,15 +55,6 @@ const getSimplificationFactor = (adminLevel: number): number => {
 // const baseQuery = 'http://localhost:9000/collections/debug.admin_areas/items?filter=';
 const baseQuery = `${ibfApiBackend}admin-areas?filter=`;
 const and = '%20AND%20';
-
-export const getGlobalAdmin0Url = (): string => {
-    const factor = getSimplificationFactor(0);
-    const levelParam = `${ADMIN_LEVEL_FIELD_KEY}=0`;
-    const limitParam = 'limit=10000';
-    const simplifyParam = `transform=simplify,${factor}`;
-
-    return `${baseQuery}${levelParam}&${limitParam}&${simplifyParam}`;
-};
 
 export const getAdminAreaUrl = (
     countryIso3: string,
@@ -132,10 +107,8 @@ export const getAdminAreasByCodesUrl = (
 // Get a single admin area by its code (for initial selection from URL)
 // Excludes geometry to reduce payload size
 export const getAdminAreaDetailsNoGeoUrl = (
-    countryIso3: string,
     code: string,
 ): string => {
-    const countryParam = `${COUNTRY_FIELD_KEY}=%27${countryIso3}%27`;
     const codeParam = `${PLACE_CODE_FIELD_KEY}=%27${code}%27`;
     const limitParam = 'limit=1';
     // Only fetch needed properties for the admin area. Exclude geometry.
@@ -151,5 +124,5 @@ export const getAdminAreaDetailsNoGeoUrl = (
         ATTRIBUTES_FIELD_KEY,
     ].join(',')}`;
 
-    return `${baseQuery}${countryParam}${and}${codeParam}&${limitParam}&${propsParam}`;
+    return `${baseQuery}${codeParam}&${limitParam}&${propsParam}`;
 };

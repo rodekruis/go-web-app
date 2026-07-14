@@ -4,14 +4,15 @@ import {
     test,
 } from 'vitest';
 
-import { noCountrySelectedValue } from './nrwConstants';
 import {
+    parseAndSanitizeCountryCodesParam,
     parseMapLayersParam,
     sanitizeAdminCode,
     sanitizeCountryCode,
     sanitizeMapLatitudeParam,
     sanitizeMapLongitudeParam,
     sanitizeMapZoomParam,
+    serializeCountryCodesParam,
     serializeMapLayersParam,
 } from './nrwSearchParamHelpers';
 
@@ -33,21 +34,66 @@ describe('nrwSearchParamHelpers', () => {
             expect(sanitizeCountryCode('\tMWI\n')).toBe('MWI');
         });
 
-        test('should return noCountrySelectedValue for invalid codes', () => {
-            expect(sanitizeCountryCode('US')).toBe(noCountrySelectedValue);
-            expect(sanitizeCountryCode('KENA')).toBe(noCountrySelectedValue);
-            expect(sanitizeCountryCode('1AB')).toBe(noCountrySelectedValue);
-            expect(sanitizeCountryCode('ab#')).toBe(noCountrySelectedValue);
+        test('should return null for invalid codes', () => {
+            expect(sanitizeCountryCode('US')).toBeNull();
+            expect(sanitizeCountryCode('KENA')).toBeNull();
+            expect(sanitizeCountryCode('1AB')).toBeNull();
+            expect(sanitizeCountryCode('ab#')).toBeNull();
         });
 
-        test('should return noCountrySelectedValue for null/undefined', () => {
-            expect(sanitizeCountryCode(null)).toBe(noCountrySelectedValue);
-            expect(sanitizeCountryCode(undefined)).toBe(noCountrySelectedValue);
+        test('should return null for null/undefined', () => {
+            expect(sanitizeCountryCode(null)).toBeNull();
+            expect(sanitizeCountryCode(undefined)).toBeNull();
         });
 
-        test('should return noCountrySelectedValue for empty strings', () => {
-            expect(sanitizeCountryCode('')).toBe(noCountrySelectedValue);
-            expect(sanitizeCountryCode('   ')).toBe(noCountrySelectedValue);
+        test('should return null for empty strings', () => {
+            expect(sanitizeCountryCode('')).toBeNull();
+            expect(sanitizeCountryCode('   ')).toBeNull();
+        });
+    });
+
+    describe('parseCountryCodesParam', () => {
+        test('should parse a single country code', () => {
+            expect(parseAndSanitizeCountryCodesParam('KEN')).toEqual(['KEN']);
+        });
+
+        test('should parse comma-separated country codes', () => {
+            expect(parseAndSanitizeCountryCodesParam('KEN,UGA,TZA')).toEqual(['KEN', 'UGA', 'TZA']);
+        });
+
+        test('should uppercase and trim country codes', () => {
+            expect(parseAndSanitizeCountryCodesParam(' ken, UGA ,\ttza\n')).toEqual(['KEN', 'UGA', 'TZA']);
+        });
+
+        test('should filter out invalid country values', () => {
+            expect(parseAndSanitizeCountryCodesParam('KEN,XX,1AB,UGA')).toEqual(['KEN', 'UGA']);
+            expect(parseAndSanitizeCountryCodesParam('None')).toEqual([]);
+        });
+
+        test('should return empty array for null/undefined/empty', () => {
+            expect(parseAndSanitizeCountryCodesParam(null)).toEqual([]);
+            expect(parseAndSanitizeCountryCodesParam(undefined)).toEqual([]);
+            expect(parseAndSanitizeCountryCodesParam('')).toEqual([]);
+            expect(parseAndSanitizeCountryCodesParam('   ')).toEqual([]);
+        });
+    });
+
+    describe('serializeCountryCodesParam', () => {
+        test('should serialize a single country code', () => {
+            expect(serializeCountryCodesParam(['KEN'])).toBe('KEN');
+        });
+
+        test('should serialize multiple country codes', () => {
+            expect(serializeCountryCodesParam(['KEN', 'UGA', 'TZA'])).toBe('KEN,UGA,TZA');
+        });
+
+        test('should sanitize and filter invalid values', () => {
+            expect(serializeCountryCodesParam([' ken ', 'XX', 'UGA', '1AB'])).toBe('KEN,UGA');
+        });
+
+        test('should return empty string for empty or invalid input', () => {
+            expect(serializeCountryCodesParam([])).toBe('');
+            expect(serializeCountryCodesParam(['None', 'XX'])).toBe('');
         });
     });
 
