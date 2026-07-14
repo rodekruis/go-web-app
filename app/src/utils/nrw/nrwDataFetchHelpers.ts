@@ -5,10 +5,7 @@ import {
     ATTRIBUTES_FIELD_KEY,
     POPULATION_ATTRIBUTE_KEY,
 } from './nrwConstants';
-import {
-    type CountryMapData,
-    type SelectedEventDetails,
-} from './nrwMapTypes';
+import { type CountryMapData } from './nrwMapTypes';
 import {
     getAdminAreaDetailsNoGeoUrl,
     getAdminAreasByCodesUrl,
@@ -196,28 +193,32 @@ export async function getCountryMapData(
 // Geometry is fetched for each scoped country and the features are merged.
 export const fetchExposedAdminAreasFeatures = async (
     scopedCountries: string[],
-    selectedEventDetails: SelectedEventDetails,
+    selectedEvent: EventResponseDto,
     signal?: AbortSignal,
 ): Promise<GeoJSON.Feature[]> => {
     const {
         eventId,
-        exposedPopulationPerAreaByLevel,
-    } = selectedEventDetails;
+        exposedAdminAreas,
+    } = selectedEvent;
 
     // Find the deepest (lowest) admin level that has exposed areas.
-    const deepestExposedLevel = Number(
-        Object.keys(exposedPopulationPerAreaByLevel).at(-1),
-    );
-    const exposedPopulationByPlaceCode = exposedPopulationPerAreaByLevel[deepestExposedLevel];
-    if (!Number.isFinite(deepestExposedLevel) || exposedPopulationByPlaceCode === undefined) {
+    const deepestExposedLevel = Object.keys(exposedAdminAreas).at(-1);
+    const deepestExposedAreas = deepestExposedLevel !== undefined
+        ? exposedAdminAreas[deepestExposedLevel]
+        : undefined;
+    if (deepestExposedLevel === undefined || deepestExposedAreas === undefined) {
         throw new Error(`Event ${eventId} has no exposed population data`);
     }
 
     // Fetch the geometry for only the exposed admin areas, per scoped country.
-    const placeCodes = Object.keys(exposedPopulationByPlaceCode);
+    const placeCodes = deepestExposedAreas.map((area) => area.placeCode);
     const results = await Promise.allSettled(
         scopedCountries.map(async (countryIso3) => {
-            const url = getAdminAreasByCodesUrl(countryIso3, deepestExposedLevel, placeCodes);
+            const url = getAdminAreasByCodesUrl(
+                countryIso3,
+                Number(deepestExposedLevel),
+                placeCodes,
+            );
             const data = await fetchJson<GeoJSON.FeatureCollection>(
                 url,
                 `exposed admin areas for ${countryIso3}`,

@@ -29,12 +29,12 @@ import type {
     MapViewParameters,
     NrwMapboxLayer,
     OrderedMapLayer,
-    SelectedEventDetails,
 } from '#utils/nrw/nrwMapTypes';
 import {
     getMapViewFromParameters,
     getMapViewParametersFromMap,
 } from '#utils/nrw/nrwMapViewHelpers';
+import { type EventResponseDto } from '#utils/nrw/shared-dtos';
 
 import handleMapClick from '../../../utils/nrw/nrwMapInteractions';
 
@@ -46,7 +46,7 @@ interface MapboxDataMapProps {
 
     // Details for the currently selected event (centroid, exposed areas)
     // Pass null when no event is selected
-    selectedEventDetails?: SelectedEventDetails | null;
+    selectedEvent?: EventResponseDto | null;
 
     // Initial map view from URL search params, if available
     initialMapView?: MapViewParameters | null;
@@ -77,7 +77,7 @@ interface MapboxDataMapProps {
  */
 export default function MapboxDataMap({
     scopedCountries,
-    selectedEventDetails,
+    selectedEvent,
     initialMapView,
     registerMapLayerFunctions,
     onSelect,
@@ -218,7 +218,7 @@ export default function MapboxDataMap({
             exposedAreasLayerRef.current = null;
         }
 
-        if (!selectedEventDetails) {
+        if (!selectedEvent) {
             return undefined;
         }
 
@@ -228,7 +228,7 @@ export default function MapboxDataMap({
         renderSelectedEventExposedAreasOnMap({
             map,
             scopedCountries,
-            selectedEventDetails,
+            selectedEvent,
             orderedLayers: orderedLayersRef.current,
             isOutdated: () => isOutdated,
         })
@@ -251,7 +251,7 @@ export default function MapboxDataMap({
             // hit before the fetch promise resolves, so we know we can ignore the result.
             isOutdated = true;
         };
-    }, [selectedEventDetails, scopedCountries, isMapLoaded, notification]);
+    }, [selectedEvent, scopedCountries, isMapLoaded, notification]);
 
     return (
         <div className={styles.container}>

@@ -22,23 +22,6 @@ import { LayerName } from '#utils/nrw/shared-enums';
 
 import styles from './styles.module.css';
 
-// Helper to group the flat list of exposed admin areas into a
-// [adminLevel][items] structure, which is easier to parse in this component.
-function groupAdminAreasByLevel(
-    areas: ExposedAdminAreaDto[],
-): ExposedAdminAreaDto[][] {
-    const grouped: ExposedAdminAreaDto[][] = [];
-    areas.forEach((area) => {
-        if (area) {
-            if (!grouped[area.adminLevel]) {
-                grouped[area.adminLevel] = [];
-            }
-            grouped[area.adminLevel]?.push(area);
-        }
-    });
-    return grouped;
-}
-
 // Helper to get exposure value by type from the exposure array
 function getExposureByLayerName(
     exposure: AdminAreaExposureDto[] | undefined,
@@ -153,14 +136,13 @@ function CollapsibleSection({
  * Detail view for a selected event
  */
 function EventDetailView({ event, onBack }: EventDetailViewProps) {
-    // Get admin data at different levels
+    // Get admin data at different levels (exposedAdminAreas is keyed by admin level)
     // TODO: support multiple max admin levels
     // See task: https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41768
-    const adminAreasByLevel = groupAdminAreasByLevel(event.exposedAdminAreas);
-    const admin0 = adminAreasByLevel[0]?.[0];
-    const admin1Areas = adminAreasByLevel[1] ?? [];
+    const admin0 = event.exposedAdminAreas['0']?.[0];
+    const admin1Areas = event.exposedAdminAreas['1'] ?? [];
     // TODO: fix this based on design. Note: admin 2 is missing
-    const admin3Areas = adminAreasByLevel[3] ?? [];
+    const admin3Areas = event.exposedAdminAreas['3'] ?? [];
 
     const totalPopulation = getExposedPopulation(admin0);
     const exposedDistrictsCount = admin3Areas.length;
@@ -324,15 +306,15 @@ function formatStartTime(startTime: string): string {
  */
 function EventButton({ event, onEventClick }: EventButtonProps) {
     // Get admin0 (country level) for total population
-    const adminAreasByLevel = groupAdminAreasByLevel(event.exposedAdminAreas);
-    const admin0 = adminAreasByLevel[0]?.[0];
+    // (exposedAdminAreas is keyed by admin level)
+    const admin0 = event.exposedAdminAreas['0']?.[0];
     const totalPopulation = getExposedPopulation(admin0);
 
     // Get admin1 areas for affected areas
-    const admin1Areas = adminAreasByLevel[1] ?? [];
+    const admin1Areas = event.exposedAdminAreas['1'] ?? [];
     // TODO: fix this based on design. Note: admin 2 is missing
     // Get admin3 count for exposed districts
-    const admin3Areas = adminAreasByLevel[3] ?? [];
+    const admin3Areas = event.exposedAdminAreas['3'] ?? [];
     const exposedDistrictsCount = admin3Areas.length;
 
     const startTimeLabel = formatStartTime(event.startAt);
