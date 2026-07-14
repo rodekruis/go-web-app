@@ -36,7 +36,7 @@ import {
     getMapViewParametersFromMap,
 } from '#utils/nrw/nrwMapViewHelpers';
 
-import handleMapClick from './nrwMapInteractions';
+import handleMapClick from '../../../utils/nrw/nrwMapInteractions';
 
 import styles from './styles.module.css';
 

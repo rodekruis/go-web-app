@@ -16,12 +16,12 @@ import {
 import exportNrwDataMapToPdf from '#utils/nrw/nrwMapToPdfExporter';
 import type { MapViewParameters } from '#utils/nrw/nrwMapTypes';
 
+import useNrwDataLoader from '../../utils/nrw/hooks/useNrwDataLoader';
+import useNrwMapSearchParams from '../../utils/nrw/hooks/useNrwMapSearchParams';
 import MapboxDataMap from './MapboxDataMap';
 import NrwEventsPanel from './NrwEventsPanel';
 import NrwLayerPanel from './NrwLayerPanel';
 import NrwLegendPanel from './NrwLegendPanel';
-import useNrwDataLoader from './useNrwDataLoader';
-import useNrwMapSearchParams from './useNrwMapSearchParams';
 
 import styles from './styles.module.css';
 
