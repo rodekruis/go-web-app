@@ -190,6 +190,7 @@ export async function getCountryMapData(
 
 // Fetch the exposed admin areas for the selected event and return their GeoJSON features.
 // The areas are the deepest (lowest) admin level that has exposure data.
+// Note: this will change when design completes interaction design.
 // Geometry is fetched for each scoped country and the features are merged.
 export const fetchExposedAdminAreasFeatures = async (
     scopedCountries: string[],
@@ -212,6 +213,12 @@ export const fetchExposedAdminAreasFeatures = async (
 
     // Fetch the geometry for only the exposed admin areas, per scoped country.
     const placeCodes = deepestExposedAreas.map((area) => area.placeCode);
+
+    if (placeCodes.length === 0) {
+        // Once we have a design on this process, implement falling back to a higher admin level
+        return [];
+    }
+
     const results = await Promise.allSettled(
         scopedCountries.map(async (countryIso3) => {
             const url = getAdminAreasByCodesUrl(
