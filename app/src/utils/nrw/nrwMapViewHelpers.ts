@@ -49,8 +49,7 @@ export function getMapViewParametersFromMap(
 
 // Build a square lon/lat bounding box centered on the data, sized to the larger
 // of the width/height dimensions, plus padding on all sides.
-// Using the larger dimension means the map can zoom out to fit the full extent
-// (height or width) and still leaves room to pan.
+// Using the larger dimension means the map can zoom out to fit all geometry.
 export function getPaddedSquareBounds(
     bounds: LonLatBounds,
     paddingRatio: number,

@@ -14,8 +14,8 @@ import type {
     MapViewParameters,
     NrwMapboxLayer,
     OrderedMapLayer,
-    RasterExtent,
     RasterMetadataResponse,
+    RasterSpatialExtent,
 } from './nrwMapTypes';
 import type { LonLatBounds } from './nrwMapViewHelpers';
 import {
@@ -33,7 +33,7 @@ const constraintPaddingRatio = 2;
 
 // Mapbox renders in EPSG:3857, but takes lon/lat coordinates in WGS84
 // Because of this, image data is stored in EPSG:3857, but
-// The API still needs WGS84 coordinates to define the image extent.
+// The API still needs WGS84 coordinates to define the image spatial extent.
 // Half of the earth's circumference in meters at the equator (EPSG:3857 bound)
 const webMercatorHalfCircumference = 20037508.34;
 
@@ -57,17 +57,17 @@ function makeLayerIds(layerKey: string): { sourceId: string; layerId: string } {
     };
 }
 
-// Build a mapbox image raster layer from an image URL and its EPSG:3857 extent
+// Build a mapbox image raster layer from an image URL and its EPSG:3857 spatial extent
 function makeImageRasterLayer(
     layerKey: string,
     imageUrl: string,
-    extent: RasterExtent
+    spatialExtent: RasterSpatialExtent
     ,
 ): NrwMapboxLayer {
-    const west = webMercatorToLongitude(extent.xmin);
-    const south = webMercatorToLatitude(extent.ymin);
-    const east = webMercatorToLongitude(extent.xmax);
-    const north = webMercatorToLatitude(extent.ymax);
+    const west = webMercatorToLongitude(spatialExtent.xmin);
+    const south = webMercatorToLatitude(spatialExtent.ymin);
+    const east = webMercatorToLongitude(spatialExtent.xmax);
+    const north = webMercatorToLatitude(spatialExtent.ymax);
 
     const { sourceId, layerId } = makeLayerIds(layerKey);
 

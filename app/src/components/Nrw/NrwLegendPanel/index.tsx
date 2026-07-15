@@ -4,13 +4,16 @@ import {
     alertColors,
     tierLevelToNumber,
 } from '#utils/nrw/nrwMapStyles';
-import { type SelectedEventDetails } from '#utils/nrw/nrwMapTypes';
-import { type AlertClass } from '#utils/nrw/shared-enums';
+import { type EventResponseDto } from '#utils/nrw/shared-dtos';
+import {
+    type AlertClass,
+    LayerName,
+} from '#utils/nrw/shared-enums';
 
 import styles from './styles.module.css';
 
 interface NrwLegendPanelProps {
-    selectedEventDetails: SelectedEventDetails | null;
+    selectedEvent: EventResponseDto | null;
 }
 
 // a color and its lower-bound value.
@@ -56,24 +59,36 @@ const getExposureLegend = (
  * TODO: This is debug, and is awaiting design.
  */
 export default function NrwLegendPanel({
-    selectedEventDetails,
+    selectedEvent,
 }: NrwLegendPanelProps) {
     const legend = useMemo(() => {
-        if (!selectedEventDetails) {
+        if (!selectedEvent) {
             return null;
         }
 
-        const levels = Object.keys(selectedEventDetails.highestExposedPopulationByLevel)
-            .map(Number);
-        if (levels.length === 0) {
+        // Use the deepest (lowest) admin level that has exposed areas,
+        // matching the areas drawn on the map.
+        const { exposedAdminAreas } = selectedEvent;
+        const deepestLevel = Object.keys(exposedAdminAreas).at(-1);
+        const deepestAreas = deepestLevel !== undefined
+            ? exposedAdminAreas[deepestLevel]
+            : undefined;
+        if (deepestAreas === undefined) {
             return null;
         }
-        const deepestLevel = Math.max(...levels);
-        const highestValue = selectedEventDetails
-            .highestExposedPopulationByLevel[deepestLevel] ?? 0;
 
-        return getExposureLegend(highestValue, selectedEventDetails.alertClass);
-    }, [selectedEventDetails]);
+        // Find the highest exposed population value among the areas
+        const highestValue = Math.max(
+            0,
+            ...deepestAreas.map((area) => (
+                area.exposure.find(
+                    (layer) => layer.layerName === LayerName.populationExposed,
+                )?.exposed ?? 0
+            )),
+        );
+
+        return getExposureLegend(highestValue, selectedEvent.alertClass);
+    }, [selectedEvent]);
 
     if (!legend) {
         return null;

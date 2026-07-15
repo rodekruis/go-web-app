@@ -66,7 +66,7 @@ export default function NrwMapContainer() {
         toggleMapLayer,
         hideAllLayers,
         visibleLayerNames,
-        selectedEventDetails,
+        selectedEvent,
     } = useNrwDataLoader(scopedCountries, [], selectedEventId, initialLayerKeys);
 
     // Clear all selections and reload event data
@@ -198,7 +198,7 @@ export default function NrwMapContainer() {
                     </div>
                     <MapboxDataMap
                         scopedCountries={scopedCountries}
-                        selectedEventDetails={selectedEventDetails}
+                        selectedEvent={selectedEvent}
                         initialMapView={initialMapView}
                         registerMapLayerFunctions={registerMapLayerFunctions}
                         onSelect={handleAdminAreaSelected}
@@ -217,7 +217,7 @@ export default function NrwMapContainer() {
                     />
                     <div id={LEGEND_PANEL_ELEMENT_ID}>
                         <NrwLegendPanel
-                            selectedEventDetails={selectedEventDetails}
+                            selectedEvent={selectedEvent}
                         />
                     </div>
                 </div>

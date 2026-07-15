@@ -13,7 +13,6 @@ import {
     getAllEventData,
     getCountryMapData,
 } from '#utils/nrw/nrwDataFetchHelpers';
-import { getSelectedEventDetails } from '#utils/nrw/nrwMapEventHelpers';
 import {
     makeEventImageLayer,
     makePointLayerFromFeatures,
@@ -322,22 +321,16 @@ export default function useNrwDataLoader(
         return Array.from(byName.values());
     }, [countryNonEventLayers]);
 
-    // Get details for the selected event
-    const selectedEventDetails = useMemo(
-        () => getSelectedEventDetails(eventData, selectedEventId),
-        [eventData, selectedEventId],
-    );
-
     // Warn when the selected event has no exposed areas.
     useEffect(() => {
-        if (selectedEventDetails
-            && Object.keys(selectedEventDetails.exposedPopulationPerAreaByLevel).length === 0) {
+        if (selectedEvent
+            && Object.keys(selectedEvent.exposedAdminAreas).length === 0) {
             notification.show('No exposed areas', {
                 variant: 'danger',
                 description: `No exposed areas found for event "${selectedEventId}".`,
             });
         }
-    }, [selectedEventDetails, selectedEventId, notification]);
+    }, [selectedEvent, selectedEventId, notification]);
 
     // ----- Init -----
 
@@ -393,7 +386,7 @@ export default function useNrwDataLoader(
         reloadCountryEventData,
         selectedEventLayers,
         nonEventLayers,
-        selectedEventDetails,
+        selectedEvent,
         registerMapLayerFunctions,
         toggleMapLayer,
         hideAllLayers,

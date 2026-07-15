@@ -6,7 +6,6 @@ import type {
 } from 'mapbox-gl-v3';
 
 import { type LayerDto } from './shared-dtos';
-import type { AlertClass } from './shared-enums';
 
 // A zoom/center pair describing the current map view
 export interface MapViewParameters {
@@ -61,7 +60,7 @@ export enum EventDataSources {
 }
 
 // Extents for the raster metadata
-export interface RasterExtent {
+export interface RasterSpatialExtent {
     xmin: number;
     ymin: number;
     xmax: number;
@@ -72,31 +71,7 @@ export interface RasterExtent {
 export interface RasterMetadataResponse {
     metadata: {
         coloured: {
-            extent: RasterExtent;
+            extent: RasterSpatialExtent;
         };
     };
-}
-
-// Details needed by the map when an event is selected
-// This is derived from EventResponseDto and passed to the map component
-export interface SelectedEventDetails {
-  eventId: number;
-  centroid: {
-    latitude: number;
-    longitude: number;
-  };
-  // Alert class of the parent event, used to pick the color ramp for exposed areas
-  alertClass: AlertClass;
-
-  // Exposure data for the current event, keyed by admin level,
-  // and sorted from lowest to highest (which is a byproduct of being a Record type).
-
-  // Exposed admin areas with their exposed population,
-  // keyed by admin level then place code.
-  // If new data is needed to be passed to the map for rendering, add that data
-  // to this object.
-  exposedPopulationPerAreaByLevel: Record<number, Record<string, number>>;
-  // Highest exposed population value per whole admin level.
-  // This is precomputed so we don't need to find the highest value for every feature render.
-  highestExposedPopulationByLevel: Record<number, number>;
 }
