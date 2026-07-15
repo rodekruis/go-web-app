@@ -380,7 +380,7 @@ export default function NrwEventsPanel({
     onDeselectEvent,
     countryCodes,
     selectedAdminPlaceCode,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     adminDetails,
 }: NrwEventsPanelProps) {
     const countryCode = countryCodes[0] ?? '';
@@ -390,7 +390,7 @@ export default function NrwEventsPanel({
         onDeselectEvent();
     };
 
-    if (selectedAdminPlaceCode) {
+    if (selectedAdminPlaceCode && adminDetails) {
     // TODO: change the view based on this
         // eslint-disable-next-line no-console
         console.debug(
