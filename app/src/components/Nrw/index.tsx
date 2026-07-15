@@ -4,7 +4,6 @@ import {
 } from 'react';
 
 import { nrwPortalMode } from '#config';
-import useAlert from '#hooks/useAlert';
 import {
     EVENTS_PANEL_ELEMENT_ID,
     LEGEND_PANEL_ELEMENT_ID,
@@ -30,8 +29,6 @@ import styles from './styles.module.css';
  * @returns A standalone component
  */
 export default function NrwMapContainer() {
-    const notification = useAlert();
-
     // All URL search param handling lives in this hook.
     const {
         initialParams: {

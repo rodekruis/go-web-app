@@ -1,8 +1,6 @@
-# NRW Map Component
+# NRW Component
 
-(Note: this readme is here while this component is in dev. The goal is to enable anyone to setup and test the changes. The content here should be reworked or moved to another readme as dev wraps up on this.)
-
-This component will be the shared NRW map component.
+This is the shared NRW map component.
 
 The "Nrw..." prefix naming of the files and components is to help tell the new changes apart from existing GO components. More general components will be derived from these after working more with the TC team.
 
@@ -17,13 +15,11 @@ The "Nrw..." prefix naming of the files and components is to help tell the new c
 
 ### Components
 
-- `MapboxDataMap` is the map component for NRW. It displays data from the `useNrwDataLoader` hook via the layer functions it registers with that hook. Map click interactions (admin area selection/rendering, feature popups) are not implemented yet; see the git history of `OlDataMap` and `NrwMapPopupPanel` for the previous OpenLayers implementations.
+- `MapboxDataMap` is the map component for NRW. It displays data from the `useNrwDataLoader` hook via the layer functions it registers with that hook.
 - `NrwEventsPanel` and `NrwLayerPanel` are the UI interaction layers.
 - `NrwLegendPanel` displays map legend information
 
 ## Running Locally
-
-(Note: This is the temporary setup process and will change as dev progresses)
 
 The NRW frontend can be launched either from this project, or from the [standalone NRW project in the IBF repo](https://github.com/rodekruis/IBF/blob/main/portal/nrw-standalone/README.md). For launching from this repo, see the setup steps below:
 
@@ -38,9 +34,9 @@ The NRW frontend can be launched either from this project, or from the [standalo
 
 The base map is provided through [MapBox](https://www.mapbox.com/). You can modify the existing map or create a map there. For the NLRC MapBox account credentials, see BitWarden. The map 'style' url is set in `nrwConstants.ts`.
 
-The `.env` var must be set to match the API key of either the NLRC or IFRC Mapbox account (Mapbox > API Keys).
+The `.env` var must be set to match the API key of either the NLRC or IFRC Mapbox account (Mapbox > API Keys). For Go, production will use the IFRC Mapbox API key. The NRW base map is set to public, so it can be accessed with either the NLRC or IFRC Mapbox API keys.
 
 ## Testing
 
-- Unit testing is under development, but will be added later.
+- Unit testing is to be added for the helper files. See task [43473](https://dev.azure.com/redcrossnl/National%20Risk%20Watch/_workitems/edit/43473)
 - End-to-end testing for IBF backend integration will be carried out in the [IBF repo](https://github.com/rodekruis/IBF).
