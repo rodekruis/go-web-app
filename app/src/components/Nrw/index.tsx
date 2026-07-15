@@ -13,7 +13,6 @@ import {
     type AdminAreaDetails,
     fetchAdminAreaDetails,
 } from '#utils/nrw/nrwDataFetchHelpers';
-import exportNrwDataMapToPdf from '#utils/nrw/nrwMapToPdfExporter';
 import type { MapViewParameters } from '#utils/nrw/nrwMapTypes';
 
 import useNrwDataLoader from '../../utils/nrw/hooks/useNrwDataLoader';
@@ -127,16 +126,6 @@ export default function NrwMapContainer() {
         });
     };
 
-    // Export to PDF button handler
-    const handlePdfExportClicked = async () => {
-        try {
-            await exportNrwDataMapToPdf(scopedCountries);
-        } catch (error) {
-            notification.show('Failed to export Mapbox PDF. Please try again.', { variant: 'danger' });
-            console.error('[NrwMapContainer] Export failed:', error);
-        }
-    };
-
     // When the admin area is deeplinked via URL, fetch its details once on mount.
     useEffect(() => {
         if (!initialAdminCode) {
@@ -187,15 +176,6 @@ export default function NrwMapContainer() {
                     </div>
                 </div>
                 <div className={styles.mapColumn}>
-                    <div className={styles.debugToolbar}>
-                        <button
-                            type="button"
-                            className={styles.debugExportButton}
-                            onClick={handlePdfExportClicked}
-                        >
-                            Debug Export PDF (Mapbox)
-                        </button>
-                    </div>
                     <MapboxDataMap
                         scopedCountries={scopedCountries}
                         selectedEvent={selectedEvent}

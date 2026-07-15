@@ -1,13 +1,10 @@
 import type {
-    CircleLayerSpecification,
     FillLayerSpecification,
     LineLayerSpecification,
 } from 'mapbox-gl-v3';
 
 import { EXPOSURE_COLOR_FIELD_KEY } from './nrwConstants';
 import { AlertClass } from './shared-enums';
-
-const defaultPointStrokeWidth = 2;
 
 // Fill opacity for exposed admin area polygons
 export const exposedAreaFillOpacity = 0.65;
@@ -60,22 +57,6 @@ export const getExposureColor = (
     return colors[index]!;
 };
 
-// Mapbox circle paint for Red Cross branch point features
-export const rcBranchPointPaint: CircleLayerSpecification['paint'] = {
-    'circle-radius': 6,
-    'circle-color': '#cc1111', // Debug color
-    'circle-stroke-color': '#ffffff',
-    'circle-stroke-width': defaultPointStrokeWidth,
-};
-
-// Mapbox circle paint for clinic point features
-export const clinicPointPaint: CircleLayerSpecification['paint'] = {
-    'circle-radius': 6,
-    'circle-color': '#6a1b9a', // Debug color
-    'circle-stroke-color': '#ffffff',
-    'circle-stroke-width': defaultPointStrokeWidth,
-};
-
 // Set the fill for exposed admin areas based on the precomputed exposure
 // color property in the feature properties.
 export const exposedAreasFillPaint: FillLayerSpecification['paint'] = {
@@ -86,6 +67,7 @@ export const exposedAreasFillPaint: FillLayerSpecification['paint'] = {
 
 // Border paint for scoped-country admin0 polygons on initial map load.
 export const scopedCountriesAdmin0BorderPaint: LineLayerSpecification['paint'] = {
-    'line-color': '#ff60ea', // Debug color
-    'line-width': 3,
+    // Keep hidden while awaiting design
+    'line-color': '#ffffff00',
+    'line-width': 0,
 };

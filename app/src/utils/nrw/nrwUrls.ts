@@ -11,17 +11,6 @@ import {
 // IBF API events endpoint
 export const getEventsApiUrl = (countryIso3: string) => `${ibfApiBackend}events?countryCodeIso3=${countryIso3}&active=true`;
 
-// GO API URLs for local units data
-// TODO: Revisit these sources as part of this task:
-// https://dev.azure.com/redcrossnl/IBF/_workitems/edit/42046
-// At a minimum, we need a more complete dataset for clinics
-// IFRC GO clinics data only seems to list RC locs that are also clinics
-// For the Philippines, this is a 100% crossover.
-const goApiBaseUrl = 'https://goadmin.ifrc.org/api/v2';
-const GO_API_RESULTS_LIMIT = 200;
-export const getRcLocsApiUrl = (countryIso3: string) => `${goApiBaseUrl}/public-local-units/?country__iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
-export const getHealthLocsApiUrl = (countryIso3: string) => `${goApiBaseUrl}/health-local-units/?iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
-
 // Simplification algorithm factor for simplifying vector data
 // A larger factor returns a smaller, more simplified vector shape.
 // Example of factor values on vector object size:
@@ -48,12 +37,14 @@ const getSimplificationFactor = (adminLevel: number): number => {
     return factor;
 };
 
-// For debug purposes, replace baseQuery by the following string. This directly
-// calls pg_featureserv.
+// Base url for the admin area query
+const baseQuery = `${ibfApiBackend}admin-areas?filter=`;
+// For debug purposes, you can replace the above baseQuery with the following string.
+// This directly calls pg_featureserv.
 // This lets you access tables (such as debug.admin_areas) that are not wrapped by the API.
 // Note that the query structure is slightly different for this base url.
 // const baseQuery = 'http://localhost:9000/collections/debug.admin_areas/items?filter=';
-const baseQuery = `${ibfApiBackend}admin-areas?filter=`;
+
 const and = '%20AND%20';
 
 export const getAdminAreaUrl = (

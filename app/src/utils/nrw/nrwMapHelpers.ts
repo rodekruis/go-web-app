@@ -20,7 +20,6 @@ import type {
 import type { LonLatBounds } from './nrwMapViewHelpers';
 import {
     getBoundsFromFeatures,
-    getPaddedSquareBounds,
     getZoomToFitBounds,
 } from './nrwMapViewHelpers';
 import { getAdminAreaUrl } from './nrwUrls';
@@ -28,8 +27,6 @@ import { LayerName } from './shared-enums';
 
 // Time in ms for map panning and zooming animations
 export const animationDurationMs = 500;
-// Extent padding ratio for constraining the panning/zooming to the scoped countries
-const constraintPaddingRatio = 2;
 
 // Mapbox renders in EPSG:3857, but takes lon/lat coordinates in WGS84
 // Because of this, image data is stored in EPSG:3857, but
@@ -254,7 +251,7 @@ export function removeLayerAndSource(
 }
 
 // Draw the admin0 borders for the scoped countries and constrain the map
-// view to them. Never rejects: returns null when the features cannot be
+// view to them. Returns null when the features cannot be
 // fetched or their bounds computed.
 export async function drawScopedCountriesAdmin0Layer(
     map: MapboxGLMap,
@@ -312,10 +309,6 @@ export async function drawScopedCountriesAdmin0Layer(
         if (!bounds) {
             throw new Error('Failed to compute bounds for scoped countries admin0 features');
         }
-
-        // Create bounds to constrain panning and zooming
-        const constraintBounds = getPaddedSquareBounds(bounds, constraintPaddingRatio);
-        map.setMaxBounds(constraintBounds);
 
         // If there is not deeplinked view, fit the map to scoped countries on load
         const hasValidInitialMapCenter = (
