@@ -60,7 +60,7 @@ export enum EventDataSources {
 }
 
 // Extents for the raster metadata
-export interface RasterExtent {
+export interface RasterSpatialExtent {
     xmin: number;
     ymin: number;
     xmax: number;
@@ -71,7 +71,7 @@ export interface RasterExtent {
 export interface RasterMetadataResponse {
     metadata: {
         coloured: {
-            extent: RasterExtent;
+            extent: RasterSpatialExtent;
         };
     };
 }
