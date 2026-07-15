@@ -13,7 +13,10 @@ import {
     getHealthLocsApiUrl,
     getRcLocsApiUrl,
 } from './nrwUrls';
-import type { EventResponseDto } from './shared-dtos';
+import type {
+    EventResponseDto,
+    ExposedAdminAreaDto,
+} from './shared-dtos';
 
 // Fetch a URL and parse the response body as JSON.
 // Throws when the request fails or the response is not OK.
@@ -188,9 +191,66 @@ export async function getCountryMapData(
     );
 }
 
+// Get the target exposed admin level.
+// This is the starting admin level when viewing exposed admin areas as defined by design.
+const getTargetExposedAdminLevel = (
+    exposedAdminAreas: Record<string, unknown>,
+): number | null => {
+    // Note: this will change when design completes interaction design.
+    // For now, it just grabs deepest
+    const adminLevels = Object.keys(exposedAdminAreas)
+        .map((adminLevel) => Number(adminLevel))
+        .filter((adminLevel) => Number.isFinite(adminLevel));
+
+    if (adminLevels.length === 0) {
+        return null;
+    }
+
+    return Math.max(...adminLevels);
+};
+
+// Get the exposed place codes for an event, starting from the target exposed
+// admin level and falling back to higher admin levels if a level has no exposed areas.
+// Returns the resolved admin level alongside its place codes,
+// or null when no level has any exposed areas.
+const getExposedPlaceCodes = (
+    exposedAdminAreas: Record<string, ExposedAdminAreaDto[]>,
+): { adminLevel: number; placeCodes: string[] } | null => {
+    // Get the ideal admin level we want to start with
+    const targetExposedLevel = getTargetExposedAdminLevel(exposedAdminAreas);
+    if (targetExposedLevel === null) {
+        return null;
+    }
+
+    // Make a sorted list of admin levels (starting with the initial target admin level)
+    // so we can fall back to a higher level if needed.
+    const candidateLevels = Object.keys(exposedAdminAreas)
+        .map((adminLevel) => Number(adminLevel))
+        .filter((adminLevel) => Number.isFinite(adminLevel)
+            && adminLevel <= targetExposedLevel)
+        .sort((first, second) => second - first);
+
+    // Get the first candidate level that has any exposed areas.
+    // This operates on the list in order and returns the first match.
+    const targetLevel = candidateLevels.find(
+        (adminLevel) => (exposedAdminAreas[adminLevel] ?? []).length > 0,
+    );
+
+    // No candidate level had any exposed areas.
+    if (targetLevel === undefined) {
+        return null;
+    }
+
+    // Get the place codes for every exposed area at the chosen level.
+    const exposedAreas = exposedAdminAreas[targetLevel] ?? [];
+    const placeCodes = exposedAreas.map((area) => area.placeCode);
+    return {
+        adminLevel: targetLevel,
+        placeCodes,
+    };
+};
+
 // Fetch the exposed admin areas for the selected event and return their GeoJSON features.
-// The areas are the deepest (lowest) admin level that has exposure data.
-// Note: this will change when design completes interaction design.
 // Geometry is fetched for each scoped country and the features are merged.
 export const fetchExposedAdminAreasFeatures = async (
     scopedCountries: string[],
@@ -202,28 +262,19 @@ export const fetchExposedAdminAreasFeatures = async (
         exposedAdminAreas,
     } = selectedEvent;
 
-    // Find the deepest (lowest) admin level that has exposed areas.
-    const deepestExposedLevel = Object.keys(exposedAdminAreas).at(-1);
-    const deepestExposedAreas = deepestExposedLevel !== undefined
-        ? exposedAdminAreas[deepestExposedLevel]
-        : undefined;
-    if (deepestExposedLevel === undefined || deepestExposedAreas === undefined) {
+    const exposedPlaceCodes = getExposedPlaceCodes(exposedAdminAreas);
+    if (exposedPlaceCodes === null) {
         throw new Error(`Event ${eventId} has no exposed population data`);
     }
 
+    const { adminLevel: targetExposedLevel, placeCodes } = exposedPlaceCodes;
+
     // Fetch the geometry for only the exposed admin areas, per scoped country.
-    const placeCodes = deepestExposedAreas.map((area) => area.placeCode);
-
-    if (placeCodes.length === 0) {
-        // Once we have a design on this process, implement falling back to a higher admin level
-        return [];
-    }
-
     const results = await Promise.allSettled(
         scopedCountries.map(async (countryIso3) => {
             const url = getAdminAreasByCodesUrl(
                 countryIso3,
-                Number(deepestExposedLevel),
+                Number(targetExposedLevel),
                 placeCodes,
             );
             const data = await fetchJson<GeoJSON.FeatureCollection>(

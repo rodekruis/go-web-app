@@ -380,7 +380,6 @@ export default function NrwEventsPanel({
     onDeselectEvent,
     countryCodes,
     selectedAdminPlaceCode,
-
     adminDetails,
 }: NrwEventsPanelProps) {
     const countryCode = countryCodes[0] ?? '';
@@ -391,7 +390,9 @@ export default function NrwEventsPanel({
     };
 
     if (selectedAdminPlaceCode && adminDetails) {
-    // TODO: change the view based on this
+    // TODO: change the view based on this. The admin place code is to see what the user selcted.
+    // AdminDetails would be passed in for actions that need to display more data on that
+    // admin area (like when the user clicks on the lowest admin area on the map).
         // eslint-disable-next-line no-console
         console.debug(
             `TODO: [NrwEventsPanel] Selected admin area: ${selectedAdminPlaceCode}`,

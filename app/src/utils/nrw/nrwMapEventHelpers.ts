@@ -17,13 +17,55 @@ import {
     getBoundsFromFeatures,
     getZoomToFitBounds,
 } from './nrwMapViewHelpers';
-import type { EventResponseDto } from './shared-dtos';
+import type {
+    EventResponseDto,
+    ExposedAdminAreaDto,
+} from './shared-dtos';
 import { LayerName } from './shared-enums';
 
+// Exposure values for a single admin level, used to color that level's areas.
+// Get the exposed population value for a single exposed admin area
+const getExposedPopulation = (area: ExposedAdminAreaDto): number => {
+    const populationLayer = area.exposure.find(
+        (layer) => layer.layerName === LayerName.populationExposed,
+    );
+    return populationLayer?.exposed ?? 0;
+};
+
+// Compute the exposure color for every exposed admin area, keyed by place code.
+// Each area is colored relative to the most exposed area within its own admin level.
+// Note: how the color is calculated may change with the final design.
+const getExposureColorByPlaceCode = (
+    exposedAdminAreas: Record<string, ExposedAdminAreaDto[]>,
+    alertClass: EventResponseDto['alertClass'],
+): Record<string, string> => {
+    const exposureColorByPlaceCode: Record<string, string> = {};
+
+    Object.values(exposedAdminAreas).forEach((exposedAreas) => {
+        // Find the highest exposed population within this admin level
+        const highestExposedPopulation = Math.max(
+            0,
+            ...exposedAreas.map(getExposedPopulation),
+        );
+
+        // Get the color for each area, scaled against the level's highest value
+        exposedAreas.forEach((area) => {
+            exposureColorByPlaceCode[area.placeCode] = getExposureColor(
+                getExposedPopulation(area),
+                highestExposedPopulation,
+                alertClass,
+            );
+        });
+    });
+
+    return exposureColorByPlaceCode;
+};
+
 // Add the exposure color to each admin area as a feature property.
+// Each feature is colored relative to the other areas in its own admin level.
 // Mapbox needs the color to be a property of the vector data if colors differ
 // among objects of the same layer.
-export const setExposureColorsOnFeatures = (
+const setExposureColorsOnFeatures = (
     features: GeoJSON.Feature[],
     selectedEvent: EventResponseDto,
 ): GeoJSON.Feature[] => {
@@ -33,46 +75,34 @@ export const setExposureColorsOnFeatures = (
         exposedAdminAreas,
     } = selectedEvent;
 
-    // Find the deepest (lowest) admin level that has exposed areas.
-    // Note: this is prototype behavior and we'd need colors for each level
-    // depending on the final design.
-    const deepestExposedLevel = Object.keys(exposedAdminAreas).at(-1);
-    const deepestExposedAreas = deepestExposedLevel !== undefined
-        ? exposedAdminAreas[deepestExposedLevel]
-        : undefined;
-    if (deepestExposedAreas === undefined) {
-        throw new Error(`Event ${eventId} has no exposed population data`);
+    if (Object.keys(exposedAdminAreas).length === 0) {
+        throw new Error(`Event ${eventId} has no exposure data`);
     }
 
-    // Get the exposed population per place code, and the highest value, for the level
-    const exposedPopulationByPlaceCode: Record<string, number> = {};
-    let highestExposedPopulation = 0;
-    deepestExposedAreas.forEach((area) => {
-        const populationLayer = area.exposure.find(
-            (layer) => layer.layerName === LayerName.populationExposed,
-        );
-        const exposedPopulation = populationLayer?.exposed ?? 0;
-        exposedPopulationByPlaceCode[area.placeCode] = exposedPopulation;
-        if (exposedPopulation > highestExposedPopulation) {
-            highestExposedPopulation = exposedPopulation;
-        }
-    });
+    // Get exposure colors for all exposed admin areas, keyed by place code.
+    const exposureColorByPlaceCode = getExposureColorByPlaceCode(
+        exposedAdminAreas,
+        alertClass,
+    );
 
     // Set the exposure color property for each feature
     return features.map((feature) => {
         const placeCode = feature.properties?.[PLACE_CODE_FIELD_KEY];
-        const exposedPopulation = typeof placeCode === 'string'
-            ? exposedPopulationByPlaceCode[placeCode] ?? 0
-            : 0;
+        const exposureColor = typeof placeCode === 'string'
+            ? exposureColorByPlaceCode[placeCode]
+            : undefined;
+
+        if (exposureColor === undefined) {
+            // This would only be expected to be hit if the data is malformed.
+            console.error(`[setExposureColorsOnFeatures] No exposure color for feature with place code ${placeCode}`);
+            return feature;
+        }
+
         return {
             ...feature,
             properties: {
                 ...feature.properties,
-                [EXPOSURE_COLOR_FIELD_KEY]: getExposureColor(
-                    exposedPopulation,
-                    highestExposedPopulation,
-                    alertClass,
-                ),
+                [EXPOSURE_COLOR_FIELD_KEY]: exposureColor,
             },
         };
     });
