@@ -39,7 +39,7 @@ Adjust settings as needed.
 
 You can get the `FONTAWESOME_API_KEY` from the NLRC BitWarden page, or login to the NLRC FontAwesome account, and get it from there. If it has already been set in GitHub secrets, you can get it from there as well. This is needed to build locally.
 
-### Github setup
+### GitHub setup
 
 The CI workflow needs to build the UI library. To do this, you must set the `FONTAWESOME_API_KEY` in the GitHub secrets. See above on how to get this.
 
