@@ -23,7 +23,7 @@ import styles from './styles.module.css';
 export interface Props extends ContainerProps {
     initiallyExpanded?: boolean;
     onExpansionChange?: (isExpanded: boolean) => void;
-    componentRef?: React.MutableRefObject<{
+    componentRef?: React.RefObject<{
         setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>;
     } | null>;
     toggleButtonLabel?: [React.ReactNode, React.ReactNode];

@@ -14,13 +14,13 @@ import {
     isNotDefined,
     mapToList,
 } from '@togglecorp/fujs';
-import getBbox from '@turf/bbox';
 
 import RiskImminentEvents, { type ImminentEventSource } from '#components/domain/RiskImminentEvents';
 import Link from '#components/Link';
 import TabPage from '#components/TabPage';
 import useInputState from '#hooks/useInputState';
 import { multiMonthSelectDefaultValue } from '#utils/constants';
+import { getGeoJsonBounds } from '#utils/geo';
 import type { CountryOutletContext } from '#utils/outletContext';
 import { useRiskRequest } from '#utils/restRequest';
 
@@ -38,7 +38,6 @@ function getCurrentMonth() {
     return new Date().getMonth();
 }
 
-/** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const { countryResponse } = useOutletContext<CountryOutletContext>();
@@ -131,7 +130,7 @@ export function Component() {
     const riskResponse = countryRiskResponse?.[0];
     const bbox = useMemo(() => (
         (countryResponse && countryResponse.bbox)
-            ? getBbox(countryResponse.bbox)
+            ? getGeoJsonBounds(countryResponse.bbox)
             : undefined
     ), [countryResponse]);
 

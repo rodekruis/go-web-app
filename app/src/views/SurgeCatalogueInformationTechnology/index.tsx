@@ -6,7 +6,6 @@ import SurgeCatalogueContainer from '#components/domain/SurgeCatalogueContainer'
 
 import i18n from './i18n.json';
 
-/** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const strings = useTranslation(i18n);
@@ -64,6 +63,24 @@ export function Component() {
         },
     ];
 
+    const serviceCatalogue: LinkData[] = [
+        {
+            title: strings.catalogueITLearnMore,
+            href: 'https://ifrcorg.sharepoint.com/:x:/s/IFRCSharing/IQCpBcABvCW2QL8fMGKx8LgJAaNW93UtuO5ClLNovfwWxFA',
+            external: true,
+            withLinkIcon: true,
+        },
+    ];
+
+    const jobAids: LinkData[] = [
+        {
+            title: strings.catalogueITLearnMore,
+            href: 'https://ifrcorg.sharepoint.com/:f:/s/IFRCSharing/IgAn2xGtgTc4QauHXK-0Su09AQbWhFUJJL58mUrrp4GNWrg',
+            external: true,
+            withLinkIcon: true,
+        },
+    ];
+
     return (
         <SurgeCatalogueContainer
             heading={strings.catalogueITTitle}
@@ -106,6 +123,14 @@ export function Component() {
                     title={strings.catalogueITRole}
                     data={rolesResponsibilities}
                     description={strings.catalogueITRoleDescription}
+                />
+                <CatalogueInfoCard
+                    title={strings.catalogueITServiceCatalogue}
+                    data={serviceCatalogue}
+                />
+                <CatalogueInfoCard
+                    title={strings.catalogueITJobAids}
+                    data={jobAids}
                 />
             </SurgeCardContainer>
 

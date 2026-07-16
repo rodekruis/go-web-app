@@ -1,5 +1,4 @@
 import {
-    type ElementRef,
     useCallback,
     useMemo,
     useRef,
@@ -41,11 +40,13 @@ import LanguageMismatchMessage from '#components/domain/LanguageMismatchMessage'
 import Link from '#components/Link';
 import NonFieldError from '#components/NonFieldError';
 import Page from '#components/Page';
+import ViewOnlyModeBanner from '#components/ViewOnlyModeBanner';
 import useCurrentLanguage from '#hooks/domain/useCurrentLanguage';
 import useAlert from '#hooks/useAlert';
 import useRouting from '#hooks/useRouting';
 import {
     DREF_STATUS_DRAFT,
+    DREF_STATUS_FAILED,
     DREF_STATUS_FINALIZED,
 } from '#utils/constants';
 import {
@@ -139,7 +140,6 @@ function getNextStep(current: DrefTabKey, direction: 1 | -1, typeOfDref: TypeOfD
     return undefined;
 }
 
-/** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const { drefId } = useParams<{ drefId: string }>();
@@ -148,7 +148,7 @@ export function Component() {
     const { navigate } = useRouting();
     const strings = useTranslation(i18n);
 
-    const formContentRef = useRef<ElementRef<'div'>>(null);
+    const tabListRef = useRef<HTMLDivElement>(null);
 
     const [activeTab, setActiveTab] = useState<DrefTabKey>('overview');
     const [fileIdToUrlMap, setFileIdToUrlMap] = useState<Record<number, string>>({});
@@ -163,7 +163,7 @@ export function Component() {
         setTrue: setShowExportModalTrue,
         setFalse: setShowExportModalFalse,
     }] = useBooleanState(false);
-    const lastModifiedAtRef = useRef<string | undefined>();
+    const lastModifiedAtRef = useRef<string | undefined>(undefined);
 
     const [districtOptions, setDistrictOptions] = useState<
         DistrictItem[] | undefined | null
@@ -309,6 +309,7 @@ export function Component() {
 
     const loadResponseToFormValue = useCallback((response: GetDrefResponse) => {
         handleDrefLoad(response);
+
         const {
             planned_interventions,
             proposed_action,
@@ -571,7 +572,7 @@ export function Component() {
 
     const handleFormSubmit = useCallback(
         (modifiedAt?: string) => {
-            formContentRef.current?.scrollIntoView();
+            tabListRef.current?.scrollIntoView();
 
             // FIXME: use createSubmitHandler
             const result = validate();
@@ -613,7 +614,7 @@ export function Component() {
     );
 
     const handleTabChange = useCallback((newTab: DrefTabKey) => {
-        formContentRef.current?.scrollIntoView();
+        tabListRef.current?.scrollIntoView({ behavior: 'smooth' });
         setActiveTab(newTab);
     }, []);
 
@@ -622,13 +623,39 @@ export function Component() {
     const saveDrefPending = createDrefPending || updateDrefPending;
     const disabled = fetchingDref || saveDrefPending;
 
-    const languageMismatch = isDefined(drefId)
-        && isDefined(drefResponse)
-        && currentLanguage !== drefResponse?.translation_module_original_language;
+    // NOTE: this also covers the case where DREF is finalized
+    // and the user's language is not english
+    const languageMismatch = isNotDefined(drefId)
+        ? false
+        : currentLanguage !== drefResponse?.translation_module_original_language;
 
-    const readOnly = languageMismatch
-        && (drefResponse?.status === DREF_STATUS_FINALIZED
-        || drefResponse?.status === DREF_STATUS_DRAFT);
+    const isEditable = useMemo(() => {
+        // New DREF
+        if (isNotDefined(drefId)) {
+            return true;
+        }
+
+        if (isNotDefined(drefResponse)) {
+            return false;
+        }
+
+        if (languageMismatch) {
+            return false;
+        }
+
+        const { status } = drefResponse;
+
+        if (status === DREF_STATUS_DRAFT
+            || status === DREF_STATUS_FINALIZED
+            || status === DREF_STATUS_FAILED
+        ) {
+            return true;
+        }
+
+        return false;
+    }, [languageMismatch, drefResponse, drefId]);
+
+    const readOnly = !isEditable;
 
     const shouldHideForm = fetchingDref
         || isDefined(drefResponseError);
@@ -685,7 +712,6 @@ export function Component() {
             styleVariant="step"
         >
             <Page
-                elementRef={formContentRef}
                 title={strings.formPageTitle}
                 heading={strings.formPageHeading}
                 description={(
@@ -725,7 +751,10 @@ export function Component() {
                     </>
                 )}
                 info={!shouldHideForm && (
-                    <TabList styleVariant="step">
+                    <TabList
+                        styleVariant="step"
+                        elementRef={tabListRef}
+                    >
                         {tabs.map((tab, i) => (
                             <Tab
                                 key={tab.key}
@@ -739,6 +768,9 @@ export function Component() {
                     </TabList>
                 )}
                 withBackgroundColorInMainSection
+                beforeHeaderContent={!fetchingDref && readOnly && (
+                    <ViewOnlyModeBanner />
+                )}
             >
                 {fetchingDref && (
                     <Message
@@ -746,10 +778,10 @@ export function Component() {
                         title={strings.formLoadingMessage}
                     />
                 )}
-                {languageMismatch && (
+                {!fetchingDref && languageMismatch && (
                     <LanguageMismatchMessage
                         title={strings.formEditNotAvailableInSelectedLanguageMessage}
-                        originalLanguage={drefResponse.translation_module_original_language}
+                        originalLanguage={drefResponse?.translation_module_original_language}
                         selectedLanguage={currentLanguage}
                     />
                 )}
@@ -843,7 +875,7 @@ export function Component() {
                                 <Button
                                     name={undefined}
                                     onClick={handleFormSubmit}
-                                    disabled={disabled}
+                                    disabled={disabled || readOnly}
                                 >
                                     {strings.formSaveButtonLabel}
                                 </Button>

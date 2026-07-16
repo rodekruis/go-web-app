@@ -1,4 +1,6 @@
-import React, {
+import {
+    type ComponentType,
+    type ReactNode,
     useCallback,
     useMemo,
 } from 'react';
@@ -28,7 +30,7 @@ export interface Props<
     keySelector: (option: OPTION) => KEY;
     label?: React.ReactNode;
     labelSelector: (option: OPTION) => string;
-    descriptionSelector?: (option: OPTION) => React.ReactNode;
+    descriptionSelector?: (option: OPTION) => ReactNode;
     name: NAME;
     onChange: (newValue: KEY[], name: NAME) => void;
     options: OPTION[] | undefined;
@@ -36,10 +38,13 @@ export interface Props<
     value: KEY[] | undefined | null;
     checkListLayout?: 'inline' | 'block' | 'grid';
     checkListLayoutPreferredGridColumns?: number;
+    checkListLayoutMinGridColumnSize?: string;
     spacing?: SpacingType;
     withPadding?: boolean;
     withBackground?: boolean;
     withDarkBackground?: boolean;
+    renderer?: ComponentType<CheckboxProps<KEY>>
+    withoutOpticalSpacingCorrection?: boolean;
 
     prevValue?: KEY[] | undefined | null;
     withPrevValue?: boolean;
@@ -70,6 +75,7 @@ function Checklist<
         value,
         checkListLayout = 'inline',
         checkListLayoutPreferredGridColumns,
+        checkListLayoutMinGridColumnSize,
         spacing,
         withPadding,
         withBackground,
@@ -79,6 +85,8 @@ function Checklist<
         withDiffView,
         withPrevValue,
         required,
+        renderer = Checkbox<KEY>,
+        withoutOpticalSpacingCorrection,
     } = props;
 
     const highlightMode = useMemo(
@@ -133,7 +141,7 @@ function Checklist<
         <RawList<OPTION, KEY, CheckboxProps<KEY>>
             data={options}
             keySelector={keySelector}
-            renderer={Checkbox}
+            renderer={renderer}
             rendererParams={optionListRendererParams}
         />
     );
@@ -156,12 +164,13 @@ function Checklist<
             withPrevValue={withPrevValue}
             errorOnTooltip={errorOnTooltip}
             variant="transparent"
+            withoutInputSectionPadding
             input={(
                 <>
                     {checkListLayout === 'inline' && (
                         <ListView
                             withWrap
-                            withSpacingOpticalCorrection
+                            withSpacingOpticalCorrection={!withoutOpticalSpacingCorrection}
                             spacing={spacing}
                             spacingOffset={spacingOffset}
                         >
@@ -171,7 +180,7 @@ function Checklist<
                     {checkListLayout === 'block' && (
                         <ListView
                             layout="block"
-                            withSpacingOpticalCorrection
+                            withSpacingOpticalCorrection={!withoutOpticalSpacingCorrection}
                             spacingOffset={spacingOffset}
                             spacing={spacing}
                         >
@@ -182,7 +191,8 @@ function Checklist<
                         <ListView
                             layout="grid"
                             numPreferredGridColumns={checkListLayoutPreferredGridColumns}
-                            withSpacingOpticalCorrection
+                            minGridColumnSize={checkListLayoutMinGridColumnSize}
+                            withSpacingOpticalCorrection={!withoutOpticalSpacingCorrection}
                             spacingOffset={spacingOffset}
                             spacing={spacing}
                         >

@@ -7,6 +7,7 @@ const {
     APP_IBF_API_BACKEND,
     APP_TINY_API_KEY,
     APP_RISK_API_ENDPOINT,
+    APP_TRANSLATION_API_ENDPOINT,
     APP_SDT_URL,
     APP_POWER_BI_REPORT_ID_1,
     APP_SENTRY_DSN,
@@ -33,6 +34,7 @@ export const adminUrl = APP_ADMIN_URL ?? `${api}admin/`;
 export const mbtoken = APP_MAPBOX_ACCESS_TOKEN;
 export const ibfApiBackend = APP_IBF_API_BACKEND;
 export const riskApi = APP_RISK_API_ENDPOINT;
+export const translationApi = APP_TRANSLATION_API_ENDPOINT;
 export const sdtUrl = APP_SDT_URL;
 export const powerBiReportId1 = APP_POWER_BI_REPORT_ID_1;
 

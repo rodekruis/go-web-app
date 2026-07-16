@@ -58,13 +58,14 @@ export const CATEGORY_RISK_VERY_HIGH = 5;
 // Colors
 
 export const COLOR_WHITE = '#ffffff';
-// export const COLOR_TEXT = '#313131';
-// export const COLOR_TEXT_ON_DARK = '#ffffff';
+export const COLOR_TEXT = '#313131';
+export const COLOR_TEXT_ON_DARK = '#ffffff';
 export const COLOR_LIGHT_GREY = '#e0e0e0';
 export const COLOR_DARK_GREY = '#a5a5a5';
 export const COLOR_BLACK = '#000000';
 // const COLOR_LIGHT_YELLOW = '#ffd470';
 export const COLOR_YELLOW = '#ff9e00';
+export const COLOR_DREF_YELLOW = '#FFF939';
 export const COLOR_BLUE = '#4c5d9b';
 export const COLOR_LIGHT_BLUE = '#c7d3e0';
 export const COLOR_ORANGE = '#ff8000';
@@ -176,6 +177,10 @@ export const SURGE_ALERT_STATUS_OPEN = 0 satisfies SurgeAlertTypeEnum;
 export const SURGE_ALERT_STATUS_STOOD_DOWN = 1 satisfies SurgeAlertTypeEnum;
 export const SURGE_ALERT_STATUS_CLOSED = 2 satisfies SurgeAlertTypeEnum;
 
+type TypeOfNsContributionEnum = components<'read'>['schemas']['DeploymentsEruReadinessNsContributionEnumKey'];
+export const NS_CONTRIBUTION_HOLDS_ERU = 1 satisfies TypeOfNsContributionEnum;
+export const NS_CONTRIBUTION_SUPPORTS_ERU = 2 satisfies TypeOfNsContributionEnum;
+
 export const NUM_X_AXIS_TICKS_MIN = 3;
 export const NUM_X_AXIS_TICKS_MAX = 12;
 
@@ -198,6 +203,7 @@ export const multiMonthSelectDefaultValue = listToMap(
     () => false,
 );
 
+// FIXME these need to satisfy some enum
 export const ERU_READINESS_READY = 1;
 export const ERU_READINESS_CAN_CONTRIBUTE = 2;
 export const ERU_READINESS_NO_CAPACITY = 3;
@@ -220,3 +226,24 @@ export const OTHER_TRAINING_FACILITIES = 9 satisfies LocalUnitTrainingFacilityTy
 type LocalUnitAffiliationOptions = NonNullable<NonNullable<GoApiResponse<'/api/v2/local-units-options/'>['affiliation']>[number]>['id']
 
 export const OTHER_AFFILIATION = 9 satisfies LocalUnitAffiliationOptions;
+
+type EapTypeEnumKey = components['schemas']['EapEapTypeEnumKey'];
+export const EAP_TYPE_SIMPLIFIED = 20 satisfies EapTypeEnumKey;
+export const EAP_TYPE_FULL = 10 satisfies EapTypeEnumKey;
+
+// Timeframe
+export type TimeFrameEnumKey = components['schemas']['EapTimeframeEnumKey'];
+
+export const TIMEFRAME_YEAR = 10 satisfies TimeFrameEnumKey;
+export const TIMEFRAME_DAYS = 30 satisfies TimeFrameEnumKey;
+export const TIMEFRAME_MONTHS = 20 satisfies TimeFrameEnumKey;
+export const TIMEFRAME_HOURS = 40 satisfies TimeFrameEnumKey;
+
+type EapStatus = components['schemas']['EapEapStatusEnumKey'];
+
+export const EAP_STATUS_UNDER_DEVELOPMENT = 10 satisfies EapStatus;
+export const EAP_STATUS_UNDER_REVIEW = 20 satisfies EapStatus;
+export const EAP_STATUS_NS_ADDRESSING_COMMENTS = 30 satisfies EapStatus;
+export const EAP_STATUS_TECHNICALLY_VALIDATED = 40 satisfies EapStatus;
+export const EAP_STATUS_PENDING_PFA = 50 satisfies EapStatus;
+export const EAP_STATUS_APPROVED = 60 satisfies EapStatus;

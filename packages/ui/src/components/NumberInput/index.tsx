@@ -18,7 +18,7 @@ type InheritedProps<NAME> = Omit<InputContainerProps, 'input'>
 & Omit<RawInputProps<NAME>, 'onChange' | 'value' | 'className' | 'elementRef'>;
 
 export interface Props<NAME> extends InheritedProps<NAME> {
-    inputElementRef?: React.RefObject<HTMLInputElement>;
+    inputElementRef?: React.RefObject<HTMLInputElement | null>;
     inputClassName?: string;
     value: number | undefined | null;
     onChange?: (
@@ -50,6 +50,8 @@ function NumberInput<const T>(props: Props<T>) {
     const [tempValue, setTempValue] = useState<string | undefined>(String(valueFromProps ?? ''));
 
     useEffect(() => {
+        // FIXME(frozenhelium): Syncs local string state with incoming prop value
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setTempValue(String(valueFromProps ?? ''));
     }, [valueFromProps]);
 

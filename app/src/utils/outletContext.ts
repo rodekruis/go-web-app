@@ -40,6 +40,6 @@ export interface PerProcessOutletContext {
     fetchingStatus: boolean,
     statusResponse: PerProcessStatusResponse | undefined,
     refetchStatusResponse: () => void,
-    actionDivRef: React.RefObject<HTMLDivElement>,
+    actionDivRef: React.RefObject<HTMLDivElement | null>,
     readOnly?: boolean;
 }

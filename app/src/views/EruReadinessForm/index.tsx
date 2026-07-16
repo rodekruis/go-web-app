@@ -73,7 +73,6 @@ function eruTypeKeySelector(eruType: EruOption) {
 
 const defaultFormValues: FormType = {};
 
-/** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const strings = useTranslation(i18n);

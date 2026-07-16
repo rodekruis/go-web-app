@@ -41,7 +41,7 @@ import {
     MapLayer,
     MapSource,
 } from '@togglecorp/re-map';
-import getBbox from '@turf/bbox';
+import { type LngLatBoundsLike } from 'mapbox-gl';
 
 import {
     APPEAL_TYPE_DREF,
@@ -79,6 +79,7 @@ import {
     createDisasterTypeColumn,
     createEventColumn,
 } from '#utils/domain/tableHelpers';
+import { getGeoJsonBounds } from '#utils/geo';
 import { type CountryOutletContext } from '#utils/outletContext';
 import type {
     GoApiResponse,
@@ -110,7 +111,6 @@ interface ClickedPoint {
     lngLat: mapboxgl.LngLatLike;
 }
 
-/** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const { countryOngoingActivitiesEmergencies } = useContext(RouteContext);
@@ -145,9 +145,9 @@ export function Component() {
         pageSize: 5,
     });
 
-    const countryBounds = useMemo(() => (
+    const countryBounds = useMemo<LngLatBoundsLike | undefined>(() => (
         (countryResponse && countryResponse.bbox)
-            ? getBbox(countryResponse.bbox)
+            ? getGeoJsonBounds(countryResponse.bbox)
             : undefined
     ), [countryResponse]);
 

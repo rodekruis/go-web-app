@@ -47,11 +47,11 @@ import CountrySelectInput from '#components/domain/CountrySelectInput';
 import DisasterTypeSelectInput from '#components/domain/DisasterTypeSelectInput';
 import DistrictSearchMultiSelectInput, { type DistrictItem } from '#components/domain/DistrictSearchMultiSelectInput';
 import DrefShareModal from '#components/domain/DrefShareModal';
-import UserItem from '#components/domain/DrefShareModal/UserItem';
 import { type FieldReportItem as FieldReportSearchItem } from '#components/domain/FieldReportSearchSelectInput';
 import GoSingleFileInput from '#components/domain/GoSingleFileInput';
 import ImageWithCaptionInput from '#components/domain/ImageWithCaptionInput';
 import NationalSocietySelectInput from '#components/domain/NationalSocietySelectInput';
+import ShareUserItem from '#components/domain/ShareUserItem';
 import { type User } from '#components/domain/UserSearchMultiSelectInput';
 import Link from '#components/Link';
 import TabPage from '#components/TabPage';
@@ -165,27 +165,19 @@ function Overview(props: Props) {
         [setFieldValue],
     );
 
-    const handleGenerateTitleButtonClick = useCallback(
-        () => {
-            const countryName = countryOptions?.find(
-                (country) => country.id === value?.country,
-            )?.name || '{Country}';
-            const disasterName = disasterTypes?.find(
-                (disasterType) => disasterType.id === value?.disaster_type,
-            )?.name || '{Disaster}';
-            const currentYear = new Date().getFullYear();
+    // FIXME(frozenhelium): useCallback removed for React Compiler compatibility
+    const handleGenerateTitleButtonClick = () => {
+        const countryName = countryOptions?.find(
+            (country) => country.id === value?.country,
+        )?.name || '{Country}';
+        const disasterName = disasterTypes?.find(
+            (disasterType) => disasterType.id === value?.disaster_type,
+        )?.name || '{Disaster}';
+        const currentYear = new Date().getFullYear();
 
-            const title = `${countryName} ${disasterName} ${currentYear}`;
-            setFieldValue(title, 'title');
-        },
-        [
-            countryOptions,
-            disasterTypes,
-            value?.disaster_type,
-            value?.country,
-            setFieldValue,
-        ],
-    );
+        const title = `${countryName} ${disasterName} ${currentYear}`;
+        setFieldValue(title, 'title');
+    };
 
     const handleTypeofDrefChange = useCallback((
         typeOfDref: DrefTypeOption['key'] | undefined,
@@ -276,7 +268,7 @@ function Overview(props: Props) {
                                 name={undefined}
                                 onClick={setShowShareModalTrue}
                                 before={<ShareLineIcon />}
-                                disabled={isNotDefined(drefId) || readOnly}
+                                disabled={isNotDefined(drefId)}
                             >
                                 {strings.formShareButtonLabel}
                             </Button>
@@ -290,7 +282,7 @@ function Overview(props: Props) {
                         >
                             <RawList
                                 data={drefUsers}
-                                renderer={UserItem}
+                                renderer={ShareUserItem}
                                 keySelector={userKeySelector}
                                 rendererParams={userRendererParams}
                             />

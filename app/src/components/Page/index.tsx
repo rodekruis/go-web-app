@@ -1,5 +1,4 @@
 import {
-    type ElementRef,
     type RefObject,
     useEffect,
 } from 'react';
@@ -41,7 +40,7 @@ interface Props {
     mainSectionClassName?: string;
     wikiLink?: React.ReactNode;
     withBackgroundColorInMainSection?: boolean;
-    elementRef?: RefObject<ElementRef<'div'>>;
+    elementRef?: RefObject<HTMLDivElement | null>;
     blockingContent?: React.ReactNode;
     contentOriginalLanguage?: TranslationModuleOriginalLanguageEnum;
     beforeHeaderContent?: React.ReactNode;
