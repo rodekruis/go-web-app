@@ -4,6 +4,8 @@ import {
 } from 'react';
 
 import { nrwPortalMode } from '#config';
+import useNrwDataLoader from '#utils/nrw/hooks/useNrwDataLoader';
+import useNrwMapSearchParams from '#utils/nrw/hooks/useNrwMapSearchParams';
 import {
     EVENTS_PANEL_ELEMENT_ID,
     LEGEND_PANEL_ELEMENT_ID,
@@ -14,8 +16,6 @@ import {
 } from '#utils/nrw/nrwDataFetchHelpers';
 import type { MapViewParameters } from '#utils/nrw/nrwMapTypes';
 
-import useNrwDataLoader from '#utils/nrw/hooks/useNrwDataLoader';
-import useNrwMapSearchParams from '#utils/nrw/hooks/useNrwMapSearchParams';
 import MapboxDataMap from './MapboxDataMap';
 import NrwEventsPanel from './NrwEventsPanel';
 import NrwLayerPanel from './NrwLayerPanel';
