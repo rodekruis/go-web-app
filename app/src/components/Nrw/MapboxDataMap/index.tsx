@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import 'mapbox-gl-v3/dist/mapbox-gl.css';
 
 import {
@@ -6,8 +7,6 @@ import {
     useRef,
     useState,
 } from 'react';
-import { byPrefixAndName } from '@awesome.me/kit-92f09b5225/icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import mapboxgl, { type Map as MapboxGLMap } from 'mapbox-gl-v3';
 
 import { mbtoken } from '#config';
@@ -17,13 +16,6 @@ import {
     NRW_MAPBOX_STYLE_URL,
 } from '#utils/nrw/nrwConstants';
 import { type AdminAreaDetails } from '#utils/nrw/nrwDataFetchHelpers';
-import renderSelectedEventExposedAreasOnMap from '#utils/nrw/nrwMapEventHelpers';
-import {
-    addOrderedLayer,
-    drawScopedCountriesAdmin0Layer,
-    getDrawOrder,
-    removeLayerAndSource,
-} from '#utils/nrw/nrwMapHelpers';
 import type {
     MapLayerFunctions,
     MapViewParameters,
@@ -35,8 +27,6 @@ import {
     getMapViewParametersFromMap,
 } from '#utils/nrw/nrwMapViewHelpers';
 import { type EventResponseDto } from '#utils/nrw/shared-dtos';
-
-import handleMapClick from '../../../utils/nrw/nrwMapInteractions';
 
 import styles from './styles.module.css';
 
@@ -73,7 +63,6 @@ interface MapboxDataMapProps {
 /**
  * Mapbox v3 map component for NRW data maps.
  * Data layers are added via the exposed map layer functions.
- * @returns A component that can be either standalone, or nested in a NrwMapContainer.
  */
 export default function MapboxDataMap({
     scopedCountries,
@@ -130,40 +119,6 @@ export default function MapboxDataMap({
 
         map.on('load', () => {
             setIsMapLoaded(true);
-
-            drawScopedCountriesAdmin0Layer(map, scopedCountries, initialMapView)
-                .then((latLonBounds) => {
-                    if (!latLonBounds) {
-                        notification.show('Failed to load country boundaries for the map.', {
-                            variant: 'danger',
-                        });
-                    }
-                });
-
-            // Expose the layer functions to the data loader once the style has
-            // loaded, since layers can't be added before that.
-            if (registerMapLayerFunctions) {
-                registerMapLayerFunctions({
-                    addLayer: (newLayer: NrwMapboxLayer, layerDetails) => {
-                        orderedLayersRef.current = addOrderedLayer(
-                            map,
-                            newLayer,
-                            getDrawOrder(layerDetails.layerName),
-                            orderedLayersRef.current,
-                        );
-                    },
-                    setLayerVisibility: (layer: NrwMapboxLayer, visible: boolean) => {
-                        if (!map.getLayer(layer.renderLayerId)) {
-                            return;
-                        }
-                        map.setLayoutProperty(
-                            layer.renderLayerId,
-                            'visibility',
-                            visible ? 'visible' : 'none',
-                        );
-                    },
-                });
-            }
         });
 
         // Update map view state after each pan/zoom end
@@ -174,16 +129,6 @@ export default function MapboxDataMap({
             }
 
             onViewChangeRef.current?.(mapView);
-        });
-
-        // Handle map interactions
-        map.on('click', (event) => {
-            handleMapClick({
-                map,
-                event,
-                exposedLayerId: exposedAreasLayerRef.current?.renderLayerId,
-                onMapItemSelect: onSelectRef.current,
-            });
         });
 
         mapInstanceRef.current = map;
@@ -199,59 +144,6 @@ export default function MapboxDataMap({
     // Set the dependencies to empty since this only runs on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    // Handle loading event data on the map when the selected event changes.
-    useEffect(() => {
-        const map = mapInstanceRef.current;
-        if (!map || !isMapLoaded) {
-            return undefined;
-        }
-
-        // Remove the exposed areas of the previously selected event, if any
-        const previousLayer = exposedAreasLayerRef.current;
-        if (previousLayer) {
-            orderedLayersRef.current = removeLayerAndSource(
-                map,
-                previousLayer,
-                orderedLayersRef.current,
-            );
-            exposedAreasLayerRef.current = null;
-        }
-
-        if (!selectedEvent) {
-            return undefined;
-        }
-
-        // Ignore the fetch result if the selection changed while it was in flight
-        let isOutdated = false;
-
-        renderSelectedEventExposedAreasOnMap({
-            map,
-            scopedCountries,
-            selectedEvent,
-            orderedLayers: orderedLayersRef.current,
-            isOutdated: () => isOutdated,
-        })
-            .then((result) => {
-                if (isOutdated) {
-                    return;
-                }
-
-                if (!result) {
-                    notification.show('No exposed areas data available for this event.', { variant: 'danger' });
-                    return;
-                }
-
-                orderedLayersRef.current = result.orderedLayers;
-                exposedAreasLayerRef.current = result.layer;
-            });
-
-        return () => {
-            // If this call is cancelled by React (e.g., it starts a new fetch), this block will get
-            // hit before the fetch promise resolves, so we know we can ignore the result.
-            isOutdated = true;
-        };
-    }, [selectedEvent, scopedCountries, isMapLoaded, notification]);
 
     return (
         <div className={styles.container}>
@@ -269,15 +161,7 @@ export default function MapboxDataMap({
                 >
                     {layerPanel}
                 </div>
-                <button
-                    type="button"
-                    className={styles.layersButton}
-                    aria-label="Layers"
-                    aria-expanded={isLayerPanelOpen}
-                    onClick={() => setIsLayerPanelOpen((prev) => !prev)}
-                >
-                    <FontAwesomeIcon icon={byPrefixAndName.far!['layer-group']!} />
-                </button>
+
             </div>
         </div>
     );

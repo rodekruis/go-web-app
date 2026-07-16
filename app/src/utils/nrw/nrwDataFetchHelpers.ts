@@ -10,8 +10,6 @@ import {
     getAdminAreaDetailsNoGeoUrl,
     getAdminAreasByCodesUrl,
     getEventsApiUrl,
-    getHealthLocsApiUrl,
-    getRcLocsApiUrl,
 } from './nrwUrls';
 import type {
     EventResponseDto,
@@ -33,57 +31,6 @@ export default async function fetchJson<T>(
     }
     return response.json() as Promise<T>;
 }
-
-// Fields shared by GO API local unit results (RC branches and clinics)
-// that are mapped onto map feature properties.
-type LocalUnitResult = {
-    id?: number;
-    local_branch_name?: string;
-    english_branch_name?: string;
-    address_loc?: string;
-    address_en?: string;
-    modified_at?: string;
-    status?: number;
-    status_details?: string;
-    type_details?: {
-        name?: string;
-    };
-    link?: string;
-};
-
-// Format of GO API result for Red Cross locations
-type RcLocResult = LocalUnitResult & {
-    country_details?: {
-        iso3?: string;
-    };
-    type?: number;
-    health_details?: {
-        health_facility_type?: number;
-        health_facility_type_details?: {
-            name?: string;
-        };
-    };
-    location_geojson?: {
-        type?: string;
-        coordinates?: [number, number] | number[];
-    };
-};
-
-// Format of GO API result for Clinic locations
-type ClinicLocResult = LocalUnitResult & {
-    country_iso3?: string;
-    health_facility_type_details?: {
-        name?: string;
-    };
-    location?: {
-        lat?: number;
-        lng?: number;
-    };
-};
-
-type GoDataResults<T> = {
-    results?: T[];
-};
 
 // Admin area details fetched from the API
 // This is used for finding info on selected admin areas.
@@ -289,86 +236,4 @@ export const fetchExposedAdminAreasFeatures = async (
     return results.flatMap((result) => (
         result.status === 'fulfilled' ? result.value : []
     ));
-};
-
-const isValidCoordinatePair = (
-    longitude: number,
-    latitude: number,
-): boolean => Number.isFinite(longitude)
-    && Number.isFinite(latitude)
-    && Math.abs(longitude) <= 180
-    && Math.abs(latitude) <= 90;
-
-// Build the GeoJSON point feature for a GO API local unit (RC branch or clinic).
-// Returns an empty array when the coordinates are invalid, so callers can flatMap.
-function makeLocalUnitFeatures(
-    item: LocalUnitResult,
-    longitude: number,
-    latitude: number,
-    healthFacilityTypeName: string | undefined,
-    country: string,
-): GeoJSON.Feature[] {
-    if (!isValidCoordinatePair(longitude, latitude)) {
-        return [];
-    }
-
-    return [{
-        type: 'Feature',
-        geometry: {
-            type: 'Point',
-            coordinates: [longitude, latitude],
-        },
-        properties: {
-            id: item.id,
-            name: item.local_branch_name,
-            local_branch_name: item.local_branch_name,
-            english_branch_name: item.english_branch_name,
-            address_loc: item.address_loc,
-            address_en: item.address_en,
-            modified_at: item.modified_at,
-            status: item.status,
-            status_display: item.status_details,
-            type_name: item.type_details?.name,
-            health_facility_type_name: healthFacilityTypeName,
-            link: item.link,
-            country,
-        },
-    }];
-}
-
-export const fetchRcBranchesFeatures = async (
-    selectedCountry: string,
-): Promise<GeoJSON.Feature[]> => {
-    const apiUrl = getRcLocsApiUrl(selectedCountry);
-    const data = await fetchJson<GoDataResults<RcLocResult>>(apiUrl, 'RC branches data');
-    return (data.results ?? [])
-        .flatMap((item) => {
-            const coordinates = item.location_geojson?.coordinates;
-            if (!coordinates || coordinates.length < 2) {
-                return [];
-            }
-
-            return makeLocalUnitFeatures(
-                item,
-                Number(coordinates[0]),
-                Number(coordinates[1]),
-                item.health_details?.health_facility_type_details?.name,
-                selectedCountry,
-            );
-        });
-};
-
-export const fetchClinicFeatures = async (
-    selectedCountry: string,
-): Promise<GeoJSON.Feature[]> => {
-    const apiUrl = getHealthLocsApiUrl(selectedCountry);
-    const data = await fetchJson<GoDataResults<ClinicLocResult>>(apiUrl, 'clinic data');
-    return (data.results ?? [])
-        .flatMap((item) => makeLocalUnitFeatures(
-            item,
-            Number(item.location?.lng),
-            Number(item.location?.lat),
-            item.health_facility_type_details?.name,
-            selectedCountry,
-        ));
 };

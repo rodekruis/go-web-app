@@ -8,20 +8,9 @@ import {
 
 import useAlert from '#hooks/useAlert';
 import {
-    fetchClinicFeatures,
-    fetchRcBranchesFeatures,
     getAllEventData,
     getCountryMapData,
 } from '#utils/nrw/nrwDataFetchHelpers';
-import {
-    makeEventImageLayer,
-    makePointLayerFromFeatures,
-    makeStaticImageLayer,
-} from '#utils/nrw/nrwMapHelpers';
-import {
-    clinicPointPaint,
-    rcBranchPointPaint,
-} from '#utils/nrw/nrwMapStyles';
 import type {
     MapLayerFunctions,
     NrwMapboxLayer,
@@ -30,10 +19,7 @@ import {
     type EventResponseDto,
     type LayerDto,
 } from '#utils/nrw/shared-dtos';
-import {
-    LayerName,
-    LayerType,
-} from '#utils/nrw/shared-enums';
+import { type LayerName } from '#utils/nrw/shared-enums';
 
 /**
  * Hook used to manage and share data for the NRW map components.
@@ -181,39 +167,10 @@ export default function useNrwDataLoader(
         layerDetails: LayerDto,
         country: string,
     ): (() => Promise<NrwMapboxLayer>) | null => {
-        const { layerName, layerType, resourceId } = layerDetails;
-
-        if (layerType === LayerType.raster && layerName === LayerName.floodDepth) {
-            return () => makeEventImageLayer(resourceId);
-        }
-        if (layerType === LayerType.raster && layerName === LayerName.population) {
-            return () => makeStaticImageLayer(country, layerName);
-        }
-
-        if (layerType === LayerType.point && layerName === LayerName.redCrossBranches) {
-            return async () => {
-                const features = await fetchRcBranchesFeatures(country);
-                return makePointLayerFromFeatures(
-                    `${LayerName.redCrossBranches}-${country}`,
-                    features,
-                    rcBranchPointPaint,
-                );
-            };
-        }
-        if (layerType === LayerType.point && layerName === LayerName.clinics) {
-            return async () => {
-                const features = await fetchClinicFeatures(country);
-                return makePointLayerFromFeatures(
-                    `${LayerName.clinics}-${country}`,
-                    features,
-                    clinicPointPaint,
-                );
-            };
-        }
-
+        // This function is stubbed for now till the layers are implemented.
         console.error(
-            `[useNrwDataLoader] Unsupported layer: ${layerDetails.layerName} `
-            + `(${layerDetails.layerType})`,
+            `[useNrwDataLoader] Unsupported layer: ${layerDetails.layerName}, `
+            + `(${layerDetails.layerType}), country ${country}`,
         );
 
         return null;
