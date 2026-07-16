@@ -13,7 +13,7 @@ Some of the [readme](./README.md) instructions don't work or are incomplete. Rat
    ```
 
    If this fails, you may need to manually checkout the directories.
-   You can either work from HEAD or get the specific commit that your target branch is using by going to the repo online (at Github), or by looking at your local submodule settings.
+   You can either work from HEAD or get the specific commit that your target branch is using by going to the repo online (at GitHub), or by looking at your local submodule settings.
    Online, you'd see in the root dir something like this: `go-risk-module-api @ e6afd9b`. Use the last string as your commit to check out to.
 
    To run this, navigate to the repo base directory and run the following. It removes the directories if they exist,
