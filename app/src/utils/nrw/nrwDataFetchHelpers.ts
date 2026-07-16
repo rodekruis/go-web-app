@@ -180,7 +180,7 @@ const getExposedPlaceCodes = (
     // Get the first candidate level that has any exposed areas.
     // This operates on the list in order and returns the first match.
     const targetLevel = candidateLevels.find(
-        (adminLevel) => (exposedAdminAreas[adminLevel] ?? []).length > 0,
+        (adminLevel) => (exposedAdminAreas[String(adminLevel)] ?? []).length > 0,
     );
 
     // No candidate level had any exposed areas.
@@ -189,7 +189,7 @@ const getExposedPlaceCodes = (
     }
 
     // Get the place codes for every exposed area at the chosen level.
-    const exposedAreas = exposedAdminAreas[targetLevel] ?? [];
+    const exposedAreas = exposedAdminAreas[String(targetLevel)] ?? [];
     const placeCodes = exposedAreas.map((area) => area.placeCode);
     return {
         adminLevel: targetLevel,
