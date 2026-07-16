@@ -3,6 +3,7 @@ import {
     useState,
 } from 'react';
 
+import { nrwPortalMode } from '#config';
 import useNrwDataLoader from '#utils/nrw/hooks/useNrwDataLoader';
 import useNrwMapSearchParams from '#utils/nrw/hooks/useNrwMapSearchParams';
 import {
@@ -198,6 +199,9 @@ export default function NrwMapContainer() {
                     </div>
                 </div>
             </div>
+            {nrwPortalMode === 'STANDALONE' && (
+                <div />
+            )}
         </div>
     );
 }
