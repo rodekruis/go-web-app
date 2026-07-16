@@ -28,12 +28,12 @@ import { type LayerName } from '#utils/nrw/shared-enums';
  * - Load shared data and cache it
  * - Track shared states locally applied to that data
  *
- * @param scopedCountries - ISO_A3 country code list for country-specific layers
+ * @param scopedCountries - ISO_A3 country code list for viewable countries
  * @param selectedEventId - Currently selected event id (selection state owned by the container)
+ * @param initialVisibleLayerNames - Initial list of visible layer names (from the container)
  */
 export default function useNrwDataLoader(
     scopedCountries: string[],
-    initialEventData: EventResponseDto[],
     selectedEventId: number | null,
     initialVisibleLayerNames: string[],
 ) {
@@ -42,7 +42,7 @@ export default function useNrwDataLoader(
     // ----- States -----
 
     // Data state: event data loaded from the API.
-    const [eventData, setEventData] = useState<EventResponseDto[]>(initialEventData);
+    const [eventData, setEventData] = useState<EventResponseDto[]>([]);
 
     // Non-event data layers available for the current scoped countries.
     const [countryNonEventLayers,

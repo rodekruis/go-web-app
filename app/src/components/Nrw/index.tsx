@@ -24,7 +24,7 @@ import NrwLegendPanel from './NrwLegendPanel';
 import styles from './styles.module.css';
 
 /**
- * Parent map component for NRW
+ * Parent component for NRW
  * This creates the NRW components and facilitates their interactions.
  * @returns A standalone component
  */
@@ -63,7 +63,7 @@ export default function NrwMapContainer() {
         hideAllLayers,
         visibleLayerNames,
         selectedEvent,
-    } = useNrwDataLoader(scopedCountries, [], selectedEventId, initialLayerKeys);
+    } = useNrwDataLoader(scopedCountries, selectedEventId, initialLayerKeys);
 
     // Clear all selections and reload event data
     const handleRefreshAll = async () => {
