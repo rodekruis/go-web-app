@@ -8,7 +8,8 @@ import {
     useState,
 } from 'react';
 import mapboxgl, { type Map as MapboxGLMap } from 'mapbox-gl-v3';
-
+import { byPrefixAndName } from '@awesome.me/kit-92f09b5225/icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { mbtoken } from '#config';
 import useAlert from '#hooks/useAlert';
 import {
@@ -161,6 +162,17 @@ export default function MapboxDataMap({
                 >
                     {layerPanel}
                 </div>
+                <button
+                    type="button"
+                    className={styles.layersButton}
+                    aria-label="Layers"
+                    aria-expanded={isLayerPanelOpen}
+                    onClick={() => setIsLayerPanelOpen((prev) => !prev)}
+                    // Hide this for now until the layer panel is implemented and ready
+                    hidden={true}
+                >
+                    <FontAwesomeIcon icon={byPrefixAndName.far!['layer-group']!} />
+                </button>
 
             </div>
         </div>
