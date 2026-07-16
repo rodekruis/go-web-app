@@ -19,10 +19,10 @@ export const getEventsApiUrl = (countryIso3: string) => `${ibfApiBackend}events?
 //    .001 = 188kb
 //    .01 = 53kb
 //    .05 = 30kb
-const adminLevelToSimplificationFactor: number[] = [0.05, 0.01, 0.005, 0.004];
+const adminLevelToSimplificationFactor: number[] = [0.05, 0.01, 0.005, 0.004, 0.004];
 
 // Get the vector simplification factor (for the query algorithm)
-// This factor is based on the admin level
+// This factor is based on the admin level (0, 1, 2, etc.)
 const getSimplificationFactor = (adminLevel: number): number => {
     let factor = adminLevelToSimplificationFactor[adminLevel];
     if (!factor) {
