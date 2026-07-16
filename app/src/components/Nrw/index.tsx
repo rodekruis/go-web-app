@@ -3,7 +3,6 @@ import {
     useState,
 } from 'react';
 
-import { nrwPortalMode } from '#config';
 import useNrwDataLoader from '#utils/nrw/hooks/useNrwDataLoader';
 import useNrwMapSearchParams from '#utils/nrw/hooks/useNrwMapSearchParams';
 import {
@@ -158,7 +157,7 @@ export default function NrwMapContainer() {
     return (
         <div className={styles.container}>
             <div className={styles.mainContent}>
-                <div className={styles.controlPanelColumn}>
+                <div className={styles.eventPanelColumn}>
                     <div id={EVENTS_PANEL_ELEMENT_ID}>
                         <NrwEventsPanel
                             eventData={eventData}
@@ -199,9 +198,6 @@ export default function NrwMapContainer() {
                     </div>
                 </div>
             </div>
-            {nrwPortalMode === 'STANDALONE' && (
-                <div>__</div>
-            )}
         </div>
     );
 }
