@@ -104,6 +104,10 @@
     filter: var(--control-shadow);
 }
 
+.layersButton[hidden] {
+    display: none;
+}
+
 .layersButton:hover {
     background-color: var(--control-bg-hover);
 }
