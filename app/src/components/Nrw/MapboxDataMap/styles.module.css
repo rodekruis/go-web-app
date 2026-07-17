@@ -26,57 +26,44 @@
     min-height: 384px;
 }
 
-/* Restyle the Mapbox zoom controls */
-.map :global(.mapboxgl-ctrl-top-right) {
+/* Custom zoom controls overlaid on the map */
+.zoomControls {
+    display: flex;
+    position: absolute;
     top: 12px;
     right: 12px;
-}
-
-.map :global(.mapboxgl-ctrl-top-right .mapboxgl-ctrl) {
-    margin: 0;
-}
-
-.map :global(.mapboxgl-ctrl-group) {
-    display: flex;
     flex-direction: column;
     border: 2px solid var(--control-border-color);
     border-radius: var(--control-border-radius);
-    box-shadow: none;
-    background: none;
     inline-size: 28px;
     filter: var(--control-shadow);
+    overflow: hidden;
 }
 
-.map :global(.mapboxgl-ctrl-group button) {
+.zoomButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: none;
     background-color: var(--control-bg);
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 14px 14px;
+    cursor: pointer;
+    padding: 0;
     inline-size: 100%;
     height: 24px;
-    color: transparent;
-    font-size: 0;
+    color: var(--control-text);
+    font-size: 14px;
 }
 
-.map :global(.mapboxgl-ctrl-group button:hover) {
+.zoomButton:hover {
     background-color: var(--control-bg-hover);
 }
 
-.map :global(.mapboxgl-ctrl-group button:focus),
-.map :global(.mapboxgl-ctrl-group button:focus-visible) {
+.zoomButton:focus,
+.zoomButton:focus-visible {
     outline: none;
     box-shadow: none;
 }
 
-.map :global(.mapboxgl-ctrl-group .mapboxgl-ctrl-zoom-in) {
-    border-bottom: 1px solid var(--control-border-color);
-    border-radius: 2px 2px 0 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%23323232' d='M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z'/%3E%3C/svg%3E");
-}
-
-.map :global(.mapboxgl-ctrl-group .mapboxgl-ctrl-zoom-out) {
+.zoomButton + .zoomButton {
     border-top: 1px solid var(--control-border-color);
-    border-radius: 0 0 2px 2px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%23323232' d='M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z'/%3E%3C/svg%3E");
 }

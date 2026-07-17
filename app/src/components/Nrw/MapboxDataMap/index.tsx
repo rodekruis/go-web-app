@@ -1,9 +1,12 @@
 import 'mapbox-gl-v3/dist/mapbox-gl.css';
 
 import {
+    useCallback,
     useEffect,
     useRef,
 } from 'react';
+import { byPrefixAndName } from '@awesome.me/kit-92f09b5225/icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import mapboxgl, { type Map as MapboxGLMap } from 'mapbox-gl-v3';
 
 import { mbtoken } from '#config';
@@ -38,8 +41,6 @@ export default function MapboxDataMap() {
             zoom: defaultMapZoom,
         });
 
-        map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
-
         mapInstanceRef.current = map;
 
         return () => {
@@ -49,6 +50,14 @@ export default function MapboxDataMap() {
         };
     }, []);
 
+    const handleZoomIn = useCallback(() => {
+        mapInstanceRef.current?.zoomIn();
+    }, []);
+
+    const handleZoomOut = useCallback(() => {
+        mapInstanceRef.current?.zoomOut();
+    }, []);
+
     return (
         <div className={styles.container}>
             <div className={styles.mapWrapper}>
@@ -56,6 +65,24 @@ export default function MapboxDataMap() {
                     ref={mapContainerRef}
                     className={styles.map}
                 />
+                <div className={styles.zoomControls}>
+                    <button
+                        type="button"
+                        className={styles.zoomButton}
+                        onClick={handleZoomIn}
+                        aria-label="Zoom in"
+                    >
+                        <FontAwesomeIcon icon={byPrefixAndName.fas!.plus!} />
+                    </button>
+                    <button
+                        type="button"
+                        className={styles.zoomButton}
+                        onClick={handleZoomOut}
+                        aria-label="Zoom out"
+                    >
+                        <FontAwesomeIcon icon={byPrefixAndName.fas!.minus!} />
+                    </button>
+                </div>
             </div>
         </div>
     );
