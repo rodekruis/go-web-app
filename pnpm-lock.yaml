@@ -35,10 +35,10 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7
       '@fortawesome/fontawesome-svg-core':
-        specifier: ^7.2.0
+        specifier: ^7.3.1
         version: 7.3.1
       '@fortawesome/react-fontawesome':
-        specifier: ^3.3.1
+        specifier: ^3.4.0
         version: 3.4.0(@fortawesome/fontawesome-svg-core@7.3.1)(react@19.2.4)
       '@ifrc-go/icons':
         specifier: ^2.0.1

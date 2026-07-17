@@ -50,6 +50,9 @@ export default function MapboxDataMap() {
         };
     }, []);
 
+    // Handlers for zoom controls.
+    // These are needed since we override the default zoom controls with
+    // our own styling
     const handleZoomIn = useCallback(() => {
         mapInstanceRef.current?.zoomIn();
     }, []);
