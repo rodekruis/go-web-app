@@ -1,0 +1,27 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    inline-size: 100%;
+    min-height: 384px;
+}
+
+.mapWrapper {
+    position: relative;
+    height: 100%;
+    inline-size: 100%;
+    min-height: 384px;
+    --control-border-color: #32323250;
+    --control-bg: #ffffff;
+    --control-bg-hover: #f2f2f2;
+    --control-text: #323232;
+    --control-border-radius: 4px;
+    --control-shadow: drop-shadow(0 0 10px rgba(0, 0, 0, 0.08));
+}
+
+.map {
+    height: 100%;
+    inline-size: 100%;
+    min-height: 384px;
+}
