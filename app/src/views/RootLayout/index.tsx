@@ -154,7 +154,6 @@ export function Component() {
             setLanguagePending(false);
         },
         onFailure: (err, { pages }) => {
-            // eslint-disable-next-line no-console
             console.error(err);
 
             // FIXME: If we get an error, we should try again?
@@ -352,7 +351,7 @@ export function Component() {
                     perFormComponentsTrigger();
                     break;
                 default:
-                    // eslint-disable-next-line no-console
+
                     console.error(`Cannot call invalidate on '${name}'`);
             }
         },
