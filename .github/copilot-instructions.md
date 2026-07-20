@@ -2,8 +2,8 @@
 
 ## Project Overview
 
-NRW is a web application for visualizing and analyzing disaster risk data, built on top of the IFRC Go platform. This repo contains code for the whole Go platform, but this branch focuses on NRW development only.
-We control the backend for NRW and generally run it locally during development, so we have direct access to the service and data for debugging.
+NRW is a web application for visualizing and analyzing disaster risk data, built on top of the IFRC Go platform. This repo contains code for the whole Go platform, but this fork focuses on NRW development only.
+Assume backend services are running locally in development environments. This allows for direct access to the service and data for debugging and changes.
 
 ## Repository Overview
 
