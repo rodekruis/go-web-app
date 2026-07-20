@@ -1,6 +1,6 @@
 import { useTranslation } from '@ifrc-go/ui/hooks';
 
-import NrwMapContainer from '#components/Nrw';
+import NrwMap from './NrwMap';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
@@ -16,7 +16,17 @@ export function Component() {
             >
                 {strings.nationalRiskWatchHeading}
             </div>
-            <NrwMapContainer />
+            <div className={styles.container}>
+                <div className={styles.mainContent}>
+                    <div className={styles.eventPanelColumn}>
+                        <div />
+                    </div>
+                    <div className={styles.mapColumn}>
+                        <NrwMap />
+                    </div>
+                </div>
+            </div>
+
         </div>
     );
 }
