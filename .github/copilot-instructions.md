@@ -9,7 +9,7 @@ Assume backend services are running locally in development environments. This al
 
 Directories that relate to NRW:
 
-- `app/src/components/Nrw`: NRW components
+- `app/src/views/CountryProfileNationalRiskWatch`: NRW components
 - `app/src/utils/nrw`: NRW helper files
 
 ---
