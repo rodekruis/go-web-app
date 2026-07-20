@@ -546,20 +546,6 @@ const threeWActivityEdit = customWrapRoute({
     },
 });
 
-const nrwIndex = customWrapRoute({
-    parent: rootLayout,
-    path: 'nrw',
-    component: {
-        render: () => import('#views/NrwGlobal'),
-        props: {},
-    },
-    wrapperComponent: Auth,
-    context: {
-        title: 'NRW',
-        visibility: 'anything',
-    },
-});
-
 type DefaultRiskWatchChild = 'seasonal';
 const riskWatchLayout = customWrapRoute({
     parent: rootLayout,
@@ -1528,7 +1514,6 @@ const wrappedRoutes = {
     flashUpdateFormNew,
     flashUpdateFormDetails,
     flashUpdateFormEdit,
-    nrwIndex,
     riskWatchLayout,
     riskWatchIndex,
     riskWatchImminent,
