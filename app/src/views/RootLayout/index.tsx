@@ -9,7 +9,6 @@ import {
 import { unstable_batchedUpdates } from 'react-dom';
 import {
     Outlet,
-    useLocation,
     useNavigation,
 } from 'react-router-dom';
 import { AlertInformationLineIcon } from '@ifrc-go/icons';
@@ -43,6 +42,7 @@ import DomainContext, {
 import UserContext from '#contexts/user';
 import useAuth from '#hooks/domain/useAuth';
 import useDebouncedValue from '#hooks/useDebouncedValue';
+import useIsChromeless from '#hooks/useIsChromeless';
 import {
     useRequest,
     useTranslationLazyRequest,
@@ -59,9 +59,8 @@ export function Component() {
 
     const strings = useTranslation(i18n);
 
-    // Use location to hide navigation for specific pages
-    const location = useLocation();
-    const hideNavigation = location.pathname.startsWith('/nrw');
+    // "Chromeless" mode hides Navbar/Footer and potentially more.
+    const hideNavigation = useIsChromeless();
 
     const { isAuthenticated } = useAuth();
     const { removeUserAuth } = useContext(UserContext);

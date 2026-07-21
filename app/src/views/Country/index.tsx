@@ -32,6 +32,7 @@ import useAuth from '#hooks/domain/useAuth';
 import useCountry from '#hooks/domain/useCountry';
 import usePermissions from '#hooks/domain/usePermissions';
 import useRegion from '#hooks/domain/useRegion';
+import useIsChromeless from '#hooks/useIsChromeless';
 import {
     countryIdToRegionIdMap,
     isCountryIdRegion,
@@ -46,6 +47,7 @@ import i18n from './i18n.json';
 export function Component() {
     const { countryId } = useParams<{ countryId: string }>();
     const { regionIndex } = useContext(RouteContext);
+    const isChromeless = useIsChromeless();
 
     const strings = useTranslation(i18n);
     const country = useCountry({ id: Number(countryId) });
@@ -129,6 +131,12 @@ export function Component() {
                     title={strings.countryLoadingErrorMessage}
                 />
             </Page>
+        );
+    }
+
+    if (isChromeless) {
+        return (
+            <Outlet context={outletContext} />
         );
     }
 

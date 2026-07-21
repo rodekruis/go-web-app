@@ -1,4 +1,7 @@
 import { useTranslation } from '@ifrc-go/ui/hooks';
+import { _cs } from '@togglecorp/fujs';
+
+import useIsChromeless from '#hooks/useIsChromeless';
 
 import NrwMap from './NrwMap';
 
@@ -8,6 +11,7 @@ import styles from './styles.module.css';
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const strings = useTranslation(i18n);
+    const isChromeless = useIsChromeless();
 
     return (
         <div>
@@ -16,7 +20,12 @@ export function Component() {
             >
                 {strings.nationalRiskWatchHeading}
             </div>
-            <div className={styles.container}>
+            <div
+                className={_cs(
+                    styles.container,
+                    isChromeless && styles.chromeless,
+                )}
+            >
                 <div className={styles.mainContent}>
                     <div className={styles.eventPanelColumn}>
                         <div />

@@ -7,6 +7,7 @@ import { useTranslation } from '@ifrc-go/ui/hooks';
 
 import NavigationTab from '#components/NavigationTab';
 import TabPage from '#components/TabPage';
+import useIsChromeless from '#hooks/useIsChromeless';
 import { type CountryOutletContext } from '#utils/outletContext';
 
 import i18n from './i18n.json';
@@ -16,6 +17,13 @@ export function Component() {
     const outletContext = useOutletContext<CountryOutletContext>();
     const { countryId } = outletContext;
     const strings = useTranslation(i18n);
+    const isChromeless = useIsChromeless();
+
+    if (isChromeless) {
+        return (
+            <Outlet context={outletContext} />
+        );
+    }
 
     return (
         <TabPage>
