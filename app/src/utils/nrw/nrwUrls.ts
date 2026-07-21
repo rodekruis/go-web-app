@@ -8,8 +8,12 @@ import {
     PLACE_CODE_FIELD_KEY,
 } from './nrwConstants';
 
+// IBF API countries endpoint
+export const getCountriesApiUrl = () => `${ibfApiBackend}countries`;
+
 // IBF API events endpoint
-export const getEventsApiUrl = (countryIso3: string) => `${ibfApiBackend}events?countryCodeIso3=${countryIso3}&active=true`;
+export const getEventsApiUrl = (countryIso3: string) =>
+    `${ibfApiBackend}events?countryCodeIso3=${countryIso3}&active=true`;
 
 // GO API URLs for local units data
 // TODO: Revisit these sources as part of this task:
@@ -19,8 +23,10 @@ export const getEventsApiUrl = (countryIso3: string) => `${ibfApiBackend}events?
 // For the Philippines, this is a 100% crossover.
 const goApiBaseUrl = 'https://goadmin.ifrc.org/api/v2';
 const GO_API_RESULTS_LIMIT = 200;
-export const getRcLocsApiUrl = (countryIso3: string) => `${goApiBaseUrl}/public-local-units/?country__iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
-export const getHealthLocsApiUrl = (countryIso3: string) => `${goApiBaseUrl}/health-local-units/?iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
+export const getRcLocsApiUrl = (countryIso3: string) =>
+    `${goApiBaseUrl}/public-local-units/?country__iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
+export const getHealthLocsApiUrl = (countryIso3: string) =>
+    `${goApiBaseUrl}/health-local-units/?iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
 
 // Simplification algorithm factor for simplifying vector data
 // A larger factor returns a smaller, more simplified vector shape.
@@ -106,9 +112,7 @@ export const getAdminAreasByCodesUrl = (
 
 // Get a single admin area by its code (for initial selection from URL)
 // Excludes geometry to reduce payload size
-export const getAdminAreaDetailsNoGeoUrl = (
-    code: string,
-): string => {
+export const getAdminAreaDetailsNoGeoUrl = (code: string): string => {
     const codeParam = `${PLACE_CODE_FIELD_KEY}=%27${code}%27`;
     const limitParam = 'limit=1';
     // Only fetch needed properties for the admin area. Exclude geometry.

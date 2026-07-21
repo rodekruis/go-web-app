@@ -4,25 +4,13 @@
 import { byPrefixAndName } from '@awesome.me/kit-92f09b5225/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { type LayerDto } from '#utils/nrw/shared-dtos';
-import { LayerName } from '#utils/nrw/shared-enums';
+import { type CountryLayerDto, type EventLayerDto } from '#utils/nrw/shared-dtos';
 
 import styles from './styles.module.css';
 
-// TODO: move to loc file. See task https://dev.azure.com/redcrossnl/IBF/_workitems/edit/41713
-function getLayerLabel(layer: LayerDto): string {
-    const labels: Partial<Record<LayerName, string>> = {
-        [LayerName.population]: 'Population',
-        [LayerName.floodDepth]: 'Flood Depth',
-        [LayerName.redCrossBranches]: 'Red Cross Branches',
-        [LayerName.clinics]: 'Clinics',
-    };
-    return labels[layer.layerName] ?? layer.layerName;
-}
-
 interface NrwLayerPanelProps {
-    eventLayers: LayerDto[];
-    nonEventLayers: LayerDto[];
+    eventLayers: EventLayerDto[];
+    nonEventLayers: CountryLayerDto[];
     onToggleMapLayer: (layerName: string) => void;
     onHideAllLayers: () => void;
     visibleLayerNames: string[];
@@ -51,8 +39,8 @@ export default function NrwLayerPanel({
         );
     }
 
-    const renderLayerButton = (layer: LayerDto) => {
-        const key = layer.layerName;
+    const renderLayerButton = (layer: CountryLayerDto) => {
+        const key = layer.name;
         const isVisible = visibleLayerNames.includes(key);
         return (
             <button
@@ -60,13 +48,13 @@ export default function NrwLayerPanel({
                 name={`toggle_${key}`}
                 type="button"
                 className={styles.layerLink}
-                onClick={() => onToggleMapLayer(layer.layerName)}
+                onClick={() => onToggleMapLayer(layer.name)}
             >
                 {isVisible
                     ? <FontAwesomeIcon icon={byPrefixAndName.fas!['square-check']!} />
                     : <FontAwesomeIcon icon={byPrefixAndName.far!.square!} />}
                 {' '}
-                {getLayerLabel(layer)}
+                {layer.label}
             </button>
         );
     };

@@ -11,13 +11,15 @@
  * Source DTOs:
  * - services/api-service/src/events/dto/event-exposed-admin-area.dto.ts
  * - services/api-service/src/events/dto/event-response.dto.ts
- * - services/api-service/src/events/dto/layer.dto.ts
+ * - services/api-service/src/layers/dto/event-layer.dto.ts (EventLayerDto)
+ * - services/api-service/src/layers/dto/country-layer.dto.ts (CountryLayerDto)
  */
 
 import type {
     AlertClass,
     ForecastSource,
     HazardType,
+    LayerLabel,
     LayerName,
     LayerType,
 } from './shared-enums';
@@ -56,14 +58,15 @@ export interface EventResponseDto {
     isOngoing: boolean;
     // A mapping of admin level (as a string key) to the exposed admin areas for that level
     exposedAdminAreas: Record<string, ExposedAdminAreaDto[]>;
-    availableLayers: LayerDto[];
+    availableLayers: EventLayerDto[];
 }
 
-export interface LayerDto {
-    // ID that can be used to fetch the actual map layer data
+export interface CountryLayerDto {
+    name: LayerName;
+    type: LayerType;
+    label: LayerLabel;
+}
+
+export interface EventLayerDto extends CountryLayerDto {
     resourceId: string;
-    // The type of data on this layer. Used to label and style the layer in the UI.
-    layerName: LayerName;
-    // The way this data will be displayed
-    layerType: LayerType;
 }
