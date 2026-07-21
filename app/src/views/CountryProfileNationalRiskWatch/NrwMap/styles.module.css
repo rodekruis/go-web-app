@@ -1,10 +1,13 @@
 .container {
     display: flex;
     flex-direction: column;
-    gap: 8px;
     height: 100%;
     inline-size: 100%;
     min-height: 384px;
+}
+
+.chromeless .container {
+    gap: 8px;
 }
 
 .mapWrapper {
