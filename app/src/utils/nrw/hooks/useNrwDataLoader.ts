@@ -190,9 +190,9 @@ export default function useNrwDataLoader(
     };
 
     // Find the right layer loader function and return it
-    // TODO: this function handles both event layers (EventLayerDto) and country layers (CountryLayerDto)
-    // which forces an unsafe cast below. Separate into two resolution paths so event layers and
-    // country layers don't flow through the same function.
+    // TODO: this function handles both event layers (EventLayerDto) 
+    // and country layers (CountryLayerDto) which forces an unsafe cast below. 
+    // Separate into two resolution paths so they don't flow through the same function.
     const resolveLayerLoader = (
         layerDetails: CountryLayerDto,
         country: string,
