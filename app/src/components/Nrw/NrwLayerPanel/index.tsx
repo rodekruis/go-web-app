@@ -4,7 +4,10 @@
 import { byPrefixAndName } from '@awesome.me/kit-92f09b5225/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { type CountryLayerDto, type EventLayerDto } from '#utils/nrw/shared-dtos';
+import {
+    type CountryLayerDto,
+    type EventLayerDto,
+} from '#utils/nrw/shared-dtos';
 
 import styles from './styles.module.css';
 

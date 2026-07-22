@@ -4,7 +4,10 @@ import {
     ATTRIBUTES_FIELD_KEY,
     POPULATION_ATTRIBUTE_KEY,
 } from './nrwConstants';
-import { type CountryMapData, EventDataSources } from './nrwMapTypes';
+import {
+    type CountryMapData,
+    EventDataSources,
+} from './nrwMapTypes';
 import {
     getAdminAreaDetailsNoGeoUrl,
     getAdminAreasByCodesUrl,
@@ -13,8 +16,15 @@ import {
     getHealthLocsApiUrl,
     getRcLocsApiUrl,
 } from './nrwUrls';
-import type { EventResponseDto, ExposedAdminAreaDto } from './shared-dtos';
-import type { LayerName, LayerLabel, LayerType } from './shared-enums';
+import type {
+    EventResponseDto,
+    ExposedAdminAreaDto,
+} from './shared-dtos';
+import type {
+    LayerLabel,
+    LayerName,
+    LayerType,
+} from './shared-enums';
 
 // Fetch a URL and parse the response body as JSON.
 // Throws when the request fails or the response is not OK.
@@ -252,8 +262,8 @@ const getExposedPlaceCodes = (
     const candidateLevels = Object.keys(exposedAdminAreas)
         .map((adminLevel) => Number(adminLevel))
         .filter(
-            (adminLevel) =>
-                Number.isFinite(adminLevel) && adminLevel <= targetExposedLevel,
+            (adminLevel) => Number.isFinite(adminLevel)
+                && adminLevel <= targetExposedLevel,
         )
         .sort((first, second) => second - first);
 
@@ -310,16 +320,18 @@ export const fetchExposedAdminAreasFeatures = async (
         }),
     );
 
-    return results.flatMap((result) =>
-        result.status === 'fulfilled' ? result.value : [],
-    );
+    return results.flatMap((result) => (
+        result.status === 'fulfilled' ? result.value : []
+    ));
 };
 
-const isValidCoordinatePair = (longitude: number, latitude: number): boolean =>
-    Number.isFinite(longitude) &&
-    Number.isFinite(latitude) &&
-    Math.abs(longitude) <= 180 &&
-    Math.abs(latitude) <= 90;
+const isValidCoordinatePair = (
+    longitude: number,
+    latitude: number,
+): boolean => Number.isFinite(longitude)
+    && Number.isFinite(latitude)
+    && Math.abs(longitude) <= 180
+    && Math.abs(latitude) <= 90;
 
 // Build the GeoJSON point feature for a GO API local unit (RC branch or clinic).
 // Returns an empty array when the coordinates are invalid, so callers can flatMap.
@@ -392,13 +404,11 @@ export const fetchClinicFeatures = async (
         apiUrl,
         'clinic data',
     );
-    return (data.results ?? []).flatMap((item) =>
-        makeLocalUnitFeatures(
-            item,
-            Number(item.location?.lng),
-            Number(item.location?.lat),
-            item.health_facility_type_details?.name,
-            selectedCountry,
-        ),
-    );
+    return (data.results ?? []).flatMap((item) => makeLocalUnitFeatures(
+        item,
+        Number(item.location?.lng),
+        Number(item.location?.lat),
+        item.health_facility_type_details?.name,
+        selectedCountry,
+    ));
 };

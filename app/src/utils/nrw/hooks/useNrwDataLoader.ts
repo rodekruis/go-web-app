@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
 import useAlert from '#hooks/useAlert';
 import {
@@ -12,14 +18,23 @@ import {
     makePointLayerFromFeatures,
     makeStaticImageLayer,
 } from '#utils/nrw/nrwMapHelpers';
-import { clinicPointPaint, rcBranchPointPaint } from '#utils/nrw/nrwMapStyles';
-import type { MapLayerFunctions, NrwMapboxLayer } from '#utils/nrw/nrwMapTypes';
+import {
+    clinicPointPaint,
+    rcBranchPointPaint,
+} from '#utils/nrw/nrwMapStyles';
+import type {
+    MapLayerFunctions,
+    NrwMapboxLayer,
+} from '#utils/nrw/nrwMapTypes';
 import {
     type CountryLayerDto,
-    type EventResponseDto,
     type EventLayerDto,
+    type EventResponseDto,
 } from '#utils/nrw/shared-dtos';
-import { LayerName, LayerType } from '#utils/nrw/shared-enums';
+import {
+    LayerName,
+    LayerType,
+} from '#utils/nrw/shared-enums';
 
 /**
  * Hook used to manage and share data for the NRW map components.
@@ -42,8 +57,7 @@ export default function useNrwDataLoader(
     // ----- States -----
 
     // Data state: event data loaded from the API.
-    const [eventData, setEventData] =
-        useState<EventResponseDto[]>(initialEventData);
+    const [eventData, setEventData] = useState<EventResponseDto[]>(initialEventData);
 
     // Non-event data layers available for the current scoped countries.
     const [countryNonEventLayers, setCountryNonEventLayers] = useState<
@@ -73,9 +87,8 @@ export default function useNrwDataLoader(
 
     // Get available layers for the currently selected event
     const selectedEvent = useMemo(
-        () =>
-            eventData.find((event) => event.eventId === selectedEventId) ??
-            null,
+        () => eventData.find((event) => event.eventId === selectedEventId)
+            ?? null,
         [eventData, selectedEventId],
     );
     const selectedEventLayers = useMemo<EventLayerDto[]>(
@@ -185,22 +198,22 @@ export default function useNrwDataLoader(
         const { name: layerName, type: layerType } = layerDetails;
 
         if (
-            layerType === LayerType.raster &&
-            layerName === LayerName.floodDepth
+            layerType === LayerType.raster
+            && layerName === LayerName.floodDepth
         ) {
-            const resourceId = (layerDetails as EventLayerDto).resourceId;
+            const { resourceId } = layerDetails as EventLayerDto;
             return () => makeEventImageLayer(resourceId);
         }
         if (
-            layerType === LayerType.raster &&
-            layerName === LayerName.population
+            layerType === LayerType.raster
+            && layerName === LayerName.population
         ) {
             return () => makeStaticImageLayer(country, layerName);
         }
 
         if (
-            layerType === LayerType.point &&
-            layerName === LayerName.redCrossBranches
+            layerType === LayerType.point
+            && layerName === LayerName.redCrossBranches
         ) {
             return async () => {
                 const features = await fetchRcBranchesFeatures(country);
@@ -211,7 +224,8 @@ export default function useNrwDataLoader(
                 );
             };
         }
-        if (layerType === LayerType.point && layerName === LayerName.clinics) {
+        if (layerType === LayerType.point
+            && layerName === LayerName.clinics) {
             return async () => {
                 const features = await fetchClinicFeatures(country);
                 return makePointLayerFromFeatures(
@@ -223,8 +237,8 @@ export default function useNrwDataLoader(
         }
 
         console.error(
-            `[useNrwDataLoader] Unsupported layer: ${layerDetails.name} ` +
-                `(${layerDetails.type})`,
+            `[useNrwDataLoader] Unsupported layer: ${layerDetails.name} `
+            + `(${layerDetails.type})`,
         );
 
         return null;
@@ -343,8 +357,8 @@ export default function useNrwDataLoader(
     // Warn when the selected event has no exposed areas.
     useEffect(() => {
         if (
-            selectedEvent &&
-            Object.keys(selectedEvent.exposedAdminAreas).length === 0
+            selectedEvent
+            && Object.keys(selectedEvent.exposedAdminAreas).length === 0
         ) {
             notification.show('No exposed areas', {
                 variant: 'danger',

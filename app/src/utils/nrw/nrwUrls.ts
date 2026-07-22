@@ -12,8 +12,7 @@ import {
 export const getCountriesApiUrl = () => `${ibfApiBackend}countries`;
 
 // IBF API events endpoint
-export const getEventsApiUrl = (countryIso3: string) =>
-    `${ibfApiBackend}events?countryCodeIso3=${countryIso3}&active=true`;
+export const getEventsApiUrl = (countryIso3: string) => `${ibfApiBackend}events?countryCodeIso3=${countryIso3}&active=true`;
 
 // GO API URLs for local units data
 // TODO: Revisit these sources as part of this task:
@@ -23,10 +22,8 @@ export const getEventsApiUrl = (countryIso3: string) =>
 // For the Philippines, this is a 100% crossover.
 const goApiBaseUrl = 'https://goadmin.ifrc.org/api/v2';
 const GO_API_RESULTS_LIMIT = 200;
-export const getRcLocsApiUrl = (countryIso3: string) =>
-    `${goApiBaseUrl}/public-local-units/?country__iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
-export const getHealthLocsApiUrl = (countryIso3: string) =>
-    `${goApiBaseUrl}/health-local-units/?iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
+export const getRcLocsApiUrl = (countryIso3: string) => `${goApiBaseUrl}/public-local-units/?country__iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
+export const getHealthLocsApiUrl = (countryIso3: string) => `${goApiBaseUrl}/health-local-units/?iso3=${countryIso3}&limit=${GO_API_RESULTS_LIMIT}`;
 
 // Simplification algorithm factor for simplifying vector data
 // A larger factor returns a smaller, more simplified vector shape.

@@ -1,6 +1,9 @@
 // Data types and structures use for the Nrw Map components
 
-import type { LayerSpecification, SourceSpecification } from 'mapbox-gl-v3';
+import type {
+    LayerSpecification,
+    SourceSpecification,
+} from 'mapbox-gl-v3';
 
 import { type CountryLayerDto } from './shared-dtos';
 
