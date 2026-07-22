@@ -102,8 +102,7 @@ export default function useNrwDataLoader(
     const layersCache = useRef(new Map<string, NrwMapboxLayer>());
 
     // Build a unique cache key from a parent key (country or eventId) and layer name.
-    const makeCacheKey = (cacheParentKey: string, layerName: string) =>
-        `${cacheParentKey}::${layerName}`;
+    const makeCacheKey = (cacheParentKey: string, layerName: string) => `${cacheParentKey}::${layerName}`;
 
     // Load a layer, cache it, add it to the map, and apply the target visibility.
     const loadAndAddLayer = async (
@@ -191,6 +190,9 @@ export default function useNrwDataLoader(
     };
 
     // Find the right layer loader function and return it
+    // TODO: this function handles both event layers (EventLayerDto) and country layers (CountryLayerDto)
+    // which forces an unsafe cast below. Separate into two resolution paths so event layers and
+    // country layers don't flow through the same function.
     const resolveLayerLoader = (
         layerDetails: CountryLayerDto,
         country: string,

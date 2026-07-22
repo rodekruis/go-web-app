@@ -211,18 +211,18 @@ export async function getCountryMapData(
             'countries',
         );
         const result: Record<string, CountryMapData> = {};
-        for (const country of countries) {
-            if (!scopedCountries.includes(country.countryCodeIso3)) {
-                continue;
-            }
-            result[country.countryCodeIso3] = {
-                availableLayers: country.availableLayers ?? [],
-                supportedEventDataSources: [EventDataSources.Nrw],
-            };
-        }
+        countries
+            .filter((country) => scopedCountries.includes(country.countryCodeIso3))
+            .forEach((country) => {
+                result[country.countryCodeIso3] = {
+                    availableLayers: country.availableLayers ?? [],
+                    supportedEventDataSources: [EventDataSources.Nrw],
+                };
+            });
         return result;
-    } catch {
-        return {};
+    } catch (error) {
+        console.error('[nrwDataFetchHelpers] Failed to fetch countries:', error);
+        throw error;
     }
 }
 
