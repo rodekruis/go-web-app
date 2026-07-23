@@ -1,5 +1,4 @@
 import {
-    type ElementRef,
     useCallback,
     useMemo,
     useRef,
@@ -121,14 +120,13 @@ function getNextStep(
     return undefined;
 }
 
-/** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const { fieldReportId } = useParams<{ fieldReportId: string }>();
     const { navigate } = useRouting();
     const alert = useAlert();
     const strings = useTranslation(i18n);
-    const formContentRef = useRef<ElementRef<'div'>>(null);
+    const formContentRef = useRef<HTMLDivElement>(null);
     const currentLanguage = useCurrentLanguage();
     const { state } = useLocation();
 
@@ -425,10 +423,13 @@ export function Component() {
         ],
     );
 
+    // FIXME(frozenhelium): toggle-form submit callbacks are ref-backed
     const handleFormSubmit = createSubmitHandler(
         validate,
         onErrorSet,
+        // eslint-disable-next-line react-hooks/refs
         handleSubmit,
+        // eslint-disable-next-line react-hooks/refs
         handleFormError,
     );
 

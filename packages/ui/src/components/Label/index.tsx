@@ -11,7 +11,7 @@ const textSizeToClassName: Record<TextSize, string> = {
 };
 
 export interface Props extends Omit<React.HTMLProps<HTMLDivElement>, 'ref' | 'size'> {
-    elementRef?: React.RefObject<HTMLDivElement>;
+    elementRef?: React.RefObject<HTMLDivElement | null>;
     strong?: boolean;
     textSize?: TextSize;
     withUppercaseLetters?: boolean;

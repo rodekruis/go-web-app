@@ -20,7 +20,6 @@ import {
     MapSource,
 } from '@togglecorp/re-map';
 import { type ObjectError } from '@togglecorp/toggle-form';
-import getBbox from '@turf/bbox';
 import {
     type AnySourceData,
     type CircleLayer,
@@ -39,6 +38,7 @@ import {
     COLOR_LIGHT_GREY,
     COLOR_PRIMARY_RED,
 } from '#utils/constants';
+import { getGeoJsonBounds } from '#utils/geo';
 import { localUnitMapStyle } from '#utils/map';
 
 import ActiveCountryBaseMapLayer from '../ActiveCountryBaseMapLayer';
@@ -207,14 +207,17 @@ function BaseMapPointInput<NAME extends string>(props: Props<NAME>) {
                 return undefined;
             }
 
-            return getBbox(countryDetails.bbox);
+            return getGeoJsonBounds(
+                countryDetails.bbox,
+            );
         },
         [countryDetails],
     );
 
     const [searchResult, setSearchResult] = useState<LocationSearchResult | undefined>();
 
-    const center = useMemo(() => {
+    // FIXME(frozenhelium): useMemo removed for React Compiler compatibility
+    const center = (() => {
         if (isDefined(value?.lng) && isDefined(value?.lat)) {
             return [value.lng, value.lat] satisfies [number, number];
         }
@@ -223,7 +226,7 @@ function BaseMapPointInput<NAME extends string>(props: Props<NAME>) {
         }
 
         return undefined;
-    }, [searchResult, value?.lng, value?.lat]);
+    })();
 
     return (
         <div className={_cs(styles.baseMapPointInput, className)}>

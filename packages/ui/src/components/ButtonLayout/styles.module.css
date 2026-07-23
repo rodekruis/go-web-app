@@ -77,6 +77,10 @@
         padding: 0;
     }
 
+    &.text-size-extra-small {
+        font-size: var(--go-ui-font-size-xs);
+    }
+
     &.text-size-small {
         font-size: var(--go-ui-font-size-sm);
     }

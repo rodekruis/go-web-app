@@ -1,6 +1,6 @@
 import {
-    type ElementRef,
     useCallback,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -37,10 +37,12 @@ import LanguageMismatchMessage from '#components/domain/LanguageMismatchMessage'
 import Link from '#components/Link';
 import NonFieldError from '#components/NonFieldError';
 import Page from '#components/Page';
+import ViewOnlyModeBanner from '#components/ViewOnlyModeBanner';
 import useCurrentLanguage from '#hooks/domain/useCurrentLanguage';
 import useAlert from '#hooks/useAlert';
 import {
     DREF_STATUS_DRAFT,
+    DREF_STATUS_FAILED,
     DREF_STATUS_FINALIZED,
     DREF_TYPE_IMMINENT,
     type TypeOfDrefEnum,
@@ -107,7 +109,6 @@ function getNextStep(
     return tabKeyList[currentIndex + direction];
 }
 
-/** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const { finalReportId } = useParams<{ finalReportId: string }>();
@@ -115,7 +116,7 @@ export function Component() {
     const alert = useAlert();
     const strings = useTranslation(i18n);
 
-    const formContentRef = useRef<ElementRef<'div'>>(null);
+    const tabListRef = useRef<HTMLDivElement>(null);
 
     const [activeTab, setActiveTab] = useState<TabKeys>('overview');
     const [isPreviousImminent, setIsPreviousImminent] = useState(false);
@@ -132,7 +133,7 @@ export function Component() {
         setTrue: setShowExportModalTrue,
         setFalse: setShowExportModalFalse,
     }] = useBooleanState(false);
-    const lastModifiedAtRef = useRef<string | undefined>();
+    const lastModifiedAtRef = useRef<string | undefined>(undefined);
 
     const {
         value,
@@ -366,7 +367,7 @@ export function Component() {
 
     const handleFormSubmit = useCallback(
         (modifiedAt?: string) => {
-            formContentRef.current?.scrollIntoView();
+            tabListRef.current?.scrollIntoView();
 
             // FIXME: use createSubmitHandler
             const result = validate();
@@ -397,7 +398,7 @@ export function Component() {
     );
 
     const handleTabChange = useCallback((newTab: TabKeys) => {
-        formContentRef.current?.scrollIntoView();
+        tabListRef.current?.scrollIntoView({ behavior: 'smooth' });
         setActiveTab(newTab);
     }, []);
 
@@ -406,13 +407,35 @@ export function Component() {
     const saveFinalReportPending = updateFinalReportPending;
     const disabled = fetchingFinalReport || saveFinalReportPending;
 
-    const languageMismatch = isDefined(finalReportId)
-        && isDefined(finalReportResponse)
-        && currentLanguage !== finalReportResponse?.translation_module_original_language;
+    const languageMismatch = currentLanguage
+        !== finalReportResponse?.translation_module_original_language;
 
-    const readOnly = languageMismatch
-        && (finalReportResponse?.status === DREF_STATUS_FINALIZED
-            || finalReportResponse?.status === DREF_STATUS_DRAFT);
+    const isEditable = useMemo(() => {
+        if (isNotDefined(drefId)) {
+            return false;
+        }
+
+        if (isNotDefined(finalReportResponse)) {
+            return false;
+        }
+
+        if (languageMismatch) {
+            return false;
+        }
+
+        const { status } = finalReportResponse;
+
+        if (status === DREF_STATUS_DRAFT
+            || status === DREF_STATUS_FINALIZED
+            || status === DREF_STATUS_FAILED
+        ) {
+            return true;
+        }
+
+        return false;
+    }, [languageMismatch, finalReportResponse, drefId]);
+
+    const readOnly = !isEditable;
 
     const shouldHideForm = fetchingFinalReport
         || isDefined(finalReportResponseError);
@@ -439,7 +462,6 @@ export function Component() {
             styleVariant="step"
         >
             <Page
-                elementRef={formContentRef}
                 className={styles.drefFinalReportForm}
                 title={strings.formPageTitle}
                 heading={strings.formPageHeading}
@@ -475,7 +497,7 @@ export function Component() {
                     </>
                 )}
                 info={!shouldHideForm && (
-                    <TabList>
+                    <TabList elementRef={tabListRef}>
                         {tabKeyList.map((tabKey, i) => (
                             <Tab
                                 key={tabKey}
@@ -490,6 +512,9 @@ export function Component() {
                 )}
                 withBackgroundColorInMainSection
                 mainSectionClassName={styles.content}
+                beforeHeaderContent={!fetchingFinalReport && readOnly && (
+                    <ViewOnlyModeBanner />
+                )}
             >
                 {fetchingFinalReport && (
                     <Message
@@ -497,14 +522,14 @@ export function Component() {
                         title={strings.formLoadingMessage}
                     />
                 )}
-                {languageMismatch && (
+                {!fetchingFinalReport && languageMismatch && (
                     <LanguageMismatchMessage
                         title={strings.formNotAvailableInSelectedLanguageMessage}
-                        originalLanguage={finalReportResponse.translation_module_original_language}
+                        originalLanguage={finalReportResponse?.translation_module_original_language}
                         selectedLanguage={currentLanguage}
                     />
                 )}
-                {isDefined(finalReportResponseError) && (
+                {!fetchingFinalReport && isDefined(finalReportResponseError) && (
                     <Message
                         variant="error"
                         title={strings.formLoadErrorTitle}

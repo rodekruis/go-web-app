@@ -38,7 +38,6 @@ import i18n from './i18n.json';
 
 const TOKEN_PAGE_SIZE = 12;
 
-/** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const strings = useTranslation(i18n);
@@ -194,8 +193,7 @@ export function Component() {
                             {strings.externalConnectionMontandonDescription}
                             &nbsp;
                             <Link
-                                external
-                                href="https://docs.google.com/document/d/1USM6IQwBB1jUuyIHe_Bmmc0_gTFibzxBwZ9Oy4YiYx0/edit?usp=sharing"
+                                to="montandonLandingPage"
                                 withLinkIcon
                                 withUnderline
                             >

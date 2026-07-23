@@ -13,7 +13,7 @@ export type CommonRawFileInputProps<NAME> = Omit<ButtonLayoutProps, 'elementRef'
     accept?: string;
     disabled?: boolean;
     inputProps?: React.ComponentPropsWithoutRef<'input'>;
-    inputRef?: React.RefObject<HTMLInputElement>;
+    inputRef?: React.RefObject<HTMLInputElement | null>;
     name: NAME;
     readOnly?: boolean;
 };

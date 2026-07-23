@@ -66,7 +66,6 @@ function getFieldReport(
     }, undefined);
 }
 
-/** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const strings = useTranslation(i18n);
@@ -203,7 +202,7 @@ export function Component() {
                         numPreferredGridColumns={3}
                     >
                         <TextOutput
-                            label={strings.disasterCategorization}
+                            label={strings.disasterCategorisation}
                             value={(
                                 <ListView
                                     withWrap

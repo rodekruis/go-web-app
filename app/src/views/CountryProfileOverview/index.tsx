@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
     Container,
@@ -116,7 +115,6 @@ function SeasonalCalendarEvent(props: SeasonalCalendarEventProps) {
     ));
 }
 
-/** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const strings = useTranslation(i18n);
@@ -162,52 +160,50 @@ export function Component() {
         ({ order }) => order,
     );
 
-    const seasonalCalendarData = useMemo(
-        () => (
-            databankResponse?.acaps?.map(
-                ({ month, event_type, ...otherProps }) => {
-                    if (isNotDefined(month) || isNotDefined(event_type)) {
-                        return undefined;
-                    }
+    // FIXME(frozenhelium): useMemo removed for React Compiler compatibility
+    const seasonalCalendarData = (
+        databankResponse?.acaps?.map(
+            ({ month, event_type, ...otherProps }) => {
+                if (isNotDefined(month) || isNotDefined(event_type)) {
+                    return undefined;
+                }
 
-                    // FIXME: this sort will mutate the data
-                    const orderedMonth = month.sort(
-                        (a, b) => compareNumber(monthToOrderMap[a], monthToOrderMap[b]),
-                    );
+                // FIXME: this sort will mutate the data
+                const orderedMonth = month.sort(
+                    (a, b) => compareNumber(monthToOrderMap[a], monthToOrderMap[b]),
+                );
 
-                    const monthIndices = orderedMonth.map(
-                        (monthName) => monthToOrderMap[monthName]!,
-                    );
+                const monthIndices = orderedMonth.map(
+                    (monthName) => monthToOrderMap[monthName]!,
+                );
 
-                    const discreteMonthIndices = splitList<number, number>(
-                        monthIndices,
-                        (item, index): item is number => (
-                            index === 0
-                                ? false
-                                : (item - monthIndices[index - 1]!) > 1
-                        ),
-                        true,
-                    );
+                const discreteMonthIndices = splitList<number, number>(
+                    monthIndices,
+                    (item, index): item is number => (
+                        index === 0
+                            ? false
+                            : (item - monthIndices[index - 1]!) > 1
+                    ),
+                    true,
+                );
 
-                    return {
-                        ...otherProps,
-                        event_type,
-                        month: orderedMonth,
-                        monthIndices: discreteMonthIndices.map(
-                            (continuousList, i) => ({
-                                key: i,
-                                start: continuousList[0]!,
-                                end: continuousList[continuousList.length - 1]! + 1,
-                            }),
-                        ).sort((a, b) => compareNumber(a.start, b.start)),
-                        startMonth: monthToOrderMap[orderedMonth[0]!],
-                    };
-                },
-            ).filter(isDefined).sort(
-                (a, b) => compareNumber(a.startMonth, b.startMonth),
-            )
-        ),
-        [databankResponse, monthToOrderMap],
+                return {
+                    ...otherProps,
+                    event_type,
+                    month: orderedMonth,
+                    monthIndices: discreteMonthIndices.map(
+                        (continuousList, i) => ({
+                            key: i,
+                            start: continuousList[0]!,
+                            end: continuousList[continuousList.length - 1]! + 1,
+                        }),
+                    ).sort((a, b) => compareNumber(a.start, b.start)),
+                    startMonth: monthToOrderMap[orderedMonth[0]!],
+                };
+            },
+        ).filter(isDefined).sort(
+            (a, b) => compareNumber(a.startMonth, b.startMonth),
+        )
     );
 
     const eventTypeGroupedData = mapToList(

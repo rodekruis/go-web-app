@@ -9,7 +9,7 @@ type InheritedProps<NAME> = Omit<InputContainerProps, 'input' | 'highlightMode'>
 & Omit<RawInputProps<NAME>, 'type' | 'className' | 'elementRef'>;
 
 export interface Props<NAME> extends InheritedProps<NAME> {
-    inputElementRef?: React.RefObject<HTMLInputElement>;
+    inputElementRef?: React.RefObject<HTMLInputElement | null>;
     inputClassName?: string;
     type?: 'text' | 'password';
     withDiffView?: boolean;

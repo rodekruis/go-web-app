@@ -10,7 +10,7 @@ export interface Props {
     children?: React.ReactNode;
     description?: React.ReactNode;
     // contentSectionClassName?: string;
-    tooltip?: string;
+    tooltip?: React.ReactNode;
     withoutTitleSection?: boolean;
     withFullWidthContent?: boolean;
     withoutPadding?: boolean;
@@ -18,6 +18,7 @@ export interface Props {
     withAsteriskOnTitle?: boolean;
     numPreferredColumns?: NumColumn;
     withShadow?: boolean;
+    headerActions?: React.ReactNode;
 }
 
 function InputSection(props: Props) {
@@ -35,6 +36,7 @@ function InputSection(props: Props) {
         numPreferredColumns = 1,
         withFullWidthContent,
         withShadow,
+        headerActions,
     } = props;
 
     const content = (
@@ -49,15 +51,18 @@ function InputSection(props: Props) {
                             )}
                         </>
                     )}
-                    // headingDescription={withAsteriskOnTitle && (
-                    //     <span aria-hidden className={styles.asterisk}>
-                    //         *
-                    //     </span>
-                    // )}
-                    headerActions={tooltip && <InfoPopup description={tooltip} />}
+                    headerActions={(
+                        <>
+                            {tooltip && <InfoPopup description={tooltip} />}
+                            {headerActions}
+                        </>
+                    )}
                     headingLevel={6}
                 >
-                    <Description withLightText>
+                    <Description
+                        withLightText
+                        textSize="sm"
+                    >
                         <ListView
                             layout="block"
                             withSpacingOpticalCorrection

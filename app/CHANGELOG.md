@@ -1,5 +1,208 @@
 # go-web-app
 
+## 7.27.0-beta.0
+
+### Minor Changes
+
+- b8e7c9a: Add notification preferences for email alerts under account settings
+
+## 7.26.0
+
+### Minor Changes
+
+- 4b0cd41: Update navigation pop-up style
+- fd26ab5: Implement EAP (Early Action Protocol) forms & exports (Only available in Staging)
+
+      - Add forms for EAP registration, Simplified EAP & Full EAP
+      - Add pdf exports
+          - With and without track change for Simplified EAP
+          - With and without track change for Full EAP
+          - Summary for Full EAP
+      - Add EAP Application tab in account > my forms to list and track status of EAP
+      - Create a workflow to maintain EAP lifecycle from registration to approval
+
+- 518d2c6: Update Active Operations Map show Crisis Categorization
+  - Add a toggle to select between "Appeal Types" and "Crisis Categorization"
+
+### Patch Changes
+
+- c82582c: Surge Catalogue of Services
+  - Fix NS list providing WASH M20: /surge/catalogue/wash/msm20-eru
+  - Add Service catalogue and Job aids to Digital Surge: /surge/catalogue/digital-systems
+- abd1c9c: Fix links in the PDF export
+- d056029: Update Catalogue of Surge Services:
+
+  - Change Personnel composition on Water Supply Rehabilitation
+  - Fix link of Shelter and Settlements on Shelter
+
+- Updated dependencies [cf73a97]
+- Updated dependencies [4b0cd41]
+  - @ifrc-go/ui@2.2.0
+
+## 7.26.0-beta.2
+
+### Patch Changes
+
+- c22a7a7: Update Active Operation Map in homepage
+
+  - Display map data based on emergency severity levels
+  - Update legend and map to reflect crisis and appeals types
+
+## 7.26.0-beta.1
+
+### Minor Changes
+
+- fd26ab5: Implement Early Action Protocol (EAP) forms & exports
+
+      - Add forms for EAP registration, Simplified EAP & Full EAP
+      - Add pdf exports
+          - With and without track change for Simplified EAP
+          - With and without track change for Full EAP
+          - Summary for Full EAP
+      - Add EAP Application tab in account > my forms to list and track status of EAP
+      - Create a workflow to maintain EAP lifecycle from registration to approval
+
+### Patch Changes
+
+- c82582c: Surge Catalogue of Services
+  - Fix NS list providing WASH M20: /surge/catalogue/wash/msm20-eru
+  - Add Service catalogue and Job aids to Digital Surge: /surge/catalogue/digital-systems
+- abd1c9c: Fix links in the PDF export
+- Updated dependencies [cf73a97]
+  - @ifrc-go/ui@2.2.0-beta.1
+
+## 7.26.0-beta.0
+
+### Minor Changes
+
+- 4b0cd41: Update navigation pop-up style
+
+### Patch Changes
+
+- Updated dependencies [4b0cd41]
+  - @ifrc-go/ui@2.2.0-beta.0
+
+## 7.25.0
+
+### Minor Changes
+
+- 521c1b5: Fix event map being replace by cover image is DREF forms
+- fb87ba5: Update DREF Application Forms and Exports
+
+  - Update Proposed Activities behavior in Imminent DREF Application & Final Report forms
+    - Make activities optional when budget is Zero for Early Response
+  - Update PDF export
+    - Remove duplicate display of risk regions
+    - Update PGA bank detail description
+
+- 52aefd2: Fix Radio Inputs not allowing to clear the value
+
+### Patch Changes
+
+- 6aa37a7: Use current year in Surge overview Top 5 deployments
+- 53774e6: Fix Old DREF Final Reports not being able to update in languages other than English
+- 25f062c: Make import template button label translatable in Account > DREF
+- 7a9514d: Update Montandon landing page
+  - Add 'Getting started' section
+  - Enable external links
+- e97709b: Update Catalogue of Surge Services
+
+  - Update WASH WSR NS service proveders
+  - Update Health ERU MHPSS NS service providers
+
+- 728b388: Update the DREF forms
+
+  - Make forms view-only for approved and finalizing status
+  - Add a view-only banner
+  - Update language mismatch message title
+
+- 47ab0c0: Remove Swagger API link from Montandon landing page
+- 93f1c9b: Add country to account details page and edit form
+- 2e50084: Update dref forms
+
+  - Hide view only and language mismatch banner in pending state
+  - Enable share functionality on read-only mode
+  - Fix UI for old final report form
+
+- becb909: Update Ops. Learning disclaimer to refer specific AI model being used (GPT 4o-mini)
+- Updated dependencies [22038c4]
+- Updated dependencies [bd93064]
+- Updated dependencies [52aefd2]
+- Updated dependencies [e619fc8]
+  - @ifrc-go/ui@2.1.0
+
+## 7.25.0-beta.9
+
+### Minor Changes
+
+- fb87ba5: Update DREF Application Forms and Exports
+
+  - Update Proposed Activities behavior in Imminent DREF Application & Final Report forms
+    - Make activities optional when budget is Zero for Early Response
+  - Update PDF export
+    - Remove duplicate display of risk regions
+    - Update PGA bank detail description
+
+## 7.25.0-beta.8
+
+### Patch Changes
+
+- 2e50084: Update dref forms
+
+  - Hide view only and language mismatch banner in pending state
+  - Enable share functionality on read-only mode
+  - Fix UI for old final report form
+
+- Updated dependencies [bd93064]
+  - @ifrc-go/ui@2.1.0-beta.3
+
+## 7.25.0-beta.7
+
+### Patch Changes
+
+- 728b388: Update the DREF forms
+
+  - Make forms view-only for approved and finalizing status
+  - Add a view-only banner
+  - Update language mismatch message title
+
+- Updated dependencies [e619fc8]
+  - @ifrc-go/ui@2.1.0-beta.2
+
+## 7.25.0-beta.6
+
+### Patch Changes
+
+- 47ab0c0: Remove Swagger API link from Montandon landing page
+
+## 7.25.0-beta.5
+
+### Patch Changes
+
+- 7a9514d: Update Montandon landing page
+  - Add 'Getting started' section
+  - Enable external links
+
+## 7.25.0-beta.4
+
+### Patch Changes
+
+- 25f062c: Make import template button label translatable in Account > DREF
+
+## 7.25.0-beta.3
+
+### Patch Changes
+
+- 53774e6: Fix Old DREF Final Reports not being able to update in languages other than English
+
+## 7.25.0-beta.2
+
+### Patch Changes
+
+- 6aa37a7: Use current year in Surge overview Top 5 deployments
+- Updated dependencies [22038c4]
+  - @ifrc-go/ui@2.0.1-beta.1
+
 ## 7.25.0-beta.1
 
 ### Patch Changes

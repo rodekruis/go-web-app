@@ -10,10 +10,11 @@ env:
   APP_API_ENDPOINT: 'https://goadmin-stage.ifrc.org/'
   APP_ENVIRONMENT: 'development'
   APP_MAPBOX_ACCESS_TOKEN: 'dummy-token'
-  APP_RISK_API_ENDPOINT: 'https://go-risk-staging.northeurope.cloudapp.azure.com/api/v1/'
+  APP_RISK_API_ENDPOINT: 'https://go-risk-api-stage.ifrc.org/'
   APP_TINY_API_KEY: 'dummy-api-key'
   APP_TITLE: 'IFRC Go Test'
   FONTAWESOME_API_KEY: ${{ secrets.FONTAWESOME_API_KEY }}
+  APP_TRANSLATION_API_ENDPOINT: 'https://cacheppuccino-stage.ifrc.org/'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -33,7 +34,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
@@ -69,7 +70,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
@@ -97,7 +98,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
@@ -128,7 +129,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
@@ -156,7 +157,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
@@ -182,7 +183,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
@@ -209,7 +210,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
@@ -238,7 +239,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
@@ -278,7 +279,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install

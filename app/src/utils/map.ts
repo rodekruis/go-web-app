@@ -1,11 +1,11 @@
 import { isDefined } from '@togglecorp/fujs';
-import getBbox from '@turf/bbox';
 import type {
     Map,
     NavigationControl,
 } from 'mapbox-gl';
 
 import { type Country } from '#hooks/domain/useCountryRaw';
+import { getGeoJsonBounds } from '#utils/geo';
 
 export const defaultMapStyle = 'mapbox://styles/go-ifrc/ckrfe16ru4c8718phmckdfjh0';
 export const localUnitMapStyle = 'mapbox://styles/go-ifrc/clvvgugzh00x501pc1n00b8cz';
@@ -46,9 +46,10 @@ export function getCountryListBoundingBox(countryList: Country[]) {
         type: 'FeatureCollection' as const,
         features: countryWithBbox.map((country) => ({
             type: 'Feature' as const,
-            geometry: country.bbox,
+            geometry: country.bbox as unknown as GeoJSON.Geometry,
+            properties: null,
         })),
-    };
+    } as GeoJSON.FeatureCollection;
 
-    return getBbox(collection);
+    return getGeoJsonBounds(collection);
 }

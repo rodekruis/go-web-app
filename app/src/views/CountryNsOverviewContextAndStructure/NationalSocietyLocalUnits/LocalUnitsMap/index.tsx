@@ -38,8 +38,10 @@ import {
     MapLayer,
     MapSource,
 } from '@togglecorp/re-map';
-import getBbox from '@turf/bbox';
-import { type SymbolLayer } from 'mapbox-gl';
+import {
+    type LngLatBoundsLike,
+    type SymbolLayer,
+} from 'mapbox-gl';
 
 import ActiveCountryBaseMapLayer from '#components/domain/ActiveCountryBaseMapLayer';
 import BaseMap from '#components/domain/BaseMap';
@@ -56,6 +58,7 @@ import {
     DURATION_MAP_ZOOM,
     MAX_PAGE_LIMIT,
 } from '#utils/constants';
+import { getGeoJsonBounds } from '#utils/geo';
 import { localUnitMapStyle } from '#utils/map';
 import { type CountryOutletContext } from '#utils/outletContext';
 import {
@@ -222,9 +225,9 @@ function LocalUnitsMap(props: Props) {
         [loadedIcons, localUnitsOptions],
     );
 
-    const countryBounds = useMemo(() => (
+    const countryBounds = useMemo<LngLatBoundsLike | undefined>(() => (
         (countryResponse && countryResponse.bbox)
-            ? getBbox(countryResponse.bbox)
+            ? getGeoJsonBounds(countryResponse.bbox)
             : undefined
     ), [countryResponse]);
 

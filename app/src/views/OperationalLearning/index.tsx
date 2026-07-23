@@ -99,7 +99,6 @@ const regionKeySelector = (region: RegionOption) => region.key;
 const disasterTypeLabelSelector = (type: DisasterType) => type.name ?? '?';
 const perLearningTypeKeySelector = (perLearningType: PerLearningType) => perLearningType.key;
 
-/** @knipignore */
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const strings = useTranslation(i18n);

@@ -10,10 +10,11 @@ type InheritedProps<NAME> = Omit<InputContainerProps, 'input' | 'highlightMode'>
 & Omit<RawInputProps<NAME>, 'type' | 'className' | 'elementRef'>;
 
 export interface Props<NAME> extends InheritedProps<NAME> {
-    inputElementRef?: React.RefObject<HTMLInputElement>;
+    inputElementRef?: React.RefObject<HTMLInputElement | null>;
     inputClassName?: string;
     withDiffView?: boolean;
     prevValue?: RawInputProps<NAME>['value'];
+    type?: 'date' | 'month';
 }
 
 function DateInput<const T>(props: Props<T>) {
@@ -25,6 +26,7 @@ function DateInput<const T>(props: Props<T>) {
         withDiffView,
         value,
         prevValue,
+        type = 'date',
         ...otherProps
     } = props;
 
@@ -59,7 +61,7 @@ function DateInput<const T>(props: Props<T>) {
                     readOnly={readOnly}
                     disabled={disabled}
                     className={inputClassName}
-                    type="date"
+                    type={type}
                 />
             )}
         />
