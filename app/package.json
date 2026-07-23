@@ -43,6 +43,7 @@
     "dependencies": {
         "@awesome.me/kit-92f09b5225": "^1.0.7",
         "@fortawesome/fontawesome-svg-core": "^7.3.1",
+        "@fortawesome/pro-solid-svg-icons": "^7.3.1",
         "@fortawesome/react-fontawesome": "^3.4.0",
         "@ifrc-go/icons": "^2.0.1",
         "@ifrc-go/ui": "workspace:^",

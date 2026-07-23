@@ -12,13 +12,13 @@
 }
 
 .icon {
-  font-size: var(--go-ui-font-size-xl);
   color: var(--go-ui-color-gray-90);
+  font-size: var(--go-ui-font-size-xl);
 }
 
 .icon-user {
-  font-size: var(--go-ui-font-size-2xl);
   color: var(--go-ui-color-gray-70);
+  font-size: var(--go-ui-font-size-2xl);
 }
 
 .heading {

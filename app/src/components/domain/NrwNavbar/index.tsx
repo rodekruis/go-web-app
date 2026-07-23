@@ -1,7 +1,8 @@
 import {
-    MenuLineIcon,
-    ShieldUserFillIcon,
-} from '@ifrc-go/icons';
+    faBars,
+    faCircleUser,
+} from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     Heading,
     ListView,
@@ -45,7 +46,10 @@ function NrwNavbar(props: Props) {
                     withSpaceBetweenContents
                 >
                     <div className={styles.brand}>
-                        <MenuLineIcon className={styles.icon} />
+                        <FontAwesomeIcon
+                            icon={faBars}
+                            className={styles.icon}
+                        />
                         <Heading
                             level={3}
                             className={styles.heading}
@@ -53,7 +57,10 @@ function NrwNavbar(props: Props) {
                             {headerLabel}
                         </Heading>
                     </div>
-                    <ShieldUserFillIcon className={styles.iconUser} />
+                    <FontAwesomeIcon
+                        icon={faCircleUser}
+                        className={styles.iconUser}
+                    />
                 </ListView>
             </PageContainer>
         </nav>
