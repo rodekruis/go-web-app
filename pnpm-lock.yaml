@@ -31,9 +31,6 @@ importers:
 
   app:
     dependencies:
-      '@awesome.me/kit-92f09b5225':
-        specifier: ^1.0.7
-        version: 1.0.7
       '@fortawesome/fontawesome-svg-core':
         specifier: ^7.3.1
         version: 7.3.1
@@ -628,10 +625,6 @@ packages:
   '@ast-grep/napi@0.36.3':
     resolution: {integrity: sha512-ExypohE8L7FvKBHxu7UpwcV9XVfyS+AqNZKyKIfxYwJyD9l7Gw6pmMYd7J2uopJsPEIUf44/emEFds6nFUx/dw==}
     engines: {node: '>= 10'}
-
-  '@awesome.me/kit-92f09b5225@1.0.7':
-    resolution: {integrity: sha512-KX3vbvSFlCkAbxEVWRhceWNJyTyPLUAtTcYdXN5FYl/c1H6S3M5HqvaPuDnFZaFIZsKGqOzUIyKp31xPdByz1g==}
-    engines: {node: '>=16'}
 
   '@babel/code-frame@7.29.0':
     resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
@@ -7177,7 +7170,6 @@ packages:
 
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
-    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   verror@1.10.0:
@@ -7605,10 +7597,6 @@ snapshots:
       '@ast-grep/napi-win32-arm64-msvc': 0.36.3
       '@ast-grep/napi-win32-ia32-msvc': 0.36.3
       '@ast-grep/napi-win32-x64-msvc': 0.36.3
-
-  '@awesome.me/kit-92f09b5225@1.0.7':
-    dependencies:
-      '@fortawesome/fontawesome-common-types': 7.3.1
 
   '@babel/code-frame@7.29.0':
     dependencies:
