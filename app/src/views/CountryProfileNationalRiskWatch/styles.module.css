@@ -1,4 +1,4 @@
 .page .main-section-container .main-section {
-    padding: var(--go-ui-spacing-lg);
+    padding: 0 var(--go-ui-spacing-lg);
     max-width: none;
 }

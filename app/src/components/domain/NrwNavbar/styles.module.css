@@ -1,0 +1,26 @@
+.navbar {
+  background-color: var(--go-ui-color-foreground);
+}
+
+.page-container .content {
+  max-width: none;
+}
+
+.brand {
+  display: flex;
+  gap: var(--go-ui-spacing-sm);
+}
+
+.icon {
+  font-size: var(--go-ui-font-size-xl);
+  color: var(--go-ui-color-gray-90);
+}
+
+.icon-user {
+  font-size: var(--go-ui-font-size-2xl);
+  color: var(--go-ui-color-gray-70);
+}
+
+.heading {
+  text-transform: uppercase;
+}

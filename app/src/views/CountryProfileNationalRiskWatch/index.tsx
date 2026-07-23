@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import {
     Container,
     ListView,
@@ -5,8 +6,10 @@ import {
 import { useTranslation } from '@ifrc-go/ui/hooks';
 
 import NrwMap from '#components/domain/NrwMap';
+import NrwNavbar from '#components/domain/NrwNavbar';
 import Page from '#components/Page';
 import { nrwStandalone } from '#config';
+import useCountry from '#hooks/domain/useCountry';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
@@ -15,15 +18,18 @@ import styles from './styles.module.css';
 export function Component() {
     const strings = useTranslation(i18n);
 
+    const [searchParams] = useSearchParams();
+    const countryCodeIso3 = searchParams.get('countryCodeIso3') ?? '';
+    const country = useCountry({ iso3: countryCodeIso3 });
+
     const content = (
         <Container
-            heading={strings.nationalRiskWatchHeading}
+            heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
         >
             <ListView
                 layout="grid"
                 withSidebar
             >
-
                 <NrwMap />
             </ListView>
         </Container>
@@ -31,14 +37,17 @@ export function Component() {
 
     if (nrwStandalone) {
         return (
-            <Page
-                title={strings.nationalRiskWatchPageTitle}
-                className={styles.page}
-                mainSectionContainerClassName={styles.mainSectionContainer}
-                mainSectionClassName={styles.mainSection}
-            >
-                {content}
-            </Page>
+            <>
+                <NrwNavbar countryName={country?.name} />
+                <Page
+                    title={strings.nationalRiskWatchPageTitle}
+                    className={styles.page}
+                    mainSectionContainerClassName={styles.mainSectionContainer}
+                    mainSectionClassName={styles.mainSection}
+                >
+                    {content}
+                </Page>
+            </>
         );
     }
 
