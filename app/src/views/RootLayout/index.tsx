@@ -9,7 +9,6 @@ import {
 import { unstable_batchedUpdates } from 'react-dom';
 import {
     Outlet,
-    useLocation,
     useNavigation,
 } from 'react-router-dom';
 import { AlertInformationLineIcon } from '@ifrc-go/icons';
@@ -35,7 +34,10 @@ import {
 import GlobalFooter from '#components/GlobalFooter';
 import Link from '#components/Link';
 import Navbar from '#components/Navbar';
-import { environment } from '#config';
+import {
+    environment,
+    nrwStandalone as hideNavigation,
+} from '#config';
 import DomainContext, {
     type CacheKey,
     type Domain,
@@ -58,10 +60,6 @@ export function Component() {
     const isLoadingDebounced = useDebouncedValue(isLoading);
 
     const strings = useTranslation(i18n);
-
-    // Use location to hide navigation for specific pages
-    const location = useLocation();
-    const hideNavigation = location.pathname.startsWith('/nrw');
 
     const { isAuthenticated } = useAuth();
     const { removeUserAuth } = useContext(UserContext);

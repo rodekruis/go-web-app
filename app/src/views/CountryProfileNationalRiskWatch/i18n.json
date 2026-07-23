@@ -1,6 +1,7 @@
 {
   "namespace": "countryProfileNationalRiskWatch",
   "strings": {
-    "nationalRiskWatchHeading": "National Risk Watch"
+    "nationalRiskWatchHeading": "National Risk Watch",
+    "nationalRiskWatchPageTitle": "National Risk Watch"
   }
 }
