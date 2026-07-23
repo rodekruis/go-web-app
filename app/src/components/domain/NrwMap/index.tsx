@@ -14,9 +14,6 @@ import {
 
 import styles from './styles.module.css';
 
-/**
- * Mapbox v3 map component for NRW data maps.
- */
 export default function NrwMap() {
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<MapboxGLMap | null>(null);
@@ -50,13 +47,9 @@ export default function NrwMap() {
     }, []);
 
     return (
-        <div className={styles.container}>
-            <div className={styles.mapWrapper}>
-                <div
-                    ref={mapContainerRef}
-                    className={styles.map}
-                />
-            </div>
-        </div>
+        <div
+            ref={mapContainerRef}
+            className={styles.mapContainer}
+        />
     );
 }
