@@ -53,8 +53,6 @@ const appConfigs = compat.config({
     rules: {
         'react-refresh/only-export-components': 'warn',
 
-        'no-console': ['warn', { allow: ['error'] }],
-
         'no-unused-vars': 0,
         '@typescript-eslint/no-unused-vars': 1,
 
@@ -99,9 +97,6 @@ const appConfigs = compat.config({
         'react/jsx-filename-extension': ['error', { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
 
         'import/extensions': ['off', 'never'],
-
-        // This ignore can be removed after MVP phase.
-        'import/no-unresolved': ['error', { ignore: ['^@ifrc-go/'] }],
 
         'react-hooks/rules-of-hooks': 'error',
         'react-hooks/exhaustive-deps': 'warn',
