@@ -4,9 +4,13 @@ import {
     useEffect,
     useRef,
 } from 'react';
+import { _cs } from '@togglecorp/fujs';
 import mapboxgl, { type Map as MapboxGLMap } from 'mapbox-gl-v3';
 
-import { mbtoken } from '#config';
+import {
+    mbtoken,
+    nrwStandalone,
+} from '#config';
 import {
     defaultMapZoom,
     NRW_MAPBOX_STYLE_URL,
@@ -49,7 +53,10 @@ export default function NrwMap() {
     return (
         <div
             ref={mapContainerRef}
-            className={styles.mapContainer}
+            className={_cs(
+                styles.mapContainer,
+                nrwStandalone && styles.nrwStandalone,
+            )}
         />
     );
 }
