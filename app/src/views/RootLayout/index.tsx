@@ -349,7 +349,6 @@ export function Component() {
                     perFormComponentsTrigger();
                     break;
                 default:
-
                     console.error(`Cannot call invalidate on '${name}'`);
             }
         },
