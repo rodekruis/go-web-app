@@ -24,3 +24,7 @@
 .heading {
   text-transform: uppercase;
 }
+
+.country-name {
+  margin-inline-start: var(--go-ui-spacing-md);
+}

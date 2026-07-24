@@ -30,11 +30,6 @@ function NrwNavbar(props: Props) {
 
     const strings = useTranslation(i18n);
 
-    const headerLabel = [
-        strings.nrwNavbarTitle,
-        countryName,
-    ].filter(isTruthyString).join(' | ');
-
     return (
         <nav className={_cs(styles.navbar, className)}>
             <PageContainer
@@ -54,7 +49,12 @@ function NrwNavbar(props: Props) {
                             level={3}
                             className={styles.heading}
                         >
-                            {headerLabel}
+                            {strings.nrwNavbarTitle}
+                            {isTruthyString(countryName) && (
+                                <span className={styles.countryName}>
+                                    {countryName}
+                                </span>
+                            )}
                         </Heading>
                     </div>
                     <FontAwesomeIcon
