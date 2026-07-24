@@ -10,7 +10,7 @@ import { mbtoken } from '#config';
 import {
     defaultMapZoom,
     NRW_MAPBOX_STYLE_URL,
-} from '#utils/nrw/nrwConstants';
+} from '#utils/domain/nrw';
 
 import styles from './styles.module.css';
 
