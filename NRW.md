@@ -11,7 +11,7 @@ A system that forecasts Early Warning alerts, disseminates notifications, and vi
 3. **NOTE**: You can set `APP_NRW_STANDALONE` to `false` or `true` for respectively *embedded* or *standalone* version. If the former, then set up and run the `go-api` submodule service first. See [go-api README](./go-api/README.md).
 4. The FontAwesome API token must be available when installing dependencies: `FONTAWESOME_API_KEY=XXXX pnpm install`.
 5. Launch with `pnpm start` and visit `http://localhost:3000`.
-6. In embedded version: go to Country > Country Profile > National Risk Watch. (Standalone version is directly accessible at `http://localhost:3000`.
+6. In embedded version: go to Country > Country Profile > National Risk Watch. Standalone version is directly accessible at `http://localhost:3000`.
 
 ## CI/CD setup
 
