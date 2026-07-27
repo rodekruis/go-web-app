@@ -11,12 +11,12 @@ import {
     mbtoken,
     nrwStandalone,
 } from '#config';
-import {
-    defaultMapZoom,
-    NRW_MAPBOX_STYLE_URL,
-} from '#utils/domain/nrw';
 
 import styles from './styles.module.css';
+
+const DEFAULT_MAP_ZOOM = 3;
+// Get this from Mapbox Studio > Styles > Style url
+const NRW_MAPBOX_STYLE_URL = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
 
 export default function NrwMap() {
     const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -36,7 +36,7 @@ export default function NrwMap() {
             projection: 'mercator',
             attributionControl: true,
             center: [0, 0],
-            zoom: defaultMapZoom,
+            zoom: DEFAULT_MAP_ZOOM,
         });
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
@@ -54,7 +54,7 @@ export default function NrwMap() {
         <div
             ref={mapContainerRef}
             className={_cs(
-                styles.mapContainer,
+                styles.nrwMap,
                 nrwStandalone && styles.nrwStandalone,
             )}
         />

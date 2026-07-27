@@ -31,17 +31,16 @@ export function Component() {
 
     if (nrwStandalone) {
         return (
-            <>
+            <div className={styles.countryProfileNrw}>
                 <NrwNavbar />
                 <Page
                     title={strings.nationalRiskWatchPageTitle}
-                    className={styles.page}
                     mainSectionContainerClassName={styles.mainSectionContainer}
                     mainSectionClassName={styles.mainSection}
                 >
                     {content}
                 </Page>
-            </>
+            </div>
         );
     }
 

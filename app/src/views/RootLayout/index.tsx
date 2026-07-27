@@ -36,7 +36,7 @@ import Link from '#components/Link';
 import Navbar from '#components/Navbar';
 import {
     environment,
-    nrwStandalone as hideNavigation,
+    nrwStandalone,
 } from '#config';
 import DomainContext, {
     type CacheKey,
@@ -435,11 +435,11 @@ export function Component() {
                         )}
                     />
                 )}
-                {!hideNavigation && <Navbar className={styles.navbar} />}
+                {!nrwStandalone && <Navbar className={styles.navbar} />}
                 <div className={styles.pageContent}>
                     <Outlet />
                 </div>
-                {!hideNavigation && <GlobalFooter className={styles.footer} />}
+                {!nrwStandalone && <GlobalFooter className={styles.footer} />}
                 <AlertContainer />
                 {(isCookiesBannerVisible || environment !== 'production') && (
                     <div className={styles.bannersContainer}>

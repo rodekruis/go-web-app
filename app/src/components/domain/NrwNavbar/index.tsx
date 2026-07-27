@@ -24,7 +24,7 @@ function NrwNavbar(props: Props) {
     const strings = useTranslation(i18n);
 
     return (
-        <nav className={_cs(styles.navbar, className)}>
+        <nav className={_cs(styles.nrwNavbar, className)}>
             <PageContainer
                 className={styles.pageContainer}
                 contentClassName={styles.content}
