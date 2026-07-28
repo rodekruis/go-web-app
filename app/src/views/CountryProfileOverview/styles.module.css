@@ -1,14 +1,14 @@
 .seasonal-calendar-content {
     background-image: linear-gradient(
-            to right,
-            var(--go-ui-color-separator) var(--go-ui-width-separator-thin),
-            transparent var(--go-ui-width-separator-thin)
-        ),
+        to right,
+        var(--go-ui-color-separator) var(--go-ui-width-separator-thin),
+        transparent var(--go-ui-width-separator-thin)
+    ),
         linear-gradient(
-            to bottom,
-            var(--go-ui-color-separator) var(--go-ui-width-separator-thin),
-            transparent var(--go-ui-width-separator-thin)
-        );
+        to bottom,
+        var(--go-ui-color-separator) var(--go-ui-width-separator-thin),
+        transparent var(--go-ui-width-separator-thin)
+    );
     background-size: calc(100% / 12);
 
     .event-list {
