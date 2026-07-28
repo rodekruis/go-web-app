@@ -8,6 +8,12 @@ import {
     PLACE_CODE_FIELD_KEY,
 } from './nrwConstants';
 
+// IBF API layers endpoint
+export const getLayersApiUrl = () => `${ibfApiBackend}layers`;
+
+// IBF API geo-features endpoint
+export const getGeoFeaturesApiUrl = (countryIso3: string, layerName: string) => `${ibfApiBackend}geo-features?filter=countryCodeIso3='${countryIso3}' AND "layerName"='${layerName}'`;
+
 // IBF API events endpoint
 export const getEventsApiUrl = (countryIso3: string) => `${ibfApiBackend}events?countryCodeIso3=${countryIso3}&active=true`;
 
@@ -106,9 +112,7 @@ export const getAdminAreasByCodesUrl = (
 
 // Get a single admin area by its code (for initial selection from URL)
 // Excludes geometry to reduce payload size
-export const getAdminAreaDetailsNoGeoUrl = (
-    code: string,
-): string => {
+export const getAdminAreaDetailsNoGeoUrl = (code: string): string => {
     const codeParam = `${PLACE_CODE_FIELD_KEY}=%27${code}%27`;
     const limitParam = 'limit=1';
     // Only fetch needed properties for the admin area. Exclude geometry.

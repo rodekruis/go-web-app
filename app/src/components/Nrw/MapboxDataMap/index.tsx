@@ -148,7 +148,7 @@ export default function MapboxDataMap({
                         orderedLayersRef.current = addOrderedLayer(
                             map,
                             newLayer,
-                            getDrawOrder(layerDetails.layerName),
+                            getDrawOrder(layerDetails.name),
                             orderedLayersRef.current,
                         );
                     },

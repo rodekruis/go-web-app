@@ -14,49 +14,59 @@
  */
 
 export enum EPSG {
-  WGS84 = 'EPSG:4326',
-  WebMercator = 'EPSG:3857',
+    WGS84 = 'EPSG:4326',
+    WebMercator = 'EPSG:3857',
 }
 
 export enum ForecastSource {
-  glofas = 'glofas',
-  ecmwf = 'ECMWF',
-  gefs = 'GEFS',
+    glofas = 'glofas',
+    ecmwf = 'ECMWF',
+    gefs = 'GEFS',
 }
 
 export enum HazardType {
-  floods = 'floods',
-  drought = 'drought',
-  tropicalCyclone = 'tropicalCyclone',
+    floods = 'floods',
+    drought = 'drought',
+    tropicalCyclone = 'tropicalCyclone',
 }
 
 export enum LayerName {
-  // --- generic (cross-hazard) ---
-  population = 'population',
-  populationExposed = 'populationExposed',
-  redCrossBranches = 'redCrossBranches',
-  clinics = 'clinics',
+    // --- generic (cross-hazard) ---
+    population = 'population',
+    populationExposed = 'populationExposed',
+    redCrossBranches = 'redCrossBranches',
+    clinics = 'clinics',
 
-  // --- floods-specific ---
-  floodDepth = 'floodDepth',
-  glofasStations = 'glofasStations',
+    // --- floods-specific ---
+    floodDepth = 'floodDepth',
+    glofasStations = 'glofasStations',
 
-  // --- tropical cyclone-specific ---
-  windSpeed = 'windSpeed',
+    // --- tropical cyclone-specific ---
+    windSpeed = 'windSpeed',
 }
 
 export enum LayerType {
-  raster = 'raster',
-  shape = 'shape',
-  point = 'point',
-  vectorTile = 'vectorTile',
+    raster = 'raster',
+    shape = 'shape',
+    point = 'point',
+    vectorTile = 'vectorTile',
+}
+
+export enum LayerLabel {
+    population = 'Population',
+    populationExposed = 'Population Exposed',
+    redCrossBranches = 'Red Cross Branches',
+    clinics = 'Clinics',
+    floodDepth = 'Flood Depth',
+    glofasStations = 'GloFAS Stations',
+    windSpeed = 'Wind Speed',
 }
 
 // Allowed classification levels for alertClass
 // (derived from severityClass and probabilityClass according to ALERT_CLASS_MATRIX)
 // NOTE: do not change order, as this is used functionally
 export enum AlertClass {
-  low = 'low',
-  medium = 'medium',
-  high = 'high',
+    low = 'low',
+    medium = 'medium',
+    high = 'high',
 }

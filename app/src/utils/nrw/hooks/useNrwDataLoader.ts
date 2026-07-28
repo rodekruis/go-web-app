@@ -9,9 +9,10 @@ import {
 import useAlert from '#hooks/useAlert';
 import {
     fetchClinicFeatures,
+    fetchGlofasStationsFeatures,
     fetchRcBranchesFeatures,
     getAllEventData,
-    getCountryMapData,
+    getNonEventLayers,
 } from '#utils/nrw/nrwDataFetchHelpers';
 import {
     makeEventImageLayer,
@@ -20,6 +21,7 @@ import {
 } from '#utils/nrw/nrwMapHelpers';
 import {
     clinicPointPaint,
+    glofasStationPointPaint,
     rcBranchPointPaint,
 } from '#utils/nrw/nrwMapStyles';
 import type {
@@ -27,8 +29,9 @@ import type {
     NrwMapboxLayer,
 } from '#utils/nrw/nrwMapTypes';
 import {
+    type BaseLayerDto,
+    type EventLayerDto,
     type EventResponseDto,
-    type LayerDto,
 } from '#utils/nrw/shared-dtos';
 import {
     LayerName,
@@ -58,14 +61,17 @@ export default function useNrwDataLoader(
     // Data state: event data loaded from the API.
     const [eventData, setEventData] = useState<EventResponseDto[]>(initialEventData);
 
-    // Non-event data layers available for the current scoped countries.
-    const [countryNonEventLayers,
-        setCountryNonEventLayers] = useState<Record<string, LayerDto[]>>({});
+    // Non-event data layers available (shared across all countries).
+    const [nonEventLayers, setNonEventLayers] = useState<BaseLayerDto[]>(
+        [],
+    );
 
     // List of visible layer names.
     // These are not mapped to a country or event, but are just the layer names
     // of all visible layers.
-    const [visibleLayerNames, setVisibleLayerNames] = useState<string[]>(initialVisibleLayerNames);
+    const [visibleLayerNames, setVisibleLayerNames] = useState<string[]>(
+        initialVisibleLayerNames,
+    );
 
     // If the base map setup is complete.
     // This must be awaited before any layers can be added to the map.
@@ -83,10 +89,11 @@ export default function useNrwDataLoader(
 
     // Get available layers for the currently selected event
     const selectedEvent = useMemo(
-        () => eventData.find((event) => event.eventId === selectedEventId) ?? null,
+        () => eventData.find((event) => event.eventId === selectedEventId)
+            ?? null,
         [eventData, selectedEventId],
     );
-    const selectedEventLayers = useMemo<LayerDto[]>(
+    const selectedEventLayers = useMemo<EventLayerDto[]>(
         () => selectedEvent?.availableLayers ?? [],
         [selectedEvent],
     );
@@ -101,7 +108,7 @@ export default function useNrwDataLoader(
 
     // Load a layer, cache it, add it to the map, and apply the target visibility.
     const loadAndAddLayer = async (
-        layerDetails: LayerDto,
+        layerDetails: BaseLayerDto,
         cacheKey: string,
         loadLayer: () => Promise<NrwMapboxLayer>,
         targetVisible: boolean,
@@ -111,16 +118,22 @@ export default function useNrwDataLoader(
             layersCache.current.set(cacheKey, layer);
             const mapLayerFunctions = mapLayerFunctionsRef.current;
             if (!mapLayerFunctions) {
-                console.error('[useNrwDataLoader] Map layer functions not ready');
+                console.error(
+                    '[useNrwDataLoader] Map layer functions not ready',
+                );
                 return;
             }
             mapLayerFunctions.addLayer(layer, layerDetails);
             mapLayerFunctions.setLayerVisibility(layer, targetVisible);
         } catch (error) {
-            console.error(`[useNrwDataLoader] Failed to load layer ${layerDetails.layerName}:`, error);
+            console.error(
+                `[useNrwDataLoader] Failed to load layer ${layerDetails.name}:`,
+                error,
+            );
             notification.show('Failed to load map layer', {
                 variant: 'danger',
-                description: 'The map layer could not be loaded. Please try again.',
+                description:
+                    'The map layer could not be loaded. Please try again.',
             });
         }
     };
@@ -128,14 +141,16 @@ export default function useNrwDataLoader(
     // Internal function for setting a single cached layer's visibility.
     // If not cached and the target is visible, loads it.
     const setLayerVisibility = (
-        layerDetails: LayerDto,
+        layerDetails: BaseLayerDto,
         cacheParentKey: string,
         loadLayer: (() => Promise<NrwMapboxLayer>) | null,
         targetVisible: boolean,
     ) => {
         // If no loader function, exit early.
         if (!loadLayer) {
-            console.error(`[useNrwDataLoader] No loader function for layer ${layerDetails.layerName}`);
+            console.error(
+                `[useNrwDataLoader] No loader function for layer ${layerDetails.name}`,
+            );
             return;
         }
 
@@ -146,7 +161,7 @@ export default function useNrwDataLoader(
             return;
         }
 
-        const cacheKey = makeCacheKey(cacheParentKey, layerDetails.layerName);
+        const cacheKey = makeCacheKey(cacheParentKey, layerDetails.name);
         const cachedLayer = layersCache.current.get(cacheKey);
         if (cachedLayer) {
             mapLayerFunctions.setLayerVisibility(cachedLayer, targetVisible);
@@ -159,7 +174,7 @@ export default function useNrwDataLoader(
         // Update the public list of visible layer names.
         setVisibleLayerNames((prevList) => {
             // Check if the layerName is in the list
-            const listHasLayerName = prevList.includes(layerDetails.layerName);
+            const listHasLayerName = prevList.includes(layerDetails.name);
 
             // If it's already in the list and is being made visible, do nothing.
             if (targetVisible && listHasLayerName) {
@@ -168,29 +183,42 @@ export default function useNrwDataLoader(
 
             // If it's not in the list and is now visible, add it.
             if (targetVisible) {
-                return [...prevList, layerDetails.layerName];
+                return [...prevList, layerDetails.name];
             }
 
             // If it's now hidden, remove it.
-            return prevList.filter((name) => name !== layerDetails.layerName);
+            return prevList.filter((name) => name !== layerDetails.name);
         });
     };
 
     // Find the right layer loader function and return it
+    // TODO: this function handles both event layers (EventLayerDto)
+    // and country layers (BaseLayerDto) which forces an unsafe cast below.
+    // Separate into two resolution paths so they don't flow through the same function.
     const resolveLayerLoader = (
-        layerDetails: LayerDto,
+        layerDetails: BaseLayerDto,
         country: string,
     ): (() => Promise<NrwMapboxLayer>) | null => {
-        const { layerName, layerType, resourceId } = layerDetails;
+        const { name: layerName, type: layerType } = layerDetails;
 
-        if (layerType === LayerType.raster && layerName === LayerName.floodDepth) {
+        if (
+            layerType === LayerType.raster
+            && layerName === LayerName.floodDepth
+        ) {
+            const { resourceId } = layerDetails as EventLayerDto;
             return () => makeEventImageLayer(resourceId);
         }
-        if (layerType === LayerType.raster && layerName === LayerName.population) {
+        if (
+            layerType === LayerType.raster
+            && layerName === LayerName.population
+        ) {
             return () => makeStaticImageLayer(country, layerName);
         }
 
-        if (layerType === LayerType.point && layerName === LayerName.redCrossBranches) {
+        if (
+            layerType === LayerType.point
+            && layerName === LayerName.redCrossBranches
+        ) {
             return async () => {
                 const features = await fetchRcBranchesFeatures(country);
                 return makePointLayerFromFeatures(
@@ -200,7 +228,8 @@ export default function useNrwDataLoader(
                 );
             };
         }
-        if (layerType === LayerType.point && layerName === LayerName.clinics) {
+        if (layerType === LayerType.point
+            && layerName === LayerName.clinics) {
             return async () => {
                 const features = await fetchClinicFeatures(country);
                 return makePointLayerFromFeatures(
@@ -210,10 +239,21 @@ export default function useNrwDataLoader(
                 );
             };
         }
+        if (layerType === LayerType.point
+            && layerName === LayerName.glofasStations) {
+            return async () => {
+                const features = await fetchGlofasStationsFeatures(country);
+                return makePointLayerFromFeatures(
+                    `${LayerName.glofasStations}-${country}`,
+                    features,
+                    glofasStationPointPaint,
+                );
+            };
+        }
 
         console.error(
-            `[useNrwDataLoader] Unsupported layer: ${layerDetails.layerName} `
-            + `(${layerDetails.layerType})`,
+            `[useNrwDataLoader] Unsupported layer: ${layerDetails.name} `
+            + `(${layerDetails.type})`,
         );
 
         return null;
@@ -224,10 +264,14 @@ export default function useNrwDataLoader(
         targetVisible: boolean,
     ) => {
         // Get event layer info from the event data
-        const eventLayerMatch = selectedEventLayers.find((layer) => layer.layerName === layerName);
+        const eventLayerMatch = selectedEventLayers.find(
+            (layer) => layer.name === layerName,
+        );
         if (eventLayerMatch) {
             if (selectedEventId === null) {
-                console.error('[useNrwDataLoader] No selected event id for event layer');
+                console.error(
+                    '[useNrwDataLoader] No selected event id for event layer',
+                );
                 return;
             }
 
@@ -243,26 +287,25 @@ export default function useNrwDataLoader(
         }
 
         // Handle non-event layers
-        // One layer can be applied to multiple countries, so check all of them
-        let visibilityChangeApplied = false;
-        Object.entries(countryNonEventLayers).forEach(([countryCode, layers]) => {
-            const match = layers.find((layer) => layer.layerName === layerName);
-            if (match) {
-                const layerLoader = resolveLayerLoader(match, countryCode);
-                visibilityChangeApplied = true;
-
-                setLayerVisibility(
-                    match,
-                    countryCode,
-                    layerLoader,
-                    targetVisible,
-                );
-            }
-        });
-
-        if (!visibilityChangeApplied) {
-            console.error(`[useNrwDataLoader] No matching layer found for ${layerName}`);
+        // Non-event layers are shared across countries, but the loader needs
+        // a country code to fetch country-specific data (e.g. RC branches).
+        const match = nonEventLayers.find((layer) => layer.name === layerName);
+        if (!match) {
+            console.error(
+                `[useNrwDataLoader] No matching layer found for ${layerName}`,
+            );
+            return;
         }
+
+        scopedCountries.forEach((countryCode) => {
+            const layerLoader = resolveLayerLoader(match, countryCode);
+            setLayerVisibility(
+                match,
+                countryCode,
+                layerLoader,
+                targetVisible,
+            );
+        });
     };
 
     // ----- Other exposed functions and values -----
@@ -306,31 +349,42 @@ export default function useNrwDataLoader(
         setEventData(data);
     };
 
-    // Details for available non-event layers.
-    // This flattens the country layer data into a list of layer names that
-    // appear in any of the scoped countries.
-    const nonEventLayers = useMemo<LayerDto[]>(() => {
-        const byName = new Map<LayerName, LayerDto>();
-        Object.values(countryNonEventLayers).forEach((layers) => {
-            layers.forEach((layer) => {
-                if (!byName.has(layer.layerName)) {
-                    byName.set(layer.layerName, layer);
-                }
-            });
-        });
-        return Array.from(byName.values());
-    }, [countryNonEventLayers]);
-
     // Warn when the selected event has no exposed areas.
     useEffect(() => {
-        if (selectedEvent
-            && Object.keys(selectedEvent.exposedAdminAreas).length === 0) {
+        if (
+            selectedEvent
+            && Object.keys(selectedEvent.exposedAdminAreas).length === 0
+        ) {
             notification.show('No exposed areas', {
                 variant: 'danger',
                 description: `No exposed areas found for event "${selectedEventId}".`,
             });
         }
     }, [selectedEvent, selectedEventId, notification]);
+
+    // Re-fetch non-event layers when the selected event's hazard type changes,
+    // so hazard-specific layers (e.g. glofasStations) are included.
+    const selectedHazardType = selectedEvent?.hazardType ?? null;
+    useEffect(() => {
+        if (!isInitialDataLoaded) {
+            return;
+        }
+        const fetchLayers = async () => {
+            try {
+                const layers = await getNonEventLayers(
+                    selectedHazardType ?? undefined,
+                );
+                setNonEventLayers(layers);
+            } catch (error) {
+                console.error(
+                    '[useNrwDataLoader] Failed to refresh layers:',
+                    error,
+                );
+            }
+        };
+        fetchLayers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedHazardType, isInitialDataLoaded]);
 
     // ----- Init -----
 
@@ -343,29 +397,27 @@ export default function useNrwDataLoader(
         }
         const loadInitialData = async () => {
             try {
-                const [countryData, events] = await Promise.all([
-                    getCountryMapData(scopedCountries),
+                const [layers, events] = await Promise.all([
+                    getNonEventLayers(),
                     getAllEventData(scopedCountries),
                 ]);
-                const layersByCountry = Object.fromEntries(
-                    Object.entries(countryData).map(([countryCode, data]) => [
-                        countryCode,
-                        data.availableLayers,
-                    ]),
-                );
-                setCountryNonEventLayers(layersByCountry);
+                setNonEventLayers(layers);
                 setEventData(events);
                 setIsInitialDataLoaded(true);
             } catch (error) {
-                console.error('[useNrwDataLoader] Failed to load initial map data:', error);
+                console.error(
+                    '[useNrwDataLoader] Failed to load initial map data:',
+                    error,
+                );
                 notification.show('Failed to load map data', {
                     variant: 'danger',
-                    description: 'The map data could not be loaded. Please try again.',
+                    description:
+                        'The map data could not be loaded. Please try again.',
                 });
             }
         };
         loadInitialData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isMapReady]);
 
     // Set the deeplinked layers on initial load.
@@ -378,7 +430,7 @@ export default function useNrwDataLoader(
         initialVisibleLayerNames.forEach((layerName) => {
             resolveLayerAndSetVisibility(layerName, true);
         });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isInitialDataLoaded]);
 
     return {

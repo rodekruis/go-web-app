@@ -5,7 +5,7 @@ import type {
     SourceSpecification,
 } from 'mapbox-gl-v3';
 
-import { type LayerDto } from './shared-dtos';
+import { type BaseLayerDto } from './shared-dtos';
 
 // A zoom/center pair describing the current map view
 export interface MapViewParameters {
@@ -35,28 +35,9 @@ export interface OrderedMapLayer {
 // Functions exposed by the map component so the data loader can manage layers.
 export interface MapLayerFunctions {
     // Add a prepared layer (source + layer) to the map, ordered by the layer details
-    addLayer: (layer: NrwMapboxLayer, layerInfo: LayerDto) => void;
+    addLayer: (layer: NrwMapboxLayer, layerInfo: BaseLayerDto) => void;
     // Show or hide a layer that was previously added to the map
     setLayerVisibility: (layer: NrwMapboxLayer, visible: boolean) => void;
-}
-
-// Country-level non-event data
-// This is a work in progress still and will either have more data added to it,
-// or merged into some other source.
-export interface CountryMapData {
-  // Available map layers for the country that can be added
-  availableLayers: LayerDto[];
-
-  // The event data sources for forecasted events.
-  // This can differentiate between supported event types as well as MRW/NRW data sources.
-  // If this is empty, then the country is not supported for NRW.
-  supportedEventDataSources: EventDataSources[];
-}
-
-// Supported event data sources for a country.
-export enum EventDataSources {
-  Nrw = 'nrw',
-  Mrw = 'mrw',
 }
 
 // Extents for the raster metadata

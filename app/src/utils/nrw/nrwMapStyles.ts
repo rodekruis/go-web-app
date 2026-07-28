@@ -76,6 +76,14 @@ export const clinicPointPaint: CircleLayerSpecification['paint'] = {
     'circle-stroke-width': defaultPointStrokeWidth,
 };
 
+// Mapbox circle paint for GloFAS station point features
+export const glofasStationPointPaint: CircleLayerSpecification['paint'] = {
+    'circle-radius': 7,
+    'circle-color': '#1565c0', // Debug color
+    'circle-stroke-color': '#ffffff',
+    'circle-stroke-width': defaultPointStrokeWidth,
+};
+
 // Set the fill for exposed admin areas based on the precomputed exposure
 // color property in the feature properties.
 export const exposedAreasFillPaint: FillLayerSpecification['paint'] = {
