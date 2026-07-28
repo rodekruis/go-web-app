@@ -15,9 +15,24 @@ const config = {
         'stylelint-config-concentric',
     ],
     plugins: [
+        '@stylistic/stylelint-plugin',
         'stylelint-value-no-unknown-custom-properties',
     ],
     rules: {
+        '@stylistic/indentation': 4,
+        '@stylistic/no-eol-whitespace': true,
+        '@stylistic/no-missing-end-of-source-newline': true,
+        '@stylistic/no-empty-first-line': true,
+        '@stylistic/named-grid-areas-alignment': true,
+        '@stylistic/number-leading-zero': 'always',
+        '@stylistic/unit-case': 'lower',
+        '@stylistic/string-quotes': 'single',
+        '@stylistic/max-empty-lines': 1,
+        '@stylistic/declaration-colon-space-after': 'always',
+        '@stylistic/declaration-bang-space-before': 'always',
+        '@stylistic/declaration-bang-space-after': 'never',
+        '@stylistic/declaration-block-trailing-semicolon': 'always',
+        '@stylistic/value-list-comma-space-after': 'always-single-line',
         'csstools/value-no-unknown-custom-properties': [
             true,
             {
