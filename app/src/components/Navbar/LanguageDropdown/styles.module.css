@@ -2,6 +2,6 @@
     color: transparent;
 
     &.active {
-        color: var(--go-ui-color-primary-red)
+        color: var(--go-ui-color-primary-red);
     }
 }

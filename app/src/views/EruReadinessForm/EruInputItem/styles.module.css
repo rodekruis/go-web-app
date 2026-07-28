@@ -3,7 +3,7 @@
     grid-template-columns: 1fr;
 
     .content {
-        grid-template-columns: 1fr 1fr 1fr 2fr!important;
+        grid-template-columns: 1fr 1fr 1fr 2fr !important;
 
         .readiness-input {
             .radio-list {
@@ -13,7 +13,7 @@
         }
 
         @media screen and (min-width: 30rem) and (max-width: 60rem) {
-            grid-template-columns: 1fr 1fr 1fr!important;
+            grid-template-columns: 1fr 1fr 1fr !important;
 
             .comment-input {
                 grid-column: span 3;
@@ -21,7 +21,7 @@
         }
 
         @media screen and (max-width: 30rem) {
-            grid-template-columns: 1fr!important;
+            grid-template-columns: 1fr !important;
         }
     }
 }

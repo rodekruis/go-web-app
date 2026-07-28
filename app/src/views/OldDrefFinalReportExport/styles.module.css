@@ -111,7 +111,6 @@
         margin-bottom: var(--go-ui-spacing-lg);
     }
 
-
     .target-population-content {
         display: grid;
         gap: var(--go-ui-width-separator-md);
@@ -178,7 +177,6 @@
         }
     }
 
-
     .planned-intervention-heading {
         display: flex;
         align-items: center;
@@ -228,4 +226,3 @@
         }
     }
 }
-

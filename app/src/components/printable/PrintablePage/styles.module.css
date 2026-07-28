@@ -12,9 +12,8 @@
 
     .header-section {
         display: grid;
-        grid-template-areas:
-            "logo heading"
-            "desc desc";
+        grid-template-areas: 'logo heading'
+            'desc desc';
         margin-block-end: var(--go-ui-spacing-xl);
 
         .ifrc-logo {

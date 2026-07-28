@@ -11,7 +11,7 @@
         counter-increment: section;
 
         &::before {
-            content: counter(section) ". ";
+            content: counter(section) '. ';
         }
     }
 
@@ -25,7 +25,7 @@
             margin-block-start: var(--go-ui-spacing-3xs);
 
             &::before {
-                content: counter(section) "." counter(subsection) " ";
+                content: counter(section) '.' counter(subsection) ' ';
             }
         }
     }
@@ -34,8 +34,3 @@
         font-weight: var(--go-ui-font-weight-light);
     }
 }
-
-
-
-
-
