@@ -9,9 +9,10 @@ import {
 import useAlert from '#hooks/useAlert';
 import {
     fetchClinicFeatures,
+    fetchGlofasStationsFeatures,
     fetchRcBranchesFeatures,
     getAllEventData,
-    getCountryMapData,
+    getNonEventLayers,
 } from '#utils/nrw/nrwDataFetchHelpers';
 import {
     makeEventImageLayer,
@@ -20,6 +21,7 @@ import {
 } from '#utils/nrw/nrwMapHelpers';
 import {
     clinicPointPaint,
+    glofasStationPointPaint,
     rcBranchPointPaint,
 } from '#utils/nrw/nrwMapStyles';
 import type {
@@ -27,7 +29,7 @@ import type {
     NrwMapboxLayer,
 } from '#utils/nrw/nrwMapTypes';
 import {
-    type CountryLayerDto,
+    type BaseLayerDto,
     type EventLayerDto,
     type EventResponseDto,
 } from '#utils/nrw/shared-dtos';
@@ -59,10 +61,10 @@ export default function useNrwDataLoader(
     // Data state: event data loaded from the API.
     const [eventData, setEventData] = useState<EventResponseDto[]>(initialEventData);
 
-    // Non-event data layers available for the current scoped countries.
-    const [countryNonEventLayers, setCountryNonEventLayers] = useState<
-        Record<string, CountryLayerDto[]>
-    >({});
+    // Non-event data layers available (shared across all countries).
+    const [nonEventLayers, setNonEventLayers] = useState<BaseLayerDto[]>(
+        [],
+    );
 
     // List of visible layer names.
     // These are not mapped to a country or event, but are just the layer names
@@ -106,7 +108,7 @@ export default function useNrwDataLoader(
 
     // Load a layer, cache it, add it to the map, and apply the target visibility.
     const loadAndAddLayer = async (
-        layerDetails: CountryLayerDto,
+        layerDetails: BaseLayerDto,
         cacheKey: string,
         loadLayer: () => Promise<NrwMapboxLayer>,
         targetVisible: boolean,
@@ -139,7 +141,7 @@ export default function useNrwDataLoader(
     // Internal function for setting a single cached layer's visibility.
     // If not cached and the target is visible, loads it.
     const setLayerVisibility = (
-        layerDetails: CountryLayerDto,
+        layerDetails: BaseLayerDto,
         cacheParentKey: string,
         loadLayer: (() => Promise<NrwMapboxLayer>) | null,
         targetVisible: boolean,
@@ -191,10 +193,10 @@ export default function useNrwDataLoader(
 
     // Find the right layer loader function and return it
     // TODO: this function handles both event layers (EventLayerDto)
-    // and country layers (CountryLayerDto) which forces an unsafe cast below.
+    // and country layers (BaseLayerDto) which forces an unsafe cast below.
     // Separate into two resolution paths so they don't flow through the same function.
     const resolveLayerLoader = (
-        layerDetails: CountryLayerDto,
+        layerDetails: BaseLayerDto,
         country: string,
     ): (() => Promise<NrwMapboxLayer>) | null => {
         const { name: layerName, type: layerType } = layerDetails;
@@ -237,6 +239,17 @@ export default function useNrwDataLoader(
                 );
             };
         }
+        if (layerType === LayerType.point
+            && layerName === LayerName.glofasStations) {
+            return async () => {
+                const features = await fetchGlofasStationsFeatures(country);
+                return makePointLayerFromFeatures(
+                    `${LayerName.glofasStations}-${country}`,
+                    features,
+                    glofasStationPointPaint,
+                );
+            };
+        }
 
         console.error(
             `[useNrwDataLoader] Unsupported layer: ${layerDetails.name} `
@@ -274,30 +287,25 @@ export default function useNrwDataLoader(
         }
 
         // Handle non-event layers
-        // One layer can be applied to multiple countries, so check all of them
-        let visibilityChangeApplied = false;
-        Object.entries(countryNonEventLayers).forEach(
-            ([countryCode, layers]) => {
-                const match = layers.find((layer) => layer.name === layerName);
-                if (match) {
-                    const layerLoader = resolveLayerLoader(match, countryCode);
-                    visibilityChangeApplied = true;
-
-                    setLayerVisibility(
-                        match,
-                        countryCode,
-                        layerLoader,
-                        targetVisible,
-                    );
-                }
-            },
-        );
-
-        if (!visibilityChangeApplied) {
+        // Non-event layers are shared across countries, but the loader needs
+        // a country code to fetch country-specific data (e.g. RC branches).
+        const match = nonEventLayers.find((layer) => layer.name === layerName);
+        if (!match) {
             console.error(
                 `[useNrwDataLoader] No matching layer found for ${layerName}`,
             );
+            return;
         }
+
+        scopedCountries.forEach((countryCode) => {
+            const layerLoader = resolveLayerLoader(match, countryCode);
+            setLayerVisibility(
+                match,
+                countryCode,
+                layerLoader,
+                targetVisible,
+            );
+        });
     };
 
     // ----- Other exposed functions and values -----
@@ -341,21 +349,6 @@ export default function useNrwDataLoader(
         setEventData(data);
     };
 
-    // Details for available non-event layers.
-    // This flattens the country layer data into a list of layer names that
-    // appear in any of the scoped countries.
-    const nonEventLayers = useMemo<CountryLayerDto[]>(() => {
-        const byName = new Map<LayerName, CountryLayerDto>();
-        Object.values(countryNonEventLayers).forEach((layers) => {
-            layers.forEach((layer) => {
-                if (!byName.has(layer.name)) {
-                    byName.set(layer.name, layer);
-                }
-            });
-        });
-        return Array.from(byName.values());
-    }, [countryNonEventLayers]);
-
     // Warn when the selected event has no exposed areas.
     useEffect(() => {
         if (
@@ -369,6 +362,30 @@ export default function useNrwDataLoader(
         }
     }, [selectedEvent, selectedEventId, notification]);
 
+    // Re-fetch non-event layers when the selected event's hazard type changes,
+    // so hazard-specific layers (e.g. glofasStations) are included.
+    const selectedHazardType = selectedEvent?.hazardType ?? null;
+    useEffect(() => {
+        if (!isInitialDataLoaded) {
+            return;
+        }
+        const fetchLayers = async () => {
+            try {
+                const layers = await getNonEventLayers(
+                    selectedHazardType ?? undefined,
+                );
+                setNonEventLayers(layers);
+            } catch (error) {
+                console.error(
+                    '[useNrwDataLoader] Failed to refresh layers:',
+                    error,
+                );
+            }
+        };
+        fetchLayers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedHazardType, isInitialDataLoaded]);
+
     // ----- Init -----
 
     // Load shared country and event data into state. This is done once the map
@@ -380,17 +397,11 @@ export default function useNrwDataLoader(
         }
         const loadInitialData = async () => {
             try {
-                const [countryData, events] = await Promise.all([
-                    getCountryMapData(scopedCountries),
+                const [layers, events] = await Promise.all([
+                    getNonEventLayers(),
                     getAllEventData(scopedCountries),
                 ]);
-                const layersByCountry = Object.fromEntries(
-                    Object.entries(countryData).map(([countryCode, data]) => [
-                        countryCode,
-                        data.availableLayers,
-                    ]),
-                );
-                setCountryNonEventLayers(layersByCountry);
+                setNonEventLayers(layers);
                 setEventData(events);
                 setIsInitialDataLoaded(true);
             } catch (error) {

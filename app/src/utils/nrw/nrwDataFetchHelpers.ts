@@ -5,26 +5,20 @@ import {
     POPULATION_ATTRIBUTE_KEY,
 } from './nrwConstants';
 import {
-    type CountryMapData,
-    EventDataSources,
-} from './nrwMapTypes';
-import {
     getAdminAreaDetailsNoGeoUrl,
     getAdminAreasByCodesUrl,
-    getCountriesApiUrl,
     getEventsApiUrl,
+    getGeoFeaturesApiUrl,
     getHealthLocsApiUrl,
+    getLayersApiUrl,
     getRcLocsApiUrl,
 } from './nrwUrls';
 import type {
+    BaseLayerDto,
     EventResponseDto,
     ExposedAdminAreaDto,
 } from './shared-dtos';
-import type {
-    LayerLabel,
-    LayerName,
-    LayerType,
-} from './shared-enums';
+import type { LayerName } from './shared-enums';
 
 // Fetch a URL and parse the response body as JSON.
 // Throws when the request fails or the response is not OK.
@@ -192,38 +186,34 @@ export async function getAllEventData(
     return eventsByCountry.flat();
 }
 
-interface CountryApiResponse {
-    readonly countryCodeIso3: string;
-    readonly availableLayers?: {
-        readonly name: LayerName;
-        readonly label: LayerLabel;
-        readonly type: LayerType;
-    }[];
+interface LayerApiResponse {
+    readonly name: LayerName;
+    readonly label: string;
+    readonly type: string;
 }
 
-export async function getCountryMapData(
-    scopedCountries: string[],
-): Promise<Record<string, CountryMapData>> {
-    try {
-        const url = getCountriesApiUrl();
-        const countries = await fetchJson<CountryApiResponse[]>(
-            url,
-            'countries',
-        );
-        const result: Record<string, CountryMapData> = {};
-        countries
-            .filter((country) => scopedCountries.includes(country.countryCodeIso3))
-            .forEach((country) => {
-                result[country.countryCodeIso3] = {
-                    availableLayers: country.availableLayers ?? [],
-                    supportedEventDataSources: [EventDataSources.Nrw],
-                };
-            });
-        return result;
-    } catch (error) {
-        console.error('[nrwDataFetchHelpers] Failed to fetch countries:', error);
-        throw error;
-    }
+export async function getNonEventLayers(
+    hazardType?: string,
+): Promise<BaseLayerDto[]> {
+    const baseUrl = getLayersApiUrl();
+    const url = hazardType ? `${baseUrl}?hazardType=${hazardType}` : baseUrl;
+    const layers = await fetchJson<LayerApiResponse[]>(url, 'layers');
+    return layers.map((layer) => ({
+        name: layer.name,
+        type: layer.type,
+        label: layer.label,
+    })) as BaseLayerDto[];
+}
+
+export async function fetchGlofasStationsFeatures(
+    countryIso3: string,
+): Promise<GeoJSON.Feature[]> {
+    const url = getGeoFeaturesApiUrl(countryIso3, 'glofasStations');
+    const data = await fetchJson<GeoJSON.FeatureCollection>(
+        url,
+        `GloFAS stations for ${countryIso3}`,
+    );
+    return data.features ?? [];
 }
 
 // Get the target exposed admin level.

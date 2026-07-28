@@ -5,7 +5,7 @@ import { byPrefixAndName } from '@awesome.me/kit-92f09b5225/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
-    type CountryLayerDto,
+    type BaseLayerDto,
     type EventLayerDto,
 } from '#utils/nrw/shared-dtos';
 
@@ -13,7 +13,7 @@ import styles from './styles.module.css';
 
 interface NrwLayerPanelProps {
     eventLayers: EventLayerDto[];
-    nonEventLayers: CountryLayerDto[];
+    nonEventLayers: BaseLayerDto[];
     onToggleMapLayer: (layerName: string) => void;
     onHideAllLayers: () => void;
     visibleLayerNames: string[];
@@ -42,7 +42,7 @@ export default function NrwLayerPanel({
         );
     }
 
-    const renderLayerButton = (layer: CountryLayerDto) => {
+    const renderLayerButton = (layer: BaseLayerDto) => {
         const key = layer.name;
         const isVisible = visibleLayerNames.includes(key);
         return (

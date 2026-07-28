@@ -12,7 +12,7 @@
  * - services/api-service/src/events/dto/event-exposed-admin-area.dto.ts
  * - services/api-service/src/events/dto/event-response.dto.ts
  * - services/api-service/src/layers/dto/event-layer.dto.ts (EventLayerDto)
- * - services/api-service/src/layers/dto/country-layer.dto.ts (CountryLayerDto)
+ * - services/api-service/src/layers/dto/base-layer.dto.ts (BaseLayerDto)
  */
 
 import type {
@@ -61,12 +61,12 @@ export interface EventResponseDto {
     availableLayers: EventLayerDto[];
 }
 
-export interface CountryLayerDto {
+export interface BaseLayerDto {
     name: LayerName;
     type: LayerType;
     label: LayerLabel;
 }
 
-export interface EventLayerDto extends CountryLayerDto {
+export interface EventLayerDto extends BaseLayerDto {
     resourceId: string;
 }

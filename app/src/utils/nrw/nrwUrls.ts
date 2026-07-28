@@ -8,8 +8,11 @@ import {
     PLACE_CODE_FIELD_KEY,
 } from './nrwConstants';
 
-// IBF API countries endpoint
-export const getCountriesApiUrl = () => `${ibfApiBackend}countries`;
+// IBF API layers endpoint
+export const getLayersApiUrl = () => `${ibfApiBackend}layers`;
+
+// IBF API geo-features endpoint
+export const getGeoFeaturesApiUrl = (countryIso3: string, layerName: string) => `${ibfApiBackend}geo-features?filter=countryCodeIso3='${countryIso3}' AND "layerName"='${layerName}'`;
 
 // IBF API events endpoint
 export const getEventsApiUrl = (countryIso3: string) => `${ibfApiBackend}events?countryCodeIso3=${countryIso3}&active=true`;
