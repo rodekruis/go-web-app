@@ -21,6 +21,7 @@ export default defineConfig({
 
     APP_ADMIN_URL: Schema.string.optional({ format: 'url', protocol: true, tld: false }),
     APP_MAPBOX_ACCESS_TOKEN: Schema.string(),
+    APP_IBF_API_BACKEND: Schema.string({ format: 'url', protocol: true, tld: false }),
     APP_TINY_API_KEY: Schema.string(),
     APP_RISK_API_ENDPOINT: Schema.string({ format: 'url', protocol: true }),
     APP_SDT_URL: Schema.string.optional({ format: 'url', protocol: true, tld: false }),

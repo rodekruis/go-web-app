@@ -7,10 +7,12 @@ Assume backend services are running locally in development environments. This al
 
 ## Repository Overview
 
-Directories that relate to NRW:
+Directories and files that relate to NRW:
 
-- `app/src/views/CountryProfileNationalRiskWatch`: NRW components
+- `app/src/views/CountryProfileNationalRiskWatch`: NRW view and map data orchestration
+- `app/src/components/domain/*`: NRW components (e.g. `NrwMap`, `NrwNavbar`)
 - `app/src/utils/nrw`: NRW helper files
+- `app/src/hooks/useNrwMapSearchParams.ts`: NRW map search params hook
 
 ---
 
