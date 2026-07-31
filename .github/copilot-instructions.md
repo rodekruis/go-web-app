@@ -21,6 +21,8 @@ Never change code in this prototype branch. This is just for our prototype.
 
 When making changes in the new main branch, update the llm instructions there as needed to reflect new structural changes or features.
 
+Bring UPPER_SNAKE_CASE const over as camelCase.
+
 ### Structural changes between the new main branch and this prototype branch
 
 This is a guide for future LLM changes so that future prompts know where files or logic has moved to minimize token spend. Update it as needed. Only add larger changes here that reduce token spend if listed. If a file or function is only brought over in part, that is normal and do not mention it.
