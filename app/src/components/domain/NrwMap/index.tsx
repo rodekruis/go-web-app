@@ -72,6 +72,7 @@ export default function NrwMap(props: NrwMapProps) {
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<MapboxGLMap | null>(null);
+    const mapLoadedRef = useRef(false);
     const onViewChangeRef = useRef(onViewChange);
 
     useEffect(() => {
@@ -99,6 +100,14 @@ export default function NrwMap(props: NrwMapProps) {
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 
+        // Track the initial map load completion.
+        // This is a most assured way to get the actual map loading completion,
+        // since `map.loaded()` timing changes depending on how the page is loaded
+        // (url pasted in vs page navigation).
+        map.on('load', () => {
+            mapLoadedRef.current = true;
+        });
+
         // Update the map view state after each pan/zoom end.
         map.on('moveend', () => {
             const mapView = getMapViewParametersFromMap(map);
@@ -114,14 +123,14 @@ export default function NrwMap(props: NrwMapProps) {
             // Clean up on unmount
             mapInstanceRef.current?.remove();
             mapInstanceRef.current = null;
+            mapLoadedRef.current = false;
         };
     // Set the dependencies to empty since this only runs on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Fit the map to the scoped countries whenever they change (e.g. once the
-    // country is resolved from the route in embedded mode). A valid deep-linked
-    // initial view takes precedence, so we skip fitting in that case.
+    // If there is no initial (deep-linked) view,
+    // fit the map to the scoped countries.
     useEffect(() => {
         const hasValidInitialView = initialMapView
             && Number.isFinite(initialMapView.center.lon)
@@ -153,7 +162,7 @@ export default function NrwMap(props: NrwMapProps) {
         };
 
         const map = mapInstanceRef.current;
-        if (map?.loaded()) {
+        if (mapLoadedRef.current) {
             fitToScopedCountries();
         } else {
             map?.once('load', fitToScopedCountries);
