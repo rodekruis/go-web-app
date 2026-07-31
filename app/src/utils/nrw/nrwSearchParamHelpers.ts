@@ -10,7 +10,7 @@ export const mapCenterLonParamsKey = 'lon';
 
 // Convert to uppercase and accept only 3 letter length codes
 // Returns null if the value is not a valid ISO_A3 code
-export function sanitizeCountryCode(value: string | null | undefined): string | null {
+function sanitizeCountryCode(value: string | null | undefined): string | null {
     const countryRegex = /^[A-Z]{3}$/;
     const cleanedValue = value?.trim().toUpperCase() ?? '';
     return countryRegex.test(cleanedValue) ? cleanedValue : null;

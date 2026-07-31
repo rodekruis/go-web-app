@@ -10,7 +10,7 @@ const zoomToFitPaddingRatio = 0.1;
 // Lon/lat bounds as [[west, south], [east, north]].
 // A plain tuple is used instead of mapboxgl.LngLatBounds to avoid needing to
 // construct a class instance when passing bounds to the map component.
-export type LonLatBounds = [[number, number], [number, number]];
+type LonLatBounds = [[number, number], [number, number]];
 
 // Return the map view based on map parameters.
 // This is used to set the initial view from deep link parameters.
@@ -50,7 +50,7 @@ export function getMapViewParametersFromMap(
 // Build a square lon/lat bounding box centered on the data, sized to the larger
 // of the width/height dimensions, plus padding on all sides.
 // Using the larger dimension means the map can zoom out to fit all geometry.
-export function getPaddedSquareBounds(
+function getPaddedSquareBounds(
     bounds: LonLatBounds,
     paddingRatio: number,
 ): LonLatBounds {
