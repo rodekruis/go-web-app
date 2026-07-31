@@ -170,6 +170,7 @@ export default function NrwMap(props: NrwMapProps) {
 
         return () => {
             cancelled = true;
+            map?.off('load', fitToScopedCountries);
         };
     }, [scopedCountries, initialMapView]);
 
