@@ -9,6 +9,7 @@ on:
 env:
   APP_API_ENDPOINT: 'https://goadmin-stage.ifrc.org/'
   APP_ENVIRONMENT: 'development'
+  APP_IBF_API_BACKEND: 'https://ibf-api.ifrc.org/api/'
   APP_MAPBOX_ACCESS_TOKEN: 'dummy-token'
   APP_RISK_API_ENDPOINT: 'https://go-risk-api-stage.ifrc.org/'
   APP_TINY_API_KEY: 'dummy-api-key'
