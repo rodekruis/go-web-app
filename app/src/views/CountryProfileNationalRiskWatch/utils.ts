@@ -59,3 +59,21 @@ export function sanitizeMapLongitudeParam(value: urlParameter) {
 export function serializeNumberToUrlParam(value: Zoom | Latitude | Longitude | null) {
     return value === null ? '' : value.toString();
 }
+
+export class NrwMapCenter {
+    lat: Latitude;
+
+    lon: Longitude;
+
+    constructor({ lat, lon }: { lat: Latitude; lon: Longitude; }) {
+        this.lat = lat;
+        this.lon = lon;
+    }
+
+    getForMapbox() {
+        return {
+            lat: this.lat,
+            lon: this.lon,
+        };
+    }
+}

@@ -11,6 +11,12 @@ import { nrwStandalone } from '#config';
 import useUrlSearchState from '#hooks/useUrlSearchState';
 
 import {
+    type Latitude,
+    type Longitude,
+    type Zoom,
+} from './types';
+import {
+    NrwMapCenter,
     sanitizeMapLatitudeParam,
     sanitizeMapLongitudeParam,
     sanitizeZoomUrlParam,
@@ -19,6 +25,8 @@ import {
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
+
+const DEFAULT_MAP_ZOOM = 3 as Zoom;
 
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
@@ -31,6 +39,7 @@ export function Component() {
         sanitizeZoomUrlParam,
         serializeNumberToUrlParam,
     );
+    const zoom = zoomFromUrl ?? DEFAULT_MAP_ZOOM;
 
     const [latFromUrl, setUrlLat] = useUrlSearchState(
         'lat', // only place we use this
@@ -44,6 +53,13 @@ export function Component() {
         serializeNumberToUrlParam,
     );
 
+    let center;
+    if (latFromUrl === null || lonFromUrl === null) {
+        center = new NrwMapCenter({ lat: 0 as Latitude, lon: 0 as Longitude });
+    } else {
+        center = new NrwMapCenter({ lat: latFromUrl, lon: lonFromUrl });
+    }
+
     const content = (
         <Container
             heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
@@ -52,7 +68,10 @@ export function Component() {
                 layout="grid"
                 withSidebar
             >
-                <NrwMap />
+                <NrwMap
+                    zoom={zoom}
+                    center={center}
+                />
             </ListView>
         </Container>
     );

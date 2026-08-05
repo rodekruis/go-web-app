@@ -11,14 +11,23 @@ import {
     mbtoken,
     nrwStandalone,
 } from '#config';
+import { type Zoom } from '#views/CountryProfileNationalRiskWatch/types';
+import { type NrwMapCenter } from '#views/CountryProfileNationalRiskWatch/utils';
 
 import styles from './styles.module.css';
 
-const DEFAULT_MAP_ZOOM = 3;
 // Get this from Mapbox Studio > Styles > Style url
 const NRW_MAPBOX_STYLE_URL = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
 
-export default function NrwMap() {
+export default function NrwMap(props: {
+    zoom: Zoom;
+    center: NrwMapCenter;
+}) {
+    const {
+        zoom,
+        center,
+    } = props;
+
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<MapboxGLMap | null>(null);
 
@@ -35,8 +44,8 @@ export default function NrwMap() {
             style: NRW_MAPBOX_STYLE_URL,
             projection: 'mercator',
             attributionControl: true,
-            center: [0, 0],
-            zoom: DEFAULT_MAP_ZOOM,
+            center: center.getForMapbox(),
+            zoom,
         });
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
