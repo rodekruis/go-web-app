@@ -1,4 +1,4 @@
-.nrw-map {
+.nrw-map-container {
   height: var(--go-ui-height-map-md);
 
   &.nrw-standalone {
