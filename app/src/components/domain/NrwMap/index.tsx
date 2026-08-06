@@ -5,7 +5,7 @@ import {
     useRef,
 } from 'react';
 import { _cs } from '@togglecorp/fujs';
-import mapboxgl, { type Map as MapboxGLMap } from 'mapbox-gl-v3';
+import mapboxgl from 'mapbox-gl-v3';
 
 import {
     mbtoken,
