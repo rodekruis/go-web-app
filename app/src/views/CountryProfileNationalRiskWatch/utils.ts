@@ -14,51 +14,32 @@ function sanitizeFloatInRange(
     min: number,
     max: number,
 ) {
-    const cleanedValue = value?.trim() ?? '';
-    if (cleanedValue === '') {
+    const trimmed = value?.trim() ?? '';
+    if (trimmed === '') {
         return null;
     }
 
-    const parsedValue = Number(cleanedValue);
-    if (!Number.isFinite(parsedValue)) {
+    const casted = Number(trimmed);
+    if (!Number.isFinite(casted) || casted < min || casted > max) {
         return null;
     }
 
-    if (parsedValue < min || parsedValue > max) {
-        return null;
-    }
-
-    return parsedValue;
+    // We now have a valid value.
+    return casted;
 }
 
-// Type guards, these add an opaque type.
-// Type guards *need* to return a boolean so we cannot have a single function
-// that both returns the value and asserts the type.
-function isValidZoom(input: number | null): input is Zoom {
-    return input !== null;
+// We can now confidently assert that it's either null or a specific opaque
+// type.
+export function parseZoomUrlParameter(value: UrlParameter) {
+    return sanitizeFloatInRange(value, 0, 24) as Zoom | null;
 }
 
-function isValidLatitude(input: number | null): input is Latitude {
-    return input !== null;
+export function parseMapLatitudeParameter(value: UrlParameter) {
+    return sanitizeFloatInRange(value, -90, 90) as Latitude | null;
 }
 
-function isValidLongitude(input: number | null): input is Longitude {
-    return input !== null;
-}
-
-export function sanitizeZoomUrlParam(value: UrlParameter) {
-    const parsed = sanitizeFloatInRange(value, 0, 24);
-    return isValidZoom(parsed) ? parsed as Zoom : null;
-}
-
-export function sanitizeMapLatitudeParam(value: UrlParameter) {
-    const parsed = sanitizeFloatInRange(value, -90, 90);
-    return isValidLatitude(parsed) ? parsed as Latitude : null;
-}
-
-export function sanitizeMapLongitudeParam(value: UrlParameter) {
-    const parsed = sanitizeFloatInRange(value, -180, 180);
-    return isValidLongitude(parsed) ? parsed as Longitude : null;
+export function parseMapLongitudeParameter(value: UrlParameter) {
+    return sanitizeFloatInRange(value, -180, 180) as Longitude | null;
 }
 
 // Keep the rounding and transformation of zoom and center together.

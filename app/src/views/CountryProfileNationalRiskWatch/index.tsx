@@ -19,9 +19,9 @@ import {
 import {
     NrwMapCenter,
     NrwMapZoom,
-    sanitizeMapLatitudeParam,
-    sanitizeMapLongitudeParam,
-    sanitizeZoomUrlParam,
+    parseMapLatitudeParameter,
+    parseMapLongitudeParameter,
+    parseZoomUrlParameter,
 } from './utils';
 
 import i18n from './i18n.json';
@@ -41,9 +41,9 @@ export function Component() {
     // multiple params in quick succession. Workaround: use setSearchParams for
     // handling map view changing.
     const [, setSearchParams] = useSearchParams();
-    const [zoomFromUrl] = useUrlSearchState('z', sanitizeZoomUrlParam, () => '');
-    const [latitudeFromUrl] = useUrlSearchState('lat', sanitizeMapLatitudeParam, () => '');
-    const [longitudeFromUrl] = useUrlSearchState('lon', sanitizeMapLongitudeParam, () => '');
+    const [zoomFromUrl] = useUrlSearchState('z', parseZoomUrlParameter, () => '');
+    const [latitudeFromUrl] = useUrlSearchState('lat', parseMapLatitudeParameter, () => '');
+    const [longitudeFromUrl] = useUrlSearchState('lon', parseMapLongitudeParameter, () => '');
 
     const zoom = new NrwMapZoom(zoomFromUrl ?? DEFAULT_MAP_ZOOM);
     const center = new NrwMapCenter({
