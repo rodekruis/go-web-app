@@ -68,12 +68,12 @@ export class NrwMapCenter {
     private roundingPrecisionForUrl = 6;
 
     constructor({
-        latitude, longitude, defaultLat, defaultLon,
+        latitude, longitude, defaultLatitude, defaultLongitude,
     }: {
         latitude: Latitude | null;
         longitude: Longitude | null;
-        defaultLat? : Latitude;
-        defaultLon? : Longitude
+        defaultLatitude? : Latitude;
+        defaultLongitude? : Longitude
     }) {
         // All this strict checking is necessary because lat/lon can also be
         // literal 0 which is falsy.
@@ -87,15 +87,15 @@ export class NrwMapCenter {
         }
 
         // When we get invalid values from URL.
-        if (defaultLat !== undefined && defaultLon !== undefined) {
-            this.latitude = defaultLat;
-            this.longitude = defaultLon;
+        if (defaultLatitude !== undefined && defaultLongitude !== undefined) {
+            this.latitude = defaultLatitude;
+            this.longitude = defaultLongitude;
             return;
         }
 
         // When we get invalid values from URL and no defaults are provided.
         // Erroring earlier would require a complex conditional: this is easier to read.
-        throw new Error('Either lat+lon or defaultLat+defaultLon must be provided');
+        throw new Error('Either latitude+longitude or defaultLatitude+defaultLongitude must be provided');
     }
 
     static fromMapboxGLMap(map: MapboxGLMap) {

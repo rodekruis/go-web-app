@@ -49,8 +49,8 @@ export function Component() {
     const center = new NrwMapCenter({
         latitude: latitudeFromUrl,
         longitude: longitudeFromUrl,
-        defaultLat: DEFAULT_LATITUDE,
-        defaultLon: DEFAULT_LONGITUDE,
+        defaultLatitude: DEFAULT_LATITUDE,
+        defaultLongitude: DEFAULT_LONGITUDE,
     });
 
     const handleMapViewChange = (

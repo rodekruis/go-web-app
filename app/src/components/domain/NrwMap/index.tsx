@@ -48,7 +48,7 @@ export default function NrwMap(props: {
             style: NRW_MAPBOX_STYLE_URL,
             projection: 'mercator',
             attributionControl: true,
-            center, // NrwMapCenter lat lon properties align with what Mapbox expects.
+            center,
             zoom: zoom.value,
         });
 
