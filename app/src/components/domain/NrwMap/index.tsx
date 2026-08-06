@@ -11,8 +11,10 @@ import {
     mbtoken,
     nrwStandalone,
 } from '#config';
-import { type Zoom } from '#views/CountryProfileNationalRiskWatch/types';
-import { type NrwMapCenter } from '#views/CountryProfileNationalRiskWatch/utils';
+import {
+    NrwMapCenter,
+    NrwMapZoom,
+} from '#views/CountryProfileNationalRiskWatch/utils';
 
 import styles from './styles.module.css';
 
@@ -20,48 +22,56 @@ import styles from './styles.module.css';
 const NRW_MAPBOX_STYLE_URL = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
 
 export default function NrwMap(props: {
-    zoom: Zoom;
+    zoom: NrwMapZoom;
     center: NrwMapCenter;
+    onMapViewChange: (newZoom: NrwMapZoom, newCenter: NrwMapCenter) => void;
 }) {
     const {
         zoom,
         center,
+        onMapViewChange,
     } = props;
 
-    const mapContainerRef = useRef<HTMLDivElement>(null);
-    const mapInstanceRef = useRef<MapboxGLMap | null>(null);
+    // The element inside of which the map will be rendered.
+    const containerRef = useRef<HTMLDivElement>(null);
 
     // Initialize the Mapbox map instance
     useEffect(() => {
-        if (!mapContainerRef.current || mapInstanceRef.current) {
+        if (!containerRef.current) {
             return undefined;
         }
 
         mapboxgl.accessToken = mbtoken;
 
         const map = new mapboxgl.Map({
-            container: mapContainerRef.current,
+            container: containerRef.current,
             style: NRW_MAPBOX_STYLE_URL,
             projection: 'mercator',
             attributionControl: true,
-            center: center.getForMapbox(),
-            zoom,
+            center, // NrwMapCenter lat lon properties align with what Mapbox expects.
+            zoom: zoom.value,
         });
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 
-        mapInstanceRef.current = map;
+        map.on('moveend', () => {
+            onMapViewChange(
+                NrwMapZoom.fromMapboxGLMap(map),
+                NrwMapCenter.fromMapboxGLMap(map),
+            );
+        });
 
+        // Cleanup.
         return () => {
-            // Clean up on unmount
-            mapInstanceRef.current?.remove();
-            mapInstanceRef.current = null;
+            map?.remove();
         };
+    // Set the dependencies to empty since we want this to run exactly once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <div
-            ref={mapContainerRef}
+            ref={containerRef}
             className={_cs(
                 styles.nrwMap,
                 nrwStandalone && styles.nrwStandalone,

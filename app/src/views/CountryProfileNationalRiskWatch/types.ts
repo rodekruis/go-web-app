@@ -1,6 +1,6 @@
-// Add "opaque typing" to values so we can be sure they're valid after parsing.
+// We add an "opaque type" to a value to communicate that it has been validated.
 // https://evertpot.com/opaque-ts-types/
-export type urlParameter = string | null | undefined;
+export type UrlParameter = string | null | undefined;
 
 declare const validZoom: unique symbol;
 

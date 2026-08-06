@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import {
     Container,
     ListView,
@@ -17,48 +18,55 @@ import {
 } from './types';
 import {
     NrwMapCenter,
+    NrwMapZoom,
     sanitizeMapLatitudeParam,
     sanitizeMapLongitudeParam,
     sanitizeZoomUrlParam,
-    serializeNumberToUrlParam,
 } from './utils';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
 
 const DEFAULT_MAP_ZOOM = 3 as Zoom;
+const DEFAULT_LATITUDE = 0 as Latitude;
+const DEFAULT_LONGITUDE = 0 as Longitude;
 
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const strings = useTranslation(i18n);
 
-    // This should be the only place where we parse, serialize and set zoom
-    // from/to URL.
-    const [zoomFromUrl, setUrlZoom] = useUrlSearchState(
-        'z', // only place we use this
-        sanitizeZoomUrlParam,
-        serializeNumberToUrlParam,
-    );
-    const zoom = zoomFromUrl ?? DEFAULT_MAP_ZOOM;
+    // Child components should not have to know about URLs.
 
-    const [latFromUrl, setUrlLat] = useUrlSearchState(
-        'lat', // only place we use this
-        sanitizeMapLatitudeParam,
-        serializeNumberToUrlParam,
-    );
+    // useUrlSearchState is limited: it's setValue hook cannot handle setting
+    // multiple params in quick succession. Workaround: use setSearchParams for
+    // handling map view changing.
+    const [, setSearchParams] = useSearchParams();
+    const [zoomFromUrl] = useUrlSearchState('z', sanitizeZoomUrlParam, () => '');
+    const [latFromUrl] = useUrlSearchState('lat', sanitizeMapLatitudeParam, () => '');
+    const [lonFromUrl] = useUrlSearchState('lon', sanitizeMapLongitudeParam, () => '');
 
-    const [lonFromUrl, setUrlLon] = useUrlSearchState(
-        'lon', // only place we use this
-        sanitizeMapLongitudeParam,
-        serializeNumberToUrlParam,
-    );
+    const zoom = new NrwMapZoom(zoomFromUrl ?? DEFAULT_MAP_ZOOM);
+    const center = new NrwMapCenter({
+        lat: latFromUrl,
+        lon: lonFromUrl,
+        defaultLat: DEFAULT_LATITUDE,
+        defaultLon: DEFAULT_LONGITUDE,
+    });
 
-    let center;
-    if (latFromUrl === null || lonFromUrl === null) {
-        center = new NrwMapCenter({ lat: 0 as Latitude, lon: 0 as Longitude });
-    } else {
-        center = new NrwMapCenter({ lat: latFromUrl, lon: lonFromUrl });
-    }
+    const handleMapViewChange = (
+        newZoom: NrwMapZoom,
+        newCenter: NrwMapCenter,
+    ) => {
+        setSearchParams(
+            (prevParams) => {
+                prevParams.set('z', newZoom.getRoundedForUrl());
+                prevParams.set('lat', newCenter.getLatitudeRoundedForUrl());
+                prevParams.set('lon', newCenter.getLongitudeRoundedForUrl());
+                return prevParams;
+            },
+            { replace: true },
+        );
+    };
 
     const content = (
         <Container
@@ -71,6 +79,7 @@ export function Component() {
                 <NrwMap
                     zoom={zoom}
                     center={center}
+                    onMapViewChange={handleMapViewChange}
                 />
             </ListView>
         </Container>
