@@ -42,13 +42,13 @@ export function Component() {
     // handling map view changing.
     const [, setSearchParams] = useSearchParams();
     const [zoomFromUrl] = useUrlSearchState('z', sanitizeZoomUrlParam, () => '');
-    const [latFromUrl] = useUrlSearchState('lat', sanitizeMapLatitudeParam, () => '');
-    const [lonFromUrl] = useUrlSearchState('lon', sanitizeMapLongitudeParam, () => '');
+    const [latitudeFromUrl] = useUrlSearchState('lat', sanitizeMapLatitudeParam, () => '');
+    const [longitudeFromUrl] = useUrlSearchState('lon', sanitizeMapLongitudeParam, () => '');
 
     const zoom = new NrwMapZoom(zoomFromUrl ?? DEFAULT_MAP_ZOOM);
     const center = new NrwMapCenter({
-        lat: latFromUrl,
-        lon: lonFromUrl,
+        latitude: latitudeFromUrl,
+        longitude: longitudeFromUrl,
         defaultLat: DEFAULT_LATITUDE,
         defaultLon: DEFAULT_LONGITUDE,
     });

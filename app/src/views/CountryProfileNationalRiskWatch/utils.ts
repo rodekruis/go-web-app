@@ -80,17 +80,17 @@ export class NrwMapZoom {
 }
 
 export class NrwMapCenter {
-    lat: Latitude;
+    latitude: Latitude;
 
-    lon: Longitude;
+    longitude: Longitude;
 
     private roundingPrecisionForUrl = 6;
 
     constructor({
-        lat, lon, defaultLat, defaultLon,
+        latitude, longitude, defaultLat, defaultLon,
     }: {
-        lat: Latitude | null;
-        lon: Longitude | null;
+        latitude: Latitude | null;
+        longitude: Longitude | null;
         defaultLat? : Latitude;
         defaultLon? : Longitude
     }) {
@@ -99,16 +99,16 @@ export class NrwMapCenter {
 
         // When we get valid values from URL or Mapbox
         // We don't want to combine a default lat with a URL lon or vice versa.
-        if (lat !== null && lon !== null) {
-            this.lat = lat;
-            this.lon = lon;
+        if (latitude !== null && longitude !== null) {
+            this.latitude = latitude;
+            this.longitude = longitude;
             return;
         }
 
         // When we get invalid values from URL.
         if (defaultLat !== undefined && defaultLon !== undefined) {
-            this.lat = defaultLat;
-            this.lon = defaultLon;
+            this.latitude = defaultLat;
+            this.longitude = defaultLon;
             return;
         }
 
@@ -121,16 +121,25 @@ export class NrwMapCenter {
         // We assume mapbox gives us valid values.
         const center = map.getCenter();
         return new NrwMapCenter({
-            lat: center.lat as Latitude,
-            lon: center.lng as Longitude,
+            latitude: center.lat as Latitude,
+            longitude: center.lng as Longitude,
         });
     }
 
     getLatitudeRoundedForUrl() {
-        return this.lat.toFixed(this.roundingPrecisionForUrl).toString();
+        return this.latitude.toFixed(this.roundingPrecisionForUrl).toString();
     }
 
     getLongitudeRoundedForUrl() {
-        return this.lon.toFixed(this.roundingPrecisionForUrl).toString();
+        return this.longitude.toFixed(this.roundingPrecisionForUrl).toString();
+    }
+
+    // MapBox expects "lat" and "lon" properties.
+    get lat() {
+        return this.latitude;
+    }
+
+    get lon() {
+        return this.longitude;
     }
 }
