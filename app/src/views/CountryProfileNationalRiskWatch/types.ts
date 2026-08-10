@@ -19,3 +19,6 @@ declare const validLongitude: unique symbol;
 export type Longitude = number & {
   [validLongitude]: true
 }
+
+// eslint-disable-next-line max-len
+export type MapViewChangeHandler = (newZoom: Zoom, newLatitude: Latitude, newLongitude: Longitude) => void;

@@ -11,10 +11,13 @@ import {
     mbtoken,
     nrwStandalone,
 } from '#config';
+import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
-    NrwMapCenter,
-    NrwMapZoom,
-} from '#views/CountryProfileNationalRiskWatch/utils';
+    type Latitude,
+    type Longitude,
+    type MapViewChangeHandler,
+    type Zoom,
+} from '#views/CountryProfileNationalRiskWatch/types';
 
 import styles from './styles.module.css';
 
@@ -22,9 +25,9 @@ import styles from './styles.module.css';
 const NRW_MAPBOX_STYLE_URL = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
 
 export default function NrwMap(props: {
-    zoom: NrwMapZoom;
-    center: NrwMapCenter;
-    onMapViewChange: (newZoom: NrwMapZoom, newCenter: NrwMapCenter) => void;
+    zoom: Zoom;
+    center: NrwLngLat;
+    onMapViewChange: MapViewChangeHandler;
 }) {
     const {
         zoom,
@@ -49,15 +52,16 @@ export default function NrwMap(props: {
             projection: 'mercator',
             attributionControl: true,
             center,
-            zoom: zoom.value,
+            zoom,
         });
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 
         map.on('moveend', () => {
             onMapViewChange(
-                NrwMapZoom.fromMapboxGLMap(map),
-                NrwMapCenter.fromMapboxGLMap(map),
+                map.getZoom() as Zoom,
+                map.getCenter().lat as Latitude,
+                map.getCenter().lng as Longitude,
             );
         });
 

@@ -11,14 +11,14 @@ import Page from '#components/Page';
 import { nrwStandalone } from '#config';
 import useUrlSearchState from '#hooks/useUrlSearchState';
 
+import NrwLngLat from './NrwLngLat';
 import {
     type Latitude,
     type Longitude,
+    type MapViewChangeHandler,
     type Zoom,
 } from './types';
 import {
-    NrwMapCenter,
-    NrwMapZoom,
     parseMapLatitudeParameter,
     parseMapLongitudeParameter,
     parseZoomUrlParameter,
@@ -31,6 +31,10 @@ const DEFAULT_MAP_ZOOM = 3 as Zoom;
 const DEFAULT_LATITUDE = 0 as Latitude;
 const DEFAULT_LONGITUDE = 0 as Longitude;
 
+const roundZoomForUrl = (zoom: Zoom) => zoom.toFixed(2).toString();
+
+const roundLatitudeOrLongitudeForUrl = (value: Latitude | Longitude) => value.toFixed(6).toString();
+
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const strings = useTranslation(i18n);
@@ -41,27 +45,28 @@ export function Component() {
     // multiple params in quick succession. Workaround: use setSearchParams for
     // handling map view changing.
     const [, setSearchParams] = useSearchParams();
+    // Unlikely that these URL params will have invalid values, but let's be defensive.
     const [zoomFromUrl] = useUrlSearchState('z', parseZoomUrlParameter, () => '');
     const [latitudeFromUrl] = useUrlSearchState('lat', parseMapLatitudeParameter, () => '');
     const [longitudeFromUrl] = useUrlSearchState('lon', parseMapLongitudeParameter, () => '');
 
-    const zoom = new NrwMapZoom(zoomFromUrl ?? DEFAULT_MAP_ZOOM);
-    const center = new NrwMapCenter({
-        latitude: latitudeFromUrl,
-        longitude: longitudeFromUrl,
-        defaultLatitude: DEFAULT_LATITUDE,
-        defaultLongitude: DEFAULT_LONGITUDE,
-    });
+    const zoom = zoomFromUrl ?? DEFAULT_MAP_ZOOM;
+    // Unlikely edge case: only lng or lat is provided, not handling that.
+    const center = new NrwLngLat(
+        longitudeFromUrl ?? DEFAULT_LONGITUDE,
+        latitudeFromUrl ?? DEFAULT_LATITUDE,
+    );
 
-    const handleMapViewChange = (
-        newZoom: NrwMapZoom,
-        newCenter: NrwMapCenter,
+    const handleMapViewChange: MapViewChangeHandler = (
+        newZoom,
+        newLatitude,
+        newLongitude,
     ) => {
         setSearchParams(
             (prevParams) => {
-                prevParams.set('z', newZoom.getRoundedForUrl());
-                prevParams.set('lat', newCenter.getLatitudeRoundedForUrl());
-                prevParams.set('lon', newCenter.getLongitudeRoundedForUrl());
+                prevParams.set('z', roundZoomForUrl(newZoom));
+                prevParams.set('lat', roundLatitudeOrLongitudeForUrl(newLatitude));
+                prevParams.set('lon', roundLatitudeOrLongitudeForUrl(newLongitude));
                 return prevParams;
             },
             { replace: true },
