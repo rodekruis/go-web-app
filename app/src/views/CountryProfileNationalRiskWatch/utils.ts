@@ -108,11 +108,15 @@ export class NrwMapCenter {
     }
 
     getLatitudeRoundedForUrl() {
-        return this.latitude.toFixed(this.roundingPrecisionForUrl).toString();
+        return this.roundLatitudeOrLongitude(this.latitude);
     }
 
     getLongitudeRoundedForUrl() {
-        return this.longitude.toFixed(this.roundingPrecisionForUrl).toString();
+        return this.roundLatitudeOrLongitude(this.longitude);
+    }
+
+    private roundLatitudeOrLongitude(value: Latitude | Longitude) {
+        return value.toFixed(this.roundingPrecisionForUrl).toString();
     }
 
     // MapBox expects "lat" and "lon" properties.
