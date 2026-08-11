@@ -51,6 +51,8 @@ function useUrlSearchState<VALUE>(
         [potentialValue],
     );
 
+    // Calling this function in quick succession (also for different params)
+    // will make some calls fail.
     const setValue = useCallback(
         (newValueOrGetNewValue: ValueOrSetter<VALUE>) => {
             setSearchParams(
