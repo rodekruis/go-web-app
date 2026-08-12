@@ -7,6 +7,7 @@ const {
     APP_NRW_STANDALONE,
     APP_TINY_API_KEY,
     APP_RISK_API_ENDPOINT,
+    APP_NRW_API_ENDPOINT,
     APP_TRANSLATION_API_ENDPOINT,
     APP_SDT_URL,
     APP_POWER_BI_REPORT_ID_1,
@@ -33,6 +34,7 @@ export const adminUrl = APP_ADMIN_URL ?? `${api}admin/`;
 export const mbtoken = APP_MAPBOX_ACCESS_TOKEN;
 export const nrwStandalone = APP_NRW_STANDALONE;
 export const riskApi = APP_RISK_API_ENDPOINT;
+export const nrwApi = APP_NRW_API_ENDPOINT;
 export const translationApi = APP_TRANSLATION_API_ENDPOINT;
 export const sdtUrl = APP_SDT_URL;
 export const powerBiReportId1 = APP_POWER_BI_REPORT_ID_1;

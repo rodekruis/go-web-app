@@ -11,6 +11,7 @@ env:
   APP_ENVIRONMENT: 'development'
   APP_MAPBOX_ACCESS_TOKEN: 'dummy-token'
   APP_RISK_API_ENDPOINT: 'https://go-risk-api-stage.ifrc.org/'
+  APP_NRW_API_ENDPOINT: 'http://localhost:4000/api/'
   APP_TINY_API_KEY: 'dummy-api-key'
   APP_TITLE: 'IFRC Go Test'
   FONTAWESOME_API_KEY: ${{ secrets.FONTAWESOME_API_KEY }}
