@@ -1,0 +1,2810 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["status"],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["status"],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["status"],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["status"],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["status"],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["status"],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get health of instance",
+        "tags": ["--- root ---"]
+      }
+    },
+    "/version": {
+      "get": {
+        "operationId": "HealthController_version",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get version of instance",
+        "tags": ["--- root ---"]
+      }
+    },
+    "/reset/status": {
+      "get": {
+        "operationId": "SeedController_getResetStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Current reset status."
+          }
+        },
+        "summary": "Check whether a database reset is currently in progress.",
+        "tags": ["--- root ---"]
+      }
+    },
+    "/reset": {
+      "post": {
+        "description": "Drops all data and re-seeds initial static data (admin areas, countries, etc.). Call for one, multiple, or all countries. Not available in production. Returns immediately; seeding continues in the background.",
+        "operationId": "SeedController_resetDb",
+        "parameters": [
+          {
+            "name": "skipStaticRasters",
+            "required": false,
+            "in": "query",
+            "description": "If true, skip seeding static rasters (population) to speed up resets for testing.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "resetIdentifier",
+            "required": false,
+            "in": "query",
+            "description": "Optional identifier for this reset action, will be logged by the server.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCodes",
+            "required": false,
+            "in": "query",
+            "description": "ISO3 country codes to seed. Provide comma-separated (e.g. MWI,UGA). If omitted, all countries are seeded.",
+            "schema": {
+              "example": "MWI",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SecretDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Database reset started."
+          },
+          "409": {
+            "description": "A reset is already in progress."
+          }
+        },
+        "summary": "Reset database and seed initial (non-event) data.",
+        "tags": ["--- root ---"]
+      }
+    },
+    "/mock": {
+      "post": {
+        "description": "Creates mock forecast events, for testing without pipeline data. Call for one, multiple, or all supported countries. Not available in production.",
+        "operationId": "SeedController_mockEvents",
+        "parameters": [
+          {
+            "name": "scenario",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "default": "events",
+              "enum": ["no-events", "events"],
+              "type": "string"
+            },
+            "description": "The mock scenario to generate."
+          },
+          {
+            "name": "clearEvents",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "false",
+              "enum": ["true", "false"],
+              "type": "string"
+            },
+            "description": "If true, clear existing events for the given countries before creating new ones."
+          },
+          {
+            "name": "issuedAt",
+            "required": false,
+            "in": "query",
+            "description": "ISO8601 date for the forecast issuedAt (e.g. 2026-08-11T15:44:00.194Z). Defaults to now.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCodes",
+            "required": false,
+            "in": "query",
+            "description": "ISO3 country codes to mock. Provide comma-separated (e.g. MWI,KEN). If omitted, all seeded countries with mock support are mocked.",
+            "schema": {
+              "example": "MWI",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SecretDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mock scenario applied."
+          }
+        },
+        "summary": "Generate mock events for one, multiple, or all countries.",
+        "tags": ["--- root ---"]
+      }
+    },
+    "/alerts": {
+      "get": {
+        "operationId": "AlertsController_getAlerts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Alerts returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlertReadDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n ()"
+          }
+        },
+        "summary": "Get alerts. This endpoint is not intended for use in pipelines or frontends, only for debugging.",
+        "tags": ["alerts"]
+      },
+      "post": {
+        "operationId": "AlertsController_createAlerts",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForecastCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Alerts persisted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlertReadDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Integrity check failed"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n ()"
+          }
+        },
+        "summary": "Create forecast alerts",
+        "tags": ["alerts"]
+      }
+    },
+    "/alerts/{id}": {
+      "get": {
+        "operationId": "AlertsController_getAlert",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alert returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertReadDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n ()"
+          },
+          "404": {
+            "description": "Alert not found"
+          }
+        },
+        "summary": "Get alert by id. This endpoint is not intended for use in pipelines or frontends, only for debugging.",
+        "tags": ["alerts"]
+      },
+      "delete": {
+        "operationId": "AlertsController_deleteAlert",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Alert deleted successfully"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          },
+          "404": {
+            "description": "Alert not found"
+          }
+        },
+        "summary": "Delete alert by id. This endpoint is not intended for use in pipelines or frontends, only for debugging.",
+        "tags": ["alerts"]
+      }
+    },
+    "/events": {
+      "get": {
+        "operationId": "EventsController_getEvents",
+        "parameters": [
+          {
+            "name": "countryCodeIso3",
+            "required": false,
+            "in": "query",
+            "description": "ISO 3166-1 alpha-3 country code to filter events by. If omitted, returns events for all countries.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "active",
+            "required": false,
+            "in": "query",
+            "description": "Use to filter active or closed events that were ongoing at the time of the request.",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "timestamp",
+            "required": false,
+            "in": "query",
+            "description": "NOTE: only use for mock/testing, never in production. ISO 8601 timestamp used to determine if ongoing at time of request. Defaults to now.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns events based on the active-status and request-timestamp",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all active or all closed events",
+        "tags": ["events"]
+      }
+    },
+    "/alert-configs": {
+      "get": {
+        "operationId": "AlertConfigsController_getAlertConfigs",
+        "parameters": [
+          {
+            "name": "countryCodeIso3",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "KEN",
+              "type": "string"
+            }
+          },
+          {
+            "name": "hazardType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": ["floods", "drought", "tropicalCyclone"],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alert configs returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlertConfigResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n ()"
+          }
+        },
+        "summary": "Get alert configs for country and hazard type",
+        "tags": ["alert-configs"]
+      },
+      "post": {
+        "operationId": "AlertConfigsController_createAlertConfigs",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Alert configs created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlertConfigResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          }
+        },
+        "summary": "Create one or more alert configs. Admin endpoint for managing configuration.",
+        "tags": ["alert-configs"]
+      }
+    },
+    "/alert-configs/{id}": {
+      "delete": {
+        "operationId": "AlertConfigsController_deleteAlertConfig",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Alert config deleted successfully"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          },
+          "404": {
+            "description": "Alert config not found"
+          }
+        },
+        "summary": "Delete alert config by id. Admin endpoint for managing configuration.",
+        "tags": ["alert-configs"]
+      }
+    },
+    "/admin-areas": {
+      "get": {
+        "description": "Example current use: GET /admin-areas?filter=countryCodeIso3='ETH' AND adminLevel=2",
+        "operationId": "AdminAreasController_getAdminAreas",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "GeoJSON FeatureCollection of admin areas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeoJsonFeatureCollectionDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get admin areas; all pg_featureserv query parameters are supported (not shown in Swagger UI, so calling via Swagger is limited)",
+        "tags": ["admin-areas"]
+      },
+      "post": {
+        "operationId": "AdminAreasController_createAdminAreas",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Admin areas created successfully"
+          },
+          "400": {
+            "description": "Country does not exist"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          },
+          "409": {
+            "description": "Admin area already exists"
+          }
+        },
+        "summary": "Create one or more admin areas. Admin endpoint for managing configuration.",
+        "tags": ["admin-areas"]
+      }
+    },
+    "/admin-areas/{placeCode}": {
+      "patch": {
+        "operationId": "AdminAreasController_updateAdminArea",
+        "parameters": [
+          {
+            "name": "placeCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminAreaUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Admin area updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeoJsonFeatureDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Country does not exist"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          },
+          "404": {
+            "description": "Admin area not found"
+          }
+        },
+        "summary": "Update an admin area. Admin endpoint for managing configuration.",
+        "tags": ["admin-areas"]
+      },
+      "delete": {
+        "operationId": "AdminAreasController_deleteAdminArea",
+        "parameters": [
+          {
+            "name": "placeCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Admin area deleted successfully"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          },
+          "404": {
+            "description": "Admin area not found"
+          }
+        },
+        "summary": "Delete an admin area. Admin endpoint for managing configuration.",
+        "tags": ["admin-areas"]
+      }
+    },
+    "/countries": {
+      "get": {
+        "operationId": "CountriesController_getCountries",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Countries returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CountryResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all countries",
+        "tags": ["countries"]
+      },
+      "post": {
+        "operationId": "CountriesController_createCountries",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Countries created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CountryResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          },
+          "409": {
+            "description": "Country already exists"
+          }
+        },
+        "summary": "Create one or more countries. Admin endpoint for managing configuration.",
+        "tags": ["countries"]
+      }
+    },
+    "/countries/{countryCodeIso3}": {
+      "get": {
+        "operationId": "CountriesController_getCountry",
+        "parameters": [
+          {
+            "name": "countryCodeIso3",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Country returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n ()"
+          },
+          "404": {
+            "description": "Country not found"
+          }
+        },
+        "summary": "Get country by ISO3 code",
+        "tags": ["countries"]
+      },
+      "patch": {
+        "operationId": "CountriesController_updateCountry",
+        "parameters": [
+          {
+            "name": "countryCodeIso3",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CountryUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Country updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          },
+          "404": {
+            "description": "Country not found"
+          }
+        },
+        "summary": "Update a country. Admin endpoint for managing configuration.",
+        "tags": ["countries"]
+      },
+      "delete": {
+        "operationId": "CountriesController_deleteCountry",
+        "parameters": [
+          {
+            "name": "countryCodeIso3",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Country deleted successfully"
+          },
+          "400": {
+            "description": "Country is still referenced by other records"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          },
+          "404": {
+            "description": "Country not found"
+          }
+        },
+        "summary": "Delete a country. Admin endpoint for managing configuration.",
+        "tags": ["countries"]
+      }
+    },
+    "/geo-features": {
+      "get": {
+        "description": "Example: GET /geo-features?filter=countryCodeIso3='ETH' AND \"layerName\"='glofasStations'",
+        "operationId": "GeoFeaturesController_getGeoFeatures",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "GeoJSON FeatureCollection of geo-features",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeoJsonFeatureCollectionDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get geo-features; all pg_featureserv query parameters are supported (not shown in Swagger UI, so calling via Swagger is limited)",
+        "tags": ["geo-features"]
+      },
+      "post": {
+        "operationId": "GeoFeaturesController_createGeoFeatures",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Geo-features created successfully"
+          },
+          "400": {
+            "description": "Country does not exist"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          },
+          "409": {
+            "description": "Geo-feature with the same country, layer and referenceId already exists"
+          }
+        },
+        "summary": "Create one or more geo-features. Admin endpoint for managing configuration.",
+        "tags": ["geo-features"]
+      }
+    },
+    "/geo-features/{id}": {
+      "patch": {
+        "operationId": "GeoFeaturesController_updateGeoFeature",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeoFeatureUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Geo-feature updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeoJsonFeatureDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          },
+          "404": {
+            "description": "Geo-feature not found"
+          }
+        },
+        "summary": "Update a geo-feature. Admin endpoint for managing configuration.",
+        "tags": ["geo-features"]
+      },
+      "delete": {
+        "operationId": "GeoFeaturesController_deleteGeoFeature",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Geo-feature deleted successfully"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          },
+          "404": {
+            "description": "Geo-feature not found"
+          }
+        },
+        "summary": "Delete a geo-feature. Admin endpoint for managing configuration.",
+        "tags": ["geo-features"]
+      }
+    },
+    "/layers": {
+      "get": {
+        "operationId": "LayersController_getLayers",
+        "parameters": [
+          {
+            "name": "hazardType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": ["floods", "drought", "tropicalCyclone"],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LayerReadDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get layers, optionally filtered by hazard type. Returns layers with no hazard type (shared) plus those matching the filter.",
+        "tags": ["layers"]
+      },
+      "post": {
+        "operationId": "LayersController_createLayer",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LayerCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayerReadDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          }
+        },
+        "summary": "Create a layer. Admin endpoint for managing configuration.",
+        "tags": ["layers"]
+      }
+    },
+    "/layers/{layerName}": {
+      "patch": {
+        "operationId": "LayersController_updateLayer",
+        "parameters": [
+          {
+            "name": "layerName",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LayerUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayerReadDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          }
+        },
+        "summary": "Update a layer. Admin endpoint for managing configuration.",
+        "tags": ["layers"]
+      },
+      "delete": {
+        "operationId": "LayersController_deleteLayer",
+        "parameters": [
+          {
+            "name": "layerName",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          }
+        },
+        "summary": "Delete a layer. Admin endpoint for managing configuration.",
+        "tags": ["layers"]
+      }
+    },
+    "/rasters/static/{countryCodeIso3}/{layer}": {
+      "get": {
+        "operationId": "RastersController_getStaticRaster",
+        "parameters": [
+          {
+            "name": "countryCodeIso3",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "layer",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Static raster metadata returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaticRasterResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Static raster not found"
+          }
+        },
+        "summary": "Get static raster metadata by country and layer",
+        "tags": ["rasters"]
+      },
+      "delete": {
+        "operationId": "RastersController_deleteStaticRaster",
+        "parameters": [
+          {
+            "name": "countryCodeIso3",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "layer",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Static raster deleted successfully"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          },
+          "404": {
+            "description": "Static raster not found"
+          }
+        },
+        "summary": "Delete a static raster. Admin endpoint for managing configuration.",
+        "tags": ["rasters"]
+      }
+    },
+    "/rasters/static/{countryCodeIso3}/{layer}/image": {
+      "get": {
+        "operationId": "RastersController_getStaticRasterImage",
+        "parameters": [
+          {
+            "name": "countryCodeIso3",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "layer",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PNG image returned successfully"
+          },
+          "404": {
+            "description": "Static raster not found"
+          }
+        },
+        "summary": "Get the static raster coloured image as a PNG",
+        "tags": ["rasters"]
+      }
+    },
+    "/rasters/static/{countryCodeIso3}/{layer}/data": {
+      "get": {
+        "operationId": "RastersController_getStaticRasterDataImage",
+        "parameters": [
+          {
+            "name": "countryCodeIso3",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "layer",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Raw data PNG returned successfully"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n ()"
+          },
+          "404": {
+            "description": "Static raster not found"
+          }
+        },
+        "summary": "Get the static raster raw data PNG (RGBA-encoded float values)",
+        "tags": ["rasters"]
+      }
+    },
+    "/rasters/static": {
+      "put": {
+        "operationId": "RastersController_upsertStaticRaster",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaticRasterUploadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Static raster upserted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaticRasterResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
+          }
+        },
+        "summary": "Upload or update a static raster (upsert). Admin endpoint for managing configuration.",
+        "tags": ["rasters"]
+      }
+    },
+    "/rasters/alert/{id}": {
+      "get": {
+        "operationId": "RastersController_getAlertRaster",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alert raster metadata returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRasterResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Alert raster not found"
+          }
+        },
+        "summary": "Get alert raster metadata by its resource ID",
+        "tags": ["rasters"]
+      }
+    },
+    "/rasters/alert/{id}/image": {
+      "get": {
+        "operationId": "RastersController_getAlertRasterImage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PNG image returned successfully"
+          },
+          "404": {
+            "description": "Alert raster not found"
+          }
+        },
+        "summary": "Get the coloured alert raster image as a PNG",
+        "tags": ["rasters"]
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "UserController_getUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns all users"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n ()"
+          }
+        },
+        "summary": "Get all users",
+        "tags": ["users"]
+      }
+    },
+    "/users/login": {
+      "post": {
+        "operationId": "UserController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Logged in successfully"
+          },
+          "401": {
+            "description": "Wrong username and/or password"
+          }
+        },
+        "summary": "[EXTERNALLY USED] Log in existing user",
+        "tags": ["users"]
+      }
+    },
+    "/users/logout": {
+      "post": {
+        "operationId": "UserController_logout",
+        "parameters": [],
+        "responses": {
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n ()"
+          }
+        },
+        "summary": "Log out existing user",
+        "tags": ["users"]
+      }
+    },
+    "/users/current": {
+      "get": {
+        "operationId": "UserController_findMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User returned"
+          },
+          "401": {
+            "description": "Not authenticated."
+          },
+          "403": {
+            "description": "User does not have the right permission to access this endpoint. \n ()"
+          }
+        },
+        "summary": "Get current user",
+        "tags": ["users"]
+      }
+    }
+  },
+  "info": {
+    "title": "Swagger api-service [DEV]",
+    "description": "",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "SecretDto": {
+        "type": "object",
+        "properties": {
+          "secret": {
+            "type": "string",
+            "example": "fill_in_secret"
+          }
+        },
+        "required": ["secret"]
+      },
+      "CentroidDto": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "example": 0.35
+          },
+          "longitude": {
+            "type": "number",
+            "example": 32.6
+          }
+        },
+        "required": ["latitude", "longitude"]
+      },
+      "TimeIntervalDto": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-03-20T00:00:00Z"
+          },
+          "end": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-03-20T23:59:59Z"
+          }
+        },
+        "required": ["start", "end"]
+      },
+      "SeverityReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "timeInterval": {
+            "$ref": "#/components/schemas/TimeIntervalDto"
+          },
+          "ensembleMemberType": {
+            "type": "string",
+            "example": "median",
+            "enum": ["median", "run"]
+          },
+          "severityKey": {
+            "type": "string",
+            "example": "returnPeriod",
+            "enum": ["returnPeriod", "percentile", "windSpeed"]
+          },
+          "severityValue": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": [
+          "id",
+          "created",
+          "updated",
+          "timeInterval",
+          "ensembleMemberType",
+          "severityKey",
+          "severityValue"
+        ]
+      },
+      "ExposureAdminAreaReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "placeCode": {
+            "type": "string",
+            "example": "KEN_01_001"
+          },
+          "adminLevel": {
+            "type": "number",
+            "example": 3
+          },
+          "layer": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ],
+            "example": "populationExposed"
+          },
+          "value": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "id",
+          "created",
+          "updated",
+          "placeCode",
+          "adminLevel",
+          "layer",
+          "value"
+        ]
+      },
+      "ExposureGeoFeatureReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "geoFeatureId": {
+            "type": "string",
+            "example": "station-001"
+          },
+          "layer": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ],
+            "example": "glofasStations"
+          },
+          "attributes": {
+            "type": "object",
+            "example": {
+              "triggered": true,
+              "severity": 0.8
+            }
+          }
+        },
+        "required": [
+          "id",
+          "created",
+          "updated",
+          "geoFeatureId",
+          "layer",
+          "attributes"
+        ]
+      },
+      "RasterExtentDto": {
+        "type": "object",
+        "properties": {
+          "xmin": {
+            "type": "number",
+            "example": 33.5
+          },
+          "ymin": {
+            "type": "number",
+            "example": -1.5
+          },
+          "xmax": {
+            "type": "number",
+            "example": 42
+          },
+          "ymax": {
+            "type": "number",
+            "example": 5.5
+          }
+        },
+        "required": ["xmin", "ymin", "xmax", "ymax"]
+      },
+      "RasterDataMetadata": {
+        "type": "object",
+        "properties": {
+          "extent": {
+            "$ref": "#/components/schemas/RasterExtentDto"
+          },
+          "crs": {
+            "type": "string",
+            "enum": ["EPSG:4326", "EPSG:3857"],
+            "example": "EPSG:4326"
+          },
+          "nodata": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": ["extent", "crs", "nodata"]
+      },
+      "RasterColouredMetadata": {
+        "type": "object",
+        "properties": {
+          "extent": {
+            "$ref": "#/components/schemas/RasterExtentDto"
+          },
+          "crs": {
+            "type": "string",
+            "enum": ["EPSG:4326", "EPSG:3857"],
+            "example": "EPSG:3857"
+          }
+        },
+        "required": ["extent", "crs"]
+      },
+      "RasterMetadataDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RasterDataMetadata"
+          },
+          "coloured": {
+            "$ref": "#/components/schemas/RasterColouredMetadata"
+          }
+        },
+        "required": ["data", "coloured"]
+      },
+      "ExposureRasterReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "layer": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ],
+            "example": "floodDepth"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/RasterMetadataDto"
+          }
+        },
+        "required": ["id", "created", "updated", "layer", "metadata"]
+      },
+      "ExposureReadDto": {
+        "type": "object",
+        "properties": {
+          "adminAreas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExposureAdminAreaReadDto"
+            }
+          },
+          "geoFeatures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExposureGeoFeatureReadDto"
+            }
+          },
+          "rasters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExposureRasterReadDto"
+            }
+          }
+        },
+        "required": ["adminAreas", "geoFeatures", "rasters"]
+      },
+      "AlertReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "countryCodeIso3": {
+            "type": "string",
+            "example": "KEN"
+          },
+          "eventName": {
+            "type": "string",
+            "example": "station-A"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "centroid": {
+            "$ref": "#/components/schemas/CentroidDto"
+          },
+          "hazardType": {
+            "type": "string",
+            "enum": ["floods", "drought", "tropicalCyclone"]
+          },
+          "forecastSources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["glofas", "ECMWF", "GEFS"]
+            }
+          },
+          "severity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeverityReadDto"
+            }
+          },
+          "exposure": {
+            "$ref": "#/components/schemas/ExposureReadDto"
+          }
+        },
+        "required": [
+          "id",
+          "created",
+          "updated",
+          "countryCodeIso3",
+          "eventName",
+          "issuedAt",
+          "centroid",
+          "hazardType",
+          "forecastSources",
+          "severity",
+          "exposure"
+        ]
+      },
+      "SeverityDto": {
+        "type": "object",
+        "properties": {
+          "timeInterval": {
+            "$ref": "#/components/schemas/TimeIntervalDto"
+          },
+          "ensembleMemberType": {
+            "type": "string",
+            "example": "median",
+            "enum": ["median", "run"]
+          },
+          "severityKey": {
+            "type": "string",
+            "example": "returnPeriod",
+            "enum": ["returnPeriod", "percentile", "windSpeed"]
+          },
+          "severityValue": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": [
+          "timeInterval",
+          "ensembleMemberType",
+          "severityKey",
+          "severityValue"
+        ]
+      },
+      "ExposureAdminAreaDto": {
+        "type": "object",
+        "properties": {
+          "placeCode": {
+            "type": "string",
+            "example": "KEN_01_001"
+          },
+          "adminLevel": {
+            "type": "number",
+            "example": 3
+          },
+          "layer": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ],
+            "example": "populationExposed"
+          },
+          "value": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": ["placeCode", "adminLevel", "layer", "value"]
+      },
+      "ExposureGeoFeatureDto": {
+        "type": "object",
+        "properties": {
+          "geoFeatureId": {
+            "type": "string",
+            "example": "station-001"
+          },
+          "layer": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ],
+            "example": "glofasStations"
+          },
+          "attributes": {
+            "type": "object",
+            "example": {
+              "triggered": true,
+              "severity": 0.8
+            }
+          }
+        },
+        "required": ["geoFeatureId", "layer", "attributes"]
+      },
+      "ExposureRasterDto": {
+        "type": "object",
+        "properties": {
+          "layer": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ],
+            "example": "floodDepth"
+          },
+          "valueGreyscale": {
+            "type": "string",
+            "example": "base64-encoded-greyscale-png"
+          },
+          "extent": {
+            "$ref": "#/components/schemas/RasterExtentDto"
+          }
+        },
+        "required": ["layer", "valueGreyscale", "extent"]
+      },
+      "ExposureDto": {
+        "type": "object",
+        "properties": {
+          "adminAreas": {
+            "example": [
+              {
+                "placeCode": "KEN_01_001",
+                "adminLevel": 3,
+                "layer": "populationExposed",
+                "value": 4500
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExposureAdminAreaDto"
+            }
+          },
+          "geoFeatures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExposureGeoFeatureDto"
+            }
+          },
+          "rasters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExposureRasterDto"
+            }
+          }
+        },
+        "required": ["adminAreas"]
+      },
+      "AlertCreateDto": {
+        "type": "object",
+        "properties": {
+          "eventName": {
+            "type": "string",
+            "example": "station-A"
+          },
+          "centroid": {
+            "$ref": "#/components/schemas/CentroidDto"
+          },
+          "severity": {
+            "example": [
+              {
+                "timeInterval": {
+                  "start": "2026-03-20T00:00:00Z",
+                  "end": "2026-03-20T23:59:59Z"
+                },
+                "ensembleMemberType": "median",
+                "severityKey": "returnPeriod",
+                "severityValue": 5
+              },
+              {
+                "timeInterval": {
+                  "start": "2026-03-20T00:00:00Z",
+                  "end": "2026-03-20T23:59:59Z"
+                },
+                "ensembleMemberType": "run",
+                "severityKey": "returnPeriod",
+                "severityValue": 10
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeverityDto"
+            }
+          },
+          "exposure": {
+            "$ref": "#/components/schemas/ExposureDto"
+          }
+        },
+        "required": ["eventName", "centroid", "severity", "exposure"]
+      },
+      "ForecastCreateDto": {
+        "type": "object",
+        "properties": {
+          "countryCodeIso3": {
+            "type": "string",
+            "example": "MWI"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-03-20T12:00:00Z"
+          },
+          "hazardType": {
+            "type": "string",
+            "enum": ["floods", "drought", "tropicalCyclone"],
+            "example": "floods"
+          },
+          "forecastSources": {
+            "type": "array",
+            "example": ["glofas"],
+            "items": {
+              "type": "string",
+              "enum": ["glofas", "ECMWF", "GEFS"]
+            }
+          },
+          "alerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlertCreateDto"
+            }
+          }
+        },
+        "required": [
+          "countryCodeIso3",
+          "issuedAt",
+          "hazardType",
+          "forecastSources",
+          "alerts"
+        ]
+      },
+      "EventLayerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": ["raster", "shape", "point", "vectorTile"]
+          },
+          "label": {
+            "type": "string",
+            "example": "Population"
+          },
+          "resourceId": {
+            "type": "string",
+            "description": "ID that can be used to fetch the actual map layer data"
+          }
+        },
+        "required": ["name", "type", "label", "resourceId"]
+      },
+      "EventResponseDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "number"
+          },
+          "countryCodeIso3": {
+            "type": "string",
+            "example": "KEN"
+          },
+          "eventName": {
+            "type": "string"
+          },
+          "eventLabel": {
+            "type": "string"
+          },
+          "hazardType": {
+            "type": "string",
+            "enum": ["floods", "drought", "tropicalCyclone"]
+          },
+          "forecastSources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["glofas", "ECMWF", "GEFS"]
+            }
+          },
+          "alertClass": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "trigger": {
+            "type": "boolean"
+          },
+          "centroid": {
+            "type": "object",
+            "example": {
+              "latitude": 0.35,
+              "longitude": 32.6
+            }
+          },
+          "startAt": {
+            "type": "string",
+            "example": "2026-03-20T23:59:59Z"
+          },
+          "reachesPeakAlertClassAt": {
+            "type": "string",
+            "example": "2026-03-20T23:59:59Z"
+          },
+          "endAt": {
+            "type": "string",
+            "example": "2026-03-20T23:59:59Z"
+          },
+          "firstIssuedAt": {
+            "type": "string",
+            "example": "2026-03-20T23:59:59Z"
+          },
+          "lastUpdatedAt": {
+            "type": "string",
+            "example": "2026-03-20T23:59:59Z"
+          },
+          "isOngoing": {
+            "type": "boolean"
+          },
+          "exposedAdminAreas": {
+            "type": "object",
+            "description": "A mapping of admin level (as a string key) to the exposed admin areas for that level",
+            "example": {
+              "0": [],
+              "1": []
+            }
+          },
+          "availableLayers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventLayerDto"
+            }
+          }
+        },
+        "required": [
+          "eventId",
+          "countryCodeIso3",
+          "eventName",
+          "eventLabel",
+          "hazardType",
+          "forecastSources",
+          "alertClass",
+          "trigger",
+          "centroid",
+          "startAt",
+          "reachesPeakAlertClassAt",
+          "endAt",
+          "firstIssuedAt",
+          "lastUpdatedAt",
+          "isOngoing",
+          "exposedAdminAreas",
+          "availableLayers"
+        ]
+      },
+      "ClassLevelDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "enum": ["singleThreshold", "low", "medium", "high"],
+            "example": "high"
+          },
+          "threshold": {
+            "type": "number",
+            "example": 400
+          }
+        },
+        "required": ["label", "threshold"]
+      },
+      "AlertConfigResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "countryCodeIso3": {
+            "type": "string",
+            "example": "KEN"
+          },
+          "hazardType": {
+            "type": "string",
+            "enum": ["floods", "drought", "tropicalCyclone"],
+            "example": "floods"
+          },
+          "spatialExtentName": {
+            "type": "string",
+            "example": "G5142"
+          },
+          "spatialExtentPlaceCodes": {
+            "example": ["KE030"],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "temporalExtents": {
+            "example": [
+              {
+                "lead-time-spectrum": [
+                  "0-day",
+                  "1-day",
+                  "2-day",
+                  "3-day",
+                  "4-day",
+                  "5-day",
+                  "6-day",
+                  "7-day"
+                ]
+              }
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "severityClassLevels": {
+            "example": [
+              {
+                "label": "low",
+                "threshold": 100
+              },
+              {
+                "label": "medium",
+                "threshold": 200
+              },
+              {
+                "label": "high",
+                "threshold": 400
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClassLevelDto"
+            }
+          },
+          "probabilityClassLevels": {
+            "example": [
+              {
+                "label": "low",
+                "threshold": 0.5
+              },
+              {
+                "label": "medium",
+                "threshold": 0.65
+              },
+              {
+                "label": "high",
+                "threshold": 0.85
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClassLevelDto"
+            }
+          },
+          "triggerAlertClass": {
+            "type": "object",
+            "example": "high"
+          },
+          "triggerLeadTimeDuration": {
+            "type": "object",
+            "example": "P7D"
+          }
+        },
+        "required": [
+          "id",
+          "created",
+          "updated",
+          "countryCodeIso3",
+          "hazardType",
+          "spatialExtentName",
+          "spatialExtentPlaceCodes",
+          "temporalExtents",
+          "severityClassLevels",
+          "probabilityClassLevels"
+        ]
+      },
+      "GeoJsonGeometryDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "Polygon",
+            "enum": ["Point", "Polygon", "MultiPolygon"]
+          },
+          "coordinates": {
+            "description": "Coordinates array; structure depends on geometry type.",
+            "example": [
+              [
+                [102, 0],
+                [103, 1],
+                [104, 0],
+                [102, 0]
+              ]
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["type"]
+      },
+      "GeoJsonFeatureDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["Feature"]
+          },
+          "geometry": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeoJsonGeometryDto"
+              }
+            ]
+          },
+          "id": {
+            "type": "object",
+            "description": "Feature identifier",
+            "example": "KE030"
+          },
+          "properties": {
+            "type": "object",
+            "description": "Feature properties",
+            "example": {
+              "name": "Nairobi",
+              "adminLevel": 1
+            },
+            "nullable": true
+          }
+        },
+        "required": ["type", "geometry", "properties"]
+      },
+      "GeoJsonFeatureCollectionDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["FeatureCollection"]
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeoJsonFeatureDto"
+            }
+          }
+        },
+        "required": ["type", "features"]
+      },
+      "AdminAreaUpdateDto": {
+        "type": "object",
+        "properties": {
+          "adminLevel": {
+            "type": "number",
+            "example": 1
+          },
+          "nameEn": {
+            "type": "string",
+            "example": "Nairobi"
+          },
+          "countryCodeIso3": {
+            "type": "string",
+            "example": "KEN"
+          },
+          "placeCodeLevel1": {
+            "type": "object",
+            "example": "KE010",
+            "nullable": true
+          },
+          "placeCodeLevel2": {
+            "type": "object",
+            "example": "KE010222",
+            "nullable": true
+          },
+          "placeCodeLevel3": {
+            "type": "object",
+            "example": "KE010222333",
+            "nullable": true
+          },
+          "placeCodeLevel4": {
+            "type": "object",
+            "example": "KE010222333444",
+            "nullable": true
+          },
+          "attributes": {
+            "type": "object",
+            "example": {
+              "POPULATION": 215293
+            }
+          },
+          "geometry": {
+            "type": "object",
+            "example": {
+              "type": "Feature",
+              "geometry": {},
+              "properties": {}
+            }
+          }
+        }
+      },
+      "CountryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2023-10-05T14:48:00.000Z"
+          },
+          "countryCodeIso3": {
+            "type": "string",
+            "example": "KEN"
+          },
+          "countryCodeIso2": {
+            "type": "string",
+            "example": "KE"
+          },
+          "countryName": {
+            "type": "string",
+            "example": "Kenya"
+          }
+        },
+        "required": [
+          "id",
+          "created",
+          "updated",
+          "countryCodeIso3",
+          "countryCodeIso2",
+          "countryName"
+        ]
+      },
+      "CountryUpdateDto": {
+        "type": "object",
+        "properties": {
+          "countryCodeIso2": {
+            "type": "string",
+            "example": "KE"
+          },
+          "countryName": {
+            "type": "string",
+            "example": "Kenya"
+          }
+        }
+      },
+      "GeoFeatureUpdateDto": {
+        "type": "object",
+        "properties": {
+          "featureType": {
+            "type": "string",
+            "enum": ["Point", "LineString", "Polygon"],
+            "example": "Point"
+          },
+          "geometry": {
+            "type": "object",
+            "example": {
+              "type": "Point",
+              "coordinates": [37.194, -1.095]
+            }
+          },
+          "attributes": {
+            "type": "object",
+            "example": {
+              "name": "ATHI MUNYU (3DA02)"
+            }
+          }
+        }
+      },
+      "LayerReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "example": "Population"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["raster", "shape", "point", "vectorTile"]
+          },
+          "hazardType": {
+            "type": "string",
+            "enum": ["floods", "drought", "tropicalCyclone"],
+            "example": null
+          },
+          "description": {
+            "type": "object",
+            "example": null
+          }
+        },
+        "required": ["id", "name", "label", "type"]
+      },
+      "LayerCreateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "example": "Population"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["raster", "shape", "point", "vectorTile"]
+          },
+          "hazardType": {
+            "type": "string",
+            "enum": ["floods", "drought", "tropicalCyclone"]
+          },
+          "description": {
+            "type": "string",
+            "example": "Population density raster"
+          }
+        },
+        "required": ["name", "label", "type"]
+      },
+      "LayerUpdateDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "example": "Population"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["raster", "shape", "point", "vectorTile"]
+          },
+          "hazardType": {
+            "type": "string",
+            "enum": ["floods", "drought", "tropicalCyclone"]
+          },
+          "description": {
+            "type": "string",
+            "example": "Population density raster"
+          }
+        }
+      },
+      "StaticRasterResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "layer": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ],
+            "example": "population"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/RasterMetadataDto"
+          }
+        },
+        "required": ["id", "layer", "metadata"]
+      },
+      "StaticRasterUploadDto": {
+        "type": "object",
+        "properties": {
+          "countryCodeIso3": {
+            "type": "string",
+            "example": "KEN"
+          },
+          "layer": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ],
+            "example": "population"
+          },
+          "valueData": {
+            "type": "string",
+            "description": "Base64-encoded data PNG (RGBA-encoded float values)"
+          },
+          "valueColoured": {
+            "type": "string",
+            "description": "Base64-encoded coloured PNG image for display"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/RasterMetadataDto"
+          }
+        },
+        "required": [
+          "countryCodeIso3",
+          "layer",
+          "valueData",
+          "valueColoured",
+          "metadata"
+        ]
+      },
+      "AlertRasterResponseDto": {
+        "type": "object",
+        "properties": {
+          "layer": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ],
+            "example": "floodDepth"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/RasterMetadataDto"
+          }
+        },
+        "required": ["layer", "metadata"]
+      },
+      "LoginUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "admin@example.org"
+          },
+          "password": {
+            "type": "string",
+            "example": "password"
+          }
+        },
+        "required": ["username", "password"]
+      }
+    }
+  }
+}

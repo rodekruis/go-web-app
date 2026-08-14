@@ -8,6 +8,7 @@ import { type ContextInterface } from '@togglecorp/toggle-request';
 
 import {
     api,
+    nrwApi,
     riskApi,
     translationApi,
 } from '#config';
@@ -40,7 +41,7 @@ export interface TransformedError {
     debugMessage: string;
 }
 
-type ApiType = 'go' | 'risk' | 'translation';
+type ApiType = 'go' | 'nrw' | 'risk' | 'translation';
 
 export interface AdditionalOptions {
     apiType?: ApiType;
@@ -116,6 +117,10 @@ type GoContextInterface = ContextInterface<
 function getEndPoint(apiType: ApiType | undefined) {
     if (apiType === 'risk') {
         return riskApi;
+    }
+
+    if (apiType === 'nrw') {
+        return nrwApi;
     }
 
     if (apiType === 'translation') {
