@@ -56,15 +56,15 @@ export function Component() {
     const [zoomFromUrl] = useUrlSearchState('z', parseZoomUrlParameter, () => '');
     const [latitudeFromUrl] = useUrlSearchState('lat', parseMapLatitudeParameter, () => '');
     const [longitudeFromUrl] = useUrlSearchState('lon', parseMapLongitudeParameter, () => '');
-
-    // Countries the map is scoped to, tracked via the URL in standalone mode.
-    const [searchParamCountries] = useUrlSearchState(
+    const [countriesFromUrl] = useUrlSearchState(
         'countries',
         parseCountriesUrlParameter,
         serializeCountriesUrlParameter,
     );
 
-    // In embedded mode the country comes from the route, not the search param.
+    // For embedded, get the country from the route.
+    // These are hooks, so they can't be placed in a conditional block.
+    // For standalone, this will return null, which is fine.
     const { countryId } = useParams<{ countryId: string }>();
     const countryFromRouting = useCountry({ id: Number(countryId) });
 
@@ -75,12 +75,12 @@ export function Component() {
         () => {
             // For NRW standalone mode, use the countries from the search param.
             if (nrwStandalone) {
-                return searchParamCountries;
+                return countriesFromUrl;
             }
             // For NRW embedded mode, use the country from the route path.
             return countryFromRouting?.iso3 ? [countryFromRouting.iso3] : [];
         },
-        [searchParamCountries, countryFromRouting],
+        [countriesFromUrl, countryFromRouting],
     );
 
     const zoom = zoomFromUrl ?? DEFAULT_MAP_ZOOM;
