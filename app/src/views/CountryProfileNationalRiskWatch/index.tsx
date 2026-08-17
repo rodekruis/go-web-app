@@ -25,10 +25,10 @@ import {
 } from './types';
 import {
     parseCountriesUrlParameter,
+    parseCountryCode,
     parseMapLatitudeParameter,
     parseMapLongitudeParameter,
     parseZoomUrlParameter,
-    sanitizeCountryCode,
     serializeCountriesUrlParameter,
 } from './utils';
 
@@ -79,7 +79,7 @@ export function Component() {
                 return countriesFromUrl;
             }
             // For NRW embedded mode, use the country from the route path.
-            const countryCode = sanitizeCountryCode(countryFromRouting?.iso3);
+            const countryCode = parseCountryCode(countryFromRouting?.iso3);
             return countryCode ? [countryCode] : [];
         },
         [countriesFromUrl, countryFromRouting],

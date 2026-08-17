@@ -22,7 +22,7 @@ export type Longitude = number & {
 
 declare const validCountryCode: unique symbol;
 
-export type CountryCode = string & {
+export type CountryCodeIso3 = string & {
   [validCountryCode]: true
 }
 

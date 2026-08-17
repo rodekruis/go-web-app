@@ -1,5 +1,5 @@
 import {
-    type CountryCode,
+    type CountryCodeIso3,
     type Latitude,
     type Longitude,
     type UrlParameter,
@@ -41,10 +41,10 @@ export function parseMapLongitudeParameter(value: UrlParameter) {
 
 // Sanitize to a valid country code in ISO_A3.
 // Returns null if invalid.
-export function sanitizeCountryCode(value: UrlParameter) {
+export function parseCountryCode(value: string | undefined): CountryCodeIso3 | null {
     const countryRegex = /^[A-Z]{3}$/;
     const cleaned = value?.trim().toUpperCase() ?? '';
-    return countryRegex.test(cleaned) ? (cleaned as CountryCode) : null;
+    return countryRegex.test(cleaned) ? (cleaned as CountryCodeIso3) : null;
 }
 
 // Parse comma-separated ISO_A3 country codes from a URL search parameter.
@@ -56,17 +56,16 @@ export function parseCountriesUrlParameter(value: UrlParameter) {
 
     return value
         .split(',')
-        .map(sanitizeCountryCode)
-        .filter((countryCode): countryCode is CountryCode => countryCode !== null);
+        .map(parseCountryCode)
+        .filter((countryCode): countryCode is CountryCodeIso3 => countryCode !== null);
 }
 
 // Convert ISO_A3 country codes to a comma-separated string for the search params.
-export function serializeCountriesUrlParameter(countryCodes: CountryCode[]) {
-    const serializedCodes = countryCodes
-        .map(sanitizeCountryCode)
-        .filter((countryCode): countryCode is CountryCode => countryCode !== null)
-        .join(',');
+// Returns undefined when there are no codes so that the search param is removed.
+export function serializeCountriesUrlParameter(countryCodes: CountryCodeIso3[]) {
+    if (countryCodes.length === 0) {
+        return undefined;
+    }
 
-    // If there are no valid codes, return undefined so that the search param is removed.
-    return serializedCodes === '' ? undefined : serializedCodes;
+    return countryCodes.join(',');
 }
