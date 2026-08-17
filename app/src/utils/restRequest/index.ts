@@ -30,7 +30,7 @@ export type GoApiBody<URL extends keyof goApiPaths, METHOD extends 'POST' | 'PUT
 /** @knipignore This will be used in the future. */
 export type NrwApiResponse<URL extends keyof nrwApiPaths, METHOD extends 'GET' | 'POST' | 'PUT' = 'GET'> = ApiResponse<nrwApiPaths, URL, METHOD>;
 
-export type NrwApiUrlQuery<URL extends keyof nrwApiPaths, METHOD extends 'GET' | 'POST' | 'PUT' | 'PATCH' = 'GET'> = ApiUrlQuery<nrwApiPaths, URL, METHOD>;
+export type NrwApiUrlQuery<URL extends keyof nrwApiPaths, METHOD extends 'GET' | 'POST' | 'PUT' = 'GET'> = ApiUrlQuery<nrwApiPaths, URL, METHOD>;
 
 export type RiskApiResponse<URL extends keyof riskApiPaths, METHOD extends 'GET' | 'POST' | 'PUT' | 'PATCH' = 'GET'> = ApiResponse<riskApiPaths, URL, METHOD>;
 
