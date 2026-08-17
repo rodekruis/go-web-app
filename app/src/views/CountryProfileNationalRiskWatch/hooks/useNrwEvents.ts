@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { isFalsyString } from '@togglecorp/fujs';
 
 import {
@@ -11,17 +10,12 @@ function useNrwEvents(props: NrwApiUrlQuery<'/events'>) {
         countryCodeIso3,
     } = props;
 
-    const query = useMemo(
-        () => ({
-            countryCodeIso3,
-        }),
-        [countryCodeIso3],
-    );
-
     const response = useNrwRequest({
         url: '/events',
         apiType: 'nrw',
-        query,
+        query: {
+            countryCodeIso3,
+        },
         skip: isFalsyString(countryCodeIso3),
     });
 
