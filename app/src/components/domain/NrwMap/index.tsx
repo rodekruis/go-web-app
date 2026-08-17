@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import useNrwEvents from '#hooks/domain/useNrwEvents';
+import useNrwEvents from '#views/CountryProfileNationalRiskWatch/hooks/useNrwEvents';
 import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type MapViewChangeHandler,
