@@ -29,11 +29,12 @@ This is a guide for future LLM changes so that future prompts know where files o
 
 Changes:
 
-- NRW map data orchestration: this prototype branch has it in the map container `app/src/components/Nrw/index.tsx` (NrwMapContainer). In the new main branch it lives in the view `app/src/views/CountryProfileNationalRiskWatch/index.tsx`.
+- NRW map data orchestration: this prototype branch has it in the map container `app/src/components/Nrw/index.tsx` (NrwMapContainer). In the new main branch it lives in the view `app/src/views/CountryProfileNationalRiskWatch/index.tsx`, which also routes between standalone mode (full-page with `NrwNavbar`) and embedded mode (a `CountryProfile` tab).
 - NRW components directory: this prototype branch keeps them under `app/src/components/Nrw/*`. In the new main branch they live under `app/src/components/domain/*` (e.g. `NrwMap`, `NrwNavbar`).
-- Map component: this prototype branch `app/src/components/Nrw/MapboxDataMap/` → the new main branch `app/src/components/domain/NrwMap/`.
-- `useNrwMapSearchParams` hook: this prototype branch `app/src/utils/nrw/hooks/useNrwMapSearchParams.ts` → the new main branch `app/src/hooks/useNrwMapSearchParams.ts`.
-- NRW mode config flag: this prototype branch uses `nrwPortalMode` (`APP_NRW_PORTAL_MODE`); the new main branch uses `nrwStandalone` (`APP_NRW_STANDALONE`).
+- Map component: this prototype branch `app/src/components/Nrw/MapboxDataMap/` → the new main branch `app/src/components/domain/NrwMap/`. In the new main branch `NrwMap/index.tsx` is an abstract wrapper and the actual Mapbox (mapbox-gl-v3) implementation lives in `app/src/components/domain/NrwMap/NrwMapContainer/index.tsx`.
+- Map URL search params: this prototype branch uses a `useNrwMapSearchParams` hook (`app/src/utils/nrw/hooks/useNrwMapSearchParams.ts`). The new main branch has no such hook and no `app/src/utils/nrw/` directory; map position parsing/serialization lives in `app/src/views/CountryProfileNationalRiskWatch/utils.ts` (with opaque `Zoom`/`Latitude`/`Longitude` types in `types.ts` and `NrwLngLat.ts`), driven by the shared `useUrlSearchState` hook.
+- NRW REST requests: in the new main branch, typed NRW request hooks (`useNrwRequest`, `useNrwLazyRequest`) live in `app/src/utils/restRequest/index.ts` (`apiType: 'nrw'`), using generated types in `app/generated/nrwTypes.ts`.
+- NRW mode config flag: this prototype branch uses `nrwPortalMode` (`APP_NRW_PORTAL_MODE`); the new main branch uses `nrwStandalone` (`APP_NRW_STANDALONE`), defined in `app/src/config.ts` and gating the standalone route in `app/src/App/routes/index.tsx` and the layout in `app/src/views/RootLayout/index.tsx`.
 
 ## Repository Overview
 
