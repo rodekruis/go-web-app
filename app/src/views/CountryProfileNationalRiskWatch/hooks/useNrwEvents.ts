@@ -9,17 +9,13 @@ import {
 function useNrwEvents(props: NrwApiUrlQuery<'/events'>) {
     const {
         countryCodeIso3,
-        active = true,
-        timestamp,
     } = props;
 
     const query = useMemo(
         () => ({
             countryCodeIso3,
-            active,
-            timestamp,
         }),
-        [countryCodeIso3, active, timestamp],
+        [countryCodeIso3],
     );
 
     const response = useNrwRequest({
