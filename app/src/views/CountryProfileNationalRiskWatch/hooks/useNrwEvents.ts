@@ -1,7 +1,4 @@
-import {
-    useCallback,
-    useMemo,
-} from 'react';
+import { useMemo } from 'react';
 import { isFalsyString } from '@togglecorp/fujs';
 
 import {
@@ -32,17 +29,7 @@ function useNrwEvents(props: NrwApiUrlQuery<'/events'>) {
         skip: isFalsyString(countryCodeIso3),
     });
 
-    const refetch = useCallback(
-        () => {
-            response.retrigger();
-        },
-        [response],
-    );
-
-    return {
-        ...response,
-        refetch,
-    };
+    return response;
 }
 
 export default useNrwEvents;
