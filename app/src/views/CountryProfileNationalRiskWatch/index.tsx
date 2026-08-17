@@ -28,6 +28,7 @@ import {
     parseMapLatitudeParameter,
     parseMapLongitudeParameter,
     parseZoomUrlParameter,
+    sanitizeCountryCode,
     serializeCountriesUrlParameter,
 } from './utils';
 
@@ -78,7 +79,8 @@ export function Component() {
                 return countriesFromUrl;
             }
             // For NRW embedded mode, use the country from the route path.
-            return countryFromRouting?.iso3 ? [countryFromRouting.iso3] : [];
+            const countryCode = sanitizeCountryCode(countryFromRouting?.iso3);
+            return countryCode ? [countryCode] : [];
         },
         [countriesFromUrl, countryFromRouting],
     );

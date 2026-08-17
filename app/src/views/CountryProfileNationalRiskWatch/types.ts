@@ -20,5 +20,11 @@ export type Longitude = number & {
   [validLongitude]: true
 }
 
+declare const validCountryCode: unique symbol;
+
+export type CountryCode = string & {
+  [validCountryCode]: true
+}
+
 // eslint-disable-next-line max-len
 export type MapViewChangeHandler = (newZoom: Zoom, newLatitude: Latitude, newLongitude: Longitude) => void;
