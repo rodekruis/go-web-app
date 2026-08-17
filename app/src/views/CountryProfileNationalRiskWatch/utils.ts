@@ -38,8 +38,8 @@ export function parseMapLongitudeParameter(value: UrlParameter) {
     return sanitizeFloatInRange(value, -180, 180) as Longitude | null;
 }
 
-// Convert to uppercase and accept only 3 letter length codes.
-// Returns null if the value is not a valid ISO_A3 code.
+// Convert to uppercase and accept only 3 letter length codes (ISO_A3).
+// Returns null if the value is not a 3 letter code.
 function sanitizeCountryCode(value: UrlParameter) {
     const countryRegex = /^[A-Z]{3}$/;
     const cleaned = value?.trim().toUpperCase() ?? '';
@@ -61,8 +61,11 @@ export function parseCountriesUrlParameter(value: UrlParameter) {
 
 // Convert ISO_A3 country codes to a comma-separated string for the search params.
 export function serializeCountriesUrlParameter(countryCodes: string[]) {
-    return countryCodes
+    const serializedCodes = countryCodes
         .map(sanitizeCountryCode)
         .filter((countryCode): countryCode is string => countryCode !== null)
         .join(',');
+
+    // If there are no valid codes, return undefined so that the search param is removed.
+    return serializedCodes === '' ? undefined : serializedCodes;
 }

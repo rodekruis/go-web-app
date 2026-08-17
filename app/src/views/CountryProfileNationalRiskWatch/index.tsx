@@ -64,7 +64,7 @@ export function Component() {
 
     // For embedded, get the country from the route.
     // These are hooks, so they can't be placed in a conditional block.
-    // For standalone, this will return null, which is fine.
+    // For standalone, this will return undefined, which is fine.
     const { countryId } = useParams<{ countryId: string }>();
     const countryFromRouting = useCountry({ id: Number(countryId) });
 
