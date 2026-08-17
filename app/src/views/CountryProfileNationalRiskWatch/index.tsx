@@ -1,4 +1,8 @@
-import { useSearchParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import {
+    useParams,
+    useSearchParams,
+} from 'react-router-dom';
 import {
     Container,
     ListView,
@@ -9,6 +13,7 @@ import NrwMap from '#components/domain/NrwMap';
 import NrwNavbar from '#components/domain/NrwNavbar';
 import Page from '#components/Page';
 import { nrwStandalone } from '#config';
+import useCountry from '#hooks/domain/useCountry';
 import useUrlSearchState from '#hooks/useUrlSearchState';
 
 import NrwLngLat from './NrwLngLat';
@@ -19,9 +24,11 @@ import {
     type Zoom,
 } from './types';
 import {
+    parseCountriesUrlParameter,
     parseMapLatitudeParameter,
     parseMapLongitudeParameter,
     parseZoomUrlParameter,
+    serializeCountriesUrlParameter,
 } from './utils';
 
 import i18n from './i18n.json';
@@ -49,6 +56,32 @@ export function Component() {
     const [zoomFromUrl] = useUrlSearchState('z', parseZoomUrlParameter, () => '');
     const [latitudeFromUrl] = useUrlSearchState('lat', parseMapLatitudeParameter, () => '');
     const [longitudeFromUrl] = useUrlSearchState('lon', parseMapLongitudeParameter, () => '');
+
+    // Countries the map is scoped to, tracked via the URL in standalone mode.
+    const [searchParamCountries] = useUrlSearchState(
+        'countries',
+        parseCountriesUrlParameter,
+        serializeCountriesUrlParameter,
+    );
+
+    // In embedded mode the country comes from the route, not the search param.
+    const { countryId } = useParams<{ countryId: string }>();
+    const countryFromRouting = useCountry({ id: Number(countryId) });
+
+    // The countries that the map is scoped to.
+    // This will be used in a later PR.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const countries = useMemo(
+        () => {
+            // For NRW standalone mode, use the countries from the search param.
+            if (nrwStandalone) {
+                return searchParamCountries;
+            }
+            // For NRW embedded mode, use the country from the route path.
+            return countryFromRouting?.iso3 ? [countryFromRouting.iso3] : [];
+        },
+        [searchParamCountries, countryFromRouting],
+    );
 
     const zoom = zoomFromUrl ?? DEFAULT_MAP_ZOOM;
     // Unlikely edge case: only lng or lat is provided, not handling that.
