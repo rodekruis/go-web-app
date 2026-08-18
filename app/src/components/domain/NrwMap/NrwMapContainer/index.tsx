@@ -27,7 +27,7 @@ import styles from './styles.module.css';
 
 // Get this from Mapbox Studio > Styles > Style url
 const nrwMapboxStyleUrl = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
-const paddingPixels = 60;
+const paddingPixels = 20;
 
 function NrwMapContainer(props: {
     initialMapView: InitialMapView;
