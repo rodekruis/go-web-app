@@ -33,11 +33,11 @@ export type CountryCodeIso3 = string & {
 export type MapViewChangeHandler = (newZoom: Zoom, newLatitude: Latitude, newLongitude: Longitude) => void;
 
 // Lon/lat bounds as [southwest, northeast] corners.
-export type LonLatBounds = [NrwLngLat, NrwLngLat];
+export type LngLatBounds = [NrwLngLat, NrwLngLat];
 
 // The resolved starting view handed to the map component.
 export type InitialMapView = {
     zoom: Zoom;
     center: NrwLngLat;
-    fitBounds?: LonLatBounds;
+    fitBounds?: LngLatBounds;
 };

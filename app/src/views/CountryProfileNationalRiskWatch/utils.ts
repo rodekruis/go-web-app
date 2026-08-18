@@ -7,8 +7,8 @@ import NrwLngLat from './NrwLngLat';
 import {
     type CountryCodeIso3,
     type Latitude,
+    type LngLatBounds,
     type Longitude,
-    type LonLatBounds,
     type UrlParameter,
     type Zoom,
 } from './types';
@@ -113,7 +113,7 @@ function clamp(value: number, min: number, max: number) {
 // Returns null when the collection has no usable geometries.
 export function getFeatureCollectionBounds(
     featureCollection: NrwApiResponse<'/admin-areas'> | undefined,
-): LonLatBounds | null {
+): LngLatBounds | null {
     if (!featureCollection || featureCollection.features.length === 0) {
         return null;
     }
