@@ -11,8 +11,8 @@ import {
     mbtoken,
     nrwStandalone,
 } from '#config';
-import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
+    type InitialMapView,
     type Latitude,
     type Longitude,
     type MapViewChangeHandler,
@@ -26,18 +26,23 @@ import styles from './styles.module.css';
 // This component does not know about URLs or network requests.
 
 // Get this from Mapbox Studio > Styles > Style url
-const NRW_MAPBOX_STYLE_URL = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
+const nrwMapboxStyleUrl = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
+const paddingPixels = 60;
 
 function NrwMapContainer(props: {
-    zoom: Zoom;
-    center: NrwLngLat;
+    initialMapView: InitialMapView;
     onMapViewChange: MapViewChangeHandler;
 }) {
     const {
-        zoom,
-        center,
+        initialMapView,
         onMapViewChange,
     } = props;
+
+    const {
+        zoom,
+        center,
+        fitBounds,
+    } = initialMapView;
 
     // The element inside of which the map will be rendered.
     const containerRef = useRef<HTMLDivElement>(null);
@@ -52,12 +57,17 @@ function NrwMapContainer(props: {
 
         const map = new mapboxgl.Map({
             container: containerRef.current,
-            style: NRW_MAPBOX_STYLE_URL,
+            style: nrwMapboxStyleUrl,
             projection: 'mercator',
             attributionControl: true,
             center,
             zoom,
         });
+
+        // If country bounds were provided, fit the map to these.
+        if (fitBounds) {
+            map.fitBounds(fitBounds, { padding: paddingPixels });
+        }
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 

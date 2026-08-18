@@ -151,6 +151,10 @@ type CommonOptions<METHOD, PARAMETERS, RESPONSES, CONTEXT> = {
     onFailure?: (val: TransformedError, context: CONTEXT) => void;
 }
 
+// Query shape for endpoints whose query parameters are not captured in the
+// generated schema (e.g. NRW pg_featureserv pass-through parameters).
+type UntypedQuery = Record<string, string | number | boolean | undefined>;
+
 type GetOptions<SCHEMA, PATH extends keyof SCHEMA, CONTEXT = never> = (
     SCHEMA[PATH] extends {
         get: {
@@ -163,7 +167,17 @@ type GetOptions<SCHEMA, PATH extends keyof SCHEMA, CONTEXT = never> = (
         // FIXME: This should only be for lazy
         query?: ResolveQuery<Parameters>
             | ((context: CONTEXT) => ResolveQuery<Parameters> | undefined),
-    } & CommonOptions<'GET', Parameters, Responses, CONTEXT>) : unknown
+    } & CommonOptions<'GET', Parameters, Responses, CONTEXT>) : (
+        // Some paths (e.g. NRW pg_featureserv pass-through endpoints) declare
+        // no parameters in the schema. Still allow an untyped query so they
+        // can be used with the shared request hooks.
+        SCHEMA[PATH] extends { get: { responses: infer Responses } } ? ({
+            url: PATH,
+            method?: 'GET',
+            query?: UntypedQuery
+                | ((context: CONTEXT) => UntypedQuery | undefined),
+        } & CommonOptions<'GET', unknown, Responses, CONTEXT>) : unknown
+    )
 );
 
 type PutOptions<SCHEMA, PATH extends keyof SCHEMA, CONTEXT = never> = (

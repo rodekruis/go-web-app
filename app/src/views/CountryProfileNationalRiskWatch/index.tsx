@@ -1,4 +1,9 @@
 import {
+    useEffect,
+    useMemo,
+    useState,
+} from 'react';
+import {
     useParams,
     useSearchParams,
 } from 'react-router-dom';
@@ -15,15 +20,19 @@ import Page from '#components/Page';
 import { nrwStandalone } from '#config';
 import useCountry from '#hooks/domain/useCountry';
 import useUrlSearchState from '#hooks/useUrlSearchState';
+import { useNrwRequest } from '#utils/restRequest';
 
 import NrwLngLat from './NrwLngLat';
 import {
+    type InitialMapView,
     type Latitude,
     type Longitude,
     type MapViewChangeHandler,
     type Zoom,
 } from './types';
 import {
+    getAdminArea0Query,
+    getFeatureCollectionBounds,
     parseCountriesUrlParameter,
     parseCountryCode,
     parseMapLatitudeParameter,
@@ -35,9 +44,9 @@ import {
 import i18n from './i18n.json';
 import styles from './styles.module.css';
 
-const DEFAULT_MAP_ZOOM = 3 as Zoom;
-const DEFAULT_LATITUDE = 0 as Latitude;
-const DEFAULT_LONGITUDE = 0 as Longitude;
+const defaultZoom = 3 as Zoom;
+const defaultLatitude = 0 as Latitude;
+const defaultLongitude = 0 as Longitude;
 
 const roundZoomForUrl = (zoom: Zoom) => zoom.toFixed(2).toString();
 
@@ -76,11 +85,82 @@ export function Component() {
         ? countriesFromUrl
         : [parseCountryCode(countryFromRouting?.iso3)].filter(isDefined);
 
-    const zoom = zoomFromUrl ?? DEFAULT_MAP_ZOOM;
-    // Unlikely edge case: only lng or lat is provided, not handling that.
-    const center = new NrwLngLat(
-        longitudeFromUrl ?? DEFAULT_LONGITUDE,
-        latitudeFromUrl ?? DEFAULT_LATITUDE,
+    // The scoped countries are resolved synchronously in standalone mode (from
+    // the URL) but asynchronously in embedded mode (from the routed country).
+    const countriesResolved = nrwStandalone || isDefined(countryFromRouting);
+
+    // Initial view state on map creation
+    const [initialMapView, setInitialMapView] = useState<InitialMapView>();
+
+    const hasInitialLatLon = isDefined(latitudeFromUrl) && isDefined(longitudeFromUrl);
+
+    // The bounds are only needed when no deep-linked lat/lon is present and
+    // the initial view hasn't been resolved yet.
+    const shouldFetchBounds = countriesResolved
+        && !initialMapView
+        && countries.length > 0
+        && !hasInitialLatLon;
+
+    // Memoized so the request hook doesn't see a new query identity on every
+    // render. Countries never change after load.
+    const adminArea0Query = useMemo(
+        () => (countries.length > 0 ? getAdminArea0Query(countries) : undefined),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [countriesResolved],
+    );
+
+    // Fit the scoped countries' bounds: fetch their admin0 outlines through
+    // the shared NRW request infrastructure and compute combined bounds.
+    // The hook aborts the request on unmount. On failure or empty geometries,
+    // fall back to the default view.
+    useNrwRequest({
+        url: '/admin-areas',
+        apiType: 'nrw',
+        skip: !shouldFetchBounds,
+        query: adminArea0Query,
+        onSuccess: (featureCollection) => {
+            const bounds = getFeatureCollectionBounds(featureCollection);
+            setInitialMapView((current) => current ?? {
+                center: new NrwLngLat(defaultLongitude, defaultLatitude),
+                zoom: defaultZoom,
+                fitBounds: bounds ?? undefined,
+            });
+        },
+        onFailure: () => {
+            setInitialMapView((current) => current ?? {
+                center: new NrwLngLat(defaultLongitude, defaultLatitude),
+                zoom: defaultZoom,
+            });
+        },
+    });
+
+    // Resolve the initial map view exactly once, in order of precedence:
+    // 1. Country list is empty: log an error and never mount the map.
+    // 2. Deep-linked lat/lon in the URL: use that for the view.
+    // 3. Otherwise: the bounds request above fits the scoped countries.
+    useEffect(
+        () => {
+            if (!countriesResolved || initialMapView) {
+                return;
+            }
+
+            if (countries.length === 0) {
+                // eslint-disable-next-line no-console
+                console.error('No countries set for NRW. Map will not be displayed.');
+                return;
+            }
+
+            if (hasInitialLatLon) {
+                setInitialMapView({
+                    center: new NrwLngLat(longitudeFromUrl, latitudeFromUrl),
+                    zoom: zoomFromUrl ?? defaultZoom,
+                });
+            }
+        },
+        // Countries never change after load, so countriesResolved and
+        // initialMapView are the only real dependencies.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [countriesResolved, initialMapView],
     );
 
     const handleMapViewChange: MapViewChangeHandler = (
@@ -107,10 +187,9 @@ export function Component() {
                 layout="grid"
                 withSidebar
             >
-                {isDefined(countries) && countries.length > 0 && (
+                {initialMapView && (
                     <NrwMap
-                        zoom={zoom}
-                        center={center}
+                        initialMapView={initialMapView}
                         onMapViewChange={handleMapViewChange}
                     />
                 )}

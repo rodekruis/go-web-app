@@ -1,4 +1,7 @@
 // We add an "opaque type" to a value to communicate that it has been validated.
+
+import type NrwLngLat from './NrwLngLat';
+
 // https://evertpot.com/opaque-ts-types/
 export type UrlParameter = string | null | undefined;
 
@@ -28,3 +31,13 @@ export type CountryCodeIso3 = string & {
 
 // eslint-disable-next-line max-len
 export type MapViewChangeHandler = (newZoom: Zoom, newLatitude: Latitude, newLongitude: Longitude) => void;
+
+// Lon/lat bounds as [southwest, northeast] corners.
+export type LonLatBounds = [NrwLngLat, NrwLngLat];
+
+// The resolved starting view handed to the map component.
+export type InitialMapView = {
+    zoom: Zoom;
+    center: NrwLngLat;
+    fitBounds?: LonLatBounds;
+};
