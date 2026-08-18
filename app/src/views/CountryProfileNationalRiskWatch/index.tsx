@@ -1,5 +1,6 @@
 import {
     useEffect,
+    useMemo,
     useState,
 } from 'react';
 import {
@@ -19,6 +20,7 @@ import Page from '#components/Page';
 import { nrwStandalone } from '#config';
 import useCountry from '#hooks/domain/useCountry';
 import useUrlSearchState from '#hooks/useUrlSearchState';
+import { useNrwRequest } from '#utils/restRequest';
 
 import NrwLngLat from './NrwLngLat';
 import {
@@ -29,7 +31,8 @@ import {
     type Zoom,
 } from './types';
 import {
-    fetchCountriesBounds,
+    getAdminArea0Query,
+    getFeatureCollectionBounds,
     parseCountriesUrlParameter,
     parseCountryCode,
     parseMapLatitudeParameter,
@@ -89,45 +92,73 @@ export function Component() {
     // Initial view state on map creation
     const [initialMapView, setInitialMapView] = useState<InitialMapView>();
 
+    const hasInitialLatLon = isDefined(latitudeFromUrl) && isDefined(longitudeFromUrl);
+
+    // The bounds are only needed when no deep-linked lat/lon is present and
+    // the initial view hasn't been resolved yet.
+    const shouldFetchBounds = countriesResolved
+        && !initialMapView
+        && countries.length > 0
+        && !hasInitialLatLon;
+
+    // Memoized so the request hook doesn't see a new query identity on every
+    // render. Countries never change after load.
+    const adminArea0Query = useMemo(
+        () => (countries.length > 0 ? getAdminArea0Query(countries) : undefined),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [countriesResolved],
+    );
+
+    // Fit the scoped countries' bounds: fetch their admin0 outlines through
+    // the shared NRW request infrastructure and compute combined bounds.
+    // The hook aborts the request on unmount. On failure or empty geometries,
+    // fall back to the default view.
+    useNrwRequest({
+        url: '/admin-areas',
+        apiType: 'nrw',
+        skip: !shouldFetchBounds,
+        query: adminArea0Query,
+        onSuccess: (featureCollection) => {
+            const bounds = getFeatureCollectionBounds(featureCollection);
+            setInitialMapView((current) => current ?? {
+                center: new NrwLngLat(defaultLongitude, defaultLatitude),
+                zoom: defaultZoom,
+                fitBounds: bounds ?? undefined,
+            });
+        },
+        onFailure: () => {
+            setInitialMapView((current) => current ?? {
+                center: new NrwLngLat(defaultLongitude, defaultLatitude),
+                zoom: defaultZoom,
+            });
+        },
+    });
+
     // Resolve the initial map view exactly once, in order of precedence:
     // 1. Country list is empty: log an error and never mount the map.
     // 2. Deep-linked lat/lon in the URL: use that for the view.
-    // 3. Otherwise: fit the scoped countries' bounds.
+    // 3. Otherwise: the bounds request above fits the scoped countries.
     useEffect(
         () => {
             if (!countriesResolved || initialMapView) {
-                return undefined;
+                return;
             }
 
             if (countries.length === 0) {
                 // eslint-disable-next-line no-console
                 console.error('No countries set for NRW. Map will not be displayed.');
-                return undefined;
+                return;
             }
 
-            const hasInitialLatLon = isDefined(latitudeFromUrl) && isDefined(longitudeFromUrl);
             if (hasInitialLatLon) {
                 setInitialMapView({
                     center: new NrwLngLat(longitudeFromUrl, latitudeFromUrl),
                     zoom: zoomFromUrl ?? defaultZoom,
                 });
-                return undefined;
             }
-
-            const controller = new AbortController();
-
-            fetchCountriesBounds(countries, controller.signal).then((bounds) => {
-                setInitialMapView((current) => current ?? {
-                    center: new NrwLngLat(defaultLongitude, defaultLatitude),
-                    zoom: defaultZoom,
-                    fitBounds: bounds ?? undefined,
-                });
-            });
-
-            return () => controller.abort();
         },
-        // Countries never change after load, so countriesReady and initialMapView
-        // are the only real dependencies.
+        // Countries never change after load, so countriesResolved and
+        // initialMapView are the only real dependencies.
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [countriesResolved, initialMapView],
     );

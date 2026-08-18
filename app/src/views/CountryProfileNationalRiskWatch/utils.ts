@@ -1,6 +1,5 @@
-import { nrwApi } from '#config';
 import { getGeoJsonBounds } from '#utils/geo';
-import { resolveUrl } from '#utils/resolveUrl';
+import { type NrwApiResponse } from '#utils/restRequest';
 
 import NrwLngLat from './NrwLngLat';
 import {
@@ -76,56 +75,43 @@ export function serializeCountriesUrlParameter(countryCodes: CountryCodeIso3[]) 
     return countryCodes.join(',');
 }
 
-// Fetch a URL and parse the response body as JSON. Throws when the request fails.
-async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-    const response = await fetch(url, { signal });
-    if (!response.ok) {
-        throw new Error(
-            `Failed to fetch ${url}: HTTP ${response.status} ${response.statusText}`,
-        );
+// Build the pg_featureserv-style filter for the admin level 0 (country
+// outline) areas of the given countries. Country codes are already validated
+// as ISO_A3, so it's safe to interpolate them into the filter string.
+function getAdminArea0Filter(countryCodes: CountryCodeIso3[]) {
+    const countryFilter = countryCodes
+        .map((countryCode) => `countryCodeIso3='${countryCode}'`)
+        .join(' OR ');
+
+    if (countryCodes.length === 1) {
+        return `${countryFilter} AND adminLevel=0`;
     }
-    return response.json() as Promise<T>;
+
+    return `(${countryFilter}) AND adminLevel=0`;
 }
 
-// Build the NRW API URL for a country's admin level 0 (country outline) GeoJSON.
-// The country code is already validated to be ISO_A3, so it's safe to interpolate.
-function getAdminArea0Url(countryCode: CountryCodeIso3) {
-    const filter = `countryCodeIso3=%27${countryCode}%27%20AND%20adminLevel=0`;
-    return `${resolveUrl(nrwApi, 'admin-areas')}?filter=${filter}&limit=10000&transform=simplify,0.05`;
+// Build the query to fetch the admin0 outlines of the scoped countries via the
+// shared NRW request hooks. The pg_featureserv query parameters are not part
+// of the generated schema, so the query is untyped there.
+export function getAdminArea0Query(countryCodes: CountryCodeIso3[]) {
+    return {
+        filter: getAdminArea0Filter(countryCodes),
+        limit: 10000,
+        transform: 'simplify,0.05',
+    };
 }
 
-// Fetch the admin0 outlines for the scoped countries and compute their combined
-// lon/lat bounds. Returns null when there are no countries or their outlines
-// can't be fetched, leaving the caller to fall back to the default view.
-export async function fetchCountriesBounds(
-    countryCodes: CountryCodeIso3[],
-    signal?: AbortSignal,
-): Promise<LonLatBounds | null> {
-    if (countryCodes.length === 0) {
+// Compute the combined lon/lat bounds of an admin-areas feature collection.
+// Returns null when the collection has no usable geometries, leaving the
+// caller to fall back to the default view.
+export function getFeatureCollectionBounds(
+    featureCollection: NrwApiResponse<'/admin-areas'> | undefined,
+): LonLatBounds | null {
+    if (!featureCollection || featureCollection.features.length === 0) {
         return null;
     }
 
-    const results = await Promise.allSettled(
-        countryCodes.map(
-            (countryCode) => fetchJson<GeoJSON.FeatureCollection>(
-                getAdminArea0Url(countryCode),
-                signal,
-            ),
-        ),
-    );
-
-    const features = results.flatMap((result) => (
-        result.status === 'fulfilled' ? (result.value.features ?? []) : []
-    ));
-
-    if (features.length === 0) {
-        return null;
-    }
-
-    const [west, south, east, north] = getGeoJsonBounds({
-        type: 'FeatureCollection',
-        features,
-    });
+    const [west, south, east, north] = getGeoJsonBounds(featureCollection);
 
     if (![west, south, east, north].every(Number.isFinite)) {
         return null;
