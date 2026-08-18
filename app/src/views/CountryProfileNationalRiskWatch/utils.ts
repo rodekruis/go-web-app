@@ -64,7 +64,7 @@ export function parseCountriesUrlParameter(value: UrlParameter) {
     return value
         .split(',')
         .map(parseCountryCode)
-        .filter((countryCode) => isDefined(countryCode));
+        .filter(isDefined);
 }
 
 // Convert ISO_A3 country codes to a comma-separated string for the search params.
@@ -124,7 +124,7 @@ export function getFeatureCollectionBounds(
         return null;
     }
 
-    // Return lat lon values, clamped to valid ranges, and asserted as the opaque types.
+    // Return lon lat values, clamped to valid ranges, and asserted as the opaque types.
     return [
         new NrwLngLat(
             clamp(west, -180, 180) as Longitude,
