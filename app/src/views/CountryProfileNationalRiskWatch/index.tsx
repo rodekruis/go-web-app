@@ -22,17 +22,14 @@ import useUrlSearchState from '#hooks/useUrlSearchState';
 
 import NrwLngLat from './NrwLngLat';
 import {
+    type InitialMapView,
     type Latitude,
     type Longitude,
     type MapViewChangeHandler,
     type Zoom,
 } from './types';
 import {
-    DEFAULT_LATITUDE,
-    DEFAULT_LONGITUDE,
-    DEFAULT_MAP_ZOOM,
-    fitCountriesMapView,
-    type InitialMapView,
+    fetchCountriesBounds,
     parseCountriesUrlParameter,
     parseCountryCode,
     parseMapLatitudeParameter,
@@ -43,6 +40,10 @@ import {
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
+
+const defaultZoom = 3 as Zoom;
+const defaultLatitude = 0 as Latitude;
+const defaultLongitude = 0 as Longitude;
 
 const roundZoomForUrl = (zoom: Zoom) => zoom.toFixed(2).toString();
 
@@ -108,17 +109,18 @@ export function Component() {
             if (hasInitialLatLon) {
                 setInitialMapView({
                     center: new NrwLngLat(longitudeFromUrl, latitudeFromUrl),
-                    zoom: zoomFromUrl ?? DEFAULT_MAP_ZOOM,
+                    zoom: zoomFromUrl ?? defaultZoom,
                 });
                 return undefined;
             }
 
             const controller = new AbortController();
 
-            fitCountriesMapView(countries, controller.signal).then((fitted) => {
-                setInitialMapView((current) => current ?? fitted ?? {
-                    center: new NrwLngLat(DEFAULT_LONGITUDE, DEFAULT_LATITUDE),
-                    zoom: DEFAULT_MAP_ZOOM,
+            fetchCountriesBounds(countries, controller.signal).then((bounds) => {
+                setInitialMapView((current) => current ?? {
+                    center: new NrwLngLat(defaultLongitude, defaultLatitude),
+                    zoom: defaultZoom,
+                    fitBounds: bounds ?? undefined,
                 });
             });
 
@@ -156,8 +158,7 @@ export function Component() {
             >
                 {initialMapView && (
                     <NrwMap
-                        zoom={initialMapView.zoom}
-                        center={initialMapView.center}
+                        initialMapView={initialMapView}
                         onMapViewChange={handleMapViewChange}
                     />
                 )}
