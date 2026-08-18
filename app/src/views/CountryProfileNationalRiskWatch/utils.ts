@@ -57,7 +57,7 @@ export function parseCountriesUrlParameter(value: UrlParameter) {
     return value
         .split(',')
         .map(parseCountryCode)
-        .filter((countryCode): countryCode is CountryCodeIso3 => countryCode !== null);
+        .filter((countryCode) => countryCode !== null);
 }
 
 // Convert ISO_A3 country codes to a comma-separated string for the search params.
