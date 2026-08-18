@@ -1,3 +1,5 @@
+import { isDefined } from '@togglecorp/fujs';
+
 import {
     type CountryCodeIso3,
     type Latitude,
@@ -57,7 +59,7 @@ export function parseCountriesUrlParameter(value: UrlParameter) {
     return value
         .split(',')
         .map(parseCountryCode)
-        .filter((countryCode) => countryCode !== null);
+        .filter((countryCode) => isDefined(countryCode));
 }
 
 // Convert ISO_A3 country codes to a comma-separated string for the search params.
