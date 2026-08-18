@@ -1,4 +1,7 @@
-import { useMemo } from 'react';
+import {
+    useEffect,
+    useState,
+} from 'react';
 import {
     useParams,
     useSearchParams,
@@ -8,6 +11,7 @@ import {
     ListView,
 } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
+import { isDefined } from '@togglecorp/fujs';
 
 import NrwMap from '#components/domain/NrwMap';
 import NrwNavbar from '#components/domain/NrwNavbar';
@@ -24,6 +28,11 @@ import {
     type Zoom,
 } from './types';
 import {
+    DEFAULT_LATITUDE,
+    DEFAULT_LONGITUDE,
+    DEFAULT_MAP_ZOOM,
+    fitCountriesMapView,
+    type InitialMapView,
     parseCountriesUrlParameter,
     parseCountryCode,
     parseMapLatitudeParameter,
@@ -34,10 +43,6 @@ import {
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
-
-const DEFAULT_MAP_ZOOM = 3 as Zoom;
-const DEFAULT_LATITUDE = 0 as Latitude;
-const DEFAULT_LONGITUDE = 0 as Longitude;
 
 const roundZoomForUrl = (zoom: Zoom) => zoom.toFixed(2).toString();
 
@@ -70,26 +75,59 @@ export function Component() {
     const countryFromRouting = useCountry({ id: Number(countryId) });
 
     // The countries that the map is scoped to.
-    // This will be used in a later PR.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const countries = useMemo(
-        () => {
-            // For NRW standalone mode, use the countries from the search param.
-            if (nrwStandalone) {
-                return countriesFromUrl;
-            }
-            // For NRW embedded mode, use the country from the route path.
-            const countryCode = parseCountryCode(countryFromRouting?.iso3);
-            return countryCode ? [countryCode] : [];
-        },
-        [countriesFromUrl, countryFromRouting],
-    );
+    // Handle both standalone and embedded modes (from search params or from routing).
+    // Countries are set once at load and never change.
+    const countries = nrwStandalone
+        ? countriesFromUrl
+        : [parseCountryCode(countryFromRouting?.iso3)].filter(isDefined);
 
-    const zoom = zoomFromUrl ?? DEFAULT_MAP_ZOOM;
-    // Unlikely edge case: only lng or lat is provided, not handling that.
-    const center = new NrwLngLat(
-        longitudeFromUrl ?? DEFAULT_LONGITUDE,
-        latitudeFromUrl ?? DEFAULT_LATITUDE,
+    // The scoped countries are resolved synchronously in standalone mode (from
+    // the URL) but asynchronously in embedded mode (from the routed country).
+    const countriesResolved = nrwStandalone || isDefined(countryFromRouting);
+
+    // Initial view state on map creation
+    const [initialMapView, setInitialMapView] = useState<InitialMapView>();
+
+    // Resolve the initial map view exactly once, in order of precedence:
+    // 1. Country list is empty: log an error and never mount the map.
+    // 2. Deep-linked lat/lon in the URL: use that for the view.
+    // 3. Otherwise: fit the scoped countries' bounds.
+    useEffect(
+        () => {
+            if (!countriesResolved || initialMapView) {
+                return undefined;
+            }
+
+            if (countries.length === 0) {
+                // eslint-disable-next-line no-console
+                console.error('No countries set for NRW. Map will not be displayed.');
+                return undefined;
+            }
+
+            const hasInitialLatLon = isDefined(latitudeFromUrl) && isDefined(longitudeFromUrl);
+            if (hasInitialLatLon) {
+                setInitialMapView({
+                    center: new NrwLngLat(longitudeFromUrl, latitudeFromUrl),
+                    zoom: zoomFromUrl ?? DEFAULT_MAP_ZOOM,
+                });
+                return undefined;
+            }
+
+            const controller = new AbortController();
+
+            fitCountriesMapView(countries, controller.signal).then((fitted) => {
+                setInitialMapView((current) => current ?? fitted ?? {
+                    center: new NrwLngLat(DEFAULT_LONGITUDE, DEFAULT_LATITUDE),
+                    zoom: DEFAULT_MAP_ZOOM,
+                });
+            });
+
+            return () => controller.abort();
+        },
+        // Countries never change after load, so countriesReady and initialMapView
+        // are the only real dependencies.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [countriesResolved, initialMapView],
     );
 
     const handleMapViewChange: MapViewChangeHandler = (
@@ -116,11 +154,13 @@ export function Component() {
                 layout="grid"
                 withSidebar
             >
-                <NrwMap
-                    zoom={zoom}
-                    center={center}
-                    onMapViewChange={handleMapViewChange}
-                />
+                {initialMapView && (
+                    <NrwMap
+                        zoom={initialMapView.zoom}
+                        center={initialMapView.center}
+                        onMapViewChange={handleMapViewChange}
+                    />
+                )}
             </ListView>
         </Container>
     );
