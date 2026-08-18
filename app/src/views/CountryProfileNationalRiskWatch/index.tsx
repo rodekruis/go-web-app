@@ -1,14 +1,19 @@
-import { useSearchParams } from 'react-router-dom';
+import {
+    useParams,
+    useSearchParams,
+} from 'react-router-dom';
 import {
     Container,
     ListView,
 } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
+import { isDefined } from '@togglecorp/fujs';
 
 import NrwMap from '#components/domain/NrwMap';
 import NrwNavbar from '#components/domain/NrwNavbar';
 import Page from '#components/Page';
 import { nrwStandalone } from '#config';
+import useCountry from '#hooks/domain/useCountry';
 import useUrlSearchState from '#hooks/useUrlSearchState';
 
 import NrwLngLat from './NrwLngLat';
@@ -19,9 +24,12 @@ import {
     type Zoom,
 } from './types';
 import {
+    parseCountriesUrlParameter,
+    parseCountryCode,
     parseMapLatitudeParameter,
     parseMapLongitudeParameter,
     parseZoomUrlParameter,
+    serializeCountriesUrlParameter,
 } from './utils';
 
 import i18n from './i18n.json';
@@ -49,6 +57,24 @@ export function Component() {
     const [zoomFromUrl] = useUrlSearchState('z', parseZoomUrlParameter, () => '');
     const [latitudeFromUrl] = useUrlSearchState('lat', parseMapLatitudeParameter, () => '');
     const [longitudeFromUrl] = useUrlSearchState('lon', parseMapLongitudeParameter, () => '');
+    const [countriesFromUrl] = useUrlSearchState(
+        'countries',
+        parseCountriesUrlParameter,
+        serializeCountriesUrlParameter,
+    );
+
+    // For embedded, get the country from the route.
+    // These are hooks, so they can't be placed in a conditional block.
+    // For standalone, this will return undefined, which is fine.
+    const { countryId } = useParams<{ countryId: string }>();
+    const countryFromRouting = useCountry({ id: Number(countryId) });
+
+    // The countries that the map is scoped to.
+    // Handle both standalone and embedded modes (from search params or from routing).
+    // Countries are set once at load and never change.
+    const countries = nrwStandalone
+        ? countriesFromUrl
+        : [parseCountryCode(countryFromRouting?.iso3)].filter(isDefined);
 
     const zoom = zoomFromUrl ?? DEFAULT_MAP_ZOOM;
     // Unlikely edge case: only lng or lat is provided, not handling that.
@@ -81,11 +107,13 @@ export function Component() {
                 layout="grid"
                 withSidebar
             >
-                <NrwMap
-                    zoom={zoom}
-                    center={center}
-                    onMapViewChange={handleMapViewChange}
-                />
+                {isDefined(countries) && countries.length > 0 && (
+                    <NrwMap
+                        zoom={zoom}
+                        center={center}
+                        onMapViewChange={handleMapViewChange}
+                    />
+                )}
             </ListView>
         </Container>
     );

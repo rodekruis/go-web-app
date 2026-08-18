@@ -1,4 +1,7 @@
+import { isDefined } from '@togglecorp/fujs';
+
 import {
+    type CountryCodeIso3,
     type Latitude,
     type Longitude,
     type UrlParameter,
@@ -36,4 +39,35 @@ export function parseMapLatitudeParameter(value: UrlParameter) {
 
 export function parseMapLongitudeParameter(value: UrlParameter) {
     return sanitizeFloatInRange(value, -180, 180) as Longitude | null;
+}
+
+// Sanitize to a valid country code in ISO_A3.
+// Returns null if invalid.
+export function parseCountryCode(value: string | undefined): CountryCodeIso3 | null {
+    const countryRegex = /^[A-Z]{3}$/;
+    const cleaned = value?.trim().toUpperCase() ?? '';
+    return countryRegex.test(cleaned) ? (cleaned as CountryCodeIso3) : null;
+}
+
+// Parse comma-separated ISO_A3 country codes from a URL search parameter.
+// Returns an empty array if there are no valid codes.
+export function parseCountriesUrlParameter(value: UrlParameter) {
+    if (!value || value.trim() === '') {
+        return [];
+    }
+
+    return value
+        .split(',')
+        .map(parseCountryCode)
+        .filter((countryCode) => isDefined(countryCode));
+}
+
+// Convert ISO_A3 country codes to a comma-separated string for the search params.
+// Returns undefined when there are no codes so that the search param is removed.
+export function serializeCountriesUrlParameter(countryCodes: CountryCodeIso3[]) {
+    if (countryCodes.length === 0) {
+        return undefined;
+    }
+
+    return countryCodes.join(',');
 }
