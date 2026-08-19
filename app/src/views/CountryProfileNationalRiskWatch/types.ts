@@ -32,12 +32,12 @@ export type CountryCodeIso3 = string & {
 // eslint-disable-next-line max-len
 export type MapViewChangeHandler = (newZoom: Zoom, newLatitude: Latitude, newLongitude: Longitude) => void;
 
-// Lon/lat bounds as [southwest, northeast] corners.
-export type LngLatBounds = [NrwLngLat, NrwLngLat];
+// Lon/lat bounds as two bounding box corners, i.e. the southwest and northeast corners.
+// The order doesn't matter for Mapbox.
+export type LongitudeLatitudeBounds = [NrwLngLat, NrwLngLat];
 
-// The resolved starting view handed to the map component.
 export type InitialMapView = {
     zoom: Zoom;
     center: NrwLngLat;
-    fitBounds?: LngLatBounds;
+    fitBounds?: LongitudeLatitudeBounds;
 };

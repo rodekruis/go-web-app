@@ -1,8 +1,4 @@
-import {
-    useEffect,
-    useMemo,
-    useState,
-} from 'react';
+import { useState } from 'react';
 import {
     useParams,
     useSearchParams,
@@ -87,12 +83,21 @@ export function Component() {
 
     // The scoped countries are resolved synchronously in standalone mode (from
     // the URL) but asynchronously in embedded mode (from the routed country).
-    const countriesResolved = nrwStandalone || isDefined(countryFromRouting);
+    const countriesResolved = nrwStandalone || countryFromRouting !== undefined;
+
+    const hasInitialLatLon = latitudeFromUrl !== null && longitudeFromUrl !== null;
 
     // Initial view state on map creation
-    const [initialMapView, setInitialMapView] = useState<InitialMapView>();
-
-    const hasInitialLatLon = isDefined(latitudeFromUrl) && isDefined(longitudeFromUrl);
+    const [initialMapView, setInitialMapView] = useState<InitialMapView | undefined>(
+        // Default to the longitude/latitude search params if they are present
+        () => (hasInitialLatLon
+            ? {
+                center: new NrwLngLat(longitudeFromUrl, latitudeFromUrl),
+                zoom: zoomFromUrl ?? defaultZoom,
+            }
+            : undefined
+        ),
+    );
 
     // The bounds are only needed when no deep-linked lat/lon is present and
     // the initial view hasn't been resolved yet.
@@ -101,67 +106,27 @@ export function Component() {
         && countries.length > 0
         && !hasInitialLatLon;
 
-    // Memoized so the request hook doesn't see a new query identity on every
-    // render. Countries never change after load.
-    const adminArea0Query = useMemo(
-        () => (countries.length > 0 ? getAdminArea0Query(countries) : undefined),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [countriesResolved],
-    );
-
-    // Fit the scoped countries' bounds: fetch their admin0 outlines through
-    // the shared NRW request infrastructure and compute combined bounds.
-    // The hook aborts the request on unmount. On failure or empty geometries,
-    // fall back to the default view.
+    // Get the admin area for level 0, and fit view to that.
     useNrwRequest({
         url: '/admin-areas',
         apiType: 'nrw',
         skip: !shouldFetchBounds,
-        query: adminArea0Query,
+        query: getAdminArea0Query(countries),
         onSuccess: (featureCollection) => {
             const bounds = getFeatureCollectionBounds(featureCollection);
-            setInitialMapView((current) => current ?? {
+            setInitialMapView({
                 center: new NrwLngLat(defaultLongitude, defaultLatitude),
                 zoom: defaultZoom,
                 fitBounds: bounds ?? undefined,
             });
         },
         onFailure: () => {
-            setInitialMapView((current) => current ?? {
+            setInitialMapView({
                 center: new NrwLngLat(defaultLongitude, defaultLatitude),
                 zoom: defaultZoom,
             });
         },
     });
-
-    // Resolve the initial map view exactly once, in order of precedence:
-    // 1. Country list is empty: log an error and never mount the map.
-    // 2. Deep-linked lat/lon in the URL: use that for the view.
-    // 3. Otherwise: the bounds request above fits the scoped countries.
-    useEffect(
-        () => {
-            if (!countriesResolved || initialMapView) {
-                return;
-            }
-
-            if (countries.length === 0) {
-                // eslint-disable-next-line no-console
-                console.error('No countries set for NRW. Map will not be displayed.');
-                return;
-            }
-
-            if (hasInitialLatLon) {
-                setInitialMapView({
-                    center: new NrwLngLat(longitudeFromUrl, latitudeFromUrl),
-                    zoom: zoomFromUrl ?? defaultZoom,
-                });
-            }
-        },
-        // Countries never change after load, so countriesResolved and
-        // initialMapView are the only real dependencies.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [countriesResolved, initialMapView],
-    );
 
     const handleMapViewChange: MapViewChangeHandler = (
         newZoom,

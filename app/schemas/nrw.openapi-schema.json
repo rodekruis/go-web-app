@@ -26,7 +26,9 @@
                       },
                       "additionalProperties": {
                         "type": "object",
-                        "required": ["status"],
+                        "required": [
+                          "status"
+                        ],
                         "properties": {
                           "status": {
                             "type": "string"
@@ -41,7 +43,9 @@
                       "example": {},
                       "additionalProperties": {
                         "type": "object",
-                        "required": ["status"],
+                        "required": [
+                          "status"
+                        ],
                         "properties": {
                           "status": {
                             "type": "string"
@@ -60,7 +64,9 @@
                       },
                       "additionalProperties": {
                         "type": "object",
-                        "required": ["status"],
+                        "required": [
+                          "status"
+                        ],
                         "properties": {
                           "status": {
                             "type": "string"
@@ -94,7 +100,9 @@
                       },
                       "additionalProperties": {
                         "type": "object",
-                        "required": ["status"],
+                        "required": [
+                          "status"
+                        ],
                         "properties": {
                           "status": {
                             "type": "string"
@@ -114,7 +122,9 @@
                       },
                       "additionalProperties": {
                         "type": "object",
-                        "required": ["status"],
+                        "required": [
+                          "status"
+                        ],
                         "properties": {
                           "status": {
                             "type": "string"
@@ -137,7 +147,9 @@
                       },
                       "additionalProperties": {
                         "type": "object",
-                        "required": ["status"],
+                        "required": [
+                          "status"
+                        ],
                         "properties": {
                           "status": {
                             "type": "string"
@@ -153,7 +165,9 @@
           }
         },
         "summary": "Get health of instance",
-        "tags": ["--- root ---"]
+        "tags": [
+          "--- root ---"
+        ]
       }
     },
     "/version": {
@@ -166,7 +180,9 @@
           }
         },
         "summary": "Get version of instance",
-        "tags": ["--- root ---"]
+        "tags": [
+          "--- root ---"
+        ]
       }
     },
     "/reset/status": {
@@ -179,7 +195,9 @@
           }
         },
         "summary": "Check whether a database reset is currently in progress.",
-        "tags": ["--- root ---"]
+        "tags": [
+          "--- root ---"
+        ]
       }
     },
     "/reset": {
@@ -235,7 +253,9 @@
           }
         },
         "summary": "Reset database and seed initial (non-event) data.",
-        "tags": ["--- root ---"]
+        "tags": [
+          "--- root ---"
+        ]
       }
     },
     "/mock": {
@@ -249,7 +269,10 @@
             "in": "query",
             "schema": {
               "default": "events",
-              "enum": ["no-events", "events"],
+              "enum": [
+                "no-events",
+                "events"
+              ],
               "type": "string"
             },
             "description": "The mock scenario to generate."
@@ -260,7 +283,10 @@
             "in": "query",
             "schema": {
               "default": "false",
-              "enum": ["true", "false"],
+              "enum": [
+                "true",
+                "false"
+              ],
               "type": "string"
             },
             "description": "If true, clear existing events for the given countries before creating new ones."
@@ -269,7 +295,7 @@
             "name": "issuedAt",
             "required": false,
             "in": "query",
-            "description": "ISO8601 date for the forecast issuedAt (e.g. 2026-08-11T15:44:00.194Z). Defaults to now.",
+            "description": "ISO8601 date for the forecast issuedAt (e.g. 2026-08-19T14:37:32.907Z). Defaults to now.",
             "schema": {
               "type": "string"
             }
@@ -301,7 +327,9 @@
           }
         },
         "summary": "Generate mock events for one, multiple, or all countries.",
-        "tags": ["--- root ---"]
+        "tags": [
+          "--- root ---"
+        ]
       }
     },
     "/alerts": {
@@ -330,7 +358,9 @@
           }
         },
         "summary": "Get alerts. This endpoint is not intended for use in pipelines or frontends, only for debugging.",
-        "tags": ["alerts"]
+        "tags": [
+          "alerts"
+        ]
       },
       "post": {
         "operationId": "AlertsController_createAlerts",
@@ -370,7 +400,9 @@
           }
         },
         "summary": "Create forecast alerts",
-        "tags": ["alerts"]
+        "tags": [
+          "alerts"
+        ]
       }
     },
     "/alerts/{id}": {
@@ -408,7 +440,9 @@
           }
         },
         "summary": "Get alert by id. This endpoint is not intended for use in pipelines or frontends, only for debugging.",
-        "tags": ["alerts"]
+        "tags": [
+          "alerts"
+        ]
       },
       "delete": {
         "operationId": "AlertsController_deleteAlert",
@@ -437,7 +471,9 @@
           }
         },
         "summary": "Delete alert by id. This endpoint is not intended for use in pipelines or frontends, only for debugging.",
-        "tags": ["alerts"]
+        "tags": [
+          "alerts"
+        ]
       }
     },
     "/events": {
@@ -489,7 +525,9 @@
           }
         },
         "summary": "Get all active or all closed events",
-        "tags": ["events"]
+        "tags": [
+          "events"
+        ]
       }
     },
     "/alert-configs": {
@@ -510,7 +548,11 @@
             "required": false,
             "in": "query",
             "schema": {
-              "enum": ["floods", "drought", "tropicalCyclone"],
+              "enum": [
+                "floods",
+                "drought",
+                "tropicalCyclone"
+              ],
               "type": "string"
             }
           }
@@ -537,7 +579,9 @@
           }
         },
         "summary": "Get alert configs for country and hazard type",
-        "tags": ["alert-configs"]
+        "tags": [
+          "alert-configs"
+        ]
       },
       "post": {
         "operationId": "AlertConfigsController_createAlertConfigs",
@@ -577,7 +621,9 @@
           }
         },
         "summary": "Create one or more alert configs. Admin endpoint for managing configuration.",
-        "tags": ["alert-configs"]
+        "tags": [
+          "alert-configs"
+        ]
       }
     },
     "/alert-configs/{id}": {
@@ -608,14 +654,43 @@
           }
         },
         "summary": "Delete alert config by id. Admin endpoint for managing configuration.",
-        "tags": ["alert-configs"]
+        "tags": [
+          "alert-configs"
+        ]
       }
     },
     "/admin-areas": {
       "get": {
         "description": "Example current use: GET /admin-areas?filter=countryCodeIso3='ETH' AND adminLevel=2",
         "operationId": "AdminAreasController_getAdminAreas",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "transform",
+            "required": false,
+            "in": "query",
+            "description": "e.g. \"simplify,0.05\"",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "filter",
+            "required": false,
+            "in": "query",
+            "description": "pg_featureserv filter expression, e.g. \"countryCodeIso3='ETH' AND adminLevel=0\"",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "GeoJSON FeatureCollection of admin areas",
@@ -629,7 +704,9 @@
           }
         },
         "summary": "Get admin areas; all pg_featureserv query parameters are supported (not shown in Swagger UI, so calling via Swagger is limited)",
-        "tags": ["admin-areas"]
+        "tags": [
+          "admin-areas"
+        ]
       },
       "post": {
         "operationId": "AdminAreasController_createAdminAreas",
@@ -665,7 +742,9 @@
           }
         },
         "summary": "Create one or more admin areas. Admin endpoint for managing configuration.",
-        "tags": ["admin-areas"]
+        "tags": [
+          "admin-areas"
+        ]
       }
     },
     "/admin-areas/{placeCode}": {
@@ -716,7 +795,9 @@
           }
         },
         "summary": "Update an admin area. Admin endpoint for managing configuration.",
-        "tags": ["admin-areas"]
+        "tags": [
+          "admin-areas"
+        ]
       },
       "delete": {
         "operationId": "AdminAreasController_deleteAdminArea",
@@ -745,7 +826,9 @@
           }
         },
         "summary": "Delete an admin area. Admin endpoint for managing configuration.",
-        "tags": ["admin-areas"]
+        "tags": [
+          "admin-areas"
+        ]
       }
     },
     "/countries": {
@@ -768,7 +851,9 @@
           }
         },
         "summary": "Get all countries",
-        "tags": ["countries"]
+        "tags": [
+          "countries"
+        ]
       },
       "post": {
         "operationId": "CountriesController_createCountries",
@@ -811,7 +896,9 @@
           }
         },
         "summary": "Create one or more countries. Admin endpoint for managing configuration.",
-        "tags": ["countries"]
+        "tags": [
+          "countries"
+        ]
       }
     },
     "/countries/{countryCodeIso3}": {
@@ -849,7 +936,9 @@
           }
         },
         "summary": "Get country by ISO3 code",
-        "tags": ["countries"]
+        "tags": [
+          "countries"
+        ]
       },
       "patch": {
         "operationId": "CountriesController_updateCountry",
@@ -895,7 +984,9 @@
           }
         },
         "summary": "Update a country. Admin endpoint for managing configuration.",
-        "tags": ["countries"]
+        "tags": [
+          "countries"
+        ]
       },
       "delete": {
         "operationId": "CountriesController_deleteCountry",
@@ -927,7 +1018,9 @@
           }
         },
         "summary": "Delete a country. Admin endpoint for managing configuration.",
-        "tags": ["countries"]
+        "tags": [
+          "countries"
+        ]
       }
     },
     "/geo-features": {
@@ -948,7 +1041,9 @@
           }
         },
         "summary": "Get geo-features; all pg_featureserv query parameters are supported (not shown in Swagger UI, so calling via Swagger is limited)",
-        "tags": ["geo-features"]
+        "tags": [
+          "geo-features"
+        ]
       },
       "post": {
         "operationId": "GeoFeaturesController_createGeoFeatures",
@@ -984,7 +1079,9 @@
           }
         },
         "summary": "Create one or more geo-features. Admin endpoint for managing configuration.",
-        "tags": ["geo-features"]
+        "tags": [
+          "geo-features"
+        ]
       }
     },
     "/geo-features/{id}": {
@@ -1032,7 +1129,9 @@
           }
         },
         "summary": "Update a geo-feature. Admin endpoint for managing configuration.",
-        "tags": ["geo-features"]
+        "tags": [
+          "geo-features"
+        ]
       },
       "delete": {
         "operationId": "GeoFeaturesController_deleteGeoFeature",
@@ -1061,7 +1160,9 @@
           }
         },
         "summary": "Delete a geo-feature. Admin endpoint for managing configuration.",
-        "tags": ["geo-features"]
+        "tags": [
+          "geo-features"
+        ]
       }
     },
     "/layers": {
@@ -1073,7 +1174,11 @@
             "required": false,
             "in": "query",
             "schema": {
-              "enum": ["floods", "drought", "tropicalCyclone"],
+              "enum": [
+                "floods",
+                "drought",
+                "tropicalCyclone"
+              ],
               "type": "string"
             }
           }
@@ -1094,7 +1199,9 @@
           }
         },
         "summary": "Get layers, optionally filtered by hazard type. Returns layers with no hazard type (shared) plus those matching the filter.",
-        "tags": ["layers"]
+        "tags": [
+          "layers"
+        ]
       },
       "post": {
         "operationId": "LayersController_createLayer",
@@ -1128,7 +1235,9 @@
           }
         },
         "summary": "Create a layer. Admin endpoint for managing configuration.",
-        "tags": ["layers"]
+        "tags": [
+          "layers"
+        ]
       }
     },
     "/layers/{layerName}": {
@@ -1173,7 +1282,9 @@
           }
         },
         "summary": "Update a layer. Admin endpoint for managing configuration.",
-        "tags": ["layers"]
+        "tags": [
+          "layers"
+        ]
       },
       "delete": {
         "operationId": "LayersController_deleteLayer",
@@ -1199,7 +1310,9 @@
           }
         },
         "summary": "Delete a layer. Admin endpoint for managing configuration.",
-        "tags": ["layers"]
+        "tags": [
+          "layers"
+        ]
       }
     },
     "/rasters/static/{countryCodeIso3}/{layer}": {
@@ -1239,7 +1352,9 @@
           }
         },
         "summary": "Get static raster metadata by country and layer",
-        "tags": ["rasters"]
+        "tags": [
+          "rasters"
+        ]
       },
       "delete": {
         "operationId": "RastersController_deleteStaticRaster",
@@ -1276,7 +1391,9 @@
           }
         },
         "summary": "Delete a static raster. Admin endpoint for managing configuration.",
-        "tags": ["rasters"]
+        "tags": [
+          "rasters"
+        ]
       }
     },
     "/rasters/static/{countryCodeIso3}/{layer}/image": {
@@ -1309,7 +1426,9 @@
           }
         },
         "summary": "Get the static raster coloured image as a PNG",
-        "tags": ["rasters"]
+        "tags": [
+          "rasters"
+        ]
       }
     },
     "/rasters/static/{countryCodeIso3}/{layer}/data": {
@@ -1348,7 +1467,9 @@
           }
         },
         "summary": "Get the static raster raw data PNG (RGBA-encoded float values)",
-        "tags": ["rasters"]
+        "tags": [
+          "rasters"
+        ]
       }
     },
     "/rasters/static": {
@@ -1384,7 +1505,9 @@
           }
         },
         "summary": "Upload or update a static raster (upsert). Admin endpoint for managing configuration.",
-        "tags": ["rasters"]
+        "tags": [
+          "rasters"
+        ]
       }
     },
     "/rasters/alert/{id}": {
@@ -1416,7 +1539,9 @@
           }
         },
         "summary": "Get alert raster metadata by its resource ID",
-        "tags": ["rasters"]
+        "tags": [
+          "rasters"
+        ]
       }
     },
     "/rasters/alert/{id}/image": {
@@ -1441,7 +1566,9 @@
           }
         },
         "summary": "Get the coloured alert raster image as a PNG",
-        "tags": ["rasters"]
+        "tags": [
+          "rasters"
+        ]
       }
     },
     "/users": {
@@ -1460,7 +1587,9 @@
           }
         },
         "summary": "Get all users",
-        "tags": ["users"]
+        "tags": [
+          "users"
+        ]
       }
     },
     "/users/login": {
@@ -1486,7 +1615,9 @@
           }
         },
         "summary": "[EXTERNALLY USED] Log in existing user",
-        "tags": ["users"]
+        "tags": [
+          "users"
+        ]
       }
     },
     "/users/logout": {
@@ -1502,7 +1633,9 @@
           }
         },
         "summary": "Log out existing user",
-        "tags": ["users"]
+        "tags": [
+          "users"
+        ]
       }
     },
     "/users/current": {
@@ -1521,7 +1654,9 @@
           }
         },
         "summary": "Get current user",
-        "tags": ["users"]
+        "tags": [
+          "users"
+        ]
       }
     }
   },
@@ -1542,7 +1677,9 @@
             "example": "fill_in_secret"
           }
         },
-        "required": ["secret"]
+        "required": [
+          "secret"
+        ]
       },
       "CentroidDto": {
         "type": "object",
@@ -1556,7 +1693,10 @@
             "example": 32.6
           }
         },
-        "required": ["latitude", "longitude"]
+        "required": [
+          "latitude",
+          "longitude"
+        ]
       },
       "TimeIntervalDto": {
         "type": "object",
@@ -1572,7 +1712,10 @@
             "example": "2026-03-20T23:59:59Z"
           }
         },
-        "required": ["start", "end"]
+        "required": [
+          "start",
+          "end"
+        ]
       },
       "SeverityReadDto": {
         "type": "object",
@@ -1597,12 +1740,19 @@
           "ensembleMemberType": {
             "type": "string",
             "example": "median",
-            "enum": ["median", "run"]
+            "enum": [
+              "median",
+              "run"
+            ]
           },
           "severityKey": {
             "type": "string",
             "example": "returnPeriod",
-            "enum": ["returnPeriod", "percentile", "windSpeed"]
+            "enum": [
+              "returnPeriod",
+              "percentile",
+              "windSpeed"
+            ]
           },
           "severityValue": {
             "type": "number",
@@ -1743,7 +1893,12 @@
             "example": 5.5
           }
         },
-        "required": ["xmin", "ymin", "xmax", "ymax"]
+        "required": [
+          "xmin",
+          "ymin",
+          "xmax",
+          "ymax"
+        ]
       },
       "RasterDataMetadata": {
         "type": "object",
@@ -1753,7 +1908,10 @@
           },
           "crs": {
             "type": "string",
-            "enum": ["EPSG:4326", "EPSG:3857"],
+            "enum": [
+              "EPSG:4326",
+              "EPSG:3857"
+            ],
             "example": "EPSG:4326"
           },
           "nodata": {
@@ -1761,7 +1919,11 @@
             "example": 0
           }
         },
-        "required": ["extent", "crs", "nodata"]
+        "required": [
+          "extent",
+          "crs",
+          "nodata"
+        ]
       },
       "RasterColouredMetadata": {
         "type": "object",
@@ -1771,11 +1933,17 @@
           },
           "crs": {
             "type": "string",
-            "enum": ["EPSG:4326", "EPSG:3857"],
+            "enum": [
+              "EPSG:4326",
+              "EPSG:3857"
+            ],
             "example": "EPSG:3857"
           }
         },
-        "required": ["extent", "crs"]
+        "required": [
+          "extent",
+          "crs"
+        ]
       },
       "RasterMetadataDto": {
         "type": "object",
@@ -1787,7 +1955,10 @@
             "$ref": "#/components/schemas/RasterColouredMetadata"
           }
         },
-        "required": ["data", "coloured"]
+        "required": [
+          "data",
+          "coloured"
+        ]
       },
       "ExposureRasterReadDto": {
         "type": "object",
@@ -1823,7 +1994,13 @@
             "$ref": "#/components/schemas/RasterMetadataDto"
           }
         },
-        "required": ["id", "created", "updated", "layer", "metadata"]
+        "required": [
+          "id",
+          "created",
+          "updated",
+          "layer",
+          "metadata"
+        ]
       },
       "ExposureReadDto": {
         "type": "object",
@@ -1847,7 +2024,11 @@
             }
           }
         },
-        "required": ["adminAreas", "geoFeatures", "rasters"]
+        "required": [
+          "adminAreas",
+          "geoFeatures",
+          "rasters"
+        ]
       },
       "AlertReadDto": {
         "type": "object",
@@ -1883,13 +2064,21 @@
           },
           "hazardType": {
             "type": "string",
-            "enum": ["floods", "drought", "tropicalCyclone"]
+            "enum": [
+              "floods",
+              "drought",
+              "tropicalCyclone"
+            ]
           },
           "forecastSources": {
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["glofas", "ECMWF", "GEFS"]
+              "enum": [
+                "glofas",
+                "ECMWF",
+                "GEFS"
+              ]
             }
           },
           "severity": {
@@ -1925,12 +2114,19 @@
           "ensembleMemberType": {
             "type": "string",
             "example": "median",
-            "enum": ["median", "run"]
+            "enum": [
+              "median",
+              "run"
+            ]
           },
           "severityKey": {
             "type": "string",
             "example": "returnPeriod",
-            "enum": ["returnPeriod", "percentile", "windSpeed"]
+            "enum": [
+              "returnPeriod",
+              "percentile",
+              "windSpeed"
+            ]
           },
           "severityValue": {
             "type": "number",
@@ -1973,7 +2169,12 @@
             "example": 1
           }
         },
-        "required": ["placeCode", "adminLevel", "layer", "value"]
+        "required": [
+          "placeCode",
+          "adminLevel",
+          "layer",
+          "value"
+        ]
       },
       "ExposureGeoFeatureDto": {
         "type": "object",
@@ -2003,7 +2204,11 @@
             }
           }
         },
-        "required": ["geoFeatureId", "layer", "attributes"]
+        "required": [
+          "geoFeatureId",
+          "layer",
+          "attributes"
+        ]
       },
       "ExposureRasterDto": {
         "type": "object",
@@ -2029,7 +2234,11 @@
             "$ref": "#/components/schemas/RasterExtentDto"
           }
         },
-        "required": ["layer", "valueGreyscale", "extent"]
+        "required": [
+          "layer",
+          "valueGreyscale",
+          "extent"
+        ]
       },
       "ExposureDto": {
         "type": "object",
@@ -2061,7 +2270,9 @@
             }
           }
         },
-        "required": ["adminAreas"]
+        "required": [
+          "adminAreas"
+        ]
       },
       "AlertCreateDto": {
         "type": "object",
@@ -2103,7 +2314,12 @@
             "$ref": "#/components/schemas/ExposureDto"
           }
         },
-        "required": ["eventName", "centroid", "severity", "exposure"]
+        "required": [
+          "eventName",
+          "centroid",
+          "severity",
+          "exposure"
+        ]
       },
       "ForecastCreateDto": {
         "type": "object",
@@ -2119,15 +2335,25 @@
           },
           "hazardType": {
             "type": "string",
-            "enum": ["floods", "drought", "tropicalCyclone"],
+            "enum": [
+              "floods",
+              "drought",
+              "tropicalCyclone"
+            ],
             "example": "floods"
           },
           "forecastSources": {
             "type": "array",
-            "example": ["glofas"],
+            "example": [
+              "glofas"
+            ],
             "items": {
               "type": "string",
-              "enum": ["glofas", "ECMWF", "GEFS"]
+              "enum": [
+                "glofas",
+                "ECMWF",
+                "GEFS"
+              ]
             }
           },
           "alerts": {
@@ -2162,7 +2388,12 @@
           },
           "type": {
             "type": "string",
-            "enum": ["raster", "shape", "point", "vectorTile"]
+            "enum": [
+              "raster",
+              "shape",
+              "point",
+              "vectorTile"
+            ]
           },
           "label": {
             "type": "string",
@@ -2173,7 +2404,12 @@
             "description": "ID that can be used to fetch the actual map layer data"
           }
         },
-        "required": ["name", "type", "label", "resourceId"]
+        "required": [
+          "name",
+          "type",
+          "label",
+          "resourceId"
+        ]
       },
       "EventResponseDto": {
         "type": "object",
@@ -2193,18 +2429,30 @@
           },
           "hazardType": {
             "type": "string",
-            "enum": ["floods", "drought", "tropicalCyclone"]
+            "enum": [
+              "floods",
+              "drought",
+              "tropicalCyclone"
+            ]
           },
           "forecastSources": {
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["glofas", "ECMWF", "GEFS"]
+              "enum": [
+                "glofas",
+                "ECMWF",
+                "GEFS"
+              ]
             }
           },
           "alertClass": {
             "type": "string",
-            "enum": ["low", "medium", "high"]
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
           },
           "trigger": {
             "type": "boolean"
@@ -2279,7 +2527,12 @@
         "properties": {
           "label": {
             "type": "string",
-            "enum": ["singleThreshold", "low", "medium", "high"],
+            "enum": [
+              "singleThreshold",
+              "low",
+              "medium",
+              "high"
+            ],
             "example": "high"
           },
           "threshold": {
@@ -2287,7 +2540,10 @@
             "example": 400
           }
         },
-        "required": ["label", "threshold"]
+        "required": [
+          "label",
+          "threshold"
+        ]
       },
       "AlertConfigResponseDto": {
         "type": "object",
@@ -2312,7 +2568,11 @@
           },
           "hazardType": {
             "type": "string",
-            "enum": ["floods", "drought", "tropicalCyclone"],
+            "enum": [
+              "floods",
+              "drought",
+              "tropicalCyclone"
+            ],
             "example": "floods"
           },
           "spatialExtentName": {
@@ -2320,7 +2580,9 @@
             "example": "G5142"
           },
           "spatialExtentPlaceCodes": {
-            "example": ["KE030"],
+            "example": [
+              "KE030"
+            ],
             "type": "array",
             "items": {
               "type": "string"
@@ -2414,16 +2676,32 @@
           "type": {
             "type": "string",
             "example": "Polygon",
-            "enum": ["Point", "Polygon", "MultiPolygon"]
+            "enum": [
+              "Point",
+              "Polygon",
+              "MultiPolygon"
+            ]
           },
           "coordinates": {
             "description": "Coordinates array; structure depends on geometry type.",
             "example": [
               [
-                [102, 0],
-                [103, 1],
-                [104, 0],
-                [102, 0]
+                [
+                  102,
+                  0
+                ],
+                [
+                  103,
+                  1
+                ],
+                [
+                  104,
+                  0
+                ],
+                [
+                  102,
+                  0
+                ]
               ]
             ],
             "type": "array",
@@ -2432,14 +2710,18 @@
             }
           }
         },
-        "required": ["type"]
+        "required": [
+          "type"
+        ]
       },
       "GeoJsonFeatureDto": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["Feature"]
+            "enum": [
+              "Feature"
+            ]
           },
           "geometry": {
             "nullable": true,
@@ -2465,14 +2747,20 @@
             "nullable": true
           }
         },
-        "required": ["type", "geometry", "properties"]
+        "required": [
+          "type",
+          "geometry",
+          "properties"
+        ]
       },
       "GeoJsonFeatureCollectionDto": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["FeatureCollection"]
+            "enum": [
+              "FeatureCollection"
+            ]
           },
           "features": {
             "type": "array",
@@ -2481,7 +2769,10 @@
             }
           }
         },
-        "required": ["type", "features"]
+        "required": [
+          "type",
+          "features"
+        ]
       },
       "AdminAreaUpdateDto": {
         "type": "object",
@@ -2591,14 +2882,21 @@
         "properties": {
           "featureType": {
             "type": "string",
-            "enum": ["Point", "LineString", "Polygon"],
+            "enum": [
+              "Point",
+              "LineString",
+              "Polygon"
+            ],
             "example": "Point"
           },
           "geometry": {
             "type": "object",
             "example": {
               "type": "Point",
-              "coordinates": [37.194, -1.095]
+              "coordinates": [
+                37.194,
+                -1.095
+              ]
             }
           },
           "attributes": {
@@ -2634,11 +2932,20 @@
           },
           "type": {
             "type": "string",
-            "enum": ["raster", "shape", "point", "vectorTile"]
+            "enum": [
+              "raster",
+              "shape",
+              "point",
+              "vectorTile"
+            ]
           },
           "hazardType": {
             "type": "string",
-            "enum": ["floods", "drought", "tropicalCyclone"],
+            "enum": [
+              "floods",
+              "drought",
+              "tropicalCyclone"
+            ],
             "example": null
           },
           "description": {
@@ -2646,7 +2953,12 @@
             "example": null
           }
         },
-        "required": ["id", "name", "label", "type"]
+        "required": [
+          "id",
+          "name",
+          "label",
+          "type"
+        ]
       },
       "LayerCreateDto": {
         "type": "object",
@@ -2669,18 +2981,31 @@
           },
           "type": {
             "type": "string",
-            "enum": ["raster", "shape", "point", "vectorTile"]
+            "enum": [
+              "raster",
+              "shape",
+              "point",
+              "vectorTile"
+            ]
           },
           "hazardType": {
             "type": "string",
-            "enum": ["floods", "drought", "tropicalCyclone"]
+            "enum": [
+              "floods",
+              "drought",
+              "tropicalCyclone"
+            ]
           },
           "description": {
             "type": "string",
             "example": "Population density raster"
           }
         },
-        "required": ["name", "label", "type"]
+        "required": [
+          "name",
+          "label",
+          "type"
+        ]
       },
       "LayerUpdateDto": {
         "type": "object",
@@ -2691,11 +3016,20 @@
           },
           "type": {
             "type": "string",
-            "enum": ["raster", "shape", "point", "vectorTile"]
+            "enum": [
+              "raster",
+              "shape",
+              "point",
+              "vectorTile"
+            ]
           },
           "hazardType": {
             "type": "string",
-            "enum": ["floods", "drought", "tropicalCyclone"]
+            "enum": [
+              "floods",
+              "drought",
+              "tropicalCyclone"
+            ]
           },
           "description": {
             "type": "string",
@@ -2727,7 +3061,11 @@
             "$ref": "#/components/schemas/RasterMetadataDto"
           }
         },
-        "required": ["id", "layer", "metadata"]
+        "required": [
+          "id",
+          "layer",
+          "metadata"
+        ]
       },
       "StaticRasterUploadDto": {
         "type": "object",
@@ -2789,7 +3127,10 @@
             "$ref": "#/components/schemas/RasterMetadataDto"
           }
         },
-        "required": ["layer", "metadata"]
+        "required": [
+          "layer",
+          "metadata"
+        ]
       },
       "LoginUserDto": {
         "type": "object",
@@ -2803,7 +3144,10 @@
             "example": "password"
           }
         },
-        "required": ["username", "password"]
+        "required": [
+          "username",
+          "password"
+        ]
       }
     }
   }
