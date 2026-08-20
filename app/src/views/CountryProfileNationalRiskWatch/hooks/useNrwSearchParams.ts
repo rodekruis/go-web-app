@@ -29,9 +29,9 @@ const roundLatitudeOrLongitudeForUrl = (value: Latitude | Longitude) => value.to
 
 // Hook for the National Risk Watch map view search params
 function useNrwSearchParams() {
-    // useUrlSearchState is limited: it's setValue hook cannot handle setting
+    // useUrlSearchState is limited: its setValue hook cannot handle setting
     // multiple params in quick succession. Workaround: use setSearchParams for
-    // handling map view changing.
+    // handling map view changes.
     const [, setSearchParams] = useSearchParams();
     // Unlikely that these URL params will have invalid values, but let's be defensive.
     const [zoomFromUrl] = useUrlSearchState('z', parseZoomUrlParameter, () => '');
