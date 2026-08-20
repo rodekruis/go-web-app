@@ -114,8 +114,14 @@ export function Component() {
         query: getAdminArea0Query(countries),
         onSuccess: (featureCollection) => {
             let bounds: InitialMapView['fitBounds'] | undefined;
-            if (!featureCollection || featureCollection.features.length === 0) {
+            if (!featureCollection) {
                 bounds = undefined;
+                // eslint-disable-next-line no-console
+                console.error('Admin areas not found for countries', countries);
+            } else if (featureCollection.features.length === 0) {
+                bounds = undefined;
+                // eslint-disable-next-line no-console
+                console.error('No admin area features found for countries', countries);
             } else {
                 bounds = getFeatureCollectionBounds(featureCollection);
             }
