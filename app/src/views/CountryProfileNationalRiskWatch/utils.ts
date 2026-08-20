@@ -112,16 +112,12 @@ function clamp(value: number, min: number, max: number) {
 // Compute the combined lon/lat bounds of an admin-areas feature collection.
 // Returns null when the collection has no usable geometries.
 export function getFeatureCollectionBounds(
-    featureCollection: NrwApiResponse<'/admin-areas'> | undefined,
+    featureCollection: NrwApiResponse<'/admin-areas'>,
 ) {
-    if (!featureCollection || featureCollection.features.length === 0) {
-        return null;
-    }
-
     const [west, south, east, north] = getGeoJsonBounds(featureCollection);
 
     if (![west, south, east, north].every(Number.isFinite)) {
-        return null;
+        return undefined;
     }
 
     // Return lon lat values, clamped to valid ranges, and asserted as the opaque types.

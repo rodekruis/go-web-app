@@ -113,11 +113,17 @@ export function Component() {
         skip: !shouldFetchBounds,
         query: getAdminArea0Query(countries),
         onSuccess: (featureCollection) => {
-            const bounds = getFeatureCollectionBounds(featureCollection);
+            let bounds: InitialMapView['fitBounds'] | undefined;
+            if (!featureCollection || featureCollection.features.length === 0) {
+                bounds = undefined;
+            } else {
+                bounds = getFeatureCollectionBounds(featureCollection);
+            }
+
             setInitialMapView({
                 center: new NrwLngLat(defaultLongitude, defaultLatitude),
                 zoom: defaultZoom,
-                fitBounds: bounds ?? undefined,
+                fitBounds: bounds,
             });
         },
         onFailure: () => {
