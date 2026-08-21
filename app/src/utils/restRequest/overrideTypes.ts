@@ -150,6 +150,7 @@ type CommonOptions<METHOD, PARAMETERS, RESPONSES, CONTEXT> = {
 
     onFailure?: (val: TransformedError, context: CONTEXT) => void;
 }
+
 type GetOptions<SCHEMA, PATH extends keyof SCHEMA, CONTEXT = never> = (
     SCHEMA[PATH] extends {
         get: {
