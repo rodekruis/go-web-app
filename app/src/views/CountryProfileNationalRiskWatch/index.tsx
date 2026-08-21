@@ -90,17 +90,12 @@ export function Component() {
     // Initial view state on map creation
     const [initialMapView, setInitialMapView] = useState<InitialMapView | undefined>(
         // Default to the longitude/latitude search params if they are present
-        () => (hasInitialLatLon
-            ? {
-                center: new NrwLngLat(longitudeFromUrl, latitudeFromUrl),
-                zoom: zoomFromUrl ?? defaultZoom,
-            }
-            : undefined
-        ),
+        hasInitialLatLon ? {
+            center: new NrwLngLat(longitudeFromUrl, latitudeFromUrl),
+            zoom: zoomFromUrl ?? defaultZoom,
+        } : undefined,
     );
 
-    // The bounds are only needed when no deep-linked lat/lon is present and
-    // the initial view hasn't been resolved yet.
     const shouldFetchBounds = countriesResolved
         && !initialMapView
         && countries.length > 0
@@ -164,7 +159,7 @@ export function Component() {
                 layout="grid"
                 withSidebar
             >
-                {initialMapView && (
+                {countries.length > 0 && initialMapView && (
                     <NrwMap
                         initialMapView={initialMapView}
                         onMapViewChange={handleMapViewChange}

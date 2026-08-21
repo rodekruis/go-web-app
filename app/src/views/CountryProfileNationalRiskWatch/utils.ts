@@ -104,11 +104,6 @@ export function getAdminArea0Query(countryCodes: CountryCodeIso3[]) {
     };
 }
 
-// Helper function to clamp values to acceptable ranges.
-function clamp(value: number, min: number, max: number) {
-    return Math.min(Math.max(value, min), max);
-}
-
 // Compute the combined lon/lat bounds of an admin-areas feature collection.
 // Returns null when the collection has no usable geometries.
 export function getFeatureCollectionBounds(
@@ -123,12 +118,12 @@ export function getFeatureCollectionBounds(
     // Return lon lat values, clamped to valid ranges, and asserted as the opaque types.
     return [
         new NrwLngLat(
-            clamp(west, -180, 180) as Longitude,
-            clamp(south, -90, 90) as Latitude,
+            west as Longitude,
+            south as Latitude,
         ),
         new NrwLngLat(
-            clamp(east, -180, 180) as Longitude,
-            clamp(north, -90, 90) as Latitude,
+            east as Longitude,
+            north as Latitude,
         ),
     ] as LongitudeLatitudeBounds;
 }
