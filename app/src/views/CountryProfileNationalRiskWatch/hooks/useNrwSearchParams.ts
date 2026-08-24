@@ -34,10 +34,10 @@ function useNrwSearchParams() {
     // handling map view changes.
     const [, setSearchParams] = useSearchParams();
     // Unlikely that these URL params will have invalid values, but let's be defensive.
-    const [zoomFromUrl] = useUrlSearchState('z', parseZoomUrlParameter, () => '');
-    const [latitudeFromUrl] = useUrlSearchState('lat', parseMapLatitudeParameter, () => '');
-    const [longitudeFromUrl] = useUrlSearchState('lon', parseMapLongitudeParameter, () => '');
-    const [countriesFromUrl] = useUrlSearchState(
+    const [zoomFromUrlParams] = useUrlSearchState('z', parseZoomUrlParameter, () => '');
+    const [latitudeFromUrlParams] = useUrlSearchState('lat', parseMapLatitudeParameter, () => '');
+    const [longitudeFromUrlParams] = useUrlSearchState('lon', parseMapLongitudeParameter, () => '');
+    const [countriesFromUrlParams] = useUrlSearchState(
         'countries',
         parseCountriesUrlParameter,
         serializeCountriesUrlParameter,
@@ -53,7 +53,7 @@ function useNrwSearchParams() {
     // Handle both standalone and embedded modes (from search params or from routing).
     // Countries are set once at load and never change.
     const countries = nrwStandalone
-        ? countriesFromUrl
+        ? countriesFromUrlParams
         : [parseCountryCode(countryFromRouting?.iso3)].filter(isDefined);
 
     // The scoped countries are resolved synchronously in standalone mode (from
@@ -77,9 +77,9 @@ function useNrwSearchParams() {
     };
 
     return {
-        zoomFromUrl,
-        latitudeFromUrl,
-        longitudeFromUrl,
+        zoomFromUrlParams,
+        latitudeFromUrlParams,
+        longitudeFromUrlParams,
         countries,
         countriesResolved,
         handleMapViewChange,

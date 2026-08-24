@@ -37,22 +37,22 @@ export function Component() {
 
     // Child components should not have to know about URLs.
     const {
-        zoomFromUrl,
-        latitudeFromUrl,
-        longitudeFromUrl,
+        zoomFromUrlParams,
+        latitudeFromUrlParams,
+        longitudeFromUrlParams,
         countries,
         countriesResolved,
         handleMapViewChange,
     } = useNrwSearchParams();
 
-    const hasInitialLatLon = latitudeFromUrl !== null && longitudeFromUrl !== null;
+    const hasInitialLatLon = latitudeFromUrlParams !== null && longitudeFromUrlParams !== null;
 
     // Initial view state on map creation
     const [initialMapView, setInitialMapView] = useState<InitialMapView | undefined>(
         // Default to the longitude/latitude search params if they are present
         hasInitialLatLon ? {
-            center: new NrwLngLat(longitudeFromUrl, latitudeFromUrl),
-            zoom: zoomFromUrl ?? defaultZoom,
+            center: new NrwLngLat(longitudeFromUrlParams, latitudeFromUrlParams),
+            zoom: zoomFromUrlParams ?? defaultZoom,
         } : undefined,
     );
 
