@@ -6,7 +6,7 @@ export const defaultMapZoom = 3;
 // Mapbox style
 // This is the Map created in Mapbox Studio with the format `mapbox://styles/<username>/<style_id>`
 // Get this from Mapbox Studio > Styles > Style url
-export const NRW_MAPBOX_STYLE_URL = 'mapbox://styles/510global/cmrdb6i91000a01qrf8j675uc';
+export const NRW_MAPBOX_STYLE_URL = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
 
 // Mapbox needs to precompute colors as a property of the vector data if colors differ
 // among objects of the same layer. This key indicates the color for exposed admin areas.
