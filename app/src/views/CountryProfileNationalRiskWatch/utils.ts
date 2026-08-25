@@ -47,7 +47,6 @@ export function getFeatureCollectionBounds(
         return undefined;
     }
 
-    // Return lon lat values, clamped to valid ranges, and asserted as the opaque types.
     return [
         new NrwLngLat(
             west as Longitude,
