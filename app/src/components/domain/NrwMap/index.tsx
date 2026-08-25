@@ -1,10 +1,9 @@
 import { useEffect } from 'react';
 
 import useNrwEvents from '#views/CountryProfileNationalRiskWatch/hooks/useNrwEvents';
-import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
+    type InitialMapView,
     type MapViewChangeHandler,
-    type Zoom,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwMapContainer from './NrwMapContainer';
@@ -14,14 +13,12 @@ const DEFAULT_COUNTRY_CODE_ISO3 = 'MWI';
 // This component knows nothing about Mapbox.
 
 function NrwMap(props: {
-    zoom: Zoom;
-    center: NrwLngLat;
+    initialMapView: InitialMapView;
     onMapViewChange: MapViewChangeHandler;
     countryCodeIso3?: string;
 }) {
     const {
-        zoom,
-        center,
+        initialMapView,
         onMapViewChange,
         countryCodeIso3 = DEFAULT_COUNTRY_CODE_ISO3,
     } = props;
@@ -46,8 +43,7 @@ function NrwMap(props: {
 
     return (
         <NrwMapContainer
-            zoom={zoom}
-            center={center}
+            initialMapView={initialMapView}
             onMapViewChange={onMapViewChange}
         />
     );

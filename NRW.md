@@ -36,3 +36,11 @@ The broad steps are:
 ## CI/CD setup
 
 The CI workflow needs the environment variable `FONTAWESOME_API_KEY`.
+
+## Updating NRW API types
+
+Do this when the NRW backend API changes.
+
+1. Copy the new OpenAPI schema from `services/api-service/nrw.openapi-schema.json` in the IBF backend repo to `app/schemas/nrw.openapi-schema.json`
+2. From `/app/`, run `pnpm generate:type:nrw`
+3. Commit the updated schema and generated types together

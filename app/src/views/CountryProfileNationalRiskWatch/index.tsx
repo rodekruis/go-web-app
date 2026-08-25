@@ -1,103 +1,99 @@
-import {
-    useParams,
-    useSearchParams,
-} from 'react-router-dom';
+import { useState } from 'react';
 import {
     Container,
     ListView,
 } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
-import { isDefined } from '@togglecorp/fujs';
 
 import NrwMap from '#components/domain/NrwMap';
 import NrwNavbar from '#components/domain/NrwNavbar';
 import Page from '#components/Page';
 import { nrwStandalone } from '#config';
-import useCountry from '#hooks/domain/useCountry';
-import useUrlSearchState from '#hooks/useUrlSearchState';
+import { useNrwRequest } from '#utils/restRequest';
 
+import useNrwSearchParams from './hooks/useNrwSearchParams';
 import NrwLngLat from './NrwLngLat';
 import {
+    type InitialMapView,
     type Latitude,
     type Longitude,
-    type MapViewChangeHandler,
     type Zoom,
 } from './types';
 import {
-    parseCountriesUrlParameter,
-    parseCountryCode,
-    parseMapLatitudeParameter,
-    parseMapLongitudeParameter,
-    parseZoomUrlParameter,
-    serializeCountriesUrlParameter,
+    getAdminArea0Query,
+    getFeatureCollectionBounds,
 } from './utils';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
 
-const DEFAULT_MAP_ZOOM = 3 as Zoom;
-const DEFAULT_LATITUDE = 0 as Latitude;
-const DEFAULT_LONGITUDE = 0 as Longitude;
-
-const roundZoomForUrl = (zoom: Zoom) => zoom.toFixed(2).toString();
-
-const roundLatitudeOrLongitudeForUrl = (value: Latitude | Longitude) => value.toFixed(6).toString();
+const defaultZoom = 3 as Zoom;
+const defaultLatitude = 0 as Latitude;
+const defaultLongitude = 0 as Longitude;
 
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
     const strings = useTranslation(i18n);
 
     // Child components should not have to know about URLs.
+    const {
+        zoomFromUrlParams,
+        latitudeFromUrlParams,
+        longitudeFromUrlParams,
+        countries,
+        countriesResolved,
+        handleMapViewChange,
+    } = useNrwSearchParams();
 
-    // useUrlSearchState is limited: it's setValue hook cannot handle setting
-    // multiple params in quick succession. Workaround: use setSearchParams for
-    // handling map view changing.
-    const [, setSearchParams] = useSearchParams();
-    // Unlikely that these URL params will have invalid values, but let's be defensive.
-    const [zoomFromUrl] = useUrlSearchState('z', parseZoomUrlParameter, () => '');
-    const [latitudeFromUrl] = useUrlSearchState('lat', parseMapLatitudeParameter, () => '');
-    const [longitudeFromUrl] = useUrlSearchState('lon', parseMapLongitudeParameter, () => '');
-    const [countriesFromUrl] = useUrlSearchState(
-        'countries',
-        parseCountriesUrlParameter,
-        serializeCountriesUrlParameter,
+    const hasInitialLatLon = latitudeFromUrlParams !== null && longitudeFromUrlParams !== null;
+
+    // Initial view state on map creation
+    const [initialMapView, setInitialMapView] = useState<InitialMapView | undefined>(
+        // Default to the longitude/latitude search params if they are present
+        hasInitialLatLon ? {
+            center: new NrwLngLat(longitudeFromUrlParams, latitudeFromUrlParams),
+            zoom: zoomFromUrlParams ?? defaultZoom,
+        } : undefined,
     );
 
-    // For embedded, get the country from the route.
-    // These are hooks, so they can't be placed in a conditional block.
-    // For standalone, this will return undefined, which is fine.
-    const { countryId } = useParams<{ countryId: string }>();
-    const countryFromRouting = useCountry({ id: Number(countryId) });
+    const shouldFetchBounds = countriesResolved
+        && !initialMapView
+        && countries.length > 0
+        && !hasInitialLatLon;
 
-    // The countries that the map is scoped to.
-    // Handle both standalone and embedded modes (from search params or from routing).
-    // Countries are set once at load and never change.
-    const countries = nrwStandalone
-        ? countriesFromUrl
-        : [parseCountryCode(countryFromRouting?.iso3)].filter(isDefined);
+    // Get the admin area for level 0, and fit view to that.
+    useNrwRequest({
+        url: '/admin-areas',
+        apiType: 'nrw',
+        skip: !shouldFetchBounds,
+        query: getAdminArea0Query(countries),
+        onSuccess: (featureCollection) => {
+            let bounds: InitialMapView['fitBounds'] | undefined;
+            if (!featureCollection) {
+                bounds = undefined;
+                // eslint-disable-next-line no-console
+                console.error('Admin areas not found for countries', countries);
+            } else if (featureCollection.features.length === 0) {
+                bounds = undefined;
+                // eslint-disable-next-line no-console
+                console.error('No admin area features found for countries', countries);
+            } else {
+                bounds = getFeatureCollectionBounds(featureCollection);
+            }
 
-    const zoom = zoomFromUrl ?? DEFAULT_MAP_ZOOM;
-    // Unlikely edge case: only lng or lat is provided, not handling that.
-    const center = new NrwLngLat(
-        longitudeFromUrl ?? DEFAULT_LONGITUDE,
-        latitudeFromUrl ?? DEFAULT_LATITUDE,
-    );
-
-    const handleMapViewChange: MapViewChangeHandler = (
-        newZoom,
-        newLatitude,
-        newLongitude,
-    ) => {
-        setSearchParams(
-            (prevParams) => {
-                prevParams.set('z', roundZoomForUrl(newZoom));
-                prevParams.set('lat', roundLatitudeOrLongitudeForUrl(newLatitude));
-                prevParams.set('lon', roundLatitudeOrLongitudeForUrl(newLongitude));
-                return prevParams;
-            },
-            { replace: true },
-        );
-    };
+            setInitialMapView({
+                center: new NrwLngLat(defaultLongitude, defaultLatitude),
+                zoom: defaultZoom,
+                fitBounds: bounds,
+            });
+        },
+        onFailure: () => {
+            setInitialMapView({
+                center: new NrwLngLat(defaultLongitude, defaultLatitude),
+                zoom: defaultZoom,
+            });
+        },
+    });
 
     const content = (
         <Container
@@ -107,10 +103,9 @@ export function Component() {
                 layout="grid"
                 withSidebar
             >
-                {isDefined(countries) && countries.length > 0 && (
+                {countries.length > 0 && initialMapView && (
                     <NrwMap
-                        zoom={zoom}
-                        center={center}
+                        initialMapView={initialMapView}
                         onMapViewChange={handleMapViewChange}
                     />
                 )}
