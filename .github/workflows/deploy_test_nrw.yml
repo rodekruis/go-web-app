@@ -18,7 +18,7 @@ on:
       - 'app/**'
       - 'packages/**'
       - 'pnpm-lock.yaml'
-      - '!**.md'
+      - '!**/*.md'
 
 env:
   buildOutputDir: build

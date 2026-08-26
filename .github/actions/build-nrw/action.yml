@@ -21,7 +21,7 @@ runs:
     - name: Set up Node.js
       uses: actions/setup-node@v7
       with:
-        node-version: 20
+        node-version-file: '.nvmrc'
         cache: pnpm
 
     - name: Install dependencies
@@ -38,8 +38,8 @@ runs:
       run: |
         BUILD_VERSION=$(git describe --tags --dirty --broken 2>/dev/null || git rev-parse --short HEAD)
         echo "build_version=$BUILD_VERSION" >> $GITHUB_OUTPUT
-        echo "$BUILD_VERSION" >> ${{ inputs.buildOutputDir }}/VERSION.txt
-        echo '{"schemaVersion": 1,"label":"build","message":"'"$BUILD_VERSION"'"}' >> ${{ inputs.buildOutputDir }}/VERSION.json
+        echo "$BUILD_VERSION" > ${{ inputs.buildOutputDir }}/VERSION.txt
+        echo '{"schemaVersion": 1,"label":"build","message":"'"$BUILD_VERSION"'"}' > ${{ inputs.buildOutputDir }}/VERSION.json
 
     - name: Add SWA routing config
       shell: bash
