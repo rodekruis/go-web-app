@@ -1,0 +1,78 @@
+name: 'Deploy [test] NRW Portal'
+
+permissions:
+  contents: read
+  actions: read
+  deployments: write
+  id-token: write
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - nrw-develop
+    paths:
+      - '.github/workflows/deploy_test_nrw.yml'
+      - '.github/actions/build-nrw/**'
+      - '.github/actions/get-swa-api-key/**'
+      - 'app/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '!**.md'
+
+env:
+  buildOutputDir: build
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: 'test'
+    env:
+      APP_TITLE: NRW
+      APP_ENVIRONMENT: testing
+      APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.APP_MAPBOX_ACCESS_TOKEN }}
+      APP_NRW_API_ENDPOINT: ${{ vars.APP_NRW_API_ENDPOINT }}
+      APP_NRW_STANDALONE: true
+      FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+      # Required by GO build validation but unused in NRW standalone
+      APP_API_ENDPOINT: https://placeholder.example.com/
+      APP_TINY_API_KEY: unused
+      APP_RISK_API_ENDPOINT: https://placeholder.example.com/
+      APP_TRANSLATION_API_ENDPOINT: https://placeholder.example.com/
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build NRW Frontend
+        id: build
+        uses: ./.github/actions/build-nrw
+        with:
+          buildOutputDir: ${{ env.buildOutputDir }}
+
+      - name: Get API key for Azure Static Web App
+        id: get-api-key
+        uses: ./.github/actions/get-swa-api-key
+        with:
+          azureClientId: ${{ secrets.AZURE_CLIENT_ID }}
+          azureTenantId: ${{ secrets.AZURE_TENANT_ID }}
+          azureSubscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          staticWebAppName: nrw-portal-test
+
+      - name: Deploy to Azure Static Web App
+        id: deploy_to_aswa
+        uses: Azure/static-web-apps-deploy@v1
+        env:
+          SKIP_DEPLOY_ON_MISSING_SECRETS: true
+        with:
+          azure_static_web_apps_api_token: ${{ steps.get-api-key.outputs.apiKey }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: 'upload'
+          config_file_location: ${{ env.buildOutputDir }}
+          app_location: ${{ env.buildOutputDir }}
+          output_location: ''
+          skip_app_build: true
+          skip_api_build: true
+
+      - name: Summary
+        run: |
+          echo "Build version: ${{ steps.build.outputs.build_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "Preview: <${{ steps.deploy_to_aswa.outputs.static_web_app_url }}>" >> $GITHUB_STEP_SUMMARY

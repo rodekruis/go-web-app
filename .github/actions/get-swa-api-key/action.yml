@@ -1,0 +1,52 @@
+name: 'Get Static Web App API Key'
+description: Logs in to Azure and retrieves the API key for a Static Web App.
+
+inputs:
+  azureClientId:
+    description: Azure service principal client ID.
+    required: true
+  azureTenantId:
+    description: Azure tenant ID.
+    required: true
+  azureSubscriptionId:
+    description: Azure subscription ID.
+    required: true
+  staticWebAppName:
+    description: Name of the Azure Static Web App resource.
+    required: true
+  azCliVersion:
+    description: Azure CLI version to use.
+    required: false
+    default: '2.88.0'
+
+outputs:
+  apiKey:
+    description: The API key for the Static Web App.
+    value: ${{ steps.get-api-key.outputs.API_KEY }}
+
+runs:
+  using: composite
+  steps:
+    - name: Azure Login
+      if: ${{ inputs.azureClientId != '' && inputs.azureTenantId != '' && inputs.azureSubscriptionId != '' }}
+      uses: azure/login@v3
+      with:
+        client-id: ${{ inputs.azureClientId }}
+        tenant-id: ${{ inputs.azureTenantId }}
+        subscription-id: ${{ inputs.azureSubscriptionId }}
+
+    - name: Get API key for Azure Static Web App
+      id: get-api-key
+      if: ${{ inputs.azureClientId != '' && inputs.azureTenantId != '' && inputs.azureSubscriptionId != '' }}
+      uses: azure/cli@v3
+      with:
+        azcliversion: ${{ inputs.azCliVersion }}
+        inlineScript: |
+          apiKey=$(az staticwebapp secrets list --name ${{ inputs.staticWebAppName }} --query "properties.apiKey" -o tsv)
+          if [ -z "$apiKey" ]; then
+            echo "Failed to retrieve Azure Static Web App API key" >&2
+            exit 1
+          fi
+
+          echo "::add-mask::$apiKey"
+          echo "API_KEY=$apiKey" >> "$GITHUB_OUTPUT"
