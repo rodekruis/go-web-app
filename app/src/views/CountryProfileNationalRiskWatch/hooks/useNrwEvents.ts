@@ -6,27 +6,26 @@ import {
 import { type CountryCodeIso3 } from '../types';
 
 function useNrwEvents(countries: CountryCodeIso3[]) {
-    const query: NrwApiUrlQuery<'/events'> = {
-        countryCodeIso3: countries.length === 1 ? countries[0] : undefined,
-    };
-
-    const {
-        response,
-        pending,
-        error,
-    } = useNrwRequest({
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const results = countries.map((country) => useNrwRequest({
         url: '/events',
         apiType: 'nrw',
-        query,
-        skip: countries.length === 0,
-    });
+        query: {
+            countryCodeIso3: country,
+        } satisfies NrwApiUrlQuery<'/events'>,
+    }));
 
-    const events = response?.filter(
+    const pending = results.some((result) => result.pending);
+    const error = results.find((result) => result.error)?.error;
+
+    const events = results.flatMap(
+        (result) => result.response ?? [],
+    ).filter(
         (event) => countries.some((country) => country === event.countryCodeIso3),
     );
 
     return {
-        events,
+        events: countries.length === 0 ? undefined : events,
         pending,
         error,
     };
