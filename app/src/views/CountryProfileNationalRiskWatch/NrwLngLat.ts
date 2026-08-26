@@ -1,4 +1,4 @@
-import { LngLat } from 'mapbox-gl';
+import { LngLat } from 'mapbox-gl-v3';
 
 import {
     type Latitude,
@@ -14,5 +14,9 @@ export default class NrwLngLat extends LngLat {
     // eslint-disable-next-line no-useless-constructor -- We add types, so it's not useless.
     constructor(longitude: Longitude, latitude: Latitude) {
         super(longitude, latitude);
+    }
+
+    equals(other: NrwLngLat): boolean {
+        return this.lng === other.lng && this.lat === other.lat;
     }
 }
