@@ -1,25 +1,35 @@
-import { isFalsyString } from '@togglecorp/fujs';
-
 import {
     type NrwApiUrlQuery,
     useNrwRequest,
 } from '#utils/restRequest';
 
-function useNrwEvents(props: NrwApiUrlQuery<'/events'>) {
-    const {
-        countryCodeIso3,
-    } = props;
+import { type CountryCodeIso3 } from '../types';
 
-    const response = useNrwRequest({
+function useNrwEvents(countries: CountryCodeIso3[]) {
+    const query: NrwApiUrlQuery<'/events'> = {
+        countryCodeIso3: countries.length === 1 ? countries[0] : undefined,
+    };
+
+    const {
+        response,
+        pending,
+        error,
+    } = useNrwRequest({
         url: '/events',
         apiType: 'nrw',
-        query: {
-            countryCodeIso3,
-        },
-        skip: isFalsyString(countryCodeIso3),
+        query,
+        skip: countries.length === 0,
     });
 
-    return response;
+    const events = response?.filter(
+        (event) => countries.some((country) => country === event.countryCodeIso3),
+    );
+
+    return {
+        events,
+        pending,
+        error,
+    };
 }
 
 export default useNrwEvents;

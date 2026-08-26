@@ -2,32 +2,31 @@ import { useEffect } from 'react';
 
 import useNrwEvents from '#views/CountryProfileNationalRiskWatch/hooks/useNrwEvents';
 import {
+    type CountryCodeIso3,
     type InitialMapView,
     type MapViewChangeHandler,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwMapContainer from './NrwMapContainer';
 
-const DEFAULT_COUNTRY_CODE_ISO3 = 'MWI';
-
 // This component knows nothing about Mapbox.
 
 function NrwMap(props: {
     initialMapView: InitialMapView;
     onMapViewChange: MapViewChangeHandler;
-    countryCodeIso3?: string;
+    countries: CountryCodeIso3[];
 }) {
     const {
         initialMapView,
         onMapViewChange,
-        countryCodeIso3 = DEFAULT_COUNTRY_CODE_ISO3,
+        countries,
     } = props;
 
     const {
-        response: events,
+        events,
         pending,
         error,
-    } = useNrwEvents({ countryCodeIso3 });
+    } = useNrwEvents(countries);
 
     useEffect(
         () => {
