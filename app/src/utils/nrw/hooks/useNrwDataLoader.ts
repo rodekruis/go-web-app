@@ -210,6 +210,13 @@ export default function useNrwDataLoader(
         }
         if (
             layerType === LayerType.raster
+            && layerName === LayerName.windSpeed
+        ) {
+            const { resourceId } = layerDetails as EventLayerDto;
+            return () => makeEventImageLayer(resourceId);
+        }
+        if (
+            layerType === LayerType.raster
             && layerName === LayerName.population
         ) {
             return () => makeStaticImageLayer(country, layerName);
@@ -383,7 +390,6 @@ export default function useNrwDataLoader(
             }
         };
         fetchLayers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedHazardType, isInitialDataLoaded]);
 
     // ----- Init -----
