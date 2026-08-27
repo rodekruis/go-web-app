@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import {
     useParams,
     useSearchParams,
@@ -110,13 +109,9 @@ function useNrwSearchParams() {
     // The countries that the map is scoped to.
     // Handle both standalone and embedded modes (from search params or from routing).
     // Countries are set once at load and never change.
-    const countryIso3FromRouting = countryFromRouting?.iso3;
-    const countries = useMemo(
-        () => (nrwStandalone
-            ? countriesFromUrlParams
-            : [parseCountryCode(countryIso3FromRouting)].filter(isDefined)),
-        [countriesFromUrlParams, countryIso3FromRouting],
-    );
+    const countries = nrwStandalone
+        ? countriesFromUrlParams
+        : [parseCountryCode(countryFromRouting?.iso3)].filter(isDefined);
 
     // The scoped countries are resolved synchronously in standalone mode (from
     // the URL) but asynchronously in embedded mode (from the routed country).

@@ -1,9 +1,4 @@
-import { useMemo } from 'react';
-
-import {
-    type NrwApiUrlQuery,
-    useNrwRequest,
-} from '#utils/restRequest';
+import { useNrwRequest } from '#utils/restRequest';
 
 import { type CountryCodeIso3 } from '../types';
 
@@ -24,14 +19,11 @@ function useNrwEvents(countries: CountryCodeIso3[]) {
         apiType: 'nrw',
         query: {
             countryCodeIso3: singleCountry,
-        } satisfies NrwApiUrlQuery<'/events'>,
+        },
     });
 
-    const events = useMemo(
-        () => response?.filter(
-            (event) => countries.some((country) => country === event.countryCodeIso3),
-        ),
-        [response, countries],
+    const events = response?.filter(
+        (event) => countries.some((country) => country === event.countryCodeIso3),
     );
 
     return {
