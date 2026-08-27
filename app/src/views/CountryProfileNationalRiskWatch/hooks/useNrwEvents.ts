@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import {
     type NrwApiUrlQuery,
     useNrwRequest,
@@ -6,26 +8,35 @@ import {
 import { type CountryCodeIso3 } from '../types';
 
 function useNrwEvents(countries: CountryCodeIso3[]) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const results = countries.map((country) => useNrwRequest({
+    // If there is a single country, pass that to the query to fetch data for only there.
+    // If there is no country, pass no country to fetch all events, and then filter the results.
+    // Making multi-country requests as a request for all countries is generally faster than
+    // chaining calls to the backend API. The NRW API may be later made to support
+    // multi-country requests, but for now this is the best approach.
+    const singleCountry = countries.length === 1 ? countries[0] : undefined;
+
+    const {
+        response,
+        pending,
+        error,
+    } = useNrwRequest({
         url: '/events',
         apiType: 'nrw',
+        skip: countries.length === 0,
         query: {
-            countryCodeIso3: country,
+            countryCodeIso3: singleCountry,
         } satisfies NrwApiUrlQuery<'/events'>,
-    }));
+    });
 
-    const pending = results.some((result) => result.pending);
-    const error = results.find((result) => result.error)?.error;
-
-    const events = results.flatMap(
-        (result) => result.response ?? [],
-    ).filter(
-        (event) => countries.some((country) => country === event.countryCodeIso3),
+    const events = useMemo(
+        () => response?.filter(
+            (event) => countries.some((country) => country === event.countryCodeIso3),
+        ),
+        [response, countries],
     );
 
     return {
-        events: countries.length === 0 ? undefined : events,
+        events,
         pending,
         error,
     };
