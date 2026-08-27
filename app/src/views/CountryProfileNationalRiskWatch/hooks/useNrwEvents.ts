@@ -22,7 +22,6 @@ function useNrwEvents(countries: CountryCodeIso3[]) {
     } = useNrwRequest({
         url: '/events',
         apiType: 'nrw',
-        skip: countries.length === 0,
         query: {
             countryCodeIso3: singleCountry,
         } satisfies NrwApiUrlQuery<'/events'>,
