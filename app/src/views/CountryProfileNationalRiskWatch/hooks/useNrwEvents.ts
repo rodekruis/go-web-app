@@ -8,8 +8,8 @@ import {
 import { type CountryCodeIso3 } from '../types';
 
 function useNrwEvents(countries: CountryCodeIso3[]) {
-    // If there is a single country, pass that to the query to fetch data for only there.
-    // If there is no country, pass no country to fetch all events, and then filter the results.
+    // For one country: pass the country code to the query to fetch data for only there.
+    // For more than one country: pass no country to fetch all events, and then filter the results.
     // Making multi-country requests as a request for all countries is generally faster than
     // chaining calls to the backend API. The NRW API may be later made to support
     // multi-country requests, but for now this is the best approach.
