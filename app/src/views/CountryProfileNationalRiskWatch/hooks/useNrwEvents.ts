@@ -25,7 +25,7 @@ function useNrwEvents(countries: CountryCodeIso3[]) {
     // This would be hit every map pan/zoom.
     const events = useMemo(
         () => response?.filter(
-            (event) => countries.some((country) => country === event.countryCodeIso3),
+            ({ countryCodeIso3 }) => countries.includes(countryCodeIso3 as CountryCodeIso3),
         ),
         [response, countries],
     );
