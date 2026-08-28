@@ -118,7 +118,7 @@ jobs:
       - name: Add Deployment URL to PR Description
         uses: nefrob/pr-description@v1.3.0
         with:
-          content: ${{ needs.build-and-deploy.outputs.preview_url }}
+          content: '${{ needs.build-and-deploy.outputs.preview_url }}?countries=MWI'
           regex: '<!-- start deployment url -->.*?<!-- end deployment url -->'
           regexFlags: ims
           appendContentOnMatchOnly: true
