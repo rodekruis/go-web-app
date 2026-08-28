@@ -107,6 +107,7 @@ export function Component() {
                     <NrwMap
                         initialMapView={initialMapView}
                         onMapViewChange={handleMapViewChange}
+                        countries={countries}
                     />
                 )}
             </ListView>
