@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import useNrwEvents from '#views/CountryProfileNationalRiskWatch/hooks/useNrwEvents';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
+    type CountryCodeIso3,
     type InitialMapView,
     type Latitude,
     type Longitude,
@@ -40,15 +41,19 @@ function parseCentroid(centroid: unknown): NrwLngLat | undefined {
 function NrwMap(props: {
     initialMapView: InitialMapView;
     onMapViewChange: MapViewChangeHandler;
-    countryCodeIso3?: string;
+    countries: CountryCodeIso3[];
 }) {
     const {
         initialMapView,
         onMapViewChange,
-        countryCodeIso3 = DEFAULT_COUNTRY_CODE_ISO3,
+        countries,
     } = props;
 
-    const { response: events } = useNrwEvents({ countryCodeIso3 });
+    const {
+        events,
+        pending,
+        error,
+    } = useNrwEvents(countries);
 
     const markers = useMemo(
         () => events?.map((event) => {

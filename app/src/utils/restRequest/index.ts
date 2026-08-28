@@ -27,9 +27,9 @@ export type GoApiResponse<URL extends keyof goApiPaths, METHOD extends 'GET' | '
 export type GoApiUrlQuery<URL extends keyof goApiPaths, METHOD extends 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'GET'> = ApiUrlQuery<goApiPaths, URL, METHOD>
 export type GoApiBody<URL extends keyof goApiPaths, METHOD extends 'POST' | 'PUT' | 'PATCH'> = ApiBody<goApiPaths, URL, METHOD>
 
-/** @knipignore This will be used in the future. */
 export type NrwApiResponse<URL extends keyof nrwApiPaths, METHOD extends 'GET' | 'POST' | 'PUT' = 'GET'> = ApiResponse<nrwApiPaths, URL, METHOD>;
 
+/** @knipignore This will be used in the future. */
 export type NrwApiUrlQuery<URL extends keyof nrwApiPaths, METHOD extends 'GET' | 'POST' | 'PUT' = 'GET'> = ApiUrlQuery<nrwApiPaths, URL, METHOD>;
 
 export type RiskApiResponse<URL extends keyof riskApiPaths, METHOD extends 'GET' | 'POST' | 'PUT' | 'PATCH' = 'GET'> = ApiResponse<riskApiPaths, URL, METHOD>;
@@ -76,7 +76,6 @@ const useGoLazyRequest = useLazyRequest as <
 ) => CustomLazyRequestReturn<goApiPaths, PATH, METHOD, CONTEXT>;
 
 // FIXME: identify a way to do this without a cast
-/** @knipignore This will be used in the future. */
 export const useNrwRequest = useRequest as <
     PATH extends keyof nrwApiPaths,
     METHOD extends VALID_METHOD | undefined = 'GET',

@@ -28,3 +28,13 @@ Provide a brief description of what this PR addresses and its purpose.
 ## Additional Notes
 
 *Optional: Add any other relevant context, screenshots, or details here.*
+
+## NRW Portal preview-deployment
+
+<!--- Do not remove this block. It will be replaced automatically by a GitHub action if a deployment is made -->
+
+<!-- start deployment url -->
+
+This PR does not have any NRW Portal preview deployments yet.
+
+<!-- end deployment url -->
