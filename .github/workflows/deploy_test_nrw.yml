@@ -59,7 +59,7 @@ jobs:
       APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.APP_MAPBOX_ACCESS_TOKEN }}
       APP_NRW_API_ENDPOINT: ${{ vars.APP_NRW_API_ENDPOINT }}
       APP_NRW_STANDALONE: true
-      FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+      FONTAWESOME_API_KEY: ${{ secrets.FONTAWESOME_API_KEY }}
       # Required by GO build validation but unused in NRW standalone
       APP_API_ENDPOINT: https://placeholder.example.com/
       APP_TINY_API_KEY: unused
