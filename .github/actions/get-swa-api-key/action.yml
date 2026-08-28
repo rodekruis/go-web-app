@@ -48,5 +48,6 @@ runs:
             exit 1
           fi
 
+          # Mask token to prevent accidental log exposure.
           echo "::add-mask::$apiKey"
           echo "API_KEY=$apiKey" >> "$GITHUB_OUTPUT"

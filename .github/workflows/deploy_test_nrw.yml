@@ -1,3 +1,5 @@
+# See: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
+
 name: 'Deploy [test] NRW Portal'
 
 permissions:
@@ -5,10 +7,25 @@ permissions:
   actions: read
   deployments: write
   id-token: write
+  # Disabling this to avoid spamming the PR with "Your stage site is ready!" comments
+  # https://github.com/Azure/static-web-apps/issues/1135#issuecomment-1750066331
+  # pull-requests: write
 
 on:
   workflow_dispatch:
   push:
+    branches:
+      - nrw-develop
+    paths:
+      - '.github/workflows/deploy_test_nrw.yml'
+      - '.github/actions/build-nrw/**'
+      - '.github/actions/get-swa-api-key/**'
+      - 'app/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '!**/*.md'
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
     branches:
       - nrw-develop
     paths:
@@ -25,10 +42,19 @@ env:
 
 jobs:
   build-and-deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    name: Build and Deploy Job (Test)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      deployments: write
+      id-token: write
     environment: 'test'
+    outputs:
+      preview_url: ${{ steps.deploy_to_aswa.outputs.static_web_app_url }}
     env:
-      APP_TITLE: NRW
+      APP_TITLE: NRW test
       APP_ENVIRONMENT: testing
       APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.APP_MAPBOX_ACCESS_TOKEN }}
       APP_NRW_API_ENDPOINT: ${{ vars.APP_NRW_API_ENDPOINT }}
@@ -41,6 +67,8 @@ jobs:
       APP_TRANSLATION_API_ENDPOINT: https://placeholder.example.com/
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Build NRW Frontend
         id: build
@@ -57,6 +85,9 @@ jobs:
           azureSubscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           staticWebAppName: nrw-portal-test
 
+
+      # More information on Static Web App workflow configurations,
+      # See: https://aka.ms/swaworkflowconfig
       - name: Deploy to Azure Static Web App
         id: deploy_to_aswa
         uses: Azure/static-web-apps-deploy@v1
@@ -72,7 +103,56 @@ jobs:
           skip_app_build: true
           skip_api_build: true
 
-      - name: Summary
+      - name: Finish
         run: |
           echo "Build version: ${{ steps.build.outputs.build_version }}" >> $GITHUB_STEP_SUMMARY
           echo "Preview: <${{ steps.deploy_to_aswa.outputs.static_web_app_url }}>" >> $GITHUB_STEP_SUMMARY
+
+  add-preview-link:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed' && needs.build-and-deploy.outputs.preview_url != ''
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Add Deployment URL to PR Description
+        uses: nefrob/pr-description@v1.3.0
+        with:
+          content: ${{ needs.build-and-deploy.outputs.preview_url }}
+          regex: '<!-- start deployment url -->.*?<!-- end deployment url -->'
+          regexFlags: ims
+          appendContentOnMatchOnly: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  close-pull-request:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Pull Request Job
+    permissions:
+      contents: read
+      actions: read
+      deployments: write
+      id-token: write
+    environment: 'test'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Get API key for Azure Static Web App
+        id: get-api-key
+        uses: ./.github/actions/get-swa-api-key
+        with:
+          azureClientId: ${{ secrets.AZURE_CLIENT_ID }}
+          azureTenantId: ${{ secrets.AZURE_TENANT_ID }}
+          azureSubscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          staticWebAppName: nrw-portal-test
+
+      - name: Close Pull Request
+        uses: Azure/static-web-apps-deploy@v1
+        env:
+          SKIP_DEPLOY_ON_MISSING_SECRETS: true
+        with:
+          app_location: ${{ env.buildOutputDir }}
+          azure_static_web_apps_api_token: ${{ steps.get-api-key.outputs.apiKey }}
+          action: 'close'
