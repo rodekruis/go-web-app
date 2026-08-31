@@ -13,8 +13,6 @@ import {
 import NrwMapContainer from './NrwMapContainer';
 import NrwMapMarker from './NrwMapMarker';
 
-const DEFAULT_COUNTRY_CODE_ISO3 = 'UGA';
-
 // This component knows nothing about Mapbox.
 
 // The generated API type for centroid is Record<string, never>, while the
@@ -51,8 +49,6 @@ function NrwMap(props: {
 
     const {
         events,
-        pending,
-        error,
     } = useNrwEvents(countries);
 
     const markers = useMemo(
