@@ -63,7 +63,7 @@ function NrwMapContainer(props: {
 
     // The element inside of which the map will be rendered.
     const containerRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<MapboxMap>(undefined);
+const mapRef = useRef<MapboxMap | undefined>(undefined);
     const markerEntriesRef = useRef<Map<string, MarkerEntry>>(new Map());
     // Marker entries live in state so React renders their portal contents;
     // the mapboxgl.Marker objects are only mutated, never recreated on
