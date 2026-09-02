@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { isDefined } from '@togglecorp/fujs';
 
 import useNrwEvents from '#views/CountryProfileNationalRiskWatch/hooks/useNrwEvents';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
@@ -10,8 +11,8 @@ import {
     type MapViewChangeHandler,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
-import NrwMapContainer from './NrwMapContainer';
-import NrwMapMarker from './NrwMapMarker';
+import NrwEventMarker from './NrwEventMarker';
+import NrwMapContainer, { type NrwMapMarker } from './NrwMapContainer';
 
 // This component knows nothing about Mapbox.
 
@@ -51,24 +52,25 @@ function NrwMap(props: {
         events,
     } = useNrwEvents(countries);
 
-    const markers = useMemo(
+    const markers = useMemo<NrwMapMarker[] | undefined>(
         () => events?.map((event) => {
             const coordinates = parseCentroid(event.centroid);
             if (!coordinates) {
-                return null;
+                return undefined;
             }
 
-            return (
-                <NrwMapMarker
-                    key={event.eventId}
-                    id={String(event.eventId)}
-                    coordinates={coordinates}
-                    alertClass={event.alertClass}
-                    hazardType={event.hazardType}
-                    trigger={event.trigger}
-                />
-            );
-        }),
+            return {
+                id: String(event.eventId),
+                coordinates,
+                content: (
+                    <NrwEventMarker
+                        alertClass={event.alertClass}
+                        hazardType={event.hazardType}
+                        trigger={event.trigger}
+                    />
+                ),
+            };
+        }).filter(isDefined),
         [events],
     );
 
