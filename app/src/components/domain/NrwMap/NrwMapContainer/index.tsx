@@ -3,14 +3,16 @@ import 'mapbox-gl-v3/dist/mapbox-gl.css';
 import {
     useEffect,
     useRef,
+    useState,
 } from 'react';
 import { _cs } from '@togglecorp/fujs';
-import mapboxgl from 'mapbox-gl-v3';
+import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 import {
     mbtoken,
     nrwStandalone,
 } from '#config';
+import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type InitialMapView,
     type Latitude,
@@ -18,6 +20,8 @@ import {
     type MapViewChangeHandler,
     type Zoom,
 } from '#views/CountryProfileNationalRiskWatch/types';
+
+import NrwMapMarkerPortal from './NrwMapMarkerPortal';
 
 import styles from './styles.module.css';
 
@@ -29,13 +33,21 @@ import styles from './styles.module.css';
 const nrwMapboxStyleUrl = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
 const paddingPixels = 20;
 
+export interface NrwMapMarker {
+    id: string;
+    coordinates: NrwLngLat;
+    content: React.ReactNode;
+}
+
 function NrwMapContainer(props: {
     initialMapView: InitialMapView;
     onMapViewChange: MapViewChangeHandler;
+    markers?: NrwMapMarker[];
 }) {
     const {
         initialMapView,
         onMapViewChange,
+        markers,
     } = props;
 
     const {
@@ -44,8 +56,8 @@ function NrwMapContainer(props: {
         fitBounds,
     } = initialMapView;
 
-    // The element inside of which the map will be rendered.
     const containerRef = useRef<HTMLDivElement>(null);
+    const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
 
     // Initialize the Mapbox map instance
     useEffect(() => {
@@ -79,22 +91,38 @@ function NrwMapContainer(props: {
             );
         });
 
+        setMapboxMap(map);
+
         // Cleanup.
         return () => {
-            map?.remove();
+            setMapboxMap(undefined);
+            map.remove();
         };
     // Set the dependencies to empty since we want this to run exactly once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
-        <div
-            ref={containerRef}
-            className={_cs(
-                styles.nrwMapContainer,
-                nrwStandalone && styles.nrwStandalone,
+        <>
+            <div
+                ref={containerRef}
+                className={_cs(
+                    styles.nrwMapContainer,
+                    nrwStandalone && styles.nrwStandalone,
+                )}
+            />
+            {markers?.map(
+                ({ id, coordinates, content }) => (
+                    <NrwMapMarkerPortal
+                        key={id}
+                        mapboxMap={mapboxMap}
+                        coordinates={coordinates}
+                    >
+                        {content}
+                    </NrwMapMarkerPortal>
+                ),
             )}
-        />
+        </>
     );
 }
 
