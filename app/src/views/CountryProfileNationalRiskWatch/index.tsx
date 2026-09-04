@@ -13,6 +13,7 @@ import { nrwStandalone } from '#config';
 
 import useNrwAdminAreas from './hooks/useNrwAdminAreas';
 import useNrwEvents from './hooks/useNrwEvents';
+import useNrwLayers from './hooks/useNrwLayers';
 import useNrwSearchParams from './hooks/useNrwSearchParams';
 import NrwLngLat from './NrwLngLat';
 import {
@@ -68,6 +69,10 @@ export function Component() {
 
     const eventCountries = getEventCountries(events ?? []);
     const countries = urlCountries?.length ? urlCountries : eventCountries;
+
+    // Load the available layers once countries are resolved.
+    // Once selected events are added, pass the selected event as an arg.
+    useNrwLayers(countries.length > 0);
 
     const {
         adminAreas,
