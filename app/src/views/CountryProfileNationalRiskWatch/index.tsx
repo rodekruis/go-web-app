@@ -11,6 +11,7 @@ import Page from '#components/Page';
 import { nrwStandalone } from '#config';
 import { useNrwRequest } from '#utils/restRequest';
 
+import useNrwLayers from './hooks/useNrwLayers';
 import useNrwSearchParams from './hooks/useNrwSearchParams';
 import NrwLngLat from './NrwLngLat';
 import {
@@ -55,6 +56,10 @@ export function Component() {
             zoom: zoomFromUrlParams ?? defaultZoom,
         } : undefined,
     );
+
+    // Load the available layers once countries are resolved.
+    // Once selected events are added, pass the selected event as an arg.
+    useNrwLayers(countriesResolved);
 
     const shouldFetchBounds = countriesResolved
         && !initialMapView
