@@ -1,27 +1,29 @@
-import { useState } from 'react';
 import {
     Container,
     ListView,
 } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
+import { isDefined } from '@togglecorp/fujs';
 
 import NrwMap from '#components/domain/NrwMap';
 import NrwNavbar from '#components/domain/NrwNavbar';
 import Page from '#components/Page';
 import { nrwStandalone } from '#config';
-import { useNrwRequest } from '#utils/restRequest';
 
+import useNrwAdminAreas from './hooks/useNrwAdminAreas';
+import useNrwEvents from './hooks/useNrwEvents';
 import useNrwSearchParams from './hooks/useNrwSearchParams';
 import NrwLngLat from './NrwLngLat';
 import {
-    type InitialMapView,
+    type AdminLevel,
     type Latitude,
     type Longitude,
+    type MapView,
     type Zoom,
 } from './types';
 import {
-    getAdminArea0Query,
     getFeatureCollectionBounds,
+    getMapView,
 } from './utils';
 
 import i18n from './i18n.json';
@@ -30,6 +32,11 @@ import styles from './styles.module.css';
 const defaultZoom = 3 as Zoom;
 const defaultLatitude = 0 as Latitude;
 const defaultLongitude = 0 as Longitude;
+
+const defaultMapView: MapView = {
+    center: new NrwLngLat(defaultLongitude, defaultLatitude),
+    zoom: defaultZoom,
+};
 
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
@@ -41,59 +48,43 @@ export function Component() {
         latitudeFromUrlParams,
         longitudeFromUrlParams,
         countries,
-        countriesResolved,
         handleMapViewChange,
     } = useNrwSearchParams();
 
-    const hasInitialLatLon = latitudeFromUrlParams !== null && longitudeFromUrlParams !== null;
-
-    // Initial view state on map creation
-    const [initialMapView, setInitialMapView] = useState<InitialMapView | undefined>(
-        // Default to the longitude/latitude search params if they are present
-        hasInitialLatLon ? {
-            center: new NrwLngLat(longitudeFromUrlParams, latitudeFromUrlParams),
-            zoom: zoomFromUrlParams ?? defaultZoom,
-        } : undefined,
+    // Set from the longitude/latitude search params when they are present.
+    const urlMapView = getMapView(
+        latitudeFromUrlParams,
+        longitudeFromUrlParams,
+        zoomFromUrlParams ?? defaultZoom,
     );
 
-    const shouldFetchBounds = countriesResolved
-        && !initialMapView
-        && countries.length > 0
-        && !hasInitialLatLon;
+    const {
+        events,
+        pending: eventsPending,
+        error: eventsError,
+    } = useNrwEvents(countries);
 
-    // Get the admin area for level 0, and fit view to that.
-    useNrwRequest({
-        url: '/admin-areas',
-        apiType: 'nrw',
-        skip: !shouldFetchBounds,
-        query: getAdminArea0Query(countries),
-        onSuccess: (featureCollection) => {
-            let bounds: InitialMapView['fitBounds'] | undefined;
-            if (!featureCollection) {
-                bounds = undefined;
-                // eslint-disable-next-line no-console
-                console.error('Admin areas not found for countries', countries);
-            } else if (featureCollection.features.length === 0) {
-                bounds = undefined;
-                // eslint-disable-next-line no-console
-                console.error('No admin area features found for countries', countries);
-            } else {
-                bounds = getFeatureCollectionBounds(featureCollection);
-            }
-
-            setInitialMapView({
-                center: new NrwLngLat(defaultLongitude, defaultLatitude),
-                zoom: defaultZoom,
-                fitBounds: bounds,
-            });
-        },
-        onFailure: () => {
-            setInitialMapView({
-                center: new NrwLngLat(defaultLongitude, defaultLatitude),
-                zoom: defaultZoom,
-            });
-        },
+    const {
+        adminAreas,
+        error: adminAreasError,
+    } = useNrwAdminAreas({
+        countries,
+        adminLevels: [0 as AdminLevel],
+        skip: isDefined(urlMapView),
     });
+
+    const countryBounds = isDefined(adminAreas)
+        ? getFeatureCollectionBounds(adminAreas)
+        : undefined;
+
+    // Use undefined while admin areas are loading
+    const countryMapView = isDefined(adminAreas) || isDefined(adminAreasError)
+        ? { ...defaultMapView, fitBounds: countryBounds }
+        : undefined;
+
+    // MapView preference: URL > countries > default
+    const mapView = urlMapView
+        ?? (countries?.length === 0 ? defaultMapView : countryMapView);
 
     const content = (
         <Container
@@ -102,21 +93,25 @@ export function Component() {
             <ListView
                 layout="grid"
                 withSidebar
+                sidebarSize="lg"
+                gridContentClassName={styles.eventsPanelHeight}
             >
-                {countries.length > 0 && initialMapView && (
-                    <NrwMap
-                        initialMapView={initialMapView}
-                        onMapViewChange={handleMapViewChange}
-                        countries={countries}
-                    />
-                )}
+                <div>
+                    {isDefined(mapView) && (
+                        <NrwMap
+                            mapView={mapView}
+                            onMapViewChange={handleMapViewChange}
+                            events={events}
+                        />
+                    )}
+                </div>
             </ListView>
         </Container>
     );
 
     if (nrwStandalone) {
         return (
-            <div className={styles.countryProfileNrw}>
+            <div className={styles.countryProfileNrwStandalone}>
                 <NrwNavbar />
                 <Page
                     title={strings.nationalRiskWatchPageTitle}

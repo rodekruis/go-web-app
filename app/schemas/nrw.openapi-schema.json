@@ -301,6 +301,23 @@
             }
           },
           {
+            "name": "hazardTypes",
+            "required": false,
+            "in": "query",
+            "description": "Hazard types to mock. Select one or more. If omitted, all hazard types configured for the country are mocked.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "floods",
+                  "drought",
+                  "tropicalCyclone"
+                ]
+              }
+            }
+          },
+          {
             "name": "countryCodes",
             "required": false,
             "in": "query",
@@ -481,11 +498,12 @@
         "operationId": "EventsController_getEvents",
         "parameters": [
           {
-            "name": "countryCodeIso3",
+            "name": "countryCodesIso3",
             "required": false,
             "in": "query",
-            "description": "ISO 3166-1 alpha-3 country code to filter events by. If omitted, returns events for all countries.",
+            "description": "ISO 3166-1 alpha-3 country codes to filter events by. If omitted, returns events for all countries.",
             "schema": {
+              "example": "MWI",
               "type": "string"
             }
           },
@@ -493,7 +511,7 @@
             "name": "active",
             "required": false,
             "in": "query",
-            "description": "Use to filter active or closed events that were ongoing at the time of the request.",
+            "description": "Use to filter events that have not ended (imminent or ongoing) or that have ended.",
             "schema": {
               "default": true,
               "type": "boolean"
@@ -503,7 +521,7 @@
             "name": "timestamp",
             "required": false,
             "in": "query",
-            "description": "NOTE: only use for mock/testing, never in production. ISO 8601 timestamp used to determine if ongoing at time of request. Defaults to now.",
+            "description": "NOTE: only use for mock/testing, never in production. ISO 8601 timestamp used to determine event status at time of request. Defaults to now.",
             "schema": {
               "type": "string"
             }
@@ -524,7 +542,7 @@
             }
           }
         },
-        "summary": "Get all active or all closed events",
+        "summary": "Get all ended or all not-ended events",
         "tags": [
           "events"
         ]
@@ -668,8 +686,8 @@
             "name": "transform",
             "required": false,
             "in": "query",
-            "description": "e.g. \"simplify,0.05\"",
             "schema": {
+              "example": "simplify,0.05",
               "type": "string"
             }
           },
@@ -685,8 +703,8 @@
             "name": "filter",
             "required": false,
             "in": "query",
-            "description": "pg_featureserv filter expression, e.g. \"countryCodeIso3='ETH' AND adminLevel=0\"",
             "schema": {
+              "example": "countryCodeIso3='MWI' AND adminLevel=1",
               "type": "string"
             }
           }
@@ -2484,8 +2502,13 @@
             "type": "string",
             "example": "2026-03-20T23:59:59Z"
           },
-          "isOngoing": {
-            "type": "boolean"
+          "eventStatus": {
+            "type": "string",
+            "enum": [
+              "ongoing",
+              "imminent",
+              "ended"
+            ]
           },
           "exposedAdminAreas": {
             "type": "object",
@@ -2517,7 +2540,7 @@
           "endAt",
           "firstIssuedAt",
           "lastUpdatedAt",
-          "isOngoing",
+          "eventStatus",
           "exposedAdminAreas",
           "availableLayers"
         ]

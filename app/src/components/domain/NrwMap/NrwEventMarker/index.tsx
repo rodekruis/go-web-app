@@ -1,24 +1,11 @@
-import {
-    faHouseFloodWater,
-    faHurricane,
-    faSunPlantWilt,
-    type IconDefinition,
-} from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { _cs } from '@togglecorp/fujs';
 
 import NrwEventMarkerIcon from '#assets/icons/nrw/event-marker.svg?react';
-import { type NrwApiResponse } from '#utils/restRequest';
+import hazardIcons from '#utils/nrw/hazardIcons';
+import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
 import styles from './styles.module.css';
-
-type NrwEvent = NrwApiResponse<'/events'>[number];
-
-const hazardIcons: Record<NrwEvent['hazardType'], IconDefinition> = {
-    floods: faHouseFloodWater,
-    drought: faSunPlantWilt,
-    tropicalCyclone: faHurricane,
-};
 
 const alertClassStyles: Record<NrwEvent['alertClass'], string | undefined> = {
     low: styles.alertLow,

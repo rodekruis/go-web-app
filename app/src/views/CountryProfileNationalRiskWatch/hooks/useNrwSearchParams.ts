@@ -105,17 +105,17 @@ function useNrwSearchParams() {
     // For standalone, this will return undefined, which is fine.
     const { countryId } = useParams<{ countryId: string }>();
     const countryFromRouting = useCountry({ id: Number(countryId) });
+    const countryCodeFromRouting = parseCountryCode(countryFromRouting?.iso3);
+    const countriesFromRouting = isDefined(countryCodeFromRouting)
+        ? [countryCodeFromRouting]
+        : undefined;
 
     // The countries that the map is scoped to.
     // Handle both standalone and embedded modes (from search params or from routing).
     // Countries are set once at load and never change.
     const countries = nrwStandalone
         ? countriesFromUrlParams
-        : [parseCountryCode(countryFromRouting?.iso3)].filter(isDefined);
-
-    // The scoped countries are resolved synchronously in standalone mode (from
-    // the URL) but asynchronously in embedded mode (from the routed country).
-    const countriesResolved = nrwStandalone || countryFromRouting !== undefined;
+        : countriesFromRouting;
 
     const handleMapViewChange: MapViewChangeHandler = (
         newZoom,
@@ -138,7 +138,6 @@ function useNrwSearchParams() {
         latitudeFromUrlParams,
         longitudeFromUrlParams,
         countries,
-        countriesResolved,
         handleMapViewChange,
     };
 }

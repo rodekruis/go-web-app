@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
-import useNrwEvents from '#views/CountryProfileNationalRiskWatch/hooks/useNrwEvents';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
-    type CountryCodeIso3,
-    type InitialMapView,
     type Latitude,
     type Longitude,
+    type MapView,
     type MapViewChangeHandler,
+    type NrwEvent,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwEventMarker from './NrwEventMarker';
@@ -38,19 +37,15 @@ function parseCentroid(centroid: unknown): NrwLngLat | undefined {
 }
 
 function NrwMap(props: {
-    initialMapView: InitialMapView;
+    mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
-    countries: CountryCodeIso3[];
+    events: NrwEvent[] | undefined;
 }) {
     const {
-        initialMapView,
+        mapView,
         onMapViewChange,
-        countries,
-    } = props;
-
-    const {
         events,
-    } = useNrwEvents(countries);
+    } = props;
 
     const markers = useMemo<NrwMapMarker[] | undefined>(
         () => events?.map((event) => {
@@ -76,7 +71,7 @@ function NrwMap(props: {
 
     return (
         <NrwMapContainer
-            initialMapView={initialMapView}
+            mapView={mapView}
             onMapViewChange={onMapViewChange}
             markers={markers}
         />

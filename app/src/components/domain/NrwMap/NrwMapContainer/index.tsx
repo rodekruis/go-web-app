@@ -14,9 +14,9 @@ import {
 } from '#config';
 import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
-    type InitialMapView,
     type Latitude,
     type Longitude,
+    type MapView,
     type MapViewChangeHandler,
     type Zoom,
 } from '#views/CountryProfileNationalRiskWatch/types';
@@ -40,12 +40,12 @@ export interface NrwMapMarker {
 }
 
 function NrwMapContainer(props: {
-    initialMapView: InitialMapView;
+    mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
     markers?: NrwMapMarker[];
 }) {
     const {
-        initialMapView,
+        mapView,
         onMapViewChange,
         markers,
     } = props;
@@ -54,7 +54,7 @@ function NrwMapContainer(props: {
         zoom,
         center,
         fitBounds,
-    } = initialMapView;
+    } = mapView;
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
@@ -78,7 +78,7 @@ function NrwMapContainer(props: {
 
         // If country bounds were provided, fit the map to these.
         if (fitBounds) {
-            map.fitBounds(fitBounds, { padding: paddingPixels });
+            map.fitBounds(fitBounds, { padding: paddingPixels, animate: false });
         }
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
