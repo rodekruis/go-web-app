@@ -73,12 +73,14 @@ function makeRasterLayerDetails(
     };
 }
 
-function upsertRaster(
+function appendRasterDetails(
     rasters: NrwRasterLayerDetails[],
-    descriptor: NrwRasterLayerDetails,
+    details: NrwRasterLayerDetails,
 ): NrwRasterLayerDetails[] {
-    const others = rasters.filter((raster) => raster.id !== descriptor.id);
-    return [...others, descriptor];
+    if (rasters.some((raster) => raster.id === details.id)) {
+        return rasters;
+    }
+    return [...rasters, details];
 }
 
 // Pass in the hazard type to get layers specific to that hazard type, or
@@ -89,8 +91,6 @@ function useNrwLayers(
 ) {
     const [loadError, setLoadError] = useState<unknown>(undefined);
     const [rasters, setRasters] = useState<NrwRasterLayerDetails[]>([]);
-
-    // Cache loaded raster descriptors by id so we don't refetch them.
     const rasterCacheRef = useRef<Map<string, NrwRasterLayerDetails>>(new Map());
 
     const skip = !countriesResolved;
@@ -119,35 +119,26 @@ function useNrwLayers(
         [response],
     );
 
-    function getPathVariables(context: LayerQueryContext) {
-        return {
-            countryCodeIso3: context.countryCodeIso3,
-            layer: context.layerName,
-        };
-    }
-
-    function handleFetchSuccess(json: StaticRasterResponse, context: LayerQueryContext) {
-        const descriptor = makeRasterLayerDetails(
-            context.countryCodeIso3,
-            context.layerName,
-            json,
-        );
-        rasterCacheRef.current.set(descriptor.id, descriptor);
-        setRasters((prev) => upsertRaster(prev, descriptor));
-    }
-
-    function handleFetchFailure(error: unknown) {
-        setLoadError(error);
-    }
-
     const rasterRequest = useNrwLazyRequest<'/rasters/static/{countryCodeIso3}/{layer}', LayerQueryContext>({
         apiType: 'nrw',
         url: '/rasters/static/{countryCodeIso3}/{layer}',
-        pathVariables: getPathVariables,
-        onSuccess: handleFetchSuccess,
-        onFailure: handleFetchFailure,
+        pathVariables: (context) => ({
+            countryCodeIso3: context.countryCodeIso3,
+            layer: context.layerName,
+        }),
+        onSuccess: (json, context) => {
+            const details = makeRasterLayerDetails(
+                context.countryCodeIso3,
+                context.layerName,
+                json,
+            );
+            rasterCacheRef.current.set(details.id, details);
+            setRasters((prev) => appendRasterDetails(prev, details));
+        },
+        onFailure: (error) => {
+            setLoadError(error);
+        },
     });
-    const fetchRaster = rasterRequest.trigger;
 
     const loadLayer = useCallback(
         (
@@ -162,9 +153,9 @@ function useNrwLayers(
             if (rasterCacheRef.current.has(cacheKey)) {
                 return;
             }
-            fetchRaster({ countryCodeIso3, layerName: layer.name });
+            rasterRequest.trigger({ countryCodeIso3, layerName: layer.name });
         },
-        [fetchRaster],
+        [rasterRequest],
     );
 
     return {
