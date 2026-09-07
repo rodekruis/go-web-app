@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
+import useNrwLayers from '#views/CountryProfileNationalRiskWatch/hooks/useNrwLayers';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
+    type CountryCodeIso3,
     type Latitude,
     type Longitude,
     type MapView,
@@ -40,12 +42,19 @@ function NrwMap(props: {
     mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
     events: NrwEvent[] | undefined;
+    countries: CountryCodeIso3[];
 }) {
     const {
         mapView,
         onMapViewChange,
         events,
+        countries,
     } = props;
+
+    // Logs the available NRW layers to the console.
+    // This is replaced in the next PR.
+    const countriesResolved = countries.length > 0;
+    useNrwLayers(countriesResolved);
 
     const markers = useMemo<NrwMapMarker[] | undefined>(
         () => events?.map((event) => {
