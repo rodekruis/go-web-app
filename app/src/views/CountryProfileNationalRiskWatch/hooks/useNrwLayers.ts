@@ -1,20 +1,22 @@
 import {
     useCallback,
-    useEffect,
     useRef,
     useState,
 } from 'react';
-import { isDefined } from '@togglecorp/fujs';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 
 import { nrwApi } from '#config';
 import { resolveUrl } from '#utils/resolveUrl';
 import {
     type NrwApiResponse,
-    useNrwLazyRequest,
     useNrwRequest,
 } from '#utils/restRequest';
 
 import {
+    type CountryCodeIso3,
     type Latitude,
     type Longitude,
 } from '../types';
@@ -23,7 +25,7 @@ import {
 type NrwLayer = NrwApiResponse<'/layers'>[number];
 type StaticRasterResponse = NrwApiResponse<'/rasters/static/{countryCodeIso3}/{layer}'>;
 type NrwHazardType = NrwLayer['hazardType'];
-type NrwLayerName = NrwLayer['name'];
+export type NrwLayerName = NrwLayer['name'];
 
 export type CoordinateCorners = [
     [Longitude, Latitude],
@@ -38,32 +40,29 @@ export interface NrwRasterLayerDetails{
     coordinates: CoordinateCorners;
 }
 
-interface LayerQueryContext {
-    countryCodeIso3: string;
+interface LayerRequest {
+    id: string;
+    countryCodeIso3: CountryCodeIso3;
     layerName: NrwLayerName;
 }
 
 function makeRasterLayerDetails(
-    countryCodeIso3: string,
-    layerName: NrwLayerName,
+    layerRequest: LayerRequest,
     json: StaticRasterResponse,
 ): NrwRasterLayerDetails {
-    const { extent } = json.metadata.data;
+    const { id, countryCodeIso3, layerName } = layerRequest;
+    const {
+        xmin, ymin, xmax, ymax,
+    } = json.metadata.data.extent;
 
-    const west = extent.xmin as Longitude;
-    const south = extent.ymin as Latitude;
-    const east = extent.xmax as Longitude;
-    const north = extent.ymax as Latitude;
-
-    const id = `layer-${countryCodeIso3}-${layerName}`;
-    const imageUrl = resolveUrl(
-        nrwApi,
-        `rasters/static/${countryCodeIso3}/${layerName}/image`,
-    );
+    const west = xmin as Longitude;
+    const south = ymin as Latitude;
+    const east = xmax as Longitude;
+    const north = ymax as Latitude;
 
     return {
         id,
-        imageUrl,
+        imageUrl: resolveUrl(nrwApi, `rasters/static/${countryCodeIso3}/${layerName}/image`),
         coordinates: [
             [west, north],
             [east, north],
@@ -73,96 +72,68 @@ function makeRasterLayerDetails(
     };
 }
 
-function appendRasterDetails(
-    rasters: NrwRasterLayerDetails[],
-    details: NrwRasterLayerDetails,
-): NrwRasterLayerDetails[] {
-    if (rasters.some((raster) => raster.id === details.id)) {
-        return rasters;
-    }
-    return [...rasters, details];
-}
-
-// Pass in the hazard type to get layers specific to that hazard type, or
-// pass in nothing/undefined to get all non-event layers
-function useNrwLayers(
-    countriesResolved: boolean,
-    hazardType?: NrwHazardType,
-) {
+// Pass a hazard type to get the available layers for that hazard,
+// or leave it undefined to get all non-event layers.
+function useNrwLayers(hazardType?: NrwHazardType) {
+    const [rasterLayerDetails, setRasterLayerDetails] = useState<NrwRasterLayerDetails[]>([]);
+    const [requestQueue, setRequestQueue] = useState<LayerRequest[]>([]);
+    const [queueIndex, setQueueIndex] = useState(0);
     const [loadError, setLoadError] = useState<unknown>(undefined);
-    const [rasters, setRasters] = useState<NrwRasterLayerDetails[]>([]);
-    const rasterCacheRef = useRef<Map<string, NrwRasterLayerDetails>>(new Map());
+    const requestedIdsRef = useRef<Set<string>>(new Set());
 
-    const skip = !countriesResolved;
-
-    const query = isDefined(hazardType)
-        ? { hazardType }
-        : undefined;
-
+    // Fetch the list of available layers
     const {
-        response,
-        error: requestError,
+        response: availableLayers,
+        error: layersError,
     } = useNrwRequest({
         url: '/layers',
         apiType: 'nrw',
-        skip,
-        query,
+        query: isDefined(hazardType) ? { hazardType } : undefined,
     });
 
-    useEffect(
-        () => {
-            if (isDefined(response)) {
-                // eslint-disable-next-line no-console
-                console.log('Available NRW layers', response);
-            }
-        },
-        [response],
-    );
+    // Use a request queue to load data one after another
+    const nextRequest = requestQueue[queueIndex];
 
-    const rasterRequest = useNrwLazyRequest<'/rasters/static/{countryCodeIso3}/{layer}', LayerQueryContext>({
+    useNrwRequest({
         apiType: 'nrw',
         url: '/rasters/static/{countryCodeIso3}/{layer}',
-        pathVariables: (context) => ({
-            countryCodeIso3: context.countryCodeIso3,
-            layer: context.layerName,
-        }),
-        onSuccess: (json, context) => {
-            const details = makeRasterLayerDetails(
-                context.countryCodeIso3,
-                context.layerName,
-                json,
-            );
-            rasterCacheRef.current.set(details.id, details);
-            setRasters((prev) => appendRasterDetails(prev, details));
+        skip: isNotDefined(nextRequest),
+        pathVariables: isDefined(nextRequest)
+            ? { countryCodeIso3: nextRequest.countryCodeIso3, layer: nextRequest.layerName }
+            : undefined,
+        onSuccess: (json) => {
+            if (isDefined(nextRequest)) {
+                setRasterLayerDetails((prev) => [
+                    ...prev,
+                    makeRasterLayerDetails(nextRequest, json),
+                ]);
+            }
+            setQueueIndex((prev) => prev + 1);
         },
         onFailure: (error) => {
             setLoadError(error);
+            setQueueIndex((prev) => prev + 1);
         },
     });
 
     const loadLayer = useCallback(
-        (
-            layer: NrwLayer,
-            countryCodeIso3: string,
-        ) => {
-            if (layer.type !== 'raster') {
-                setLoadError(new Error(`Unsupported NRW layer type: ${layer.type}`));
+        (countryCodeIso3: CountryCodeIso3, layerName: NrwLayerName) => {
+            const id = `layer-${countryCodeIso3}-${layerName}`;
+            // Requesting the same layer twice is a no-op, so callers can call this freely.
+            if (requestedIdsRef.current.has(id)) {
                 return;
             }
-            const cacheKey = `layer-${countryCodeIso3}-${layer.name}`;
-            if (rasterCacheRef.current.has(cacheKey)) {
-                return;
-            }
-            rasterRequest.trigger({ countryCodeIso3, layerName: layer.name });
+            requestedIdsRef.current.add(id);
+            setRequestQueue((prev) => [...prev, { id, countryCodeIso3, layerName }]);
         },
-        [rasterRequest],
+        [],
     );
 
     return {
-        layers: response,
-        rasters,
-        error: requestError ?? loadError,
+        availableLayers,
+        rasterLayerDetails,
         loadLayer,
+        error: layersError ?? loadError,
     };
 }
 

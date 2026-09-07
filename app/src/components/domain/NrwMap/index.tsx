@@ -1,5 +1,11 @@
-import { useMemo } from 'react';
-import { isDefined } from '@togglecorp/fujs';
+import {
+    useEffect,
+    useMemo,
+} from 'react';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 
 import useNrwLayers from '#views/CountryProfileNationalRiskWatch/hooks/useNrwLayers';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
@@ -51,10 +57,34 @@ function NrwMap(props: {
         countries,
     } = props;
 
-    // Logs the available NRW layers to the console.
-    // This is replaced in the next PR.
+    const {
+        availableLayers,
+        rasterLayerDetails,
+        loadLayer,
+    } = useNrwLayers();
+
     const countriesResolved = countries.length > 0;
-    useNrwLayers(countriesResolved);
+
+    // Temporary: load the population raster until layer buttons and deep links exist.
+    useEffect(
+        () => {
+            if (!countriesResolved || isNotDefined(availableLayers)) {
+                return;
+            }
+
+            const populationAvailable = availableLayers.some(
+                ({ name, type }) => name === 'population' && type === 'raster',
+            );
+
+            if (!populationAvailable) {
+                return;
+            }
+
+            countries.forEach((countryCodeIso3) => loadLayer(countryCodeIso3, 'population'));
+        },
+
+        [availableLayers, countries, countriesResolved, loadLayer],
+    );
 
     const markers = useMemo<NrwMapMarker[] | undefined>(
         () => events?.map((event) => {
@@ -83,6 +113,7 @@ function NrwMap(props: {
             mapView={mapView}
             onMapViewChange={onMapViewChange}
             markers={markers}
+            rasterLayerDetails={rasterLayerDetails}
         />
     );
 }
