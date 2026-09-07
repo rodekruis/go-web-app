@@ -1,4 +1,4 @@
-.events-panel-height {
+.events-height {
     grid-template-rows: var(--nrw-height-map);
 }
 
@@ -10,7 +10,7 @@
         }
     }
 
-    .events-panel-height {
+    .events-height {
         grid-template-rows: var(--nrw-height-map-standalone);
     }
 }

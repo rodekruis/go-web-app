@@ -1,3 +1,8 @@
+import {
+    isDefined,
+    unique,
+} from '@togglecorp/fujs';
+
 import { getGeoJsonBounds } from '#utils/geo';
 import { type NrwApiResponse } from '#utils/restRequest';
 
@@ -9,8 +14,26 @@ import {
     type Longitude,
     type LongitudeLatitudeBounds,
     type MapView,
+    type NrwEvent,
     type Zoom,
 } from './types';
+
+// Sanitize to a valid country code in ISO_A3.
+// Returns null if invalid.
+export function parseCountryCode(value: string | undefined): CountryCodeIso3 | null {
+    const countryRegex = /^[A-Z]{3}$/;
+    const cleaned = value?.trim().toUpperCase() ?? '';
+    return countryRegex.test(cleaned) ? (cleaned as CountryCodeIso3) : null;
+}
+
+// The countries that have events, deduplicated and sorted.
+export function getEventCountries(events: NrwEvent[]): CountryCodeIso3[] {
+    const countryCodes = events
+        .map((event) => parseCountryCode(event.countryCodeIso3))
+        .filter(isDefined);
+
+    return unique(countryCodes, (countryCode) => countryCode).sort();
+}
 
 export function getMapView(
     latitude: Latitude | null,

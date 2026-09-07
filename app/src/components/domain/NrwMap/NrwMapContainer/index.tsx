@@ -5,7 +5,10 @@ import {
     useRef,
     useState,
 } from 'react';
-import { _cs } from '@togglecorp/fujs';
+import {
+    _cs,
+    isNotDefined,
+} from '@togglecorp/fujs';
 import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 import {
@@ -56,6 +59,8 @@ function NrwMapContainer(props: {
         fitBounds,
     } = mapView;
 
+    const [southWest, northEast] = fitBounds ?? [];
+
     const containerRef = useRef<HTMLDivElement>(null);
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
 
@@ -75,11 +80,6 @@ function NrwMapContainer(props: {
             center,
             zoom,
         });
-
-        // If country bounds were provided, fit the map to these.
-        if (fitBounds) {
-            map.fitBounds(fitBounds, { padding: paddingPixels, animate: false });
-        }
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 
@@ -101,6 +101,16 @@ function NrwMapContainer(props: {
     // Set the dependencies to empty since we want this to run exactly once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // The country bounds arrive after the map is created.
+    useEffect(() => {
+        if (isNotDefined(mapboxMap) || isNotDefined(fitBounds)) {
+            return;
+        }
+
+        mapboxMap.fitBounds(fitBounds, { padding: paddingPixels, animate: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mapboxMap, southWest?.lng, southWest?.lat, northEast?.lng, northEast?.lat]);
 
     return (
         <>

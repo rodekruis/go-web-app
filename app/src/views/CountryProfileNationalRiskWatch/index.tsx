@@ -22,6 +22,7 @@ import {
     type Zoom,
 } from './types';
 import {
+    getEventCountries,
     getFeatureCollectionBounds,
     getMapView,
 } from './utils';
@@ -47,7 +48,7 @@ export function Component() {
         zoomFromUrlParams,
         latitudeFromUrlParams,
         longitudeFromUrlParams,
-        countries,
+        urlCountries,
         handleMapViewChange,
     } = useNrwSearchParams();
 
@@ -62,11 +63,13 @@ export function Component() {
         events,
         pending: eventsPending,
         error: eventsError,
-    } = useNrwEvents(countries);
+    } = useNrwEvents(urlCountries);
+
+    const eventCountries = getEventCountries(events ?? []);
+    const countries = urlCountries?.length ? urlCountries : eventCountries;
 
     const {
         adminAreas,
-        error: adminAreasError,
     } = useNrwAdminAreas({
         countries,
         adminLevels: [0 as AdminLevel],
@@ -77,14 +80,12 @@ export function Component() {
         ? getFeatureCollectionBounds(adminAreas)
         : undefined;
 
-    // Use undefined while admin areas are loading
-    const countryMapView = isDefined(adminAreas) || isDefined(adminAreasError)
+    const countryMapView = isDefined(countryBounds)
         ? { ...defaultMapView, fitBounds: countryBounds }
         : undefined;
 
-    // MapView preference: URL > countries > default
-    const mapView = urlMapView
-        ?? (countries?.length === 0 ? defaultMapView : countryMapView);
+    // MapView preference: URL > countries > default.
+    const mapView = urlMapView ?? countryMapView ?? defaultMapView;
 
     const content = (
         <Container
@@ -94,17 +95,13 @@ export function Component() {
                 layout="grid"
                 withSidebar
                 sidebarSize="lg"
-                gridContentClassName={styles.eventsPanelHeight}
+                gridContentClassName={styles.eventsHeight}
             >
-                <div>
-                    {isDefined(mapView) && (
-                        <NrwMap
-                            mapView={mapView}
-                            onMapViewChange={handleMapViewChange}
-                            events={events}
-                        />
-                    )}
-                </div>
+                <NrwMap
+                    mapView={mapView}
+                    onMapViewChange={handleMapViewChange}
+                    events={events}
+                />
             </ListView>
         </Container>
     );

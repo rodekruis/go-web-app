@@ -16,6 +16,7 @@ import {
     type UrlParameter,
     type Zoom,
 } from '../types';
+import { parseCountryCode } from '../utils';
 
 function sanitizeFloatInRange(
     value: UrlParameter,
@@ -48,14 +49,6 @@ function parseMapLatitudeParameter(value: UrlParameter) {
 
 function parseMapLongitudeParameter(value: UrlParameter) {
     return sanitizeFloatInRange(value, -180, 180) as Longitude | null;
-}
-
-// Sanitize to a valid country code in ISO_A3.
-// Returns null if invalid.
-function parseCountryCode(value: string | undefined): CountryCodeIso3 | null {
-    const countryRegex = /^[A-Z]{3}$/;
-    const cleaned = value?.trim().toUpperCase() ?? '';
-    return countryRegex.test(cleaned) ? (cleaned as CountryCodeIso3) : null;
 }
 
 // Parse comma-separated ISO_A3 country codes from a URL search parameter.
@@ -110,10 +103,10 @@ function useNrwSearchParams() {
         ? [countryCodeFromRouting]
         : undefined;
 
-    // The countries that the map is scoped to.
+    // The country codes specified in the URL.
     // Handle both standalone and embedded modes (from search params or from routing).
     // Countries are set once at load and never change.
-    const countries = nrwStandalone
+    const urlCountries = nrwStandalone
         ? countriesFromUrlParams
         : countriesFromRouting;
 
@@ -137,7 +130,7 @@ function useNrwSearchParams() {
         zoomFromUrlParams,
         latitudeFromUrlParams,
         longitudeFromUrlParams,
-        countries,
+        urlCountries,
         handleMapViewChange,
     };
 }
