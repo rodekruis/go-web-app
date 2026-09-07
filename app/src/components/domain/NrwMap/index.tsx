@@ -1,5 +1,11 @@
-import { useMemo } from 'react';
-import { isDefined } from '@togglecorp/fujs';
+import {
+    useEffect,
+    useMemo,
+} from 'react';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 
 import useNrwEvents from '#views/CountryProfileNationalRiskWatch/hooks/useNrwEvents';
 import useNrwLayers from '#views/CountryProfileNationalRiskWatch/hooks/useNrwLayers';
@@ -42,21 +48,45 @@ function NrwMap(props: {
     initialMapView: InitialMapView;
     onMapViewChange: MapViewChangeHandler;
     countries: CountryCodeIso3[];
+    countriesResolved: boolean;
 }) {
     const {
         initialMapView,
         onMapViewChange,
         countries,
+        countriesResolved,
     } = props;
 
     const {
         events,
     } = useNrwEvents(countries);
 
-    // Logs the available NRW layers to the console.
-    // This is replaced in the next PR.
-    const countriesResolved = countries.length > 0;
-    useNrwLayers(countriesResolved);
+    const {
+        availableLayers,
+        rasterLayerDetails,
+        loadLayer,
+    } = useNrwLayers();
+
+    // Temporary: load the population raster until layer buttons and deep links exist.
+    useEffect(
+        () => {
+            if (!countriesResolved || isNotDefined(availableLayers)) {
+                return;
+            }
+
+            const populationAvailable = availableLayers.some(
+                ({ name, type }) => name === 'population' && type === 'raster',
+            );
+
+            if (!populationAvailable) {
+                return;
+            }
+
+            countries.forEach((countryCodeIso3) => loadLayer(countryCodeIso3, 'population'));
+        },
+
+        [availableLayers, countries, countriesResolved, loadLayer],
+    );
 
     const markers = useMemo<NrwMapMarker[] | undefined>(
         () => events?.map((event) => {
@@ -85,6 +115,7 @@ function NrwMap(props: {
             initialMapView={initialMapView}
             onMapViewChange={onMapViewChange}
             markers={markers}
+            rasterLayerDetails={rasterLayerDetails}
         />
     );
 }

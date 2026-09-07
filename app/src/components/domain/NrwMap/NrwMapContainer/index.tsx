@@ -12,6 +12,7 @@ import {
     mbtoken,
     nrwStandalone,
 } from '#config';
+import { type NrwRasterLayerDetails } from '#views/CountryProfileNationalRiskWatch/hooks/useNrwLayers';
 import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type InitialMapView,
@@ -22,6 +23,10 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwMapMarkerPortal from './NrwMapMarkerPortal';
+import {
+    addRasterLayer,
+    removeRasterLayer,
+} from './utils';
 
 import styles from './styles.module.css';
 
@@ -43,11 +48,13 @@ function NrwMapContainer(props: {
     initialMapView: InitialMapView;
     onMapViewChange: MapViewChangeHandler;
     markers?: NrwMapMarker[];
+    rasterLayerDetails?: NrwRasterLayerDetails[];
 }) {
     const {
         initialMapView,
         onMapViewChange,
         markers,
+        rasterLayerDetails,
     } = props;
 
     const {
@@ -58,6 +65,8 @@ function NrwMapContainer(props: {
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
+    // isStyleLoaded() also reports false while sources load, so track the load event instead.
+    const [styleLoaded, setStyleLoaded] = useState(false);
 
     // Initialize the Mapbox map instance
     useEffect(() => {
@@ -83,6 +92,10 @@ function NrwMapContainer(props: {
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 
+        map.on('load', () => {
+            setStyleLoaded(true);
+        });
+
         map.on('moveend', () => {
             onMapViewChange(
                 map.getZoom() as Zoom,
@@ -96,11 +109,29 @@ function NrwMapContainer(props: {
         // Cleanup.
         return () => {
             setMapboxMap(undefined);
+            setStyleLoaded(false);
             map.remove();
         };
     // Set the dependencies to empty since we want this to run exactly once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Add the raster overlays (e.g. population) to the map, once it's ready.
+    useEffect(() => {
+        if (!mapboxMap || !styleLoaded || !rasterLayerDetails || rasterLayerDetails.length === 0) {
+            return undefined;
+        }
+
+        const addedIds: string[] = [];
+        rasterLayerDetails.forEach((raster) => {
+            addRasterLayer(mapboxMap, raster);
+            addedIds.push(raster.id);
+        });
+
+        return () => {
+            addedIds.forEach((id) => removeRasterLayer(mapboxMap, id));
+        };
+    }, [mapboxMap, styleLoaded, rasterLayerDetails]);
 
     return (
         <>
