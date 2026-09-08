@@ -103,6 +103,7 @@ function useNrwLayers(hazardType?: NrwHazardType) {
             ? { countryCodeIso3: nextRequest.countryCodeIso3, layer: nextRequest.layerName }
             : undefined,
         onSuccess: (json) => {
+            setLoadError(undefined);
             if (isDefined(nextRequest)) {
                 setRasterLayerDetails((prev) => [
                     ...prev,
@@ -113,6 +114,9 @@ function useNrwLayers(hazardType?: NrwHazardType) {
         },
         onFailure: (error) => {
             setLoadError(error);
+            if (isDefined(nextRequest)) {
+                requestedIdsRef.current.delete(nextRequest.id);
+            }
             setQueueIndex((prev) => prev + 1);
         },
     });
