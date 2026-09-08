@@ -1,0 +1,53 @@
+.nrw-event-chips {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--go-ui-spacing-2xs);
+
+    .chip {
+        text-transform: uppercase;
+        font-size: var(--go-ui-font-size-xs);
+        font-weight: var(--go-ui-font-weight-semibold);
+
+        /* HACK: use .chip.chip to override .chip.primary */
+        &.chip {
+            --color-border: var(--color-background);
+            --padding: var(--go-ui-spacing-5xs) var(--go-ui-spacing-xs);
+        }
+
+        &.alert-class-low {
+            --color-background: var(--nrw-color-alert-low);
+            --color-text: var(--go-ui-color-gray-90);
+        }
+
+        &.alert-class-medium {
+            --color-background: var(--nrw-color-alert-medium);
+            --color-text: var(--go-ui-color-white);
+        }
+
+        &.alert-class-high {
+            --color-background: var(--nrw-color-alert-high);
+            --color-text: var(--go-ui-color-white);
+        }
+
+        &.event-status-chip {
+            --color-background: var(--go-ui-color-gray-30);
+            --color-text: var(--go-ui-color-gray-90);
+        }
+
+        &.trigger-chip {
+            --color-background: var(--go-ui-color-white);
+            --color-text: var(--nrw-color-alert-trigger);
+        }
+    }
+
+    .event-status-label {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--go-ui-spacing-3xs);
+    }
+
+    .event-status-icon svg {
+        font-size: var(--go-ui-font-size-2xs);
+    }
+}

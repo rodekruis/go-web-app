@@ -1,0 +1,13 @@
+{
+    "namespace": "nrwEvents",
+    "strings": {
+        "nrwEventChipsAlertClassLow": "Low",
+        "nrwEventChipsAlertClassMedium": "Medium",
+        "nrwEventChipsAlertClassHigh": "High",
+        "nrwEventChipsStatusImminent": "Imminent",
+        "nrwEventChipsStatusOngoing": "Ongoing",
+        "nrwEventChipsStatusEnded": "Ended",
+        "nrwEventChipsStatusEndedDescription": "This event has ended and is kept for reference.",
+        "nrwEventChipsTriggerReached": "Trigger reached"
+    }
+}

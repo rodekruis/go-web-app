@@ -1,0 +1,9 @@
+{
+    "namespace": "nrwEvents",
+    "strings": {
+        "nrwEventNameHazardFloods": "Flood",
+        "nrwEventNameHazardDrought": "Drought",
+        "nrwEventNameHazardTropicalCyclone": "Tropical cyclone",
+        "nrwEventName": "{hazard} - {label} - {date}"
+    }
+}

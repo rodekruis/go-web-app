@@ -5,6 +5,7 @@ import {
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import { isDefined } from '@togglecorp/fujs';
 
+import NrwEvents from '#components/domain/NrwEvents';
 import NrwMap from '#components/domain/NrwMap';
 import NrwNavbar from '#components/domain/NrwNavbar';
 import Page from '#components/Page';
@@ -101,6 +102,11 @@ export function Component() {
                     mapView={mapView}
                     onMapViewChange={handleMapViewChange}
                     events={events}
+                />
+                <NrwEvents
+                    events={events}
+                    pending={eventsPending}
+                    errored={isDefined(eventsError)}
                 />
             </ListView>
         </Container>
