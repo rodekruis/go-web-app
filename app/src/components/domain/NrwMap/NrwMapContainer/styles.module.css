@@ -1,7 +1,3 @@
 .nrw-map-container {
   height: var(--nrw-height-map);
-
-  &.nrw-standalone {
-    height: var(--nrw-height-map-standalone);
-  }
 }

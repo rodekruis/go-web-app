@@ -5,16 +5,10 @@ import {
     useRef,
     useState,
 } from 'react';
-import {
-    _cs,
-    isNotDefined,
-} from '@togglecorp/fujs';
+import { isNotDefined } from '@togglecorp/fujs';
 import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
-import {
-    mbtoken,
-    nrwStandalone,
-} from '#config';
+import { mbtoken } from '#config';
 import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,
@@ -116,10 +110,7 @@ function NrwMapContainer(props: {
         <>
             <div
                 ref={containerRef}
-                className={_cs(
-                    styles.nrwMapContainer,
-                    nrwStandalone && styles.nrwStandalone,
-                )}
+                className={styles.nrwMapContainer}
             />
             {markers?.map(
                 ({ id, coordinates, content }) => (
