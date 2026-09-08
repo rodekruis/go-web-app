@@ -5,7 +5,7 @@ import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 import NrwEventChips, { type NrwEventChipsEvent } from '../NrwEventChips';
 import NrwEventName, { type NrwEventNameEvent } from '../NrwEventName';
 
-export type NrwEventCardEvent =
+type NrwEventCardEvent =
     & Pick<NrwEvent, 'eventId'>
     & NrwEventChipsEvent
     & NrwEventNameEvent;
