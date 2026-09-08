@@ -23,10 +23,7 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwMapMarkerPortal from './NrwMapMarkerPortal';
-import {
-    addRasterLayer,
-    removeRasterLayer,
-} from './utils';
+import syncRasterLayers from './utils';
 
 import styles from './styles.module.css';
 
@@ -65,14 +62,16 @@ function NrwMapContainer(props: {
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
-    // isStyleLoaded() also reports false while sources load, so track the load event instead.
-    const [styleLoaded, setStyleLoaded] = useState(false);
+    const [mapLoadComplete, setMapLoadComplete] = useState(false);
+    const loadedRasterIdsRef = useRef<Set<string>>(new Set());
 
     // Initialize the Mapbox map instance
     useEffect(() => {
         if (!containerRef.current) {
             return undefined;
         }
+
+        const loadedRasterIds = loadedRasterIdsRef.current;
 
         mapboxgl.accessToken = mbtoken;
 
@@ -92,8 +91,8 @@ function NrwMapContainer(props: {
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 
-        map.on('load', () => {
-            setStyleLoaded(true);
+        map.on('style.load', () => {
+            setMapLoadComplete(true);
         });
 
         map.on('moveend', () => {
@@ -109,29 +108,22 @@ function NrwMapContainer(props: {
         // Cleanup.
         return () => {
             setMapboxMap(undefined);
-            setStyleLoaded(false);
+            setMapLoadComplete(false);
+            loadedRasterIds.clear();
             map.remove();
         };
     // Set the dependencies to empty since we want this to run exactly once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Add the raster overlays (e.g. population) to the map, once it's ready.
+    // Sync the raster overlays with the map
     useEffect(() => {
-        if (!mapboxMap || !styleLoaded || !rasterLayerDetails || rasterLayerDetails.length === 0) {
-            return undefined;
+        if (!mapboxMap || !mapLoadComplete) {
+            return;
         }
 
-        const addedIds: string[] = [];
-        rasterLayerDetails.forEach((raster) => {
-            addRasterLayer(mapboxMap, raster);
-            addedIds.push(raster.id);
-        });
-
-        return () => {
-            addedIds.forEach((id) => removeRasterLayer(mapboxMap, id));
-        };
-    }, [mapboxMap, styleLoaded, rasterLayerDetails]);
+        syncRasterLayers(mapboxMap, rasterLayerDetails ?? [], loadedRasterIdsRef.current);
+    }, [mapboxMap, mapLoadComplete, rasterLayerDetails]);
 
     return (
         <>
