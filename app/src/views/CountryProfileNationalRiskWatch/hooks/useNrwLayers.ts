@@ -25,7 +25,7 @@ import {
 type NrwLayer = NrwApiResponse<'/layers'>[number];
 type StaticRasterResponse = NrwApiResponse<'/rasters/static/{countryCodeIso3}/{layer}'>;
 type NrwHazardType = NrwLayer['hazardType'];
-export type NrwLayerName = NrwLayer['name'];
+type NrwLayerName = NrwLayer['name'];
 
 export type CoordinateCorners = [
     [Longitude, Latitude],
@@ -76,10 +76,14 @@ function makeRasterLayerDetails(
 // or leave it undefined to get all non-event layers.
 function useNrwLayers(hazardType?: NrwHazardType) {
     const [rasterLayerDetails, setRasterLayerDetails] = useState<NrwRasterLayerDetails[]>([]);
+    const [loadError, setLoadError] = useState<unknown>(undefined);
+
+    // Use a request queue so layers can be loaded on after another
+    // since useNrwRequest doesn't support concurrent requests.
+    const requestedIdsRef = useRef<Set<string>>(new Set());
     const [requestQueue, setRequestQueue] = useState<LayerRequest[]>([]);
     const [queueIndex, setQueueIndex] = useState(0);
-    const [loadError, setLoadError] = useState<unknown>(undefined);
-    const requestedIdsRef = useRef<Set<string>>(new Set());
+    const nextRequest = requestQueue[queueIndex];
 
     // Fetch the list of available layers
     const {
@@ -90,9 +94,6 @@ function useNrwLayers(hazardType?: NrwHazardType) {
         apiType: 'nrw',
         query: isDefined(hazardType) ? { hazardType } : undefined,
     });
-
-    // Use a request queue to load data one after another
-    const nextRequest = requestQueue[queueIndex];
 
     useNrwRequest({
         apiType: 'nrw',
@@ -119,7 +120,7 @@ function useNrwLayers(hazardType?: NrwHazardType) {
     const loadLayer = useCallback(
         (countryCodeIso3: CountryCodeIso3, layerName: NrwLayerName) => {
             const id = `layer-${countryCodeIso3}-${layerName}`;
-            // Requesting the same layer twice is a no-op, so callers can call this freely.
+
             if (requestedIdsRef.current.has(id)) {
                 return;
             }
