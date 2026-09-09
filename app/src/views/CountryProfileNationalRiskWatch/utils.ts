@@ -69,11 +69,11 @@ function getCountryAdminLevelFilter(countryCodes: CountryCodeIso3[], adminLevels
 // The pg_featureserv query parameters are not part
 // of the generated schema, so the query is untyped there.
 export function getAdminAreasQuery(countryCodes: CountryCodeIso3[], adminLevels: AdminLevel[]) {
+    const simplifyFactor = 0.05; // for admin level 0
     return {
         filter: getCountryAdminLevelFilter(countryCodes, adminLevels),
         limit: 10000,
-        // Simplify with a factor of 0.05, which gives a 90% size reduction in tests
-        transform: 'simplify,0.05',
+        transform: `simplify,${simplifyFactor}`,
     };
 }
 
