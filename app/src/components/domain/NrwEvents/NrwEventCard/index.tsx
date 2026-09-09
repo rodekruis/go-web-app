@@ -5,6 +5,7 @@ import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 import NrwEventChips, { type NrwEventChipsEvent } from '../NrwEventChips';
 import NrwEventName, { type NrwEventNameEvent } from '../NrwEventName';
 
+// Pick NrwEvent props used in the NrwEventCard component
 type NrwEventCardEvent =
     & Pick<NrwEvent, 'eventId'>
     & NrwEventChipsEvent

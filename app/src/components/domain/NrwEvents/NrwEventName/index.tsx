@@ -15,6 +15,7 @@ import styles from './styles.module.css';
 
 const eventDateFormat = 'dd MMM yyyy';
 
+// Pick NrwEvent props used in the NrwEventName component
 export type NrwEventNameEvent = Pick<NrwEvent, 'eventLabel' | 'hazardType' | 'startAt'>;
 
 interface Props {
