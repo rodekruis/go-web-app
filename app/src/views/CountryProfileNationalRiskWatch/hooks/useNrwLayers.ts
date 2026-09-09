@@ -51,6 +51,11 @@ function makeRasterLayerDetails(
     json: StaticRasterResponse,
 ): NrwRasterLayerDetails {
     const { id, countryCodeIso3, layerName } = layerRequest;
+
+    // Intentionally get the extent coordinates from the EPSG:4326 data extent,
+    // since these are in longitude/latitude, while the EPSG:3857 data is in meters.
+    // The image itself is in EPSG:3857, but the long/lat corners are the same for
+    // both projections.
     const {
         xmin, ymin, xmax, ymax,
     } = json.metadata.data.extent;
