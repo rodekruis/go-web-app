@@ -2,7 +2,7 @@ import { useNrwRequest } from '#utils/restRequest';
 
 import { type CountryCodeIso3 } from '../types';
 
-function useNrwEvents(countries: CountryCodeIso3[] | undefined) {
+function useNrwEvents(countries: CountryCodeIso3[] | undefined, active: boolean = true) {
     const {
         response,
         pending,
@@ -11,7 +11,7 @@ function useNrwEvents(countries: CountryCodeIso3[] | undefined) {
         url: '/events',
         apiType: 'nrw',
         skip: !countries,
-        query: { countryCodesIso3: countries?.length ? countries.join(',') : undefined },
+        query: { active, countryCodesIso3: countries?.length ? countries.join(',') : undefined },
     });
 
     return {
