@@ -71,8 +71,15 @@ function NrwMap(props: {
                 return;
             }
 
-            // eslint-disable-next-line no-console
-            console.log('Available layers for countries', countries, availableLayers);
+            const populationAvailable = availableLayers.some(
+                ({ name, type }) => name === 'population' && type === 'raster',
+            );
+
+            if (!populationAvailable) {
+                return;
+            }
+
+            countries.forEach((countryCodeIso3) => loadLayer(countryCodeIso3, 'population'));
         },
 
         [availableLayers, countries, countriesResolved, loadLayer],
