@@ -1,0 +1,15 @@
+.nrw-event-name {
+    display: flex;
+    align-items: center;
+    gap: var(--go-ui-spacing-2xs);
+    color: var(--go-ui-color-gray-90);
+
+    .hazard-icon {
+        flex-shrink: 0;
+        font-size: var(--go-ui-font-size-md);
+    }
+
+    .heading {
+        overflow-wrap: anywhere;
+    }
+}

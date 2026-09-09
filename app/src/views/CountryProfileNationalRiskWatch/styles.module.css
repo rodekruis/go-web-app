@@ -1,4 +1,10 @@
-.country-profile-nrw {
+.events-height {
+    grid-template-rows: var(--nrw-height-map);
+}
+
+.country-profile-nrw-standalone {
+    --nrw-height-map: var(--nrw-height-map-standalone);
+
     .main-section-container {
         .main-section {
             padding: 0 var(--go-ui-spacing-md);

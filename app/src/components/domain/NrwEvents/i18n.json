@@ -1,0 +1,9 @@
+{
+    "namespace": "nrwEvents",
+    "strings": {
+        "nrwEventsHeading": "Events",
+        "nrwEventsEmptyMessage": "There are no events for the selected area.",
+        "nrwEventsErrorMessage": "Events could not be loaded.",
+        "nrwEventsPendingMessage": "Loading events..."
+    }
+}

@@ -1,0 +1,30 @@
+.nrw-events {
+    .heading {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--go-ui-spacing-2xs);
+    }
+
+    .heading-label {
+        text-transform: uppercase;
+        color: var(--go-ui-color-text-black);
+    }
+
+    .event-count {
+        display: inline-grid;
+        place-items: center;
+        border-radius: var(--go-ui-border-radius-full);
+        background-color: var(--nrw-color-alert-high);
+        padding: 0 var(--go-ui-spacing-5xs);
+        min-width: 1.25rem;
+        height: 1.25rem;
+        color: var(--go-ui-color-white);
+        font-size: var(--go-ui-font-size-sm);
+    }
+
+    .event-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--go-ui-spacing-2xs);
+    }
+}

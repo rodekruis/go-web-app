@@ -5,18 +5,15 @@ import {
     useRef,
     useState,
 } from 'react';
-import { _cs } from '@togglecorp/fujs';
+import { isNotDefined } from '@togglecorp/fujs';
 import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
-import {
-    mbtoken,
-    nrwStandalone,
-} from '#config';
+import { mbtoken } from '#config';
 import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
-    type InitialMapView,
     type Latitude,
     type Longitude,
+    type MapView,
     type MapViewChangeHandler,
     type Zoom,
 } from '#views/CountryProfileNationalRiskWatch/types';
@@ -40,12 +37,12 @@ export interface NrwMapMarker {
 }
 
 function NrwMapContainer(props: {
-    initialMapView: InitialMapView;
+    mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
     markers?: NrwMapMarker[];
 }) {
     const {
-        initialMapView,
+        mapView,
         onMapViewChange,
         markers,
     } = props;
@@ -54,7 +51,9 @@ function NrwMapContainer(props: {
         zoom,
         center,
         fitBounds,
-    } = initialMapView;
+    } = mapView;
+
+    const [southWest, northEast] = fitBounds ?? [];
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
@@ -75,11 +74,6 @@ function NrwMapContainer(props: {
             center,
             zoom,
         });
-
-        // If country bounds were provided, fit the map to these.
-        if (fitBounds) {
-            map.fitBounds(fitBounds, { padding: paddingPixels });
-        }
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 
@@ -102,14 +96,21 @@ function NrwMapContainer(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // The country bounds arrive after the map is created.
+    useEffect(() => {
+        if (isNotDefined(mapboxMap) || isNotDefined(fitBounds)) {
+            return;
+        }
+
+        mapboxMap.fitBounds(fitBounds, { padding: paddingPixels, animate: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mapboxMap, southWest?.lng, southWest?.lat, northEast?.lng, northEast?.lat]);
+
     return (
         <>
             <div
                 ref={containerRef}
-                className={_cs(
-                    styles.nrwMapContainer,
-                    nrwStandalone && styles.nrwStandalone,
-                )}
+                className={styles.nrwMapContainer}
             />
             {markers?.map(
                 ({ id, coordinates, content }) => (

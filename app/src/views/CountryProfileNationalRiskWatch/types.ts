@@ -1,5 +1,7 @@
 // We add an "opaque type" to a value to communicate that it has been validated.
 
+import { type NrwApiResponse } from '#utils/restRequest';
+
 import type NrwLngLat from './NrwLngLat';
 
 // https://evertpot.com/opaque-ts-types/
@@ -29,6 +31,12 @@ export type CountryCodeIso3 = string & {
   [validCountryCode]: true
 }
 
+declare const validAdminLevel: unique symbol;
+
+export type AdminLevel = number & {
+  [validAdminLevel]: true
+}
+
 // eslint-disable-next-line max-len
 export type MapViewChangeHandler = (newZoom: Zoom, newLatitude: Latitude, newLongitude: Longitude) => void;
 
@@ -36,8 +44,10 @@ export type MapViewChangeHandler = (newZoom: Zoom, newLatitude: Latitude, newLon
 // The order doesn't matter for Mapbox.
 export type LongitudeLatitudeBounds = [NrwLngLat, NrwLngLat];
 
-export type InitialMapView = {
+export type MapView = {
     zoom: Zoom;
     center: NrwLngLat;
     fitBounds?: LongitudeLatitudeBounds;
 };
+
+export type NrwEvent = NrwApiResponse<'/events'>[number];

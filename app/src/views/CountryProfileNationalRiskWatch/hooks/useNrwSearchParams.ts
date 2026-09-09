@@ -16,6 +16,7 @@ import {
     type UrlParameter,
     type Zoom,
 } from '../types';
+import { parseCountryCode } from '../utils';
 
 function sanitizeFloatInRange(
     value: UrlParameter,
@@ -48,14 +49,6 @@ function parseMapLatitudeParameter(value: UrlParameter) {
 
 function parseMapLongitudeParameter(value: UrlParameter) {
     return sanitizeFloatInRange(value, -180, 180) as Longitude | null;
-}
-
-// Sanitize to a valid country code in ISO_A3.
-// Returns null if invalid.
-function parseCountryCode(value: string | undefined): CountryCodeIso3 | null {
-    const countryRegex = /^[A-Z]{3}$/;
-    const cleaned = value?.trim().toUpperCase() ?? '';
-    return countryRegex.test(cleaned) ? (cleaned as CountryCodeIso3) : null;
 }
 
 // Parse comma-separated ISO_A3 country codes from a URL search parameter.
@@ -105,17 +98,17 @@ function useNrwSearchParams() {
     // For standalone, this will return undefined, which is fine.
     const { countryId } = useParams<{ countryId: string }>();
     const countryFromRouting = useCountry({ id: Number(countryId) });
+    const countryCodeFromRouting = parseCountryCode(countryFromRouting?.iso3);
+    const countriesFromRouting = isDefined(countryCodeFromRouting)
+        ? [countryCodeFromRouting]
+        : undefined;
 
-    // The countries that the map is scoped to.
+    // The country codes specified in the URL.
     // Handle both standalone and embedded modes (from search params or from routing).
     // Countries are set once at load and never change.
-    const countries = nrwStandalone
+    const urlCountries = nrwStandalone
         ? countriesFromUrlParams
-        : [parseCountryCode(countryFromRouting?.iso3)].filter(isDefined);
-
-    // The scoped countries are resolved synchronously in standalone mode (from
-    // the URL) but asynchronously in embedded mode (from the routed country).
-    const countriesResolved = nrwStandalone || countryFromRouting !== undefined;
+        : countriesFromRouting;
 
     const handleMapViewChange: MapViewChangeHandler = (
         newZoom,
@@ -137,8 +130,7 @@ function useNrwSearchParams() {
         zoomFromUrlParams,
         latitudeFromUrlParams,
         longitudeFromUrlParams,
-        countries,
-        countriesResolved,
+        urlCountries,
         handleMapViewChange,
     };
 }

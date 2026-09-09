@@ -3,4 +3,8 @@
     --nrw-color-alert-medium: #ff6e00;
     --nrw-color-alert-high: #f5333f;
     --nrw-color-alert-trigger: #c01825;
+
+    --nrw-height-map: var(--go-ui-height-map-md);
+    /* hardcoded height because the header has dynamic height */
+    --nrw-height-map-standalone: calc(100vh - 140px);
 }
