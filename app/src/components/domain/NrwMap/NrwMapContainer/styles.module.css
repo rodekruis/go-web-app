@@ -1,3 +1,97 @@
+.map-wrapper {
+    position: relative;
+    height: var(--nrw-height-map);
+    --control-border-color: rgba(50, 50, 50, 0.2);
+    --control-divider-color: #e0e0e0;
+    --control-bg: #ffffff;
+    --control-bg-hover: #f2f2f2;
+    --control-text: #323232;
+    --control-border-radius: 4px;
+    --control-shadow: drop-shadow(0 4px 7px rgba(0, 0, 0, 0.1));
+}
 .nrw-map-container {
-  height: var(--nrw-height-map);
+    height: var(--nrw-height-map);
+    inline-size: 100%;
+}
+
+/* Restyle the Mapbox zoom controls */
+.nrw-map-container :global(.mapboxgl-ctrl-top-right) {
+    top: 12px;
+    right: 12px;
+}
+
+.nrw-map-container :global(.mapboxgl-ctrl-top-right .mapboxgl-ctrl) {
+    margin: 0;
+}
+
+.nrw-map-container :global(.mapboxgl-ctrl-group) {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid var(--control-border-color);
+    border-radius: var(--control-border-radius);
+    box-shadow: none;
+    background: none;
+    inline-size: 28px;
+    filter: var(--control-shadow);
+}
+
+.nrw-map-container :global(.mapboxgl-ctrl-group button) {
+    border: none;
+    background-color: var(--control-bg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 14px 14px;
+    inline-size: 100%;
+    height: 27px;
+    color: transparent;
+    font-size: 0;
+}
+
+.nrw-map-container :global(.mapboxgl-ctrl-group button:hover) {
+    background-color: var(--control-bg-hover);
+}
+
+.nrw-map-container :global(.mapboxgl-ctrl-group button:focus),
+.nrw-map-container :global(.mapboxgl-ctrl-group button:focus-visible) {
+    outline: none;
+    box-shadow: none;
+}
+
+.nrw-map-container :global(.mapboxgl-ctrl-group .mapboxgl-ctrl-zoom-in) {
+    border-bottom: 1px solid var(--control-divider-color);
+    border-radius: 2px 2px 0 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%23323232' d='M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z'/%3E%3C/svg%3E");
+}
+
+.nrw-map-container :global(.mapboxgl-ctrl-group .mapboxgl-ctrl-zoom-out) {
+    border-top: 1px solid var(--control-divider-color);
+    border-radius: 0 0 2px 2px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%23323232' d='M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z'/%3E%3C/svg%3E");
+}
+
+/* Layers button rendered below the Mapbox navigation control */
+.layers-button {
+    display: flex;
+    position: absolute;
+    top: calc(12px + 59px + 8px);
+    right: 12px;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--control-border-color);
+    border-radius: var(--control-border-radius);
+    background-clip: padding-box;
+    background-color: var(--control-bg);
+    cursor: pointer;
+    padding: 0;
+    inline-size: 28px;
+    height: 28px;
+    line-height: 1;
+    color: var(--control-text);
+    font-size: 14px;
+    font-weight: 700;
+    filter: var(--control-shadow);
+}
+
+.layers-button:hover {
+    background-color: var(--control-bg-hover);
 }
