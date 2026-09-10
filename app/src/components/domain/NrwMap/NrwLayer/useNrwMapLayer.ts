@@ -13,7 +13,7 @@ function useNrwMapLayer(
 ) {
     const { map } = useContext(NrwMapContext);
 
-    // mount & unmount
+    // on mount
     useEffect(
         () => {
             if (isNotDefined(map) || isNotDefined(mapLayer)) {
