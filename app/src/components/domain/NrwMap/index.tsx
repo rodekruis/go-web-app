@@ -1,13 +1,9 @@
-import {
-    useEffect,
-    useMemo,
-} from 'react';
+import { useState } from 'react';
 import {
     isDefined,
     isNotDefined,
 } from '@togglecorp/fujs';
 
-import useNrwLayers from '#views/CountryProfileNationalRiskWatch/hooks/useNrwLayers';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type CountryCodeIso3,
@@ -16,10 +12,14 @@ import {
     type MapView,
     type MapViewChangeHandler,
     type NrwEvent,
+    type NrwLayer as NrwLayerType,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwEventMarker from './NrwEventMarker';
-import NrwMapContainer, { type NrwMapMarker } from './NrwMapContainer';
+import NrwLayer from './NrwLayer';
+import NrwMapContainer from './NrwMapContainer';
+import NrwMarker from './NrwMarker';
+import useNrwLayers from './useNrwLayers';
 
 // This component knows nothing about Mapbox.
 
@@ -51,62 +51,53 @@ function NrwMap(props: {
     countries: CountryCodeIso3[];
 }) {
     const {
-        mapView,
-        onMapViewChange,
-        events,
-        countries,
+        mapView, onMapViewChange, events, countries,
     } = props;
 
-    const {
-        availableLayers,
-        rasterLayerDetails,
-        loadLayer,
-    } = useNrwLayers();
+    const { availableLayers } = useNrwLayers();
 
-    const countriesResolved = countries.length > 0;
+    // The map only supports single countries for the layers.
+    // If multiple countries, select the first only.
+    // This will be refactored out once event selection is in.
+    const countryCodeIso3 = countries[0];
 
-    useEffect(
-        () => {
-            if (!countriesResolved || isNotDefined(availableLayers)) {
-                return;
-            }
-
-            // eslint-disable-next-line no-console
-            console.log('Available layers for countries', countries, availableLayers);
-        },
-
-        [availableLayers, countries, countriesResolved, loadLayer],
-    );
-
-    const markers = useMemo<NrwMapMarker[] | undefined>(
-        () => events?.map((event) => {
-            const coordinates = parseCentroid(event.centroid);
-            if (!coordinates) {
-                return undefined;
-            }
-
-            return {
-                id: String(event.eventId),
-                coordinates,
-                content: (
-                    <NrwEventMarker
-                        alertClass={event.alertClass}
-                        hazardType={event.hazardType}
-                        trigger={event.trigger}
-                    />
-                ),
-            };
-        }).filter(isDefined),
-        [events],
-    );
+    // Layers shown by default
+    const [visibleLayers] = useState<NrwLayerType['name'][]>(['population']);
 
     return (
         <NrwMapContainer
             mapView={mapView}
             onMapViewChange={onMapViewChange}
-            markers={markers}
-            rasterLayerDetails={rasterLayerDetails}
-        />
+        >
+            {isDefined(countryCodeIso3) && availableLayers?.map((layer) => (
+                <NrwLayer
+                    key={layer.name}
+                    countryCodeIso3={countryCodeIso3}
+                    layer={layer}
+                    isVisible={visibleLayers.includes(layer.name)}
+                />
+            ))}
+            {events?.map((event) => {
+                const coordinates = parseCentroid(event.centroid);
+
+                if (isNotDefined(coordinates)) {
+                    return null;
+                }
+
+                return (
+                    <NrwMarker
+                        key={event.eventId}
+                        coordinates={coordinates}
+                    >
+                        <NrwEventMarker
+                            alertClass={event.alertClass}
+                            hazardType={event.hazardType}
+                            trigger={event.trigger}
+                        />
+                    </NrwMarker>
+                );
+            })}
+        </NrwMapContainer>
     );
 }
 

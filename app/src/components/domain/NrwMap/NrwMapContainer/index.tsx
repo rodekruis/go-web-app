@@ -2,6 +2,7 @@ import 'mapbox-gl-v3/dist/mapbox-gl.css';
 
 import {
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -9,8 +10,6 @@ import { isNotDefined } from '@togglecorp/fujs';
 import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 import { mbtoken } from '#config';
-import { type NrwRasterLayerDetails } from '#views/CountryProfileNationalRiskWatch/hooks/useNrwLayers';
-import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,
     type Longitude,
@@ -19,8 +18,7 @@ import {
     type Zoom,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
-import NrwMapMarkerPortal from './NrwMapMarkerPortal';
-import syncRasterLayers from './utils';
+import NrwMapContext from '../NrwMapContext';
 
 import styles from './styles.module.css';
 
@@ -32,45 +30,26 @@ import styles from './styles.module.css';
 const nrwMapboxStyleUrl = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
 const paddingPixels = 20;
 
-export interface NrwMapMarker {
-    id: string;
-    coordinates: NrwLngLat;
-    content: React.ReactNode;
-}
-
 function NrwMapContainer(props: {
     mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
-    markers?: NrwMapMarker[];
-    rasterLayerDetails?: NrwRasterLayerDetails[];
+    children?: React.ReactNode;
 }) {
-    const {
-        mapView,
-        onMapViewChange,
-        markers,
-        rasterLayerDetails,
-    } = props;
+    const { mapView, onMapViewChange, children } = props;
 
-    const {
-        zoom,
-        center,
-        fitBounds,
-    } = mapView;
+    const { zoom, center, fitBounds } = mapView;
 
     const [southWest, northEast] = fitBounds ?? [];
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
     const [mapLoadComplete, setMapLoadComplete] = useState(false);
-    const loadedRasterIdsRef = useRef<Set<string>>(new Set());
 
     // Initialize the Mapbox map instance
     useEffect(() => {
         if (!containerRef.current) {
             return undefined;
         }
-
-        const loadedRasterIds = loadedRasterIdsRef.current;
 
         mapboxgl.accessToken = mbtoken;
 
@@ -103,7 +82,6 @@ function NrwMapContainer(props: {
         return () => {
             setMapboxMap(undefined);
             setMapLoadComplete(false);
-            loadedRasterIds.clear();
             map.remove();
         };
     // Set the dependencies to empty since we want this to run exactly once on mount.
@@ -120,14 +98,10 @@ function NrwMapContainer(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mapboxMap, southWest?.lng, southWest?.lat, northEast?.lng, northEast?.lat]);
 
-    // Sync the raster overlays with the map
-    useEffect(() => {
-        if (!mapboxMap || !mapLoadComplete) {
-            return;
-        }
-
-        syncRasterLayers(mapboxMap, rasterLayerDetails ?? [], loadedRasterIdsRef.current);
-    }, [mapboxMap, mapLoadComplete, rasterLayerDetails]);
+    const mapContext = useMemo(
+        () => ({ map: mapLoadComplete ? mapboxMap : undefined }),
+        [mapboxMap, mapLoadComplete],
+    );
 
     return (
         <>
@@ -135,17 +109,9 @@ function NrwMapContainer(props: {
                 ref={containerRef}
                 className={styles.nrwMapContainer}
             />
-            {markers?.map(
-                ({ id, coordinates, content }) => (
-                    <NrwMapMarkerPortal
-                        key={id}
-                        mapboxMap={mapboxMap}
-                        coordinates={coordinates}
-                    >
-                        {content}
-                    </NrwMapMarkerPortal>
-                ),
-            )}
+            <NrwMapContext.Provider value={mapContext}>
+                {children}
+            </NrwMapContext.Provider>
         </>
     );
 }

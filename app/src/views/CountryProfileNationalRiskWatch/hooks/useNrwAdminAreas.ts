@@ -11,26 +11,16 @@ function useNrwAdminAreas(options: {
     adminLevels: AdminLevel[];
     skip: boolean;
 }) {
-    const {
-        countries,
-        adminLevels,
-        skip,
-    } = options;
+    const { countries, adminLevels, skip } = options;
 
-    const {
-        response,
-        error,
-    } = useNrwRequest({
+    const { response, error } = useNrwRequest({
         url: '/admin-areas',
         apiType: 'nrw',
         skip: skip || !countries?.length,
         query: getAdminAreasQuery(countries ?? [], adminLevels),
     });
 
-    return {
-        adminAreas: response,
-        error,
-    };
+    return { adminAreas: response, error };
 }
 
 export default useNrwAdminAreas;
