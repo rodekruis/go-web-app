@@ -56,10 +56,13 @@ function NrwMap(props: {
 
     const { availableLayers } = useNrwLayers();
 
-    // HACK: layers must be shown per country, use workaround for now
+    // The map only supports single countries for the layers.
+    // If multiple countries, select the first only.
+    // This will be refactored out once event selection is in.
     const countryCodeIso3 = countries[0];
 
-    const [visibleLayers] = useState<NrwLayerType['name'][]>([]);
+    // Layers shown by default
+    const [visibleLayers] = useState<NrwLayerType['name'][]>(['population']);
 
     return (
         <NrwMapContainer
