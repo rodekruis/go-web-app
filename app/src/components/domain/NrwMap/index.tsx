@@ -1,10 +1,9 @@
+import { useState } from 'react';
 import {
-    useMemo,
-    useState,
-} from 'react';
-import { isDefined } from '@togglecorp/fujs';
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 
-import useNrwLayers from '#views/CountryProfileNationalRiskWatch/hooks/useNrwLayers';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type CountryCodeIso3,
@@ -18,7 +17,9 @@ import {
 
 import NrwEventMarker from './NrwEventMarker';
 import NrwLayer from './NrwLayer';
-import NrwMapContainer, { type NrwMapMarker } from './NrwMapContainer';
+import NrwMapContainer from './NrwMapContainer';
+import NrwMarker from './NrwMarker';
+import useNrwLayers from './useNrwLayers';
 
 // This component knows nothing about Mapbox.
 
@@ -60,33 +61,10 @@ function NrwMap(props: {
 
     const [visibleLayers] = useState<NrwLayerType['name'][]>([]);
 
-    const markers = useMemo<NrwMapMarker[] | undefined>(
-        () => events?.map((event) => {
-            const coordinates = parseCentroid(event.centroid);
-            if (!coordinates) {
-                return undefined;
-            }
-
-            return {
-                id: String(event.eventId),
-                coordinates,
-                content: (
-                    <NrwEventMarker
-                        alertClass={event.alertClass}
-                        hazardType={event.hazardType}
-                        trigger={event.trigger}
-                    />
-                ),
-            };
-        }).filter(isDefined),
-        [events],
-    );
-
     return (
         <NrwMapContainer
             mapView={mapView}
             onMapViewChange={onMapViewChange}
-            markers={markers}
         >
             {isDefined(countryCodeIso3) && availableLayers?.map((layer) => (
                 <NrwLayer
@@ -96,6 +74,26 @@ function NrwMap(props: {
                     isVisible={visibleLayers.includes(layer.name)}
                 />
             ))}
+            {events?.map((event) => {
+                const coordinates = parseCentroid(event.centroid);
+
+                if (isNotDefined(coordinates)) {
+                    return null;
+                }
+
+                return (
+                    <NrwMarker
+                        key={event.eventId}
+                        coordinates={coordinates}
+                    >
+                        <NrwEventMarker
+                            alertClass={event.alertClass}
+                            hazardType={event.hazardType}
+                            trigger={event.trigger}
+                        />
+                    </NrwMarker>
+                );
+            })}
         </NrwMapContainer>
     );
 }

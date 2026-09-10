@@ -1,8 +1,7 @@
 import { isDefined } from '@togglecorp/fujs';
 
 import { useNrwRequest } from '#utils/restRequest';
-
-import { type NrwHazardType } from '../types';
+import { type NrwHazardType } from '#views/CountryProfileNationalRiskWatch/types';
 
 function useNrwLayers(hazardType?: NrwHazardType) {
     const { response, error } = useNrwRequest({

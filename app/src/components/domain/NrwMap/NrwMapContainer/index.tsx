@@ -10,7 +10,6 @@ import { isNotDefined } from '@togglecorp/fujs';
 import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 import { mbtoken } from '#config';
-import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,
     type Longitude,
@@ -20,7 +19,6 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwMapContext from '../NrwMapContext';
-import NrwMapMarkerPortal from './NrwMapMarkerPortal';
 
 import styles from './styles.module.css';
 
@@ -32,27 +30,14 @@ import styles from './styles.module.css';
 const nrwMapboxStyleUrl = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
 const paddingPixels = 20;
 
-export interface NrwMapMarker {
-    id: string;
-    coordinates: NrwLngLat;
-    content: React.ReactNode;
-}
-
 function NrwMapContainer(props: {
     mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
-    markers?: NrwMapMarker[];
     children?: React.ReactNode;
 }) {
-    const {
-        mapView, onMapViewChange, markers, children,
-    } = props;
+    const { mapView, onMapViewChange, children } = props;
 
-    const {
-        zoom,
-        center,
-        fitBounds,
-    } = mapView;
+    const { zoom, center, fitBounds } = mapView;
 
     const [southWest, northEast] = fitBounds ?? [];
 
@@ -127,17 +112,6 @@ function NrwMapContainer(props: {
             <NrwMapContext.Provider value={mapContext}>
                 {children}
             </NrwMapContext.Provider>
-            {markers?.map(
-                ({ id, coordinates, content }) => (
-                    <NrwMapMarkerPortal
-                        key={id}
-                        mapboxMap={mapboxMap}
-                        coordinates={coordinates}
-                    >
-                        {content}
-                    </NrwMapMarkerPortal>
-                ),
-            )}
         </>
     );
 }
