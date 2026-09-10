@@ -1,11 +1,8 @@
 import {
-    useEffect,
     useMemo,
+    useState,
 } from 'react';
-import {
-    isDefined,
-    isNotDefined,
-} from '@togglecorp/fujs';
+import { isDefined } from '@togglecorp/fujs';
 
 import useNrwLayers from '#views/CountryProfileNationalRiskWatch/hooks/useNrwLayers';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
@@ -16,9 +13,11 @@ import {
     type MapView,
     type MapViewChangeHandler,
     type NrwEvent,
+    type NrwLayer as NrwLayerType,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwEventMarker from './NrwEventMarker';
+import NrwLayer from './NrwLayer';
 import NrwMapContainer, { type NrwMapMarker } from './NrwMapContainer';
 
 // This component knows nothing about Mapbox.
@@ -51,32 +50,15 @@ function NrwMap(props: {
     countries: CountryCodeIso3[];
 }) {
     const {
-        mapView,
-        onMapViewChange,
-        events,
-        countries,
+        mapView, onMapViewChange, events, countries,
     } = props;
 
-    const {
-        availableLayers,
-        rasterLayerDetails,
-        loadLayer,
-    } = useNrwLayers();
+    const { availableLayers } = useNrwLayers();
 
-    const countriesResolved = countries.length > 0;
+    // HACK: layers must be shown per country, use workaround for now
+    const countryCodeIso3 = countries[0];
 
-    useEffect(
-        () => {
-            if (!countriesResolved || isNotDefined(availableLayers)) {
-                return;
-            }
-
-            // eslint-disable-next-line no-console
-            console.log('Available layers for countries', countries, availableLayers);
-        },
-
-        [availableLayers, countries, countriesResolved, loadLayer],
-    );
+    const [visibleLayers] = useState<NrwLayerType['name'][]>([]);
 
     const markers = useMemo<NrwMapMarker[] | undefined>(
         () => events?.map((event) => {
@@ -105,8 +87,16 @@ function NrwMap(props: {
             mapView={mapView}
             onMapViewChange={onMapViewChange}
             markers={markers}
-            rasterLayerDetails={rasterLayerDetails}
-        />
+        >
+            {isDefined(countryCodeIso3) && availableLayers?.map((layer) => (
+                <NrwLayer
+                    key={layer.name}
+                    countryCodeIso3={countryCodeIso3}
+                    layer={layer}
+                    isVisible={visibleLayers.includes(layer.name)}
+                />
+            ))}
+        </NrwMapContainer>
     );
 }
 
