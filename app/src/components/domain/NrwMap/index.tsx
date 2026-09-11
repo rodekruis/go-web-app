@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import {
+    useCallback,
+    useState,
+} from 'react';
 import {
     isDefined,
     isNotDefined,
@@ -17,6 +20,7 @@ import {
 
 import NrwEventMarker from './NrwEventMarker';
 import NrwLayer from './NrwLayer';
+import NrwLayerPanel from './NrwLayerPanel';
 import NrwMapContainer from './NrwMapContainer';
 import NrwMarker from './NrwMarker';
 import useNrwLayers from './useNrwLayers';
@@ -61,20 +65,47 @@ function NrwMap(props: {
     // This will be refactored out once event selection is in.
     const countryCodeIso3 = countries[0];
 
-    // Layers shown by default
-    const [visibleLayers] = useState<NrwLayerType['name'][]>(['population']);
+    const defaultVisibleLayerNames: ReadonlySet<NrwLayerType['name']> = new Set(['population']);
+    const [layerOverrides, setLayerOverrides] = useState<
+        Partial<Record<NrwLayerType['name'], boolean>>
+    >({});
+
+    const isLayerVisible = useCallback(
+        (name: NrwLayerType['name']) => (
+            layerOverrides[name] ?? defaultVisibleLayerNames.has(name)
+        ),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [layerOverrides],
+    );
+
+    const handleToggleLayer = useCallback(
+        (name: NrwLayerType['name']) => {
+            setLayerOverrides((prev) => ({
+                ...prev,
+                [name]: !(prev[name] ?? defaultVisibleLayerNames.has(name)),
+            }));
+        },
+        [],
+    );
 
     return (
         <NrwMapContainer
             mapView={mapView}
             onMapViewChange={onMapViewChange}
+            layerPanel={(
+                <NrwLayerPanel
+                    layers={availableLayers}
+                    isLayerVisible={isLayerVisible}
+                    onToggleLayer={handleToggleLayer}
+                />
+            )}
         >
             {isDefined(countryCodeIso3) && availableLayers?.map((layer) => (
                 <NrwLayer
                     key={layer.name}
                     countryCodeIso3={countryCodeIso3}
                     layer={layer}
-                    isVisible={visibleLayers.includes(layer.name)}
+                    isVisible={isLayerVisible(layer.name)}
                 />
             ))}
             {events?.map((event) => {
