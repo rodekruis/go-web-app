@@ -82,6 +82,7 @@ function NrwMapContainer(props: {
             setMapLoadComplete(true);
         });
 
+        // Listener to enable/disable zoom buttons based current zoom level.
         const updateZoomLimits = () => {
             const z = map.getZoom();
             setZoomLimits({

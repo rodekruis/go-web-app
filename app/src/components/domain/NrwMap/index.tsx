@@ -1,8 +1,4 @@
 import {
-    useCallback,
-    useState,
-} from 'react';
-import {
     isDefined,
     isNotDefined,
 } from '@togglecorp/fujs';
@@ -14,7 +10,6 @@ import {
     type MapView,
     type MapViewChangeHandler,
     type NrwEvent,
-    type NrwLayer as NrwLayerType,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
@@ -23,6 +18,7 @@ import NrwLayer from './NrwLayer';
 import NrwLayerPanel from './NrwLayerPanel';
 import NrwMapContainer from './NrwMapContainer';
 import NrwMarker from './NrwMarker';
+import useLayerVisibility from './useLayerVisibility';
 import useNrwLayers from './useNrwLayers';
 
 // This component knows nothing about Mapbox.
@@ -68,31 +64,9 @@ function NrwMap(props: {
     } = props;
 
     const { availableLayers } = useNrwLayers();
+    const { isLayerVisible, toggleLayer } = useLayerVisibility();
 
     const eventCountryCodeIso3 = parseCountryCode(selectedEvent?.countryCodeIso3);
-
-    const defaultVisibleLayerNames: ReadonlySet<NrwLayerType['name']> = new Set(['population']);
-    const [layerOverrides, setLayerOverrides] = useState<
-        Partial<Record<NrwLayerType['name'], boolean>>
-    >({});
-
-    const isLayerVisible = useCallback(
-        (name: NrwLayerType['name']) => (
-            layerOverrides[name] ?? defaultVisibleLayerNames.has(name)
-        ),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [layerOverrides],
-    );
-
-    const handleToggleLayer = useCallback(
-        (name: NrwLayerType['name']) => {
-            setLayerOverrides((prev) => ({
-                ...prev,
-                [name]: !(prev[name] ?? defaultVisibleLayerNames.has(name)),
-            }));
-        },
-        [],
-    );
 
     return (
         <NrwMapContainer
@@ -102,7 +76,7 @@ function NrwMap(props: {
                 <NrwLayerPanel
                     layers={availableLayers}
                     isLayerVisible={isLayerVisible}
-                    onToggleLayer={handleToggleLayer}
+                    onToggleLayer={toggleLayer}
                 />
             )}
         >
