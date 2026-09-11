@@ -13,8 +13,8 @@ import styles from './styles.module.css';
 
 // Layers supported in the panel, in display order.
 const supportedLayerNames = [
-    'population',
     'floodDepth',
+    'population', // Population density raster layer
 ] as const satisfies readonly NrwLayer['name'][];
 
 function NrwLayerPanel(props: {
