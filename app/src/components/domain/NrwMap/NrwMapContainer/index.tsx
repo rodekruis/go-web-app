@@ -84,10 +84,10 @@ function NrwMapContainer(props: {
 
         // Listener to enable/disable zoom buttons based current zoom level.
         const updateZoomLimits = () => {
-            const z = map.getZoom();
+            const zoomLevel = map.getZoom();
             setZoomLimits({
-                atMin: z <= map.getMinZoom(),
-                atMax: z >= map.getMaxZoom(),
+                atMin: zoomLevel <= map.getMinZoom(),
+                atMax: zoomLevel >= map.getMaxZoom(),
             });
         };
         map.on('zoom', updateZoomLimits);
@@ -139,8 +139,6 @@ function NrwMapContainer(props: {
                     <button
                         type="button"
                         className={styles.zoomButton}
-                        aria-label="Zoom in"
-                        title="Zoom in"
                         disabled={zoomLimits.atMax}
                         onClick={() => mapboxMap?.zoomIn()}
                     >
@@ -149,8 +147,6 @@ function NrwMapContainer(props: {
                     <button
                         type="button"
                         className={styles.zoomButton}
-                        aria-label="Zoom out"
-                        title="Zoom out"
                         disabled={zoomLimits.atMin}
                         onClick={() => mapboxMap?.zoomOut()}
                     >
@@ -160,8 +156,6 @@ function NrwMapContainer(props: {
                 <button
                     type="button"
                     className={styles.layersButton}
-                    aria-label="Layers"
-                    aria-expanded={isLayerPanelOpen}
                     onClick={() => setIsLayerPanelOpen((open) => !open)}
                 >
                     <FontAwesomeIcon icon={faLayerGroup} />
