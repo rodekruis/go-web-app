@@ -156,6 +156,7 @@ function NrwMapContainer(props: {
                 <button
                     type="button"
                     className={styles.layersButton}
+                    aria-expanded={isLayerPanelOpen}
                     onClick={() => setIsLayerPanelOpen((open) => !open)}
                 >
                     <FontAwesomeIcon icon={faLayerGroup} />
