@@ -6,6 +6,8 @@ import {
     useRef,
     useState,
 } from 'react';
+import { faLayerGroup } from '@fortawesome/pro-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isNotDefined } from '@togglecorp/fujs';
 import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
@@ -105,10 +107,19 @@ function NrwMapContainer(props: {
 
     return (
         <>
-            <div
-                ref={containerRef}
-                className={styles.nrwMapContainer}
-            />
+            <div className={styles.mapWrapper}>
+                <div
+                    ref={containerRef}
+                    className={styles.nrwMapContainer}
+                />
+                <button
+                    type="button"
+                    className={styles.layersButton}
+                    aria-label="Layers"
+                >
+                    <FontAwesomeIcon icon={faLayerGroup} />
+                </button>
+            </div>
             <NrwMapContext.Provider value={mapContext}>
                 {children}
             </NrwMapContext.Provider>
