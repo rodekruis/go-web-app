@@ -34,6 +34,9 @@ importers:
       '@fortawesome/fontawesome-svg-core':
         specifier: ^7.3.1
         version: 7.3.1
+      '@fortawesome/pro-regular-svg-icons':
+        specifier: ^7.3.1
+        version: 7.3.1
       '@fortawesome/pro-solid-svg-icons':
         specifier: ^7.3.1
         version: 7.3.1
@@ -1630,6 +1633,10 @@ packages:
 
   '@fortawesome/fontawesome-svg-core@7.3.1':
     resolution: {integrity: sha512-BoxVN3PKnMbgStHhjoaky/oWdxHomDqmBVA24IA3KEmssFGeI7u9YT/BJceOjIum/t6TpPa/vcMKaVYQeIQ/3Q==}
+    engines: {node: '>=6'}
+
+  '@fortawesome/pro-regular-svg-icons@7.3.1':
+    resolution: {integrity: sha512-7iJTicd2X4cgUQ5/HlMIUCMtePYNmclMeunu+tvyErsqzu2cMmS3nwaLGNikwX1ISHRybWZqkMYb5l4/so3V5Q==}
     engines: {node: '>=6'}
 
   '@fortawesome/pro-solid-svg-icons@7.3.1':
@@ -8539,6 +8546,10 @@ snapshots:
   '@fortawesome/fontawesome-common-types@7.3.1': {}
 
   '@fortawesome/fontawesome-svg-core@7.3.1':
+    dependencies:
+      '@fortawesome/fontawesome-common-types': 7.3.1
+
+  '@fortawesome/pro-regular-svg-icons@7.3.1':
     dependencies:
       '@fortawesome/fontawesome-common-types': 7.3.1
 

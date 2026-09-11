@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
     isDefined,
     isNotDefined,
@@ -12,13 +11,14 @@ import {
     type MapView,
     type MapViewChangeHandler,
     type NrwEvent,
-    type NrwLayer as NrwLayerType,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwEventMarker from './NrwEventMarker';
 import NrwLayer from './NrwLayer';
+import NrwLayerPanel from './NrwLayerPanel';
 import NrwMapContainer from './NrwMapContainer';
 import NrwMarker from './NrwMarker';
+import useLayerVisibility from './useLayerVisibility';
 import useNrwLayers from './useNrwLayers';
 
 // This component knows nothing about Mapbox.
@@ -55,26 +55,31 @@ function NrwMap(props: {
     } = props;
 
     const { availableLayers } = useNrwLayers();
+    const { isLayerVisible, toggleLayer } = useLayerVisibility();
 
     // The map only supports single countries for the layers.
     // If multiple countries, select the first only.
     // This will be refactored out once event selection is in.
     const countryCodeIso3 = countries[0];
 
-    // Layers shown by default
-    const [visibleLayers] = useState<NrwLayerType['name'][]>(['population']);
-
     return (
         <NrwMapContainer
             mapView={mapView}
             onMapViewChange={onMapViewChange}
+            layerPanel={(
+                <NrwLayerPanel
+                    layers={availableLayers}
+                    isLayerVisible={isLayerVisible}
+                    onToggleLayer={toggleLayer}
+                />
+            )}
         >
             {isDefined(countryCodeIso3) && availableLayers?.map((layer) => (
                 <NrwLayer
                     key={layer.name}
                     countryCodeIso3={countryCodeIso3}
                     layer={layer}
-                    isVisible={visibleLayers.includes(layer.name)}
+                    isVisible={isLayerVisible(layer.name)}
                 />
             ))}
             {events?.map((event) => {
