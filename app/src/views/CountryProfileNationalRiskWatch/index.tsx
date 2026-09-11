@@ -102,6 +102,7 @@ export function Component() {
                     mapView={mapView}
                     onMapViewChange={handleMapViewChange}
                     events={events}
+                    countries={countries}
                 />
                 <NrwEvents
                     events={events}

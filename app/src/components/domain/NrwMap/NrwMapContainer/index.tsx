@@ -2,6 +2,7 @@ import 'mapbox-gl-v3/dist/mapbox-gl.css';
 
 import {
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -9,7 +10,6 @@ import { isNotDefined } from '@togglecorp/fujs';
 import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 import { mbtoken } from '#config';
-import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,
     type Longitude,
@@ -18,7 +18,7 @@ import {
     type Zoom,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
-import NrwMapMarkerPortal from './NrwMapMarkerPortal';
+import NrwMapContext from '../NrwMapContext';
 
 import styles from './styles.module.css';
 
@@ -30,33 +30,20 @@ import styles from './styles.module.css';
 const nrwMapboxStyleUrl = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
 const paddingPixels = 20;
 
-export interface NrwMapMarker {
-    id: string;
-    coordinates: NrwLngLat;
-    content: React.ReactNode;
-}
-
 function NrwMapContainer(props: {
     mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
-    markers?: NrwMapMarker[];
+    children?: React.ReactNode;
 }) {
-    const {
-        mapView,
-        onMapViewChange,
-        markers,
-    } = props;
+    const { mapView, onMapViewChange, children } = props;
 
-    const {
-        zoom,
-        center,
-        fitBounds,
-    } = mapView;
+    const { zoom, center, fitBounds } = mapView;
 
     const [southWest, northEast] = fitBounds ?? [];
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
+    const [mapLoadComplete, setMapLoadComplete] = useState(false);
 
     // Initialize the Mapbox map instance
     useEffect(() => {
@@ -77,6 +64,10 @@ function NrwMapContainer(props: {
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 
+        map.on('style.load', () => {
+            setMapLoadComplete(true);
+        });
+
         map.on('moveend', () => {
             onMapViewChange(
                 map.getZoom() as Zoom,
@@ -90,6 +81,7 @@ function NrwMapContainer(props: {
         // Cleanup.
         return () => {
             setMapboxMap(undefined);
+            setMapLoadComplete(false);
             map.remove();
         };
     // Set the dependencies to empty since we want this to run exactly once on mount.
@@ -106,23 +98,20 @@ function NrwMapContainer(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mapboxMap, southWest?.lng, southWest?.lat, northEast?.lng, northEast?.lat]);
 
+    const mapContext = useMemo(
+        () => ({ map: mapLoadComplete ? mapboxMap : undefined }),
+        [mapboxMap, mapLoadComplete],
+    );
+
     return (
         <>
             <div
                 ref={containerRef}
                 className={styles.nrwMapContainer}
             />
-            {markers?.map(
-                ({ id, coordinates, content }) => (
-                    <NrwMapMarkerPortal
-                        key={id}
-                        mapboxMap={mapboxMap}
-                        coordinates={coordinates}
-                    >
-                        {content}
-                    </NrwMapMarkerPortal>
-                ),
-            )}
+            <NrwMapContext.Provider value={mapContext}>
+                {children}
+            </NrwMapContext.Provider>
         </>
     );
 }

@@ -10,32 +10,32 @@ export type UrlParameter = string | null | undefined;
 declare const validZoom: unique symbol;
 
 export type Zoom = number & {
-  [validZoom]: true
-}
+    [validZoom]: true;
+};
 
 declare const validLatitude: unique symbol;
 
 export type Latitude = number & {
-  [validLatitude]: true
-}
+    [validLatitude]: true;
+};
 
 declare const validLongitude: unique symbol;
 
 export type Longitude = number & {
-  [validLongitude]: true
-}
+    [validLongitude]: true;
+};
 
 declare const validCountryCode: unique symbol;
 
 export type CountryCodeIso3 = string & {
-  [validCountryCode]: true
-}
+    [validCountryCode]: true;
+};
 
 declare const validAdminLevel: unique symbol;
 
 export type AdminLevel = number & {
-  [validAdminLevel]: true
-}
+    [validAdminLevel]: true;
+};
 
 // eslint-disable-next-line max-len
 export type MapViewChangeHandler = (newZoom: Zoom, newLatitude: Latitude, newLongitude: Longitude) => void;
@@ -51,3 +51,6 @@ export type MapView = {
 };
 
 export type NrwEvent = NrwApiResponse<'/events'>[number];
+
+export type NrwLayer = NrwApiResponse<'/layers'>[number];
+export type NrwHazardType = NrwLayer['hazardType'];
