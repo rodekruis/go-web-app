@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
     isDefined,
     isNotDefined,
@@ -11,12 +10,12 @@ import {
     type MapView,
     type MapViewChangeHandler,
     type NrwEvent,
-    type NrwLayer as NrwLayerType,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
 import NrwEventMarker from './NrwEventMarker';
 import NrwLayer from './NrwLayer';
+import NrwLayerPanel from './NrwLayerPanel';
 import NrwMapContainer from './NrwMapContainer';
 import NrwMarker from './NrwMarker';
 import useNrwLayers from './useNrwLayers';
@@ -63,17 +62,23 @@ function NrwMap(props: {
         onEventSelect,
     } = props;
 
-    const { availableLayers } = useNrwLayers();
+    const { availableLayers, visibleLayers, handleLayerToggle } = useNrwLayers();
 
     const eventCountryCodeIso3 = parseCountryCode(selectedEvent?.countryCodeIso3);
 
-    // Layers shown by default
-    const [visibleLayers] = useState<NrwLayerType['name'][]>(['population']);
+    const layerPanel = isDefined(eventCountryCodeIso3) ? (
+        <NrwLayerPanel
+            layers={availableLayers}
+            visibleLayers={visibleLayers}
+            onLayerToggle={handleLayerToggle}
+        />
+    ) : undefined;
 
     return (
         <NrwMapContainer
             mapView={mapView}
             onMapViewChange={onMapViewChange}
+            layerPanel={layerPanel}
         >
             {isDefined(eventCountryCodeIso3) && availableLayers?.map((layer) => (
                 <NrwLayer

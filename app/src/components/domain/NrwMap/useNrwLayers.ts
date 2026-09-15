@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
 import { useNrwRequest } from '#utils/restRequest';
-import { type NrwHazardType } from '#views/CountryProfileNationalRiskWatch/types';
+import {
+    type NrwHazardType,
+    type NrwLayer,
+} from '#views/CountryProfileNationalRiskWatch/types';
 
 function useNrwLayers(hazardType?: NrwHazardType) {
     const { response, error } = useNrwRequest({
@@ -10,7 +14,23 @@ function useNrwLayers(hazardType?: NrwHazardType) {
         query: isDefined(hazardType) ? { hazardType } : undefined,
     });
 
-    return { availableLayers: response, error };
+    // Layers shown by default
+    const [visibleLayers, setVisibleLayers] = useState<NrwLayer['name'][]>(['population']);
+
+    const handleLayerToggle = (name: NrwLayer['name']) => {
+        setVisibleLayers((prev) => (
+            prev.includes(name)
+                ? prev.filter((visibleName) => visibleName !== name)
+                : [...prev, name]
+        ));
+    };
+
+    return {
+        availableLayers: response,
+        error,
+        visibleLayers,
+        handleLayerToggle,
+    };
 }
 
 export default useNrwLayers;

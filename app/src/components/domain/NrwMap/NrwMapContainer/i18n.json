@@ -1,0 +1,8 @@
+{
+    "namespace": "nrwMap",
+    "strings": {
+        "nrwMapContainerZoomInLabel": "Zoom in",
+        "nrwMapContainerZoomOutLabel": "Zoom out",
+        "nrwMapContainerLayersLabel": "Layers"
+    }
+}
