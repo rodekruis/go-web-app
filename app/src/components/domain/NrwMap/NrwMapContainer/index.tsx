@@ -99,7 +99,7 @@ function NrwMapContainer(props: {
             return;
         }
 
-        mapboxMap.fitBounds(fitBounds, { padding: paddingPixels, animate: false });
+        mapboxMap.fitBounds(fitBounds, { padding: paddingPixels });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mapboxMap, southWest?.lng, southWest?.lat, northEast?.lng, northEast?.lat]);
 
