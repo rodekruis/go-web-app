@@ -1,7 +1,10 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { RawButton } from '@ifrc-go/ui';
 import { _cs } from '@togglecorp/fujs';
 
 import NrwEventMarkerIcon from '#assets/icons/nrw/event-marker.svg?react';
+import NrwEventName, { type NrwEventNameEvent } from '#components/domain/NrwEvents/NrwEventName';
+import useHoverChange from '#hooks/useHoverChange';
 import hazardIcons from '#utils/nrw/hazardIcons';
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
@@ -13,33 +16,52 @@ const alertClassStyles: Record<NrwEvent['alertClass'], string | undefined> = {
     high: styles.alertHigh,
 };
 
+// Pick NrwEvent props used in the NrwEventMarker component
+type NrwEventMarkerEvent = NrwEventNameEvent & Pick<NrwEvent, 'eventId' | 'alertClass'>;
+
 interface Props {
-    alertClass: NrwEvent['alertClass'];
-    hazardType: NrwEvent['hazardType'];
-    trigger: boolean;
+    event: NrwEventMarkerEvent;
+    hovered: boolean;
+    onHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
+    onSelect: (eventId: NrwEvent['eventId']) => void;
 }
 
 export default function NrwEventMarker(props: Props) {
     const {
-        alertClass,
-        hazardType,
-        trigger,
+        event,
+        hovered,
+        onHoverChange,
+        onSelect,
     } = props;
+
+    const { handleMouseEnter, handleMouseLeave } = useHoverChange(event.eventId, onHoverChange);
 
     return (
         <div
             className={_cs(
                 styles.eventMarker,
-                trigger ? styles.alertTrigger : alertClassStyles[alertClass],
+                alertClassStyles[event.alertClass],
+                hovered && styles.hovered,
             )}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
-            <div className={styles.eventMarkerInner}>
+            <RawButton
+                className={styles.eventMarkerInner}
+                name={event.eventId}
+                onClick={onSelect}
+            >
                 <NrwEventMarkerIcon className={styles.eventMarkerGraphic} />
                 <FontAwesomeIcon
-                    icon={hazardIcons[hazardType]}
+                    icon={hazardIcons[event.hazardType]}
                     className={styles.hazardIcon}
                 />
-            </div>
+            </RawButton>
+            <NrwEventName
+                className={styles.popup}
+                event={event}
+                stacked
+            />
         </div>
     );
 }

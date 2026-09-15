@@ -3,6 +3,8 @@
         display: inline-flex;
         align-items: center;
         gap: var(--go-ui-spacing-2xs);
+        /* The heading is a raw button; keep the font of the heading element. */
+        font: inherit;
     }
 
     .heading-label {
@@ -25,6 +27,6 @@
     .event-list {
         display: flex;
         flex-direction: column;
-        gap: var(--go-ui-spacing-2xs);
+        gap: var(--go-ui-spacing-xs);
     }
 }

@@ -1,0 +1,50 @@
+.nrw-exposed-admin-areas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--go-ui-spacing-2xs);
+
+    &.empty-message {
+        padding: 0 var(--go-ui-spacing-xl);
+        color: var(--go-ui-color-gray-70);
+    }
+
+    .exposed-admin-area-totals {
+        display: flex;
+        flex-direction: column;
+        gap: var(--go-ui-spacing-3xs);
+        padding: 0 var(--go-ui-spacing-xl);
+    }
+
+    .exposed-admin-area-total-value {
+        margin-left: var(--go-ui-spacing-3xs);
+        font-weight: var(--go-ui-font-weight-semibold);
+    }
+
+    .exposed-admin-areas-table {
+        width: 100%;
+        border-collapse: collapse;
+
+        th,
+        td {
+            padding: var(--go-ui-spacing-3xs) var(--go-ui-spacing-2xs);
+            width: 50%;
+            text-align: left;
+            font-weight: inherit;
+        }
+
+        tbody tr {
+            border-top: var(--go-ui-width-separator-sm) solid var(--go-ui-color-gray-30);
+        }
+    }
+
+    .column-heading {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--go-ui-spacing-3xs);
+        font-weight: var(--go-ui-font-weight-medium);
+    }
+
+    .admin-area-name {
+        overflow-wrap: anywhere;
+    }
+}

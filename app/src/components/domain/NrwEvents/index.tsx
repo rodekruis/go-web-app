@@ -1,8 +1,12 @@
-import { useCallback } from 'react';
+import {
+    useCallback,
+    useMemo,
+} from 'react';
 import {
     Container,
     List,
     NumberOutput,
+    RawButton,
 } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import {
@@ -24,22 +28,63 @@ interface Props {
     events: NrwEvent[] | undefined;
     pending: boolean;
     errored: boolean;
+    selectedEvent: NrwEvent | undefined;
+    hoveredEventId: NrwEvent['eventId'] | undefined;
+    onEventSelect: (eventId: NrwEvent['eventId'] | undefined) => void;
+    onEventHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
 }
 
 function NrwEvents(props: Props) {
     const {
-        className, events, pending, errored,
+        className,
+        events,
+        pending,
+        errored,
+        selectedEvent,
+        hoveredEventId,
+        onEventSelect,
+        onEventHoverChange,
     } = props;
 
     const strings = useTranslation(i18n);
 
+    const visibleEvents = useMemo(
+        () => (isDefined(selectedEvent) ? [selectedEvent] : events),
+        [selectedEvent, events],
+    );
+
+    const handleToggle = useCallback(
+        (eventId: NrwEvent['eventId']) => {
+            onEventSelect(eventId === selectedEvent?.eventId ? undefined : eventId);
+        },
+        [selectedEvent, onEventSelect],
+    );
+
+    const handleShowAllEvents = useCallback(
+        () => {
+            onEventSelect(undefined);
+        },
+        [onEventSelect],
+    );
+
     const rendererParams = useCallback(
-        (_: NrwEvent['eventId'], event: NrwEvent) => ({ event }),
-        [],
+        (_: NrwEvent['eventId'], event: NrwEvent) => ({
+            event,
+            expanded: event.eventId === selectedEvent?.eventId,
+            hovered: event.eventId === hoveredEventId,
+            onToggle: handleToggle,
+            onHoverChange: onEventHoverChange,
+        }),
+        [selectedEvent, hoveredEventId, handleToggle, onEventHoverChange],
     );
 
     const heading = (
-        <span className={styles.heading}>
+        <RawButton
+            className={styles.heading}
+            name={undefined}
+            onClick={handleShowAllEvents}
+            title={strings.nrwEventsShowAllEvents}
+        >
             <span className={styles.headingLabel}>
                 {strings.nrwEventsHeading}
             </span>
@@ -49,7 +94,7 @@ function NrwEvents(props: Props) {
                     value={events.length}
                 />
             )}
-        </span>
+        </RawButton>
     );
 
     return (
@@ -66,7 +111,7 @@ function NrwEvents(props: Props) {
         >
             <List
                 className={styles.eventList}
-                data={events}
+                data={visibleEvents}
                 keySelector={eventKeySelector}
                 renderer={NrwEventCard}
                 rendererParams={rendererParams}

@@ -1,0 +1,60 @@
+.nrw-event-card {
+    --color-alert: var(--nrw-color-alert-high);
+    --color-alert-tint: var(--nrw-color-alert-high-tint);
+
+    border-radius: var(--go-ui-border-radius-md);
+    background-color: var(--go-ui-color-background);
+    color: var(--go-ui-color-gray-90);
+
+    &.alert-class-low {
+        --color-alert: var(--nrw-color-alert-low);
+        --color-alert-tint: var(--nrw-color-alert-low-tint);
+    }
+
+    &.alert-class-medium {
+        --color-alert: var(--nrw-color-alert-medium);
+        --color-alert-tint: var(--nrw-color-alert-medium-tint);
+    }
+
+    &:not(.expanded):hover,
+    &:not(.expanded).hovered {
+        box-shadow: inset var(--go-ui-width-separator-md) 0 0 var(--color-alert);
+        background-color: var(--color-alert-tint);
+    }
+
+    .header {
+        display: flex;
+        position: relative;
+        flex-direction: column;
+        gap: var(--go-ui-spacing-xs);
+        padding: var(--go-ui-spacing-md);
+    }
+
+    .chip-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--go-ui-spacing-3xs);
+    }
+
+    .chips button > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .toggle-button {
+        position: static;
+        line-height: 1;
+    }
+
+    /* make the card clickable */
+    &:not(.expanded) .toggle-button::after {
+        position: absolute;
+        inset: 0;
+        content: '';
+    }
+
+    .detail {
+        padding: 0 var(--go-ui-spacing-md) var(--go-ui-spacing-md);
+    }
+}

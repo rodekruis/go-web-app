@@ -6,7 +6,6 @@ import {
 
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
-    type CountryCodeIso3,
     type Latitude,
     type Longitude,
     type MapView,
@@ -14,6 +13,7 @@ import {
     type NrwEvent,
     type NrwLayer as NrwLayerType,
 } from '#views/CountryProfileNationalRiskWatch/types';
+import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
 import NrwEventMarker from './NrwEventMarker';
 import NrwLayer from './NrwLayer';
@@ -48,18 +48,24 @@ function NrwMap(props: {
     mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
     events: NrwEvent[] | undefined;
-    countries: CountryCodeIso3[];
+    selectedEvent: NrwEvent | undefined;
+    hoveredEventId: NrwEvent['eventId'] | undefined;
+    onEventHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
+    onEventSelect: (eventId: NrwEvent['eventId'] | undefined) => void;
 }) {
     const {
-        mapView, onMapViewChange, events, countries,
+        mapView,
+        onMapViewChange,
+        events,
+        selectedEvent,
+        hoveredEventId,
+        onEventHoverChange,
+        onEventSelect,
     } = props;
 
     const { availableLayers } = useNrwLayers();
 
-    // The map only supports single countries for the layers.
-    // If multiple countries, select the first only.
-    // This will be refactored out once event selection is in.
-    const countryCodeIso3 = countries[0];
+    const eventCountryCodeIso3 = parseCountryCode(selectedEvent?.countryCodeIso3);
 
     // Layers shown by default
     const [visibleLayers] = useState<NrwLayerType['name'][]>(['population']);
@@ -69,15 +75,15 @@ function NrwMap(props: {
             mapView={mapView}
             onMapViewChange={onMapViewChange}
         >
-            {isDefined(countryCodeIso3) && availableLayers?.map((layer) => (
+            {isDefined(eventCountryCodeIso3) && availableLayers?.map((layer) => (
                 <NrwLayer
                     key={layer.name}
-                    countryCodeIso3={countryCodeIso3}
+                    countryCodeIso3={eventCountryCodeIso3}
                     layer={layer}
                     isVisible={visibleLayers.includes(layer.name)}
                 />
             ))}
-            {events?.map((event) => {
+            {isNotDefined(selectedEvent) && events?.map((event) => {
                 const coordinates = parseCentroid(event.centroid);
 
                 if (isNotDefined(coordinates)) {
@@ -90,9 +96,10 @@ function NrwMap(props: {
                         coordinates={coordinates}
                     >
                         <NrwEventMarker
-                            alertClass={event.alertClass}
-                            hazardType={event.hazardType}
-                            trigger={event.trigger}
+                            event={event}
+                            hovered={event.eventId === hoveredEventId}
+                            onHoverChange={onEventHoverChange}
+                            onSelect={onEventSelect}
                         />
                     </NrwMarker>
                 );

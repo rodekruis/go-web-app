@@ -1,15 +1,20 @@
 .event-marker {
+    position: relative;
     width: 24px;
     height: 32px;
 
     .event-marker-inner {
+        display: block;
         position: relative;
+        transform-origin: bottom center;
+        transition: transform var(--go-ui-duration-transition-medium);
         width: 100%;
         height: 100%;
     }
 
     .event-marker-graphic {
         display: block;
+        transition: filter var(--go-ui-duration-transition-medium);
         width: 100%;
         height: 100%;
         overflow: visible;
@@ -26,8 +31,58 @@
         font-size: 14px;
     }
 
-    &.alert-low .hazard-icon {
-        color: var(--go-ui-color-gray-90);
+    .popup {
+        position: absolute;
+        bottom: calc(120% + 9px);
+        left: 50%;
+        transform: translateX(-50%);
+        transition:
+            opacity var(--go-ui-duration-transition-medium),
+            visibility var(--go-ui-duration-transition-medium);
+        visibility: hidden;
+        opacity: 0;
+        border: 2px solid rgb(50 50 50 / 20%);
+        border-radius: var(--go-ui-border-radius-md);
+        background-color: var(--go-ui-color-white);
+        padding: var(--go-ui-spacing-4xs) var(--go-ui-spacing-2xs);
+        white-space: nowrap;
+        font-size: var(--go-ui-font-size-md);
+        pointer-events: none;
+    }
+
+    &.hovered {
+        .event-marker-inner {
+            transform: scale(1.2);
+        }
+
+        .event-marker-graphic {
+            filter: drop-shadow(0 0 14px color-mix(in srgb, var(--color-alert) 40%, transparent));
+        }
+
+        .popup {
+            visibility: visible;
+            opacity: 1;
+        }
+    }
+
+    &.alert-low {
+        --color-alert: var(--nrw-color-alert-low);
+
+        .hazard-icon {
+            color: var(--go-ui-color-gray-90);
+        }
+    }
+
+    &.alert-medium {
+        --color-alert: var(--nrw-color-alert-medium);
+    }
+
+    &.alert-high {
+        --color-alert: var(--nrw-color-alert-high);
+    }
+
+    & :global(.event-marker-body) {
+        fill: var(--color-alert);
     }
 
     & :global(.event-marker-outline) {
@@ -35,20 +90,8 @@
         stroke: rgb(50 50 50 / 20%);
         stroke-width: 2;
     }
+}
 
-    &.alert-low :global(.event-marker-body) {
-        fill: var(--nrw-color-alert-low);
-    }
-
-    &.alert-medium :global(.event-marker-body) {
-        fill: var(--nrw-color-alert-medium);
-    }
-
-    &.alert-high :global(.event-marker-body) {
-        fill: var(--nrw-color-alert-high);
-    }
-
-    &.alert-trigger :global(.event-marker-body) {
-        fill: var(--nrw-color-alert-trigger);
-    }
+:global(.mapboxgl-marker):has(> .event-marker.hovered) {
+    z-index: 1;
 }

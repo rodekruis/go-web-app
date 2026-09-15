@@ -45,6 +45,11 @@ function NrwMapContainer(props: {
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
     const [mapLoadComplete, setMapLoadComplete] = useState(false);
 
+    const onMapViewChangeRef = useRef(onMapViewChange);
+    useEffect(() => {
+        onMapViewChangeRef.current = onMapViewChange;
+    }, [onMapViewChange]);
+
     // Initialize the Mapbox map instance
     useEffect(() => {
         if (!containerRef.current) {
@@ -69,7 +74,7 @@ function NrwMapContainer(props: {
         });
 
         map.on('moveend', () => {
-            onMapViewChange(
+            onMapViewChangeRef.current(
                 map.getZoom() as Zoom,
                 map.getCenter().lat as Latitude,
                 map.getCenter().lng as Longitude,
@@ -94,7 +99,7 @@ function NrwMapContainer(props: {
             return;
         }
 
-        mapboxMap.fitBounds(fitBounds, { padding: paddingPixels, animate: false });
+        mapboxMap.fitBounds(fitBounds, { padding: paddingPixels });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mapboxMap, southWest?.lng, southWest?.lat, northEast?.lng, northEast?.lat]);
 
