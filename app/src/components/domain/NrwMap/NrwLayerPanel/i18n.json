@@ -1,7 +1,7 @@
 {
-    "namespace": "nrwLayerPanel",
+    "namespace": "nrwMap",
     "strings": {
-      "nrwLayerPanelTitle": "Layers",
-      "nrwLayerPanelNoLayersMessage": "No layers available"
+        "nrwLayerPanelTitle": "Layers",
+        "nrwLayerPanelNoLayersMessage": "No layers available"
     }
 }
