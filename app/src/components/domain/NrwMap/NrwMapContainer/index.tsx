@@ -12,6 +12,7 @@ import {
     faPlus,
 } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useTranslation } from '@ifrc-go/ui/hooks';
 import { isNotDefined } from '@togglecorp/fujs';
 import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
@@ -26,6 +27,7 @@ import {
 
 import NrwMapContext from '../NrwMapContext';
 
+import i18n from './i18n.json';
 import styles from './styles.module.css';
 
 // This component wraps Mapbox so the rest of the components don't need to know
@@ -49,6 +51,8 @@ function NrwMapContainer(props: {
     const { zoom, center, fitBounds } = mapView;
 
     const [southWest, northEast] = fitBounds ?? [];
+
+    const strings = useTranslation(i18n);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
@@ -135,33 +139,38 @@ function NrwMapContainer(props: {
                     ref={containerRef}
                     className={styles.nrwMapContainer}
                 />
-                <div className={styles.zoomControls}>
+                <div className={styles.mapControls}>
+                    <div className={styles.zoomControls}>
+                        <button
+                            type="button"
+                            className={styles.zoomButton}
+                            aria-label={strings.nrwMapContainerZoomInLabel}
+                            disabled={zoomLimits.atMax}
+                            onClick={() => mapboxMap?.zoomIn()}
+                        >
+                            <FontAwesomeIcon icon={faPlus} />
+                        </button>
+                        <button
+                            type="button"
+                            className={styles.zoomButton}
+                            aria-label={strings.nrwMapContainerZoomOutLabel}
+                            disabled={zoomLimits.atMin}
+                            onClick={() => mapboxMap?.zoomOut()}
+                        >
+                            <FontAwesomeIcon icon={faMinus} />
+                        </button>
+                    </div>
                     <button
                         type="button"
-                        className={styles.zoomButton}
-                        disabled={zoomLimits.atMax}
-                        onClick={() => mapboxMap?.zoomIn()}
+                        className={styles.layersButton}
+                        aria-label={strings.nrwMapContainerLayersLabel}
+                        aria-expanded={isLayerPanelOpen}
+                        onClick={() => setIsLayerPanelOpen((open) => !open)}
                     >
-                        <FontAwesomeIcon icon={faPlus} />
+                        <FontAwesomeIcon icon={faLayerGroup} />
                     </button>
-                    <button
-                        type="button"
-                        className={styles.zoomButton}
-                        disabled={zoomLimits.atMin}
-                        onClick={() => mapboxMap?.zoomOut()}
-                    >
-                        <FontAwesomeIcon icon={faMinus} />
-                    </button>
+                    {isLayerPanelOpen && layerPanel}
                 </div>
-                <button
-                    type="button"
-                    className={styles.layersButton}
-                    aria-expanded={isLayerPanelOpen}
-                    onClick={() => setIsLayerPanelOpen((open) => !open)}
-                >
-                    <FontAwesomeIcon icon={faLayerGroup} />
-                </button>
-                {isLayerPanelOpen && layerPanel}
             </div>
             <NrwMapContext.Provider value={mapContext}>
                 {children}

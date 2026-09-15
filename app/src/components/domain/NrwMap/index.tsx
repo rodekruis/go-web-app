@@ -18,7 +18,6 @@ import NrwLayer from './NrwLayer';
 import NrwLayerPanel from './NrwLayerPanel';
 import NrwMapContainer from './NrwMapContainer';
 import NrwMarker from './NrwMarker';
-import useLayerVisibility from './useLayerVisibility';
 import useNrwLayers from './useNrwLayers';
 
 // This component knows nothing about Mapbox.
@@ -63,8 +62,7 @@ function NrwMap(props: {
         onEventSelect,
     } = props;
 
-    const { availableLayers } = useNrwLayers();
-    const { isLayerVisible, toggleLayer } = useLayerVisibility();
+    const { availableLayers, visibleLayers, handleLayerToggle } = useNrwLayers();
 
     const eventCountryCodeIso3 = parseCountryCode(selectedEvent?.countryCodeIso3);
 
@@ -75,8 +73,8 @@ function NrwMap(props: {
             layerPanel={(
                 <NrwLayerPanel
                     layers={availableLayers}
-                    isLayerVisible={isLayerVisible}
-                    onToggleLayer={toggleLayer}
+                    visibleLayers={visibleLayers}
+                    onLayerToggle={handleLayerToggle}
                 />
             )}
         >
@@ -85,7 +83,7 @@ function NrwMap(props: {
                     key={layer.name}
                     countryCodeIso3={eventCountryCodeIso3}
                     layer={layer}
-                    isVisible={isLayerVisible(layer.name)}
+                    isVisible={visibleLayers.includes(layer.name)}
                 />
             ))}
             {isNotDefined(selectedEvent) && events?.map((event) => {

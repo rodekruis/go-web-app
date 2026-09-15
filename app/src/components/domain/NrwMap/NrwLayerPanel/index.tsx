@@ -19,10 +19,10 @@ const supportedLayerNames = [
 
 function NrwLayerPanel(props: {
     layers: NrwLayer[] | undefined;
-    isLayerVisible: (name: NrwLayer['name']) => boolean;
-    onToggleLayer: (name: NrwLayer['name']) => void;
+    visibleLayers: NrwLayer['name'][];
+    onLayerToggle: (name: NrwLayer['name']) => void;
 }) {
-    const { layers, isLayerVisible, onToggleLayer } = props;
+    const { layers, visibleLayers, onLayerToggle } = props;
 
     const strings = useTranslation(i18n);
 
@@ -44,7 +44,7 @@ function NrwLayerPanel(props: {
             <div className={styles.items}>
                 {!hasLayers && strings.nrwLayerPanelNoLayersMessage}
                 {supportedLayers.map((layer) => {
-                    const isVisible = isLayerVisible(layer.name);
+                    const isVisible = visibleLayers.includes(layer.name);
 
                     return (
                         <button
@@ -53,7 +53,7 @@ function NrwLayerPanel(props: {
                             className={styles.layerToggle}
                             role="checkbox"
                             aria-checked={isVisible}
-                            onClick={() => onToggleLayer(layer.name)}
+                            onClick={() => onLayerToggle(layer.name)}
                         >
                             <FontAwesomeIcon
                                 icon={isVisible ? faSquareCheck : faSquare}

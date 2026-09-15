@@ -1,30 +1,36 @@
 .map-wrapper {
     position: relative;
-    height: var(--nrw-height-map);
-    --control-border-color: rgba(50, 50, 50, 0.2);
-    --control-divider-color: #e0e0e0;
-    --control-bg: #ffffff;
-    --control-bg-hover: #f2f2f2;
-    --control-text: #323232;
-    --control-border-color-active: #323232;
-    --control-border-radius: 4px;
-    --control-shadow: drop-shadow(0 4px 7px rgba(0, 0, 0, 0.1));
-}
-.nrw-map-container {
-    height: var(--nrw-height-map);
-    inline-size: 100%;
 }
 
-.zoom-controls {
+.nrw-map-container {
+    height: var(--nrw-height-map);
+}
+
+.map-controls {
     display: flex;
     position: absolute;
     top: 12px;
     right: 12px;
+    align-items: flex-end;
     flex-direction: column;
-    border: 2px solid var(--control-border-color);
-    border-radius: var(--control-border-radius);
+    z-index: 2;
+    gap: var(--go-ui-spacing-xs);
+    pointer-events: none;
+
+    > * {
+        pointer-events: auto;
+    }
+}
+
+.zoom-controls {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid rgb(50 50 50 / 20%);
+    border-radius: var(--go-ui-border-radius-md);
+    box-shadow: 0 4px 7px rgb(0 0 0 / 10%);
+    background-clip: padding-box;
+    background-color: var(--go-ui-color-white);
     inline-size: 28px;
-    filter: var(--control-shadow);
 }
 
 .zoom-button {
@@ -32,26 +38,24 @@
     align-items: center;
     justify-content: center;
     border: none;
-    background-color: var(--control-bg);
+    background: none;
     cursor: pointer;
     padding: 0;
-    inline-size: 100%;
     height: 27px;
-    line-height: 1;
-    color: var(--control-text);
+    color: var(--go-ui-color-gray-90);
     font-size: 12px;
 }
 
 .zoom-button:first-child {
-    border-radius: var(--control-border-radius) var(--control-border-radius) 0 0;
+    border-radius: 2px 2px 0 0;
 }
 
 .zoom-button:last-child {
-    border-radius: 0 0 var(--control-border-radius) var(--control-border-radius);
+    border-radius: 0 0 2px 2px;
 }
 
 .zoom-button + .zoom-button {
-    border-top: 1px solid var(--control-divider-color);
+    border-top: 1px solid var(--go-ui-color-gray-30);
 }
 
 .zoom-button:disabled {
@@ -60,37 +64,32 @@
 }
 
 .zoom-button:hover:not(:disabled) {
-    background-color: var(--control-bg-hover);
+    background-color: var(--go-ui-color-gray-20);
 }
 
 /* Layers button */
 .layers-button {
     display: flex;
-    position: absolute;
-    top: calc(12px + 57px + 14.5px);
-    right: 12px;
     align-items: center;
     justify-content: center;
-    border: 2px solid var(--control-border-color);
-    border-radius: var(--control-border-radius);
+    border: 2px solid rgb(50 50 50 / 20%);
+    border-radius: var(--go-ui-border-radius-md);
+    box-shadow: 0 4px 7px rgb(0 0 0 / 10%);
     background-clip: padding-box;
-    background-color: var(--control-bg);
+    background-color: var(--go-ui-color-white);
     cursor: pointer;
     padding: 0;
     inline-size: 28px;
     height: 28px;
-    line-height: 1;
-    color: var(--control-text);
+    color: var(--go-ui-color-gray-90);
     font-size: 12px;
-    font-weight: 700;
-    filter: var(--control-shadow);
 }
 
 .layers-button:hover {
-    background-color: var(--control-bg-hover);
+    background-color: var(--go-ui-color-gray-20);
 }
 
 .layers-button[aria-expanded="true"] {
-    border-color: var(--control-border-color-active);
-    background-color: var(--control-bg);
+    border-color: var(--go-ui-color-gray-90);
+    background-color: var(--go-ui-color-white);
 }
