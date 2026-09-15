@@ -17,6 +17,7 @@
     gap: var(--go-ui-spacing-xs);
     pointer-events: none;
 
+    /* only the controls must show pointer */
     > * {
         pointer-events: auto;
     }
@@ -44,30 +45,30 @@
     height: 27px;
     color: var(--go-ui-color-gray-90);
     font-size: 12px;
+
+    &:first-child {
+        border-radius: 2px 2px 0 0;
+    }
+
+    &:last-child {
+        border-radius: 0 0 2px 2px;
+    }
+
+    /* .zoom-button + .zoom-button */
+    & + & {
+        border-top: 1px solid var(--go-ui-color-gray-30);
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: default;
+    }
+
+    &:hover:not(:disabled) {
+        background-color: var(--go-ui-color-gray-20);
+    }
 }
 
-.zoom-button:first-child {
-    border-radius: 2px 2px 0 0;
-}
-
-.zoom-button:last-child {
-    border-radius: 0 0 2px 2px;
-}
-
-.zoom-button + .zoom-button {
-    border-top: 1px solid var(--go-ui-color-gray-30);
-}
-
-.zoom-button:disabled {
-    opacity: 0.4;
-    cursor: default;
-}
-
-.zoom-button:hover:not(:disabled) {
-    background-color: var(--go-ui-color-gray-20);
-}
-
-/* Layers button */
 .layers-button {
     display: flex;
     align-items: center;
@@ -83,13 +84,13 @@
     height: 28px;
     color: var(--go-ui-color-gray-90);
     font-size: 12px;
-}
 
-.layers-button:hover {
-    background-color: var(--go-ui-color-gray-20);
-}
+    &:hover {
+        background-color: var(--go-ui-color-gray-20);
+    }
 
-.layers-button[aria-expanded="true"] {
-    border-color: var(--go-ui-color-gray-90);
-    background-color: var(--go-ui-color-white);
+    &[aria-expanded="true"] {
+        border-color: var(--go-ui-color-gray-90);
+        background-color: var(--go-ui-color-white);
+    }
 }
