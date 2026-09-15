@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { RawButton } from '@ifrc-go/ui';
 import { _cs } from '@togglecorp/fujs';
 
+import useHoverChange from '#hooks/useHoverChange';
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwEventChips from '../NrwEventChips';
@@ -26,6 +27,7 @@ interface Props {
     expanded: boolean;
     hovered: boolean;
     onToggle: (eventId: NrwEvent['eventId']) => void;
+    onHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
 }
 
 function NrwEventCard(props: Props) {
@@ -35,7 +37,10 @@ function NrwEventCard(props: Props) {
         expanded,
         hovered,
         onToggle,
+        onHoverChange,
     } = props;
+
+    const { handleMouseEnter, handleMouseLeave } = useHoverChange(event.eventId, onHoverChange);
 
     return (
         <div
@@ -46,6 +51,8 @@ function NrwEventCard(props: Props) {
                 hovered && styles.hovered,
                 className,
             )}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
             <div className={styles.header}>
                 <div className={styles.chipRow}>

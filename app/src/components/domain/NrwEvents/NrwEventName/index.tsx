@@ -16,15 +16,16 @@ import styles from './styles.module.css';
 const eventDateFormat = 'dd MMM yyyy';
 
 // Pick NrwEvent props used in the NrwEventName component
-type NrwEventNameEvent = Pick<NrwEvent, 'eventLabel' | 'hazardType' | 'startAt'>;
+export type NrwEventNameEvent = Pick<NrwEvent, 'eventLabel' | 'hazardType' | 'startAt'>;
 
 interface Props {
     className?: string;
     event: NrwEventNameEvent;
+    stacked?: boolean;
 }
 
 function NrwEventName(props: Props) {
-    const { className, event } = props;
+    const { className, event, stacked } = props;
 
     const strings = useTranslation(i18n);
 
@@ -34,14 +35,22 @@ function NrwEventName(props: Props) {
         tropicalCyclone: strings.nrwEventNameHazardTropicalCyclone,
     };
 
-    const name = resolveToString(
-        strings.nrwEventName,
-        {
-            hazard: hazardLabels[event.hazardType],
-            label: event.eventLabel,
-            date: formatDate(event.startAt, eventDateFormat) ?? '',
-        },
-    );
+    const hazard = hazardLabels[event.hazardType];
+    const { eventLabel: label } = event;
+    const date = formatDate(event.startAt, eventDateFormat) ?? '';
+
+    if (stacked) {
+        return (
+            <div className={_cs(styles.nrwEventName, styles.stacked, className)}>
+                <div className={styles.title}>
+                    {resolveToString(strings.nrwEventName, { hazard, label })}
+                </div>
+                <div>{date}</div>
+            </div>
+        );
+    }
+
+    const name = resolveToString(strings.nrwEventNameWithDate, { hazard, label, date });
 
     const hazardIcon = hazardIcons[event.hazardType];
 

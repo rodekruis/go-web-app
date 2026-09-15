@@ -1,12 +1,9 @@
-import {
-    useCallback,
-    useEffect,
-    useRef,
-} from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { _cs } from '@togglecorp/fujs';
 
 import NrwEventMarkerIcon from '#assets/icons/nrw/event-marker.svg?react';
+import NrwEventName, { type NrwEventNameEvent } from '#components/domain/NrwEvents/NrwEventName';
+import useHoverChange from '#hooks/useHoverChange';
 import hazardIcons from '#utils/nrw/hazardIcons';
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
@@ -18,44 +15,30 @@ const alertClassStyles: Record<NrwEvent['alertClass'], string | undefined> = {
     high: styles.alertHigh,
 };
 
+// Pick NrwEvent props used in the NrwEventMarker component
+type NrwEventMarkerEvent = NrwEventNameEvent & Pick<NrwEvent, 'eventId' | 'alertClass'>;
+
 interface Props {
-    eventId: NrwEvent['eventId'];
-    alertClass: NrwEvent['alertClass'];
-    hazardType: NrwEvent['hazardType'];
+    event: NrwEventMarkerEvent;
+    hovered: boolean;
     onHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
 }
 
 export default function NrwEventMarker(props: Props) {
     const {
-        eventId,
-        alertClass,
-        hazardType,
+        event,
+        hovered,
         onHoverChange,
     } = props;
 
-    const hoveredRef = useRef(false);
-
-    const handleMouseEnter = useCallback(() => {
-        hoveredRef.current = true;
-        onHoverChange(eventId);
-    }, [eventId, onHoverChange]);
-
-    const handleMouseLeave = useCallback(() => {
-        hoveredRef.current = false;
-        onHoverChange(undefined);
-    }, [onHoverChange]);
-
-    useEffect(() => () => {
-        if (hoveredRef.current) {
-            onHoverChange(undefined);
-        }
-    }, [onHoverChange]);
+    const { handleMouseEnter, handleMouseLeave } = useHoverChange(event.eventId, onHoverChange);
 
     return (
         <div
             className={_cs(
                 styles.eventMarker,
-                alertClassStyles[alertClass],
+                alertClassStyles[event.alertClass],
+                hovered && styles.hovered,
             )}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -63,10 +46,15 @@ export default function NrwEventMarker(props: Props) {
             <div className={styles.eventMarkerInner}>
                 <NrwEventMarkerIcon className={styles.eventMarkerGraphic} />
                 <FontAwesomeIcon
-                    icon={hazardIcons[hazardType]}
+                    icon={hazardIcons[event.hazardType]}
                     className={styles.hazardIcon}
                 />
             </div>
+            <NrwEventName
+                className={styles.popup}
+                event={event}
+                stacked
+            />
         </div>
     );
 }

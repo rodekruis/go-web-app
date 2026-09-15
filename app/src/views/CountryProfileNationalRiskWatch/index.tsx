@@ -115,6 +115,7 @@ export function Component() {
                     onMapViewChange={handleMapViewChange}
                     events={events}
                     selectedEvent={selectedEvent}
+                    hoveredEventId={hoveredEventId}
                     onEventHoverChange={setHoveredEventId}
                 />
                 <NrwEvents
@@ -124,6 +125,7 @@ export function Component() {
                     selectedEvent={selectedEvent}
                     hoveredEventId={hoveredEventId}
                     onSelectedEventIdChange={handleSelectedEventIdChange}
+                    onEventHoverChange={setHoveredEventId}
                 />
             </ListView>
         </Container>

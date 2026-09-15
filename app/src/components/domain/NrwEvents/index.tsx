@@ -31,6 +31,7 @@ interface Props {
     selectedEvent: NrwEvent | undefined;
     hoveredEventId: NrwEvent['eventId'] | undefined;
     onSelectedEventIdChange: (eventId: NrwEvent['eventId'] | undefined) => void;
+    onEventHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
 }
 
 function NrwEvents(props: Props) {
@@ -42,6 +43,7 @@ function NrwEvents(props: Props) {
         selectedEvent,
         hoveredEventId,
         onSelectedEventIdChange,
+        onEventHoverChange,
     } = props;
 
     const strings = useTranslation(i18n);
@@ -71,8 +73,9 @@ function NrwEvents(props: Props) {
             expanded: event.eventId === selectedEvent?.eventId,
             hovered: event.eventId === hoveredEventId,
             onToggle: handleToggle,
+            onHoverChange: onEventHoverChange,
         }),
-        [selectedEvent, hoveredEventId, handleToggle],
+        [selectedEvent, hoveredEventId, handleToggle, onEventHoverChange],
     );
 
     const heading = (

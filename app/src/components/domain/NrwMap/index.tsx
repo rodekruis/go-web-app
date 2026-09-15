@@ -49,6 +49,7 @@ function NrwMap(props: {
     onMapViewChange: MapViewChangeHandler;
     events: NrwEvent[] | undefined;
     selectedEvent: NrwEvent | undefined;
+    hoveredEventId: NrwEvent['eventId'] | undefined;
     onEventHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
 }) {
     const {
@@ -56,6 +57,7 @@ function NrwMap(props: {
         onMapViewChange,
         events,
         selectedEvent,
+        hoveredEventId,
         onEventHoverChange,
     } = props;
 
@@ -92,9 +94,8 @@ function NrwMap(props: {
                         coordinates={coordinates}
                     >
                         <NrwEventMarker
-                            eventId={event.eventId}
-                            alertClass={event.alertClass}
-                            hazardType={event.hazardType}
+                            event={event}
+                            hovered={event.eventId === hoveredEventId}
                             onHoverChange={onEventHoverChange}
                         />
                     </NrwMarker>

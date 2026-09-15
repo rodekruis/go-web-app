@@ -12,4 +12,12 @@
     .heading {
         overflow-wrap: anywhere;
     }
+
+    &.stacked {
+        display: block;
+
+        .title {
+            font-weight: var(--go-ui-font-weight-semibold);
+        }
+    }
 }
