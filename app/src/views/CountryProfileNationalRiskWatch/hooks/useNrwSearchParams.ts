@@ -13,6 +13,7 @@ import {
     type Latitude,
     type Longitude,
     type MapViewChangeHandler,
+    type NrwEvent,
     type UrlParameter,
     type Zoom,
 } from '../types';
@@ -50,6 +51,16 @@ function parseMapLatitudeParameter(value: UrlParameter) {
 function parseMapLongitudeParameter(value: UrlParameter) {
     return sanitizeFloatInRange(value, -180, 180) as Longitude | null;
 }
+
+function parseEventIdUrlParameter(value: UrlParameter) {
+    const casted = Number(value);
+
+    return Number.isInteger(casted) && casted > 0
+        ? casted as NrwEvent['eventId']
+        : undefined;
+}
+
+const serializeEventIdUrlParameter = (eventId: NrwEvent['eventId'] | undefined) => eventId;
 
 // Parse comma-separated ISO_A3 country codes from a URL search parameter.
 // Returns an empty array if there are no valid codes.
@@ -92,6 +103,11 @@ function useNrwSearchParams() {
         parseCountriesUrlParameter,
         serializeCountriesUrlParameter,
     );
+    const [selectedEventId] = useUrlSearchState(
+        'event',
+        parseEventIdUrlParameter,
+        serializeEventIdUrlParameter,
+    );
 
     // For embedded, get the country from the route.
     // These are hooks, so they can't be placed in a conditional block.
@@ -126,12 +142,35 @@ function useNrwSearchParams() {
         );
     };
 
+    const handleSelectedEventIdChange = (eventId: NrwEvent['eventId'] | undefined) => {
+        if (eventId === selectedEventId) {
+            return;
+        }
+
+        setSearchParams(
+            (prevParams) => {
+                if (isDefined(eventId)) {
+                    prevParams.set('event', String(eventId));
+                } else {
+                    prevParams.delete('event');
+                }
+                prevParams.delete('z');
+                prevParams.delete('lat');
+                prevParams.delete('lon');
+                return prevParams;
+            },
+            { replace: true },
+        );
+    };
+
     return {
         zoomFromUrlParams,
         latitudeFromUrlParams,
         longitudeFromUrlParams,
         urlCountries,
         handleMapViewChange,
+        selectedEventId,
+        handleSelectedEventIdChange,
     };
 }
 

@@ -1,3 +1,8 @@
+import {
+    useCallback,
+    useEffect,
+    useRef,
+} from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { _cs } from '@togglecorp/fujs';
 
@@ -14,24 +19,46 @@ const alertClassStyles: Record<NrwEvent['alertClass'], string | undefined> = {
 };
 
 interface Props {
+    eventId: NrwEvent['eventId'];
     alertClass: NrwEvent['alertClass'];
     hazardType: NrwEvent['hazardType'];
-    trigger: boolean;
+    onHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
 }
 
 export default function NrwEventMarker(props: Props) {
     const {
+        eventId,
         alertClass,
         hazardType,
-        trigger,
+        onHoverChange,
     } = props;
+
+    const hoveredRef = useRef(false);
+
+    const handleMouseEnter = useCallback(() => {
+        hoveredRef.current = true;
+        onHoverChange(eventId);
+    }, [eventId, onHoverChange]);
+
+    const handleMouseLeave = useCallback(() => {
+        hoveredRef.current = false;
+        onHoverChange(undefined);
+    }, [onHoverChange]);
+
+    useEffect(() => () => {
+        if (hoveredRef.current) {
+            onHoverChange(undefined);
+        }
+    }, [onHoverChange]);
 
     return (
         <div
             className={_cs(
                 styles.eventMarker,
-                trigger ? styles.alertTrigger : alertClassStyles[alertClass],
+                alertClassStyles[alertClass],
             )}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
             <div className={styles.eventMarkerInner}>
                 <NrwEventMarkerIcon className={styles.eventMarkerGraphic} />

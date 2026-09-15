@@ -47,8 +47,4 @@
     &.alert-high :global(.event-marker-body) {
         fill: var(--nrw-color-alert-high);
     }
-
-    &.alert-trigger :global(.event-marker-body) {
-        fill: var(--nrw-color-alert-trigger);
-    }
 }

@@ -2389,6 +2389,67 @@
           "alerts"
         ]
       },
+      "AdminAreaExposureDto": {
+        "type": "object",
+        "properties": {
+          "layerName": {
+            "type": "string",
+            "enum": [
+              "population",
+              "populationExposed",
+              "redCrossBranches",
+              "clinics",
+              "floodDepth",
+              "glofasStations",
+              "windSpeed"
+            ],
+            "example": "populationExposed"
+          },
+          "total": {
+            "type": "number",
+            "example": 20000,
+            "nullable": true
+          },
+          "exposed": {
+            "type": "number",
+            "example": 5000
+          }
+        },
+        "required": [
+          "layerName",
+          "total",
+          "exposed"
+        ]
+      },
+      "ExposedAdminAreaDto": {
+        "type": "object",
+        "properties": {
+          "placeCode": {
+            "type": "string",
+            "example": "KEN_01_001"
+          },
+          "adminLevel": {
+            "type": "number",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Region A"
+          },
+          "exposure": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminAreaExposureDto"
+            }
+          }
+        },
+        "required": [
+          "placeCode",
+          "adminLevel",
+          "name",
+          "exposure"
+        ]
+      },
       "EventLayerDto": {
         "type": "object",
         "properties": {
@@ -2513,6 +2574,12 @@
           "exposedAdminAreas": {
             "type": "object",
             "description": "A mapping of admin level (as a string key) to the exposed admin areas for that level",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ExposedAdminAreaDto"
+              }
+            },
             "example": {
               "0": [],
               "1": []

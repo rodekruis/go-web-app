@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
     Container,
     ListView,
@@ -20,6 +21,7 @@ import {
     type Latitude,
     type Longitude,
     type MapView,
+    type NrwEvent,
     type Zoom,
 } from './types';
 import {
@@ -51,6 +53,8 @@ export function Component() {
         longitudeFromUrlParams,
         urlCountries,
         handleMapViewChange,
+        selectedEventId,
+        handleSelectedEventIdChange,
     } = useNrwSearchParams();
 
     // Set from the longitude/latitude search params when they are present.
@@ -69,12 +73,20 @@ export function Component() {
     const eventCountries = getEventCountries(events ?? []);
     const countries = urlCountries?.length ? urlCountries : eventCountries;
 
+    const selectedEvent = events?.find((event) => event.eventId === selectedEventId);
+
+    const [hoveredEventId, setHoveredEventId] = useState<NrwEvent['eventId'] | undefined>();
+
+    const mapCountries = isDefined(selectedEvent)
+        ? getEventCountries([selectedEvent])
+        : countries;
+
     const {
         adminAreas,
     } = useNrwAdminAreas({
-        countries,
+        countries: mapCountries,
         adminLevels: [0 as AdminLevel],
-        skip: isDefined(urlMapView),
+        skip: isDefined(urlMapView) || (isDefined(selectedEventId) && eventsPending),
     });
 
     const countryBounds = isDefined(adminAreas)
@@ -102,12 +114,16 @@ export function Component() {
                     mapView={mapView}
                     onMapViewChange={handleMapViewChange}
                     events={events}
-                    countries={countries}
+                    selectedEvent={selectedEvent}
+                    onEventHoverChange={setHoveredEventId}
                 />
                 <NrwEvents
                     events={events}
                     pending={eventsPending}
                     errored={isDefined(eventsError)}
+                    selectedEvent={selectedEvent}
+                    hoveredEventId={hoveredEventId}
+                    onSelectedEventIdChange={handleSelectedEventIdChange}
                 />
             </ListView>
         </Container>

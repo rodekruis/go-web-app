@@ -17,7 +17,7 @@ const alertClassStyles: Record<NrwEvent['alertClass'], string | undefined> = {
 };
 
 // Pick NrwEvent props used in the NrwEventChips component
-export type NrwEventChipsEvent = Pick<NrwEvent, 'alertClass' | 'eventStatus' | 'trigger'>;
+type NrwEventChipsEvent = Pick<NrwEvent, 'alertClass' | 'eventStatus' | 'trigger'>;
 
 interface Props {
     className?: string;
