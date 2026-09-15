@@ -13,7 +13,10 @@ import {
 } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from '@ifrc-go/ui/hooks';
-import { isNotDefined } from '@togglecorp/fujs';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 import { mbtoken } from '#config';
@@ -160,16 +163,20 @@ function NrwMapContainer(props: {
                             <FontAwesomeIcon icon={faMinus} />
                         </button>
                     </div>
-                    <button
-                        type="button"
-                        className={styles.layersButton}
-                        aria-label={strings.nrwMapContainerLayersLabel}
-                        aria-expanded={isLayerPanelOpen}
-                        onClick={() => setIsLayerPanelOpen((open) => !open)}
-                    >
-                        <FontAwesomeIcon icon={faLayerGroup} />
-                    </button>
-                    {isLayerPanelOpen && layerPanel}
+                    {isDefined(layerPanel) && (
+                        <>
+                            <button
+                                type="button"
+                                className={styles.layersButton}
+                                aria-label={strings.nrwMapContainerLayersLabel}
+                                aria-expanded={isLayerPanelOpen}
+                                onClick={() => setIsLayerPanelOpen((open) => !open)}
+                            >
+                                <FontAwesomeIcon icon={faLayerGroup} />
+                            </button>
+                            {isLayerPanelOpen && layerPanel}
+                        </>
+                    )}
                 </div>
             </div>
             <NrwMapContext.Provider value={mapContext}>
