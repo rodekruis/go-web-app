@@ -10,7 +10,7 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import {
-    getNrwExposedAreas,
+    getNrwExposedAdminAreas,
     getNrwExposedPopulation,
     getNrwTotalExposedPopulation,
 } from './events';
@@ -28,7 +28,7 @@ function createArea(placeCode: string, name: string, exposed: number): NrwExpose
     };
 }
 
-describe('getNrwExposedAreas', () => {
+describe('getNrwExposedAdminAreas', () => {
     test('reads the least granular sub-national admin level', () => {
         const event = createEvent({
             0: [createArea('ET', 'Ethiopia', 61800)],
@@ -36,7 +36,7 @@ describe('getNrwExposedAreas', () => {
             2: [createArea('ET0201', 'Awsi Rasu', 30000)],
         });
 
-        expect(getNrwExposedAreas(event)).toEqual([createArea('ET02', 'Afar', 40000)]);
+        expect(getNrwExposedAdminAreas(event)).toEqual([createArea('ET02', 'Afar', 40000)]);
     });
 
     test('orders the areas by exposed population, most exposed first', () => {
@@ -48,7 +48,7 @@ describe('getNrwExposedAreas', () => {
             ],
         });
 
-        expect(getNrwExposedAreas(event).map((area) => area.name)).toEqual([
+        expect(getNrwExposedAdminAreas(event).map((area) => area.name)).toEqual([
             'Rumphi',
             'Mzimba',
             'Nkhata Bay',
@@ -56,8 +56,8 @@ describe('getNrwExposedAreas', () => {
     });
 
     test('returns no areas without a sub-national admin level', () => {
-        expect(getNrwExposedAreas(createEvent({}))).toEqual([]);
-        expect(getNrwExposedAreas(createEvent({ 0: [createArea('MW', 'Malawi', 1)] }))).toEqual([]);
+        expect(getNrwExposedAdminAreas(createEvent({}))).toEqual([]);
+        expect(getNrwExposedAdminAreas(createEvent({ 0: [createArea('MW', 'Malawi', 1)] }))).toEqual([]);
     });
 });
 

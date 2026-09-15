@@ -1,0 +1,17 @@
+{
+    "namespace": "nrwEvents",
+    "strings": {
+        "nrwEventDetailStartsLabel": "Starts:",
+        "nrwEventDetailStartedLabel": "Started:",
+        "nrwEventDetailStartsToday": "Today",
+        "nrwEventDetailStartsTomorrow": "Tomorrow",
+        "nrwEventDetailStartsInDays": "In {days} days",
+        "nrwEventDetailStartValue": "{relative}, {date}",
+        "nrwEventDetailAdvisoryLabel": "Advisory:",
+        "nrwEventDetailAdvisoryTrigger": "Trigger - activate EAP",
+        "nrwEventDetailAdvisoryAlert": "Alert - notify relevant others",
+        "nrwEventDetailExposedAdminAreasHeading": "Exposed areas:",
+        "nrwEventDetailDataSourcesHeading": "Data sources:",
+        "nrwEventDetailTimestamps": "Event created: {created}, Last updated: {updated}"
+    }
+}

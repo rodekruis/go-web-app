@@ -9,7 +9,7 @@ export function getNrwExposedPopulation(area: NrwExposedAdminArea): number | und
     return area.exposure.find((layer) => layer.layerName === 'populationExposed')?.exposed;
 }
 
-export function getNrwExposedAreas(event: NrwEvent): NrwExposedAdminArea[] {
+export function getNrwExposedAdminAreas(event: NrwEvent): NrwExposedAdminArea[] {
     const adminLevel = Object.keys(event.exposedAdminAreas)
         .map(Number)
         .filter((exposedAdminLevel) => exposedAdminLevel > 0) // only use sub-national admin levels

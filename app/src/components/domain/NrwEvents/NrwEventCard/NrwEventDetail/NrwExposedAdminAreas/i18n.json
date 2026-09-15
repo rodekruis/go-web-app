@@ -1,0 +1,11 @@
+{
+    "namespace": "nrwEvents",
+    "strings": {
+        "nrwExposedAdminAreasFallbackLabel": "areas",
+        "nrwExposedAdminAreasTotalAreas": "Total exposed {adminAreaLabel}:",
+        "nrwExposedAdminAreasTotalPopulation": "Total exposed population:",
+        "nrwExposedAdminAreasAreaColumn": "Exposed {adminAreaLabel}",
+        "nrwExposedAdminAreasPopulationColumn": "Exposed population",
+        "nrwExposedAdminAreasEmptyMessage": "No exposed {adminAreaLabel} are reported for this event."
+    }
+}
