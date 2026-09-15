@@ -4,6 +4,7 @@
     height: 32px;
 
     .event-marker-inner {
+        display: block;
         position: relative;
         transform-origin: bottom center;
         transition: transform var(--go-ui-duration-transition-medium);

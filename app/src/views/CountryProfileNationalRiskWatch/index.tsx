@@ -117,6 +117,7 @@ export function Component() {
                     selectedEvent={selectedEvent}
                     hoveredEventId={hoveredEventId}
                     onEventHoverChange={setHoveredEventId}
+                    onEventSelect={handleSelectedEventIdChange}
                 />
                 <NrwEvents
                     events={events}
@@ -124,7 +125,7 @@ export function Component() {
                     errored={isDefined(eventsError)}
                     selectedEvent={selectedEvent}
                     hoveredEventId={hoveredEventId}
-                    onSelectedEventIdChange={handleSelectedEventIdChange}
+                    onEventSelect={handleSelectedEventIdChange}
                     onEventHoverChange={setHoveredEventId}
                 />
             </ListView>

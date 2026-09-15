@@ -30,7 +30,7 @@ interface Props {
     errored: boolean;
     selectedEvent: NrwEvent | undefined;
     hoveredEventId: NrwEvent['eventId'] | undefined;
-    onSelectedEventIdChange: (eventId: NrwEvent['eventId'] | undefined) => void;
+    onEventSelect: (eventId: NrwEvent['eventId'] | undefined) => void;
     onEventHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
 }
 
@@ -42,7 +42,7 @@ function NrwEvents(props: Props) {
         errored,
         selectedEvent,
         hoveredEventId,
-        onSelectedEventIdChange,
+        onEventSelect,
         onEventHoverChange,
     } = props;
 
@@ -55,16 +55,16 @@ function NrwEvents(props: Props) {
 
     const handleToggle = useCallback(
         (eventId: NrwEvent['eventId']) => {
-            onSelectedEventIdChange(eventId === selectedEvent?.eventId ? undefined : eventId);
+            onEventSelect(eventId === selectedEvent?.eventId ? undefined : eventId);
         },
-        [selectedEvent, onSelectedEventIdChange],
+        [selectedEvent, onEventSelect],
     );
 
     const handleShowAllEvents = useCallback(
         () => {
-            onSelectedEventIdChange(undefined);
+            onEventSelect(undefined);
         },
-        [onSelectedEventIdChange],
+        [onEventSelect],
     );
 
     const rendererParams = useCallback(

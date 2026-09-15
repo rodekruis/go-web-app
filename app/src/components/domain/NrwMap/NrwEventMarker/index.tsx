@@ -1,4 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { RawButton } from '@ifrc-go/ui';
 import { _cs } from '@togglecorp/fujs';
 
 import NrwEventMarkerIcon from '#assets/icons/nrw/event-marker.svg?react';
@@ -22,6 +23,7 @@ interface Props {
     event: NrwEventMarkerEvent;
     hovered: boolean;
     onHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
+    onSelect: (eventId: NrwEvent['eventId']) => void;
 }
 
 export default function NrwEventMarker(props: Props) {
@@ -29,6 +31,7 @@ export default function NrwEventMarker(props: Props) {
         event,
         hovered,
         onHoverChange,
+        onSelect,
     } = props;
 
     const { handleMouseEnter, handleMouseLeave } = useHoverChange(event.eventId, onHoverChange);
@@ -43,13 +46,17 @@ export default function NrwEventMarker(props: Props) {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            <div className={styles.eventMarkerInner}>
+            <RawButton
+                className={styles.eventMarkerInner}
+                name={event.eventId}
+                onClick={onSelect}
+            >
                 <NrwEventMarkerIcon className={styles.eventMarkerGraphic} />
                 <FontAwesomeIcon
                     icon={hazardIcons[event.hazardType]}
                     className={styles.hazardIcon}
                 />
-            </div>
+            </RawButton>
             <NrwEventName
                 className={styles.popup}
                 event={event}
