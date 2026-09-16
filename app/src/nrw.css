@@ -1,7 +1,13 @@
 :root {
     --nrw-color-alert-low: #ffc635;
+    --nrw-color-alert-low-tint: #fff9ea;
+
     --nrw-color-alert-medium: #ff6e00;
+    --nrw-color-alert-medium-tint: #fff5ea;
+
     --nrw-color-alert-high: #f5333f;
+    --nrw-color-alert-high-tint: #fef1f2;
+
     --nrw-color-alert-trigger: #c01825;
 
     --nrw-height-map: var(--go-ui-height-map-md);

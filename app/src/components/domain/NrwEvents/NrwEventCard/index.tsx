@@ -1,29 +1,77 @@
-import { Container } from '@ifrc-go/ui';
+import {
+    faAnglesRight,
+    faXmark,
+} from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { RawButton } from '@ifrc-go/ui';
+import { _cs } from '@togglecorp/fujs';
 
+import useHoverChange from '#hooks/useHoverChange';
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
-import NrwEventChips, { type NrwEventChipsEvent } from '../NrwEventChips';
-import NrwEventName, { type NrwEventNameEvent } from '../NrwEventName';
+import NrwEventChips from '../NrwEventChips';
+import NrwEventName from '../NrwEventName';
+import NrwEventDetail from './NrwEventDetail';
 
-// Pick NrwEvent props used in the NrwEventCard component
-type NrwEventCardEvent =
-    & Pick<NrwEvent, 'eventId'>
-    & NrwEventChipsEvent
-    & NrwEventNameEvent;
+import styles from './styles.module.css';
+
+const alertClassStyles: Record<NrwEvent['alertClass'], string | undefined> = {
+    low: styles.alertClassLow,
+    medium: styles.alertClassMedium,
+    high: styles.alertClassHigh,
+};
 
 interface Props {
     className?: string;
-    event: NrwEventCardEvent;
+    event: NrwEvent;
+    expanded: boolean;
+    hovered: boolean;
+    onToggle: (eventId: NrwEvent['eventId']) => void;
+    onHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
 }
 
 function NrwEventCard(props: Props) {
-    const { className, event } = props;
+    const {
+        className,
+        event,
+        expanded,
+        hovered,
+        onToggle,
+        onHoverChange,
+    } = props;
+
+    const { handleMouseEnter, handleMouseLeave } = useHoverChange(event.eventId, onHoverChange);
 
     return (
-        <Container className={className} withContentWell>
-            <NrwEventChips event={event} />
-            <NrwEventName event={event} />
-        </Container>
+        <div
+            className={_cs(
+                styles.nrwEventCard,
+                alertClassStyles[event.alertClass],
+                expanded && styles.expanded,
+                hovered && styles.hovered,
+                className,
+            )}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
+            <div className={styles.header}>
+                <div className={styles.chipRow}>
+                    <NrwEventChips className={styles.chips} event={event} />
+                    <RawButton
+                        className={styles.toggleButton}
+                        name={event.eventId}
+                        onClick={onToggle}
+                        aria-expanded={expanded}
+                    >
+                        <FontAwesomeIcon icon={expanded ? faXmark : faAnglesRight} />
+                    </RawButton>
+                </div>
+                <NrwEventName event={event} />
+            </div>
+            {expanded && (
+                <NrwEventDetail className={styles.detail} event={event} />
+            )}
+        </div>
     );
 }
 
