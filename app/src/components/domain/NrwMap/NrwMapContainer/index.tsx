@@ -6,7 +6,17 @@ import {
     useRef,
     useState,
 } from 'react';
-import { isNotDefined } from '@togglecorp/fujs';
+import {
+    faLayerGroup,
+    faMinus,
+    faPlus,
+} from '@fortawesome/pro-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useTranslation } from '@ifrc-go/ui/hooks';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 import { mbtoken } from '#config';
@@ -20,6 +30,7 @@ import {
 
 import NrwMapContext from '../NrwMapContext';
 
+import i18n from './i18n.json';
 import styles from './styles.module.css';
 
 // This component wraps Mapbox so the rest of the components don't need to know
@@ -33,17 +44,24 @@ const paddingPixels = 20;
 function NrwMapContainer(props: {
     mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
+    layerPanel?: React.ReactNode;
     children?: React.ReactNode;
 }) {
-    const { mapView, onMapViewChange, children } = props;
+    const {
+        mapView, onMapViewChange, layerPanel, children,
+    } = props;
 
     const { zoom, center, fitBounds } = mapView;
 
     const [southWest, northEast] = fitBounds ?? [];
 
+    const strings = useTranslation(i18n);
+
     const containerRef = useRef<HTMLDivElement>(null);
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
     const [mapLoadComplete, setMapLoadComplete] = useState(false);
+    const [isLayerPanelOpen, setIsLayerPanelOpen] = useState(false);
+    const [zoomLimits, setZoomLimits] = useState({ atMin: false, atMax: false });
 
     const onMapViewChangeRef = useRef(onMapViewChange);
     useEffect(() => {
@@ -67,11 +85,20 @@ function NrwMapContainer(props: {
             zoom,
         });
 
-        map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
-
         map.on('style.load', () => {
             setMapLoadComplete(true);
         });
+
+        // Listener to enable/disable zoom buttons based current zoom level.
+        const updateZoomLimits = () => {
+            const zoomLevel = map.getZoom();
+            setZoomLimits({
+                atMin: zoomLevel <= map.getMinZoom(),
+                atMax: zoomLevel >= map.getMaxZoom(),
+            });
+        };
+        map.on('zoom', updateZoomLimits);
+        updateZoomLimits();
 
         map.on('moveend', () => {
             onMapViewChangeRef.current(
@@ -110,10 +137,48 @@ function NrwMapContainer(props: {
 
     return (
         <>
-            <div
-                ref={containerRef}
-                className={styles.nrwMapContainer}
-            />
+            <div className={styles.mapWrapper}>
+                <div
+                    ref={containerRef}
+                    className={styles.nrwMapContainer}
+                />
+                <div className={styles.mapControls}>
+                    <div className={styles.zoomControls}>
+                        <button
+                            type="button"
+                            className={styles.zoomButton}
+                            aria-label={strings.nrwMapContainerZoomInLabel}
+                            disabled={zoomLimits.atMax}
+                            onClick={() => mapboxMap?.zoomIn()}
+                        >
+                            <FontAwesomeIcon icon={faPlus} />
+                        </button>
+                        <button
+                            type="button"
+                            className={styles.zoomButton}
+                            aria-label={strings.nrwMapContainerZoomOutLabel}
+                            disabled={zoomLimits.atMin}
+                            onClick={() => mapboxMap?.zoomOut()}
+                        >
+                            <FontAwesomeIcon icon={faMinus} />
+                        </button>
+                    </div>
+                    {isDefined(layerPanel) && (
+                        <>
+                            <button
+                                type="button"
+                                className={styles.layersButton}
+                                aria-label={strings.nrwMapContainerLayersLabel}
+                                aria-expanded={isLayerPanelOpen}
+                                onClick={() => setIsLayerPanelOpen((open) => !open)}
+                            >
+                                <FontAwesomeIcon icon={faLayerGroup} />
+                            </button>
+                            {isLayerPanelOpen && layerPanel}
+                        </>
+                    )}
+                </div>
+            </div>
             <NrwMapContext.Provider value={mapContext}>
                 {children}
             </NrwMapContext.Provider>

@@ -1,3 +1,96 @@
+.map-wrapper {
+    position: relative;
+}
+
 .nrw-map-container {
-  height: var(--nrw-height-map);
+    height: var(--nrw-height-map);
+}
+
+.map-controls {
+    display: flex;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    align-items: flex-end;
+    flex-direction: column;
+    z-index: 2;
+    gap: var(--go-ui-spacing-xs);
+    pointer-events: none;
+
+    /* only the controls must show pointer */
+    > * {
+        pointer-events: auto;
+    }
+}
+
+.zoom-controls {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid rgb(50 50 50 / 20%);
+    border-radius: var(--go-ui-border-radius-md);
+    box-shadow: 0 4px 7px rgb(0 0 0 / 10%);
+    background-clip: padding-box;
+    background-color: var(--go-ui-color-white);
+    inline-size: 28px;
+}
+
+.zoom-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    height: 27px;
+    color: var(--go-ui-color-gray-90);
+    font-size: 12px;
+
+    &:first-child {
+        border-radius: 2px 2px 0 0;
+    }
+
+    &:last-child {
+        border-radius: 0 0 2px 2px;
+    }
+
+    /* .zoom-button + .zoom-button */
+    & + & {
+        border-top: 1px solid var(--go-ui-color-gray-30);
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: default;
+    }
+
+    &:hover:not(:disabled) {
+        background-color: var(--go-ui-color-gray-20);
+    }
+}
+
+.layers-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgb(50 50 50 / 20%);
+    border-radius: var(--go-ui-border-radius-md);
+    box-shadow: 0 4px 7px rgb(0 0 0 / 10%);
+    background-clip: padding-box;
+    background-color: var(--go-ui-color-white);
+    cursor: pointer;
+    padding: 0;
+    inline-size: 28px;
+    height: 28px;
+    color: var(--go-ui-color-gray-90);
+    font-size: 12px;
+
+    &:hover {
+        background-color: var(--go-ui-color-gray-20);
+    }
+
+    &[aria-expanded="true"] {
+        border-color: var(--go-ui-color-gray-90);
+        background-color: var(--go-ui-color-white);
+    }
 }
