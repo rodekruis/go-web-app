@@ -10,6 +10,7 @@ import {
     type MapView,
     type MapViewChangeHandler,
     type NrwEvent,
+    type NrwLayerName,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
@@ -51,6 +52,8 @@ function NrwMap(props: {
     hoveredEventId: NrwEvent['eventId'] | undefined;
     onEventHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
     onEventSelect: (eventId: NrwEvent['eventId'] | undefined) => void;
+    visibleLayers: NrwLayerName[];
+    onLayerToggle: (name: NrwLayerName) => void;
 }) {
     const {
         mapView,
@@ -60,9 +63,11 @@ function NrwMap(props: {
         hoveredEventId,
         onEventHoverChange,
         onEventSelect,
+        visibleLayers,
+        onLayerToggle,
     } = props;
 
-    const { availableLayers, visibleLayers, handleLayerToggle } = useNrwLayers();
+    const { availableLayers } = useNrwLayers();
 
     const eventCountryCodeIso3 = parseCountryCode(selectedEvent?.countryCodeIso3);
 
@@ -70,7 +75,7 @@ function NrwMap(props: {
         <NrwLayerPanel
             layers={availableLayers}
             visibleLayers={visibleLayers}
-            onLayerToggle={handleLayerToggle}
+            onLayerToggle={onLayerToggle}
         />
     ) : undefined;
 

@@ -55,6 +55,8 @@ export function Component() {
         handleMapViewChange,
         selectedEventId,
         handleSelectedEventIdChange,
+        visibleLayers,
+        handleLayerToggle,
     } = useNrwSearchParams();
 
     // Set from the longitude/latitude search params when they are present.
@@ -118,6 +120,8 @@ export function Component() {
                     hoveredEventId={hoveredEventId}
                     onEventHoverChange={setHoveredEventId}
                     onEventSelect={handleSelectedEventIdChange}
+                    visibleLayers={visibleLayers}
+                    onLayerToggle={handleLayerToggle}
                 />
                 <NrwEvents
                     events={events}

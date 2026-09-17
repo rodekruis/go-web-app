@@ -7,6 +7,7 @@ import { isDefined } from '@togglecorp/fujs';
 import { nrwStandalone } from '#config';
 import useCountry from '#hooks/domain/useCountry';
 import useUrlSearchState from '#hooks/useUrlSearchState';
+import supportedLayerNames from '#utils/nrw/layers';
 
 import {
     type CountryCodeIso3,
@@ -14,6 +15,7 @@ import {
     type Longitude,
     type MapViewChangeHandler,
     type NrwEvent,
+    type NrwLayerName,
     type UrlParameter,
     type Zoom,
 } from '../types';
@@ -85,6 +87,31 @@ function serializeCountriesUrlParameter(countryCodes: CountryCodeIso3[]) {
     return countryCodes.join(',');
 }
 
+// Only accept layer names that are specifically supported by the frontend
+function isSupportedLayerName(value: string | undefined): value is NrwLayerName {
+    const cleaned = value?.trim() ?? '';
+    return Object.values(supportedLayerNames).some((name) => name === cleaned);
+}
+
+function parseLayersUrlParameter(value: UrlParameter) {
+    if (!value || value.trim() === '') {
+        return [];
+    }
+
+    return value
+        .split(',')
+        .map((name) => name.trim())
+        .filter(isSupportedLayerName);
+}
+
+function serializeLayersUrlParameter(layers: NrwLayerName[]) {
+    if (layers.length === 0) {
+        return undefined;
+    }
+
+    return layers.join(',');
+}
+
 const roundZoomForUrl = (zoom: Zoom) => zoom.toFixed(2).toString();
 
 const roundLatitudeOrLongitudeForUrl = (value: Latitude | Longitude) => value.toFixed(6).toString();
@@ -107,6 +134,11 @@ function useNrwSearchParams() {
         'event',
         parseEventIdUrlParameter,
         serializeEventIdUrlParameter,
+    );
+    const [visibleLayers, setVisibleLayers] = useUrlSearchState(
+        'layers',
+        parseLayersUrlParameter,
+        serializeLayersUrlParameter,
     );
 
     // For embedded, get the country from the route.
@@ -163,6 +195,14 @@ function useNrwSearchParams() {
         );
     };
 
+    const handleLayerToggle = (name: NrwLayerName) => {
+        setVisibleLayers((prev) => (
+            prev.includes(name)
+                ? prev.filter((visibleName) => visibleName !== name)
+                : [...prev, name]
+        ));
+    };
+
     return {
         zoomFromUrlParams,
         latitudeFromUrlParams,
@@ -171,6 +211,8 @@ function useNrwSearchParams() {
         handleMapViewChange,
         selectedEventId,
         handleSelectedEventIdChange,
+        visibleLayers,
+        handleLayerToggle,
     };
 }
 
