@@ -6,7 +6,7 @@ import { faSquareCheck } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 
-import { supportedLayerNames } from '#utils/nrw/layers';
+import supportedLayerNames from '#utils/nrw/layers';
 import {
     type NrwLayer,
     type NrwLayerName,
@@ -24,7 +24,7 @@ function NrwLayerPanel(props: {
 
     const strings = useTranslation(i18n);
 
-    const supportedLayers = supportedLayerNames
+    const supportedLayers = Object.values(supportedLayerNames)
         .map((name) => layers?.find((layer) => layer.name === name))
         .filter((layer) => layer !== undefined);
 

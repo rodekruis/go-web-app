@@ -1,6 +1,6 @@
 import { isNotDefined } from '@togglecorp/fujs';
 
-import { nrwLayerNames } from '#utils/nrw/layers';
+import supportedLayerNames from '#utils/nrw/layers';
 import {
     type NrwEvent,
     type NrwExposedAdminArea,
@@ -8,7 +8,7 @@ import {
 
 export function getNrwExposedPopulation(area: NrwExposedAdminArea): number | undefined {
     return area.exposure.find(
-        ({ layerName }) => layerName === nrwLayerNames.exposedPopulation,
+        ({ layerName }) => layerName === supportedLayerNames.exposedPopulation,
     )?.exposed;
 }
 

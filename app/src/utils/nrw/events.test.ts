@@ -4,7 +4,7 @@ import {
     test,
 } from 'vitest';
 
-import { nrwLayerNames } from '#utils/nrw/layers';
+import supportedLayerNames from '#utils/nrw/layers';
 import {
     type NrwEvent,
     type NrwExposedAdminArea,
@@ -25,7 +25,7 @@ function createArea(placeCode: string, name: string, exposed: number): NrwExpose
         placeCode,
         name,
         adminLevel: placeCode.length - 2,
-        exposure: [{ layerName: nrwLayerNames.exposedPopulation, total: null, exposed }],
+        exposure: [{ layerName: supportedLayerNames.exposedPopulation, total: null, exposed }],
     };
 }
 
@@ -72,7 +72,7 @@ describe('getNrwExposedPopulation', () => {
             placeCode: 'MW1',
             name: 'Northern',
             adminLevel: 1,
-            exposure: [{ layerName: nrwLayerNames.clinics, total: null, exposed: 7 }],
+            exposure: [{ layerName: supportedLayerNames.clinics, total: null, exposed: 7 }],
         };
 
         expect(getNrwExposedPopulation(area)).toBeUndefined();

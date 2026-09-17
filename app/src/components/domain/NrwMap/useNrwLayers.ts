@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
-import { nrwLayerNames } from '#utils/nrw/layers';
+import supportedLayerNames from '#utils/nrw/layers';
 import { useNrwRequest } from '#utils/restRequest';
 import {
     type NrwHazardType,
@@ -17,7 +17,7 @@ function useNrwLayers(hazardType?: NrwHazardType) {
 
     // Layers shown by default
     const [visibleLayers, setVisibleLayers] = useState<NrwLayerName[]>([
-        nrwLayerNames.populationDensity,
+        supportedLayerNames.populationDensity,
     ]);
 
     const handleLayerToggle = (name: NrwLayerName) => {
