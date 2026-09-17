@@ -7,15 +7,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 
 import { type NrwLayer } from '#views/CountryProfileNationalRiskWatch/types';
+import { supportedLayerNames } from '#views/CountryProfileNationalRiskWatch/utils';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
-
-// Layers supported in the panel, in display order.
-const supportedLayerNames = [
-    'floodDepth',
-    'population', // Population density raster layer
-] as const satisfies readonly NrwLayer['name'][];
 
 function NrwLayerPanel(props: {
     layers: NrwLayer[] | undefined;

@@ -15,6 +15,7 @@ import {
     type LongitudeLatitudeBounds,
     type MapView,
     type NrwEvent,
+    type NrwLayer,
     type Zoom,
 } from './types';
 
@@ -25,6 +26,12 @@ export function parseCountryCode(value: string | undefined): CountryCodeIso3 | n
     const cleaned = value?.trim().toUpperCase() ?? '';
     return countryRegex.test(cleaned) ? (cleaned as CountryCodeIso3) : null;
 }
+
+// Layers supported by the frontend, in display order.
+export const supportedLayerNames = [
+    'floodDepth',
+    'population', // Population density raster layer
+] as const satisfies readonly NrwLayer['name'][];
 
 // The countries that have events, deduplicated and sorted.
 export function getEventCountries(events: NrwEvent[]): CountryCodeIso3[] {
