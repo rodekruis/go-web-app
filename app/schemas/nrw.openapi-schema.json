@@ -1815,15 +1815,15 @@
           "layer": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",
               "glofasStations",
               "windSpeed"
             ],
-            "example": "populationExposed"
+            "example": "exposedPopulation"
           },
           "value": {
             "type": "number",
@@ -1864,8 +1864,8 @@
           "layer": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",
@@ -1998,8 +1998,8 @@
           "layer": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",
@@ -2172,15 +2172,15 @@
           "layer": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",
               "glofasStations",
               "windSpeed"
             ],
-            "example": "populationExposed"
+            "example": "exposedPopulation"
           },
           "value": {
             "type": "number",
@@ -2204,8 +2204,8 @@
           "layer": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",
@@ -2234,8 +2234,8 @@
           "layer": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",
@@ -2266,7 +2266,7 @@
               {
                 "placeCode": "KEN_01_001",
                 "adminLevel": 3,
-                "layer": "populationExposed",
+                "layer": "exposedPopulation",
                 "value": 4500
               }
             ],
@@ -2395,15 +2395,15 @@
           "layerName": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",
               "glofasStations",
               "windSpeed"
             ],
-            "example": "populationExposed"
+            "example": "exposedPopulation"
           },
           "total": {
             "type": "number",
@@ -2456,8 +2456,8 @@
           "name": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",
@@ -3007,8 +3007,8 @@
           "name": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",
@@ -3056,8 +3056,8 @@
           "name": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",
@@ -3137,15 +3137,15 @@
           "layer": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",
               "glofasStations",
               "windSpeed"
             ],
-            "example": "population"
+            "example": "populationDensity"
           },
           "metadata": {
             "$ref": "#/components/schemas/RasterMetadataDto"
@@ -3167,15 +3167,15 @@
           "layer": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",
               "glofasStations",
               "windSpeed"
             ],
-            "example": "population"
+            "example": "populationDensity"
           },
           "valueData": {
             "type": "string",
@@ -3203,8 +3203,8 @@
           "layer": {
             "type": "string",
             "enum": [
-              "population",
-              "populationExposed",
+              "populationDensity",
+              "exposedPopulation",
               "redCrossBranches",
               "clinics",
               "floodDepth",

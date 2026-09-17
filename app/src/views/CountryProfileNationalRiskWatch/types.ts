@@ -54,4 +54,5 @@ export type NrwEvent = NrwApiResponse<'/events'>[number];
 export type NrwExposedAdminArea = NrwEvent['exposedAdminAreas'][string][number];
 
 export type NrwLayer = NrwApiResponse<'/layers'>[number];
+export type NrwLayerName = NrwLayer['name'];
 export type NrwHazardType = NrwLayer['hazardType'];

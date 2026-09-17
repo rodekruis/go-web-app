@@ -1,12 +1,15 @@
 import { isNotDefined } from '@togglecorp/fujs';
 
+import { nrwLayerNames } from '#utils/nrw/layers';
 import {
     type NrwEvent,
     type NrwExposedAdminArea,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 export function getNrwExposedPopulation(area: NrwExposedAdminArea): number | undefined {
-    return area.exposure.find((layer) => layer.layerName === 'populationExposed')?.exposed;
+    return area.exposure.find(
+        ({ layerName }) => layerName === nrwLayerNames.exposedPopulation,
+    )?.exposed;
 }
 
 export function getNrwExposedAdminAreas(event: NrwEvent): NrwExposedAdminArea[] {
