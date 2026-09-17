@@ -11,7 +11,7 @@ export const nrwLayerNames = {
 } as const satisfies { [Name in NrwLayerName]: Name };
 
 // Layers supported in the panel, in display order.
-export const supportedLayerNames: NrwLayerName[] = [
+export const supportedLayerNames = [
     nrwLayerNames.floodDepth,
     nrwLayerNames.populationDensity,
-];
+] as const satisfies readonly NrwLayerName[];
