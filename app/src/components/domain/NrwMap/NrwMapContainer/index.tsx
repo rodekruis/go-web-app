@@ -85,6 +85,8 @@ function NrwMapContainer(props: {
             zoom,
         });
 
+        map.dragRotate.disable();
+        map.touchPitch.disable();
         map.on('style.load', () => {
             setMapLoadComplete(true);
         });
