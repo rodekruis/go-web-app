@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
+import supportedLayerNames from '#utils/nrw/layers';
 import { useNrwRequest } from '#utils/restRequest';
 import {
     type NrwHazardType,
-    type NrwLayer,
+    type NrwLayerName,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 function useNrwLayers(hazardType?: NrwHazardType) {
@@ -15,9 +16,11 @@ function useNrwLayers(hazardType?: NrwHazardType) {
     });
 
     // Layers shown by default
-    const [visibleLayers, setVisibleLayers] = useState<NrwLayer['name'][]>(['population']);
+    const [visibleLayers, setVisibleLayers] = useState<NrwLayerName[]>([
+        supportedLayerNames.populationDensity,
+    ]);
 
-    const handleLayerToggle = (name: NrwLayer['name']) => {
+    const handleLayerToggle = (name: NrwLayerName) => {
         setVisibleLayers((prev) => (
             prev.includes(name)
                 ? prev.filter((visibleName) => visibleName !== name)
