@@ -154,21 +154,20 @@ function useNrwSearchParams() {
         ? countriesFromUrlParams
         : countriesFromRouting;
 
-    const handleMapViewChange: MapViewChangeHandler = (
-        newZoom,
-        newLatitude,
-        newLongitude,
-    ) => {
-        setSearchParams(
-            (prevParams) => {
-                prevParams.set('z', roundZoomForUrl(newZoom));
-                prevParams.set('lat', roundLatitudeOrLongitudeForUrl(newLatitude));
-                prevParams.set('lon', roundLatitudeOrLongitudeForUrl(newLongitude));
-                return prevParams;
-            },
-            { replace: true },
-        );
-    };
+    const handleMapViewChange: MapViewChangeHandler = useCallback(
+        (newZoom, newLatitude, newLongitude) => {
+            setSearchParams(
+                (prevParams) => {
+                    prevParams.set('z', roundZoomForUrl(newZoom));
+                    prevParams.set('lat', roundLatitudeOrLongitudeForUrl(newLatitude));
+                    prevParams.set('lon', roundLatitudeOrLongitudeForUrl(newLongitude));
+                    return prevParams;
+                },
+                { replace: true },
+            );
+        },
+        [setSearchParams],
+    );
 
     const handleSelectedEventIdChange = useCallback(
         (eventId: NrwEvent['eventId'] | undefined) => {

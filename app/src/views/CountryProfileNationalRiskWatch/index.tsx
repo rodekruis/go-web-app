@@ -13,35 +13,14 @@ import { nrwStandalone } from '#config';
 
 import NrwEventsContext from './contexts/NrwEventsContext';
 import NrwLayersContext from './contexts/NrwLayersContext';
-import useNrwAdminAreas from './hooks/useNrwAdminAreas';
 import useNrwEvents from './hooks/useNrwEvents';
 import useNrwLayers from './hooks/useNrwLayers';
+import useNrwMapView from './hooks/useNrwMapView';
 import useNrwSearchParams from './hooks/useNrwSearchParams';
-import NrwLngLat from './NrwLngLat';
-import {
-    type AdminLevel,
-    type Latitude,
-    type Longitude,
-    type MapView,
-    type Zoom,
-} from './types';
-import {
-    getEventCountries,
-    getFeatureCollectionBounds,
-    getMapView,
-} from './utils';
+import { getEventCountries } from './utils';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
-
-const defaultZoom = 3 as Zoom;
-const defaultLatitude = 0 as Latitude;
-const defaultLongitude = 0 as Longitude;
-
-const defaultMapView: MapView = {
-    center: new NrwLngLat(defaultLongitude, defaultLatitude),
-    zoom: defaultZoom,
-};
 
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
@@ -60,13 +39,6 @@ export function Component() {
         setLayersFromUrlParams,
     } = useNrwSearchParams();
 
-    // Set from the longitude/latitude search params when they are present.
-    const urlMapView = getMapView(
-        latitudeFromUrlParams,
-        longitudeFromUrlParams,
-        zoomFromUrlParams ?? defaultZoom,
-    );
-
     const nrwEventsContext = useNrwEvents({
         countries: urlCountries,
         selectedEventId,
@@ -81,24 +53,13 @@ export function Component() {
         ? getEventCountries([selectedEvent])
         : countries;
 
-    const {
-        adminAreas,
-    } = useNrwAdminAreas({
+    const mapView = useNrwMapView({
+        urlZoom: zoomFromUrlParams,
+        urlLatitude: latitudeFromUrlParams,
+        urlLongitude: longitudeFromUrlParams,
         countries: mapCountries,
-        adminLevels: [0 as AdminLevel],
-        skip: isDefined(urlMapView) || (isDefined(selectedEventId) && eventsPending),
+        countriesPending: isDefined(selectedEventId) && eventsPending,
     });
-
-    const countryBounds = isDefined(adminAreas)
-        ? getFeatureCollectionBounds(adminAreas)
-        : undefined;
-
-    const countryMapView = isDefined(countryBounds)
-        ? { ...defaultMapView, fitBounds: countryBounds }
-        : undefined;
-
-    // MapView preference: URL > countries > default.
-    const mapView = urlMapView ?? countryMapView ?? defaultMapView;
 
     const nrwLayersContext = useNrwLayers({
         urlLayers: layersFromUrlParams,
