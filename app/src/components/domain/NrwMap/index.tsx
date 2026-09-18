@@ -11,6 +11,7 @@ import {
     type MapViewChangeHandler,
     type NrwEvent,
     type NrwLayerName,
+    type VisibleLayersChangeHandler,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
@@ -47,27 +48,30 @@ function parseCentroid(centroid: unknown): NrwLngLat | undefined {
 function NrwMap(props: {
     mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
+    urlLayers: NrwLayerName[] | undefined;
+    onVisibleLayersChange: VisibleLayersChangeHandler;
     events: NrwEvent[] | undefined;
     selectedEvent: NrwEvent | undefined;
     hoveredEventId: NrwEvent['eventId'] | undefined;
     onEventHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
     onEventSelect: (eventId: NrwEvent['eventId'] | undefined) => void;
-    visibleLayers: NrwLayerName[];
-    onLayerToggle: (name: NrwLayerName) => void;
 }) {
     const {
         mapView,
         onMapViewChange,
+        urlLayers,
+        onVisibleLayersChange,
         events,
         selectedEvent,
         hoveredEventId,
         onEventHoverChange,
         onEventSelect,
-        visibleLayers,
-        onLayerToggle,
     } = props;
 
-    const { availableLayers } = useNrwLayers();
+    const { availableLayers, visibleLayers, handleLayerToggle } = useNrwLayers({
+        urlLayers,
+        onVisibleLayersChange,
+    });
 
     const eventCountryCodeIso3 = parseCountryCode(selectedEvent?.countryCodeIso3);
 
@@ -75,7 +79,7 @@ function NrwMap(props: {
         <NrwLayerPanel
             layers={availableLayers}
             visibleLayers={visibleLayers}
-            onLayerToggle={onLayerToggle}
+            onLayerToggle={handleLayerToggle}
         />
     ) : undefined;
 

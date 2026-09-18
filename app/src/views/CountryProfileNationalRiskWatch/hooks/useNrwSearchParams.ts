@@ -88,28 +88,23 @@ function serializeCountriesUrlParameter(countryCodes: CountryCodeIso3[]) {
 }
 
 // Only accept layer names that are specifically supported by the frontend
-function isSupportedLayerName(value: string | undefined): value is NrwLayerName {
-    const cleaned = value?.trim() ?? '';
-    return Object.values(supportedLayerNames).some((name) => name === cleaned);
-}
-
-function parseLayersUrlParameter(value: UrlParameter) {
+function parseLayersUrlParameter(value: UrlParameter): NrwLayerName[] | undefined {
     if (!value || value.trim() === '') {
-        return [];
+        return undefined; // fallback to default layers
     }
 
-    return value
-        .split(',')
-        .map((name) => name.trim())
-        .filter(isSupportedLayerName);
+    const requestedNames = value.split(',').map((name) => name.trim());
+
+    return Object.values(supportedLayerNames)
+        .filter((name) => requestedNames.includes(name));
 }
 
-function serializeLayersUrlParameter(layers: NrwLayerName[]) {
-    if (layers.length === 0) {
+function serializeLayersUrlParameter(layerNames: NrwLayerName[] | undefined) {
+    if (!layerNames || layerNames.length === 0) {
         return undefined;
     }
 
-    return layers.join(',');
+    return layerNames.join(',');
 }
 
 const roundZoomForUrl = (zoom: Zoom) => zoom.toFixed(2).toString();
@@ -135,7 +130,7 @@ function useNrwSearchParams() {
         parseEventIdUrlParameter,
         serializeEventIdUrlParameter,
     );
-    const [visibleLayers, setVisibleLayers] = useUrlSearchState(
+    const [layersFromUrlParams, setLayersFromUrlParams] = useUrlSearchState(
         'layers',
         parseLayersUrlParameter,
         serializeLayersUrlParameter,
@@ -195,14 +190,6 @@ function useNrwSearchParams() {
         );
     };
 
-    const handleLayerToggle = (name: NrwLayerName) => {
-        setVisibleLayers((prev) => (
-            prev.includes(name)
-                ? prev.filter((visibleName) => visibleName !== name)
-                : [...prev, name]
-        ));
-    };
-
     return {
         zoomFromUrlParams,
         latitudeFromUrlParams,
@@ -211,8 +198,8 @@ function useNrwSearchParams() {
         handleMapViewChange,
         selectedEventId,
         handleSelectedEventIdChange,
-        visibleLayers,
-        handleLayerToggle,
+        layersFromUrlParams,
+        setLayersFromUrlParams,
     };
 }
 
