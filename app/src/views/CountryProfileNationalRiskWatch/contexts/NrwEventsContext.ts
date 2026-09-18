@@ -3,7 +3,7 @@ import { createContext } from 'react';
 import {
     type NrwEvent,
     type NrwEventIdChangeHandler,
-} from './types';
+} from '../types';
 
 export interface NrwEventsContextProps {
     events: NrwEvent[] | undefined;

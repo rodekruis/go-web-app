@@ -11,12 +11,12 @@ import NrwNavbar from '#components/domain/NrwNavbar';
 import Page from '#components/Page';
 import { nrwStandalone } from '#config';
 
+import NrwEventsContext from './contexts/NrwEventsContext';
+import NrwLayersContext from './contexts/NrwLayersContext';
 import useNrwAdminAreas from './hooks/useNrwAdminAreas';
 import useNrwEvents from './hooks/useNrwEvents';
 import useNrwLayers from './hooks/useNrwLayers';
 import useNrwSearchParams from './hooks/useNrwSearchParams';
-import NrwEventsContext from './NrwEventsContext';
-import NrwLayersContext from './NrwLayersContext';
 import NrwLngLat from './NrwLngLat';
 import {
     type AdminLevel,

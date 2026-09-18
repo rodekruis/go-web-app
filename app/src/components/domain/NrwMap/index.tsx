@@ -4,8 +4,8 @@ import {
     isNotDefined,
 } from '@togglecorp/fujs';
 
-import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/NrwEventsContext';
-import NrwLayersContext from '#views/CountryProfileNationalRiskWatch/NrwLayersContext';
+import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
+import NrwLayersContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwLayersContext';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,

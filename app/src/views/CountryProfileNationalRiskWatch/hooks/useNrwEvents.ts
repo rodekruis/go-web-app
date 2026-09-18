@@ -6,7 +6,7 @@ import { isDefined } from '@togglecorp/fujs';
 
 import { useNrwRequest } from '#utils/restRequest';
 
-import { type NrwEventsContextProps } from '../NrwEventsContext';
+import { type NrwEventsContextProps } from '../contexts/NrwEventsContext';
 import {
     type CountryCodeIso3,
     type NrwEvent,

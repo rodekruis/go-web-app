@@ -15,7 +15,7 @@ import {
     isDefined,
 } from '@togglecorp/fujs';
 
-import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/NrwEventsContext';
+import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwEventCard from './NrwEventCard';

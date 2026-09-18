@@ -6,7 +6,7 @@ import { isDefined } from '@togglecorp/fujs';
 
 import { useNrwRequest } from '#utils/restRequest';
 
-import { type NrwLayersContextProps } from '../NrwLayersContext';
+import { type NrwLayersContextProps } from '../contexts/NrwLayersContext';
 import {
     type NrwHazardType,
     type NrwLayerName,

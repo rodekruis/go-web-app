@@ -4,7 +4,7 @@ import {
     type LayerToggleHandler,
     type NrwLayer,
     type NrwLayerName,
-} from './types';
+} from '../types';
 
 export interface NrwLayersContextProps {
     availableLayers: NrwLayer[] | undefined;
