@@ -19,11 +19,14 @@ type SearchValueFromUser = string | number | boolean | Date | undefined | null;
 
 type ValueOrSetter<VALUE> = VALUE | ((prevValue: VALUE) => VALUE);
 
+// A module-level default keeps the setter identity stable across renders.
+const defaultNavigateOptions: NavigateOptions = { replace: true };
+
 function useUrlSearchState<VALUE>(
     key: string,
     deserialize: (value: SearchValueFromUrl) => VALUE,
     serialize: (value: VALUE) => SearchValueFromUser,
-    navigateOptions: NavigateOptions = { replace: true },
+    navigateOptions: NavigateOptions = defaultNavigateOptions,
 ) {
     const [searchParams, setSearchParams] = useSearchParams();
     const serializerRef = useRef(serialize);

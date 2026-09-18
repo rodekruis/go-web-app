@@ -5,14 +5,13 @@ import {
 } from '@togglecorp/fujs';
 
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/NrwEventsContext';
+import NrwLayersContext from '#views/CountryProfileNationalRiskWatch/NrwLayersContext';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,
     type Longitude,
     type MapView,
     type MapViewChangeHandler,
-    type NrwLayerName,
-    type VisibleLayersChangeHandler,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
@@ -21,7 +20,6 @@ import NrwLayer from './NrwLayer';
 import NrwLayerPanel from './NrwLayerPanel';
 import NrwMapContainer from './NrwMapContainer';
 import NrwMarker from './NrwMarker';
-import useNrwLayers from './useNrwLayers';
 
 // This component knows nothing about Mapbox.
 
@@ -49,15 +47,8 @@ function parseCentroid(centroid: unknown): NrwLngLat | undefined {
 function NrwMap(props: {
     mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
-    urlLayers: NrwLayerName[] | undefined;
-    onVisibleLayersChange: VisibleLayersChangeHandler;
 }) {
-    const {
-        mapView,
-        onMapViewChange,
-        urlLayers,
-        onVisibleLayersChange,
-    } = props;
+    const { mapView, onMapViewChange } = props;
 
     const {
         events,
@@ -67,10 +58,11 @@ function NrwMap(props: {
         onEventSelect,
     } = useContext(NrwEventsContext);
 
-    const { availableLayers, visibleLayers, handleLayerToggle } = useNrwLayers({
-        urlLayers,
-        onVisibleLayersChange,
-    });
+    const {
+        availableLayers,
+        visibleLayers,
+        onLayerToggle,
+    } = useContext(NrwLayersContext);
 
     const eventCountryCodeIso3 = parseCountryCode(selectedEvent?.countryCodeIso3);
 
@@ -78,7 +70,7 @@ function NrwMap(props: {
         <NrwLayerPanel
             layers={availableLayers}
             visibleLayers={visibleLayers}
-            onLayerToggle={handleLayerToggle}
+            onLayerToggle={onLayerToggle}
         />
     ) : undefined;
 

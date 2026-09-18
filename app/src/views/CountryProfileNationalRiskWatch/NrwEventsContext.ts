@@ -1,10 +1,11 @@
 import { createContext } from 'react';
 
-import { type NrwEvent } from './types';
+import {
+    type NrwEvent,
+    type NrwEventIdChangeHandler,
+} from './types';
 
-type NrwEventIdChangeHandler = (eventId: NrwEvent['eventId'] | undefined) => void;
-
-interface NrwEventsContextProps {
+export interface NrwEventsContextProps {
     events: NrwEvent[] | undefined;
     pending: boolean;
     errored: boolean;

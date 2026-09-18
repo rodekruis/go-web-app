@@ -8,6 +8,7 @@ import { useTranslation } from '@ifrc-go/ui/hooks';
 
 import supportedLayerNames from '#utils/nrw/layers';
 import {
+    type LayerToggleHandler,
     type NrwLayer,
     type NrwLayerName,
 } from '#views/CountryProfileNationalRiskWatch/types';
@@ -18,7 +19,7 @@ import styles from './styles.module.css';
 function NrwLayerPanel(props: {
     layers: NrwLayer[] | undefined;
     visibleLayers: NrwLayerName[];
-    onLayerToggle: (name: NrwLayerName) => void;
+    onLayerToggle: LayerToggleHandler;
 }) {
     const { layers, visibleLayers, onLayerToggle } = props;
 
