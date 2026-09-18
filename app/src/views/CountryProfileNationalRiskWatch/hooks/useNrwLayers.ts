@@ -1,12 +1,8 @@
-import {
-    useCallback,
-    useMemo,
-} from 'react';
+import { useCallback } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
 import { useNrwRequest } from '#utils/restRequest';
 
-import { type NrwLayersContextProps } from '../contexts/NrwLayersContext';
 import {
     type NrwHazardType,
     type NrwLayerName,
@@ -19,7 +15,7 @@ function useNrwLayers(props: {
     urlLayers: NrwLayerName[] | undefined;
     onVisibleLayersChange: VisibleLayersChangeHandler;
     hazardType?: NrwHazardType;
-}): NrwLayersContextProps {
+}) {
     const {
         urlLayers,
         onVisibleLayersChange,
@@ -46,14 +42,11 @@ function useNrwLayers(props: {
         [visibleLayers, onVisibleLayersChange],
     );
 
-    return useMemo(
-        () => ({
-            availableLayers,
-            visibleLayers,
-            onLayerToggle: handleLayerToggle,
-        }),
-        [availableLayers, visibleLayers, handleLayerToggle],
-    );
+    return {
+        availableLayers,
+        visibleLayers,
+        handleLayerToggle,
+    };
 }
 
 export default useNrwLayers;

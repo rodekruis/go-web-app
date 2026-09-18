@@ -5,13 +5,15 @@ import {
 } from '@togglecorp/fujs';
 
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
-import NrwLayersContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwLayersContext';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,
+    type LayerToggleHandler,
     type Longitude,
     type MapView,
     type MapViewChangeHandler,
+    type NrwLayer as NrwLayerType,
+    type NrwLayerName,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
@@ -47,8 +49,17 @@ function parseCentroid(centroid: unknown): NrwLngLat | undefined {
 function NrwMap(props: {
     mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
+    availableLayers: NrwLayerType[] | undefined;
+    visibleLayers: NrwLayerName[];
+    onLayerToggle: LayerToggleHandler;
 }) {
-    const { mapView, onMapViewChange } = props;
+    const {
+        mapView,
+        onMapViewChange,
+        availableLayers,
+        visibleLayers,
+        onLayerToggle,
+    } = props;
 
     const {
         events,
@@ -57,12 +68,6 @@ function NrwMap(props: {
         onEventHoverChange,
         onEventSelect,
     } = useContext(NrwEventsContext);
-
-    const {
-        availableLayers,
-        visibleLayers,
-        onLayerToggle,
-    } = useContext(NrwLayersContext);
 
     const eventCountryCodeIso3 = parseCountryCode(selectedEvent?.countryCodeIso3);
 

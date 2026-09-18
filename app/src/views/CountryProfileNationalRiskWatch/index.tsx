@@ -12,7 +12,6 @@ import Page from '#components/Page';
 import { nrwStandalone } from '#config';
 
 import NrwEventsContext from './contexts/NrwEventsContext';
-import NrwLayersContext from './contexts/NrwLayersContext';
 import useNrwEvents from './hooks/useNrwEvents';
 import useNrwLayers from './hooks/useNrwLayers';
 import useNrwMapView from './hooks/useNrwMapView';
@@ -61,31 +60,36 @@ export function Component() {
         countriesPending: isDefined(selectedEventId) && eventsPending,
     });
 
-    const nrwLayersContext = useNrwLayers({
+    const {
+        availableLayers,
+        visibleLayers,
+        handleLayerToggle,
+    } = useNrwLayers({
         urlLayers: layersFromUrlParams,
         onVisibleLayersChange: setLayersFromUrlParams,
     });
 
     const content = (
         <NrwEventsContext.Provider value={nrwEventsContext}>
-            <NrwLayersContext.Provider value={nrwLayersContext}>
-                <Container
-                    heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
+            <Container
+                heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
+            >
+                <ListView
+                    layout="grid"
+                    withSidebar
+                    sidebarSize="lg"
+                    gridContentClassName={styles.eventsHeight}
                 >
-                    <ListView
-                        layout="grid"
-                        withSidebar
-                        sidebarSize="lg"
-                        gridContentClassName={styles.eventsHeight}
-                    >
-                        <NrwMap
-                            mapView={mapView}
-                            onMapViewChange={handleMapViewChange}
-                        />
-                        <NrwEvents />
-                    </ListView>
-                </Container>
-            </NrwLayersContext.Provider>
+                    <NrwMap
+                        mapView={mapView}
+                        onMapViewChange={handleMapViewChange}
+                        availableLayers={availableLayers}
+                        visibleLayers={visibleLayers}
+                        onLayerToggle={handleLayerToggle}
+                    />
+                    <NrwEvents />
+                </ListView>
+            </Container>
         </NrwEventsContext.Provider>
     );
 
