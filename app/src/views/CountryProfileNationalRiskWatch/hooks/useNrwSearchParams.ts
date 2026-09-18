@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import {
     useParams,
     useSearchParams,
@@ -169,26 +170,29 @@ function useNrwSearchParams() {
         );
     };
 
-    const handleSelectedEventIdChange = (eventId: NrwEvent['eventId'] | undefined) => {
-        if (eventId === selectedEventId) {
-            return;
-        }
+    const handleSelectedEventIdChange = useCallback(
+        (eventId: NrwEvent['eventId'] | undefined) => {
+            if (eventId === selectedEventId) {
+                return;
+            }
 
-        setSearchParams(
-            (prevParams) => {
-                if (isDefined(eventId)) {
-                    prevParams.set('event', String(eventId));
-                } else {
-                    prevParams.delete('event');
-                }
-                prevParams.delete('z');
-                prevParams.delete('lat');
-                prevParams.delete('lon');
-                return prevParams;
-            },
-            { replace: true },
-        );
-    };
+            setSearchParams(
+                (prevParams) => {
+                    if (isDefined(eventId)) {
+                        prevParams.set('event', String(eventId));
+                    } else {
+                        prevParams.delete('event');
+                    }
+                    prevParams.delete('z');
+                    prevParams.delete('lat');
+                    prevParams.delete('lon');
+                    return prevParams;
+                },
+                { replace: true },
+            );
+        },
+        [selectedEventId, setSearchParams],
+    );
 
     return {
         zoomFromUrlParams,

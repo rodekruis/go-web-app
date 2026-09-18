@@ -1,15 +1,16 @@
+import { useContext } from 'react';
 import {
     isDefined,
     isNotDefined,
 } from '@togglecorp/fujs';
 
+import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/NrwEventsContext';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,
     type Longitude,
     type MapView,
     type MapViewChangeHandler,
-    type NrwEvent,
     type NrwLayerName,
     type VisibleLayersChangeHandler,
 } from '#views/CountryProfileNationalRiskWatch/types';
@@ -50,23 +51,21 @@ function NrwMap(props: {
     onMapViewChange: MapViewChangeHandler;
     urlLayers: NrwLayerName[] | undefined;
     onVisibleLayersChange: VisibleLayersChangeHandler;
-    events: NrwEvent[] | undefined;
-    selectedEvent: NrwEvent | undefined;
-    hoveredEventId: NrwEvent['eventId'] | undefined;
-    onEventHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
-    onEventSelect: (eventId: NrwEvent['eventId'] | undefined) => void;
 }) {
     const {
         mapView,
         onMapViewChange,
         urlLayers,
         onVisibleLayersChange,
+    } = props;
+
+    const {
         events,
         selectedEvent,
         hoveredEventId,
         onEventHoverChange,
         onEventSelect,
-    } = props;
+    } = useContext(NrwEventsContext);
 
     const { availableLayers, visibleLayers, handleLayerToggle } = useNrwLayers({
         urlLayers,
