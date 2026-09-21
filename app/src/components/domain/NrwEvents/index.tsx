@@ -1,5 +1,6 @@
 import {
     useCallback,
+    useContext,
     useMemo,
 } from 'react';
 import {
@@ -14,6 +15,7 @@ import {
     isDefined,
 } from '@togglecorp/fujs';
 
+import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwEventCard from './NrwEventCard';
@@ -25,18 +27,12 @@ const eventKeySelector = (event: NrwEvent) => event.eventId;
 
 interface Props {
     className?: string;
-    events: NrwEvent[] | undefined;
-    pending: boolean;
-    errored: boolean;
-    selectedEvent: NrwEvent | undefined;
-    hoveredEventId: NrwEvent['eventId'] | undefined;
-    onEventSelect: (eventId: NrwEvent['eventId'] | undefined) => void;
-    onEventHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
 }
 
 function NrwEvents(props: Props) {
+    const { className } = props;
+
     const {
-        className,
         events,
         pending,
         errored,
@@ -44,7 +40,7 @@ function NrwEvents(props: Props) {
         hoveredEventId,
         onEventSelect,
         onEventHoverChange,
-    } = props;
+    } = useContext(NrwEventsContext);
 
     const strings = useTranslation(i18n);
 

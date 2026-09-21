@@ -1,20 +1,64 @@
+import {
+    useMemo,
+    useState,
+} from 'react';
+import { isDefined } from '@togglecorp/fujs';
+
 import { useNrwRequest } from '#utils/restRequest';
 
-import { type CountryCodeIso3 } from '../types';
+import { type NrwEventsContextProps } from '../contexts/NrwEventsContext';
+import {
+    type CountryCodeIso3,
+    type NrwEvent,
+    type NrwEventIdChangeHandler,
+} from '../types';
 
-function useNrwEvents(countries: CountryCodeIso3[] | undefined, active: boolean = true) {
-    const { response, pending, error } = useNrwRequest({
+function useNrwEvents(props: {
+    countries: CountryCodeIso3[] | undefined;
+    selectedEventId: NrwEvent['eventId'] | undefined;
+    onSelectedEventIdChange: NrwEventIdChangeHandler;
+    active?: boolean;
+}): NrwEventsContextProps {
+    const {
+        countries,
+        selectedEventId,
+        onSelectedEventIdChange,
+        active = true,
+    } = props;
+
+    const { response: events, pending, error } = useNrwRequest({
         url: '/events',
         apiType: 'nrw',
         skip: !countries,
         query: { active, countryCodesIso3: countries?.length ? countries.join(',') : undefined },
     });
 
-    return {
-        events: response,
-        pending: pending || !countries,
-        error,
-    };
+    const eventsPending = pending || !countries;
+
+    const selectedEvent = events?.find((event) => event.eventId === selectedEventId);
+
+    const [hoveredEventId, setHoveredEventId] = useState<NrwEvent['eventId'] | undefined>();
+
+    return useMemo(
+        () => ({
+            events,
+            pending: eventsPending,
+            errored: isDefined(error),
+            selectedEvent,
+            hoveredEventId,
+            onEventSelect: onSelectedEventIdChange,
+            onEventHoverChange: setHoveredEventId,
+        }),
+        [
+            events,
+            eventsPending,
+            error,
+            selectedEvent,
+            hoveredEventId,
+            onSelectedEventIdChange,
+            setHoveredEventId,
+        ],
+    );
 }
 
 export default useNrwEvents;

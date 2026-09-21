@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
     Container,
     ListView,
@@ -12,35 +11,15 @@ import NrwNavbar from '#components/domain/NrwNavbar';
 import Page from '#components/Page';
 import { nrwStandalone } from '#config';
 
-import useNrwAdminAreas from './hooks/useNrwAdminAreas';
+import NrwEventsContext from './contexts/NrwEventsContext';
 import useNrwEvents from './hooks/useNrwEvents';
+import useNrwLayers from './hooks/useNrwLayers';
+import useNrwMapView from './hooks/useNrwMapView';
 import useNrwSearchParams from './hooks/useNrwSearchParams';
-import NrwLngLat from './NrwLngLat';
-import {
-    type AdminLevel,
-    type Latitude,
-    type Longitude,
-    type MapView,
-    type NrwEvent,
-    type Zoom,
-} from './types';
-import {
-    getEventCountries,
-    getFeatureCollectionBounds,
-    getMapView,
-} from './utils';
+import { getEventCountries } from './utils';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
-
-const defaultZoom = 3 as Zoom;
-const defaultLatitude = 0 as Latitude;
-const defaultLongitude = 0 as Longitude;
-
-const defaultMapView: MapView = {
-    center: new NrwLngLat(defaultLongitude, defaultLatitude),
-    zoom: defaultZoom,
-};
 
 // eslint-disable-next-line import/prefer-default-export
 export function Component() {
@@ -55,81 +34,63 @@ export function Component() {
         handleMapViewChange,
         selectedEventId,
         handleSelectedEventIdChange,
+        layersFromUrlParams,
+        setLayersFromUrlParams,
     } = useNrwSearchParams();
 
-    // Set from the longitude/latitude search params when they are present.
-    const urlMapView = getMapView(
-        latitudeFromUrlParams,
-        longitudeFromUrlParams,
-        zoomFromUrlParams ?? defaultZoom,
-    );
-
-    const {
-        events,
-        pending: eventsPending,
-        error: eventsError,
-    } = useNrwEvents(urlCountries);
+    const nrwEventsContext = useNrwEvents({
+        countries: urlCountries,
+        selectedEventId,
+        onSelectedEventIdChange: handleSelectedEventIdChange,
+    });
+    const { events, pending: eventsPending, selectedEvent } = nrwEventsContext;
 
     const eventCountries = getEventCountries(events ?? []);
     const countries = urlCountries?.length ? urlCountries : eventCountries;
-
-    const selectedEvent = events?.find((event) => event.eventId === selectedEventId);
-
-    const [hoveredEventId, setHoveredEventId] = useState<NrwEvent['eventId'] | undefined>();
 
     const mapCountries = isDefined(selectedEvent)
         ? getEventCountries([selectedEvent])
         : countries;
 
-    const {
-        adminAreas,
-    } = useNrwAdminAreas({
+    const mapView = useNrwMapView({
+        urlZoom: zoomFromUrlParams,
+        urlLatitude: latitudeFromUrlParams,
+        urlLongitude: longitudeFromUrlParams,
         countries: mapCountries,
-        adminLevels: [0 as AdminLevel],
-        skip: isDefined(urlMapView) || (isDefined(selectedEventId) && eventsPending),
+        countriesPending: isDefined(selectedEventId) && eventsPending,
     });
 
-    const countryBounds = isDefined(adminAreas)
-        ? getFeatureCollectionBounds(adminAreas)
-        : undefined;
-
-    const countryMapView = isDefined(countryBounds)
-        ? { ...defaultMapView, fitBounds: countryBounds }
-        : undefined;
-
-    // MapView preference: URL > countries > default.
-    const mapView = urlMapView ?? countryMapView ?? defaultMapView;
+    const {
+        availableLayers,
+        visibleLayers,
+        handleLayerToggle,
+    } = useNrwLayers({
+        urlLayers: layersFromUrlParams,
+        onVisibleLayersChange: setLayersFromUrlParams,
+    });
 
     const content = (
-        <Container
-            heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
-        >
-            <ListView
-                layout="grid"
-                withSidebar
-                sidebarSize="lg"
-                gridContentClassName={styles.eventsHeight}
+        <NrwEventsContext.Provider value={nrwEventsContext}>
+            <Container
+                heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
             >
-                <NrwMap
-                    mapView={mapView}
-                    onMapViewChange={handleMapViewChange}
-                    events={events}
-                    selectedEvent={selectedEvent}
-                    hoveredEventId={hoveredEventId}
-                    onEventHoverChange={setHoveredEventId}
-                    onEventSelect={handleSelectedEventIdChange}
-                />
-                <NrwEvents
-                    events={events}
-                    pending={eventsPending}
-                    errored={isDefined(eventsError)}
-                    selectedEvent={selectedEvent}
-                    hoveredEventId={hoveredEventId}
-                    onEventSelect={handleSelectedEventIdChange}
-                    onEventHoverChange={setHoveredEventId}
-                />
-            </ListView>
-        </Container>
+                <ListView
+                    layout="grid"
+                    withSidebar
+                    sidebarSize="lg"
+                    gridContentClassName={styles.eventsHeight}
+                >
+                    <NrwMap
+                        mapView={mapView}
+                        onMapViewChange={handleMapViewChange}
+                        availableLayers={availableLayers}
+                        visibleLayers={visibleLayers}
+                        onLayerToggle={handleLayerToggle}
+                    />
+                    <NrwEvents />
+                </ListView>
+            </Container>
+        </NrwEventsContext.Provider>
     );
 
     if (nrwStandalone) {

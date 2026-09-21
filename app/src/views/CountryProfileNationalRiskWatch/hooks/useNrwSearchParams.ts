@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import {
     useParams,
     useSearchParams,
@@ -7,6 +8,7 @@ import { isDefined } from '@togglecorp/fujs';
 import { nrwStandalone } from '#config';
 import useCountry from '#hooks/domain/useCountry';
 import useUrlSearchState from '#hooks/useUrlSearchState';
+import supportedLayerNames from '#utils/nrw/layers';
 
 import {
     type CountryCodeIso3,
@@ -14,6 +16,7 @@ import {
     type Longitude,
     type MapViewChangeHandler,
     type NrwEvent,
+    type NrwLayerName,
     type UrlParameter,
     type Zoom,
 } from '../types';
@@ -85,6 +88,26 @@ function serializeCountriesUrlParameter(countryCodes: CountryCodeIso3[]) {
     return countryCodes.join(',');
 }
 
+// Only accept layer names that are specifically supported by the frontend
+function parseLayersUrlParameter(value: UrlParameter): NrwLayerName[] | undefined {
+    if (!value || value.trim() === '') {
+        return undefined; // fallback to default layers
+    }
+
+    const requestedNames = value.split(',').map((name) => name.trim());
+
+    return Object.values(supportedLayerNames)
+        .filter((name) => requestedNames.includes(name));
+}
+
+function serializeLayersUrlParameter(layerNames: NrwLayerName[] | undefined) {
+    if (!layerNames || layerNames.length === 0) {
+        return undefined;
+    }
+
+    return layerNames.join(',');
+}
+
 const roundZoomForUrl = (zoom: Zoom) => zoom.toFixed(2).toString();
 
 const roundLatitudeOrLongitudeForUrl = (value: Latitude | Longitude) => value.toFixed(6).toString();
@@ -108,6 +131,11 @@ function useNrwSearchParams() {
         parseEventIdUrlParameter,
         serializeEventIdUrlParameter,
     );
+    const [layersFromUrlParams, setLayersFromUrlParams] = useUrlSearchState(
+        'layers',
+        parseLayersUrlParameter,
+        serializeLayersUrlParameter,
+    );
 
     // For embedded, get the country from the route.
     // These are hooks, so they can't be placed in a conditional block.
@@ -126,42 +154,44 @@ function useNrwSearchParams() {
         ? countriesFromUrlParams
         : countriesFromRouting;
 
-    const handleMapViewChange: MapViewChangeHandler = (
-        newZoom,
-        newLatitude,
-        newLongitude,
-    ) => {
-        setSearchParams(
-            (prevParams) => {
-                prevParams.set('z', roundZoomForUrl(newZoom));
-                prevParams.set('lat', roundLatitudeOrLongitudeForUrl(newLatitude));
-                prevParams.set('lon', roundLatitudeOrLongitudeForUrl(newLongitude));
-                return prevParams;
-            },
-            { replace: true },
-        );
-    };
+    const handleMapViewChange: MapViewChangeHandler = useCallback(
+        (newZoom, newLatitude, newLongitude) => {
+            setSearchParams(
+                (prevParams) => {
+                    prevParams.set('z', roundZoomForUrl(newZoom));
+                    prevParams.set('lat', roundLatitudeOrLongitudeForUrl(newLatitude));
+                    prevParams.set('lon', roundLatitudeOrLongitudeForUrl(newLongitude));
+                    return prevParams;
+                },
+                { replace: true },
+            );
+        },
+        [setSearchParams],
+    );
 
-    const handleSelectedEventIdChange = (eventId: NrwEvent['eventId'] | undefined) => {
-        if (eventId === selectedEventId) {
-            return;
-        }
+    const handleSelectedEventIdChange = useCallback(
+        (eventId: NrwEvent['eventId'] | undefined) => {
+            if (eventId === selectedEventId) {
+                return;
+            }
 
-        setSearchParams(
-            (prevParams) => {
-                if (isDefined(eventId)) {
-                    prevParams.set('event', String(eventId));
-                } else {
-                    prevParams.delete('event');
-                }
-                prevParams.delete('z');
-                prevParams.delete('lat');
-                prevParams.delete('lon');
-                return prevParams;
-            },
-            { replace: true },
-        );
-    };
+            setSearchParams(
+                (prevParams) => {
+                    if (isDefined(eventId)) {
+                        prevParams.set('event', String(eventId));
+                    } else {
+                        prevParams.delete('event');
+                    }
+                    prevParams.delete('z');
+                    prevParams.delete('lat');
+                    prevParams.delete('lon');
+                    return prevParams;
+                },
+                { replace: true },
+            );
+        },
+        [selectedEventId, setSearchParams],
+    );
 
     return {
         zoomFromUrlParams,
@@ -171,6 +201,8 @@ function useNrwSearchParams() {
         handleMapViewChange,
         selectedEventId,
         handleSelectedEventIdChange,
+        layersFromUrlParams,
+        setLayersFromUrlParams,
     };
 }
 

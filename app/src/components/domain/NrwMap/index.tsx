@@ -1,15 +1,19 @@
+import { useContext } from 'react';
 import {
     isDefined,
     isNotDefined,
 } from '@togglecorp/fujs';
 
+import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,
+    type LayerToggleHandler,
     type Longitude,
     type MapView,
     type MapViewChangeHandler,
-    type NrwEvent,
+    type NrwLayer as NrwLayerType,
+    type NrwLayerName,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
@@ -18,7 +22,6 @@ import NrwLayer from './NrwLayer';
 import NrwLayerPanel from './NrwLayerPanel';
 import NrwMapContainer from './NrwMapContainer';
 import NrwMarker from './NrwMarker';
-import useNrwLayers from './useNrwLayers';
 
 // This component knows nothing about Mapbox.
 
@@ -46,23 +49,25 @@ function parseCentroid(centroid: unknown): NrwLngLat | undefined {
 function NrwMap(props: {
     mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
-    events: NrwEvent[] | undefined;
-    selectedEvent: NrwEvent | undefined;
-    hoveredEventId: NrwEvent['eventId'] | undefined;
-    onEventHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
-    onEventSelect: (eventId: NrwEvent['eventId'] | undefined) => void;
+    availableLayers: NrwLayerType[] | undefined;
+    visibleLayers: NrwLayerName[];
+    onLayerToggle: LayerToggleHandler;
 }) {
     const {
         mapView,
         onMapViewChange,
+        availableLayers,
+        visibleLayers,
+        onLayerToggle,
+    } = props;
+
+    const {
         events,
         selectedEvent,
         hoveredEventId,
         onEventHoverChange,
         onEventSelect,
-    } = props;
-
-    const { availableLayers, visibleLayers, handleLayerToggle } = useNrwLayers();
+    } = useContext(NrwEventsContext);
 
     const eventCountryCodeIso3 = parseCountryCode(selectedEvent?.countryCodeIso3);
 
@@ -70,7 +75,7 @@ function NrwMap(props: {
         <NrwLayerPanel
             layers={availableLayers}
             visibleLayers={visibleLayers}
-            onLayerToggle={handleLayerToggle}
+            onLayerToggle={onLayerToggle}
         />
     ) : undefined;
 
