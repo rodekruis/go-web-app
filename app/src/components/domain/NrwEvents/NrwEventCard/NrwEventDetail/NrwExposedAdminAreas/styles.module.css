@@ -32,6 +32,10 @@
             font-weight: inherit;
         }
 
+        td {
+          text-indent: var(--go-ui-spacing-lg);
+        }
+
         tbody tr {
             border-top: var(--go-ui-width-separator-sm) solid var(--go-ui-color-gray-30);
         }
