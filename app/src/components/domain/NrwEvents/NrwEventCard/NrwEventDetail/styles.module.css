@@ -25,7 +25,6 @@
     }
 
     .fact-value {
-        text-transform: uppercase;
         font-weight: var(--go-ui-font-weight-semibold);
     }
 
