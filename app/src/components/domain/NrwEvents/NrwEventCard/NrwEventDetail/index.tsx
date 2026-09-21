@@ -4,7 +4,7 @@ import {
     faDatabase,
     faMap,
     faTriangleExclamation,
-} from '@fortawesome/pro-solid-svg-icons';
+} from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import {
