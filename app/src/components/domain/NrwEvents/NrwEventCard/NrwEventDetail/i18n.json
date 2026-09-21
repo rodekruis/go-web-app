@@ -9,7 +9,7 @@
         "nrwEventDetailStartValue": "{relative}, {date}",
         "nrwEventDetailAdvisoryLabel": "Advisory:",
         "nrwEventDetailAdvisoryTrigger": "Trigger - activate EAP",
-        "nrwEventDetailAdvisoryAlert": "Alert - notify relevant others",
+        "nrwEventDetailAdvisoryAlert": "Alert - notify relevant stakeholders",
         "nrwEventDetailExposedAdminAreasHeading": "Exposed areas:",
         "nrwEventDetailDataSourcesHeading": "Data sources:",
         "nrwEventDetailTimestamps": "Event created: {created}, Last updated: {updated}"
