@@ -29,9 +29,7 @@ function useNrwMapView(props: {
     urlZoom: Zoom | null;
     urlLatitude: Latitude | null;
     urlLongitude: Longitude | null;
-    // The countries to fit the map to when the URL has no map view.
     countries: CountryCodeIso3[] | undefined;
-    // True while the countries to fit are not known yet.
     countriesPending: boolean;
 }): MapView {
     const {
