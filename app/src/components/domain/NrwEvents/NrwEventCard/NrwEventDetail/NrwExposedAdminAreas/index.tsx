@@ -1,8 +1,6 @@
 import { useMemo } from 'react';
-import {
-    faLocationDot,
-    faPersonRays,
-} from '@fortawesome/pro-solid-svg-icons';
+import { faLocationDot } from '@fortawesome/pro-regular-svg-icons';
+import { faPersonRays } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NumberOutput } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
