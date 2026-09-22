@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
+import supportedLayerNames from '#utils/nrw/layers';
 import { useNrwRequest } from '#utils/restRequest';
 
 import {
@@ -9,7 +10,7 @@ import {
     type VisibleLayersChangeHandler,
 } from '../types';
 
-const defaultVisibleLayers: NrwLayerName[] = [];
+const defaultVisibleLayers: NrwLayerName[] = [supportedLayerNames.exposedPopulation];
 
 function useNrwLayers(props: {
     urlLayers: NrwLayerName[] | undefined;
