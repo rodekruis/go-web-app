@@ -16,6 +16,7 @@ import {
     type MapView,
     type NrwAdminAreaAttributes,
     type NrwAdminAreaFeatureCollection,
+    type NrwAdminAreaProperties,
     type NrwEvent,
     type PlaceCode,
     type Zoom,
@@ -53,6 +54,20 @@ export function getMapView(
     };
 }
 
+// The parent place code properties of an admin area, one per admin level.
+// Checked against the API schema, so a schema change shows up here.
+const placeCodeLevelKeys = [
+    'placeCodeLevel0',
+    'placeCodeLevel1',
+    'placeCodeLevel2',
+    'placeCodeLevel3',
+    'placeCodeLevel4',
+] as const satisfies readonly (keyof NrwAdminAreaProperties)[];
+
+// The deepest admin level whose areas can be fetched by parent,
+// as the parent must have a place code property.
+export const maxQueryableAdminLevel = placeCodeLevelKeys.length as AdminLevel;
+
 // Build the pg_featureserv-style filter for the given admin level
 // of the given countries. Country codes are already validated
 // as ISO_A3, so it's safe to interpolate them into the filter string.
@@ -65,8 +80,9 @@ function getCountryAdminLevelFilter(
         .map((countryCode) => `countryCodeIso3='${countryCode}'`)
         .join(' OR ');
 
-    const parentFilter = isDefined(parentPlaceCode)
-        ? ` AND placeCodeLevel${adminLevel - 1}='${parentPlaceCode}'`
+    const parentPlaceCodeKey = placeCodeLevelKeys[adminLevel - 1];
+    const parentFilter = isDefined(parentPlaceCode) && isDefined(parentPlaceCodeKey)
+        ? ` AND ${parentPlaceCodeKey}='${parentPlaceCode}'`
         : '';
 
     return `(${countryFilter}) AND adminLevel=${adminLevel}${parentFilter}`;

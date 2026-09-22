@@ -1,7 +1,9 @@
 import {
     useCallback,
+    useRef,
     useState,
 } from 'react';
+import { isDefined } from '@togglecorp/fujs';
 
 import {
     type AdminLevel,
@@ -9,9 +11,10 @@ import {
     type NrwAdminAreaFeatureCollection,
     type PlaceCode,
 } from '#views/CountryProfileNationalRiskWatch/types';
+import { maxQueryableAdminLevel } from '#views/CountryProfileNationalRiskWatch/utils';
 
 // The whole country is one area, so start one level down.
-const topAdminLevel = 1 as AdminLevel;
+const minAdminLevel = 1 as AdminLevel;
 
 // Track the admin area drilled into, as a path of place codes
 // from the top admin level down.
@@ -22,9 +25,12 @@ function useAdminAreaDrill(countryCodeIso3: CountryCodeIso3) {
         path: PlaceCode[];
     }>({ countryCodeIso3, path: [] });
 
+    // The admin areas found to have no children, so they are not fetched again.
+    const childlessPlaceCodes = useRef(new Set<PlaceCode>());
+
     const drillPath = drill.countryCodeIso3 === countryCodeIso3 ? drill.path : [];
     const parentPlaceCode = drillPath[drillPath.length - 1];
-    const adminLevel = (topAdminLevel + drillPath.length) as AdminLevel;
+    const adminLevel = (minAdminLevel + drillPath.length) as AdminLevel;
 
     const setDrillPath = useCallback(
         (update: (path: PlaceCode[]) => PlaceCode[]) => {
@@ -37,8 +43,15 @@ function useAdminAreaDrill(countryCodeIso3: CountryCodeIso3) {
     );
 
     const drillDown = useCallback(
-        (placeCode: PlaceCode) => setDrillPath((path) => [...path, placeCode]),
-        [setDrillPath],
+        (placeCode: PlaceCode) => {
+            if (
+                adminLevel < maxQueryableAdminLevel
+                && !childlessPlaceCodes.current.has(placeCode)
+            ) {
+                setDrillPath((path) => [...path, placeCode]);
+            }
+        },
+        [setDrillPath, adminLevel],
     );
 
     const drillUp = useCallback(
@@ -50,10 +63,13 @@ function useAdminAreaDrill(countryCodeIso3: CountryCodeIso3) {
     const handleAdminAreasSuccess = useCallback(
         (adminAreas: NrwAdminAreaFeatureCollection) => {
             if (adminAreas.features.length === 0) {
+                if (isDefined(parentPlaceCode)) {
+                    childlessPlaceCodes.current.add(parentPlaceCode);
+                }
                 drillUp();
             }
         },
-        [drillUp],
+        [drillUp, parentPlaceCode],
     );
 
     return {
@@ -62,6 +78,7 @@ function useAdminAreaDrill(countryCodeIso3: CountryCodeIso3) {
         drillDown,
         drillUp,
         handleAdminAreasSuccess,
+        handleAdminAreasFailure: drillUp,
     };
 }
 

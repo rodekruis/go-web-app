@@ -13,6 +13,7 @@ import {
 import {
     getAdminAreasQuery,
     getEventCountries,
+    maxQueryableAdminLevel,
     parseAdminAreaProperties,
 } from './utils';
 
@@ -98,6 +99,19 @@ describe('getAdminAreasQuery', () => {
         expect(getAdminAreasQuery(countries, 0 as AdminLevel).transform).toBe('simplify,0.5');
         expect(getAdminAreasQuery(countries, 2 as AdminLevel).transform).toBe('simplify,0.001');
         expect(getAdminAreasQuery(countries, 5 as AdminLevel).transform).toBe('simplify,0.0005');
+    });
+});
+
+describe('maxQueryableAdminLevel', () => {
+    test('is one deeper than the last parent place code level', () => {
+        expect(maxQueryableAdminLevel).toBe(5);
+    });
+
+    test('has no parent filter beyond the last parent place code level', () => {
+        const countries = ['SSD' as CountryCodeIso3];
+        const query = getAdminAreasQuery(countries, 9 as AdminLevel, 'SS03' as PlaceCode);
+
+        expect(query.filter).toBe("(countryCodeIso3='SSD') AND adminLevel=9");
     });
 });
 

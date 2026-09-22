@@ -1,3 +1,8 @@
+import {
+    useCallback,
+    useState,
+} from 'react';
+
 import { useNrwRequest } from '#utils/restRequest';
 
 import {
@@ -14,20 +19,35 @@ function useNrwAdminAreas(options: {
     parentPlaceCode?: PlaceCode;
     skip: boolean;
     onSuccess?: (adminAreas: NrwAdminAreaFeatureCollection) => void;
+    onFailure?: () => void;
 }) {
     const {
-        countries, adminLevel, parentPlaceCode, skip, onSuccess,
+        countries, adminLevel, parentPlaceCode, skip, onSuccess, onFailure,
     } = options;
 
-    const { response, error } = useNrwRequest({
+    const [adminAreas, setAdminAreas] = useState<NrwAdminAreaFeatureCollection>();
+
+    const handleSuccess = useCallback(
+        (response: NrwAdminAreaFeatureCollection) => {
+            if (response.features.length > 0) {
+                setAdminAreas(response);
+            }
+            onSuccess?.(response);
+        },
+        [onSuccess],
+    );
+
+    const { pending, error } = useNrwRequest({
         url: '/admin-areas',
         apiType: 'nrw',
         skip: skip || !countries?.length,
         query: getAdminAreasQuery(countries ?? [], adminLevel, parentPlaceCode),
-        onSuccess,
+        preserveResponse: true,
+        onSuccess: handleSuccess,
+        onFailure,
     });
 
-    return { adminAreas: response, error };
+    return { adminAreas, pending, error };
 }
 
 export default useNrwAdminAreas;

@@ -51,14 +51,16 @@ function NrwShapeLayer(props: {
         drillDown,
         drillUp,
         handleAdminAreasSuccess,
+        handleAdminAreasFailure,
     } = useAdminAreaDrill(countryCodeIso3);
 
-    const { adminAreas } = useNrwAdminAreas({
+    const { adminAreas, pending } = useNrwAdminAreas({
         countries: [countryCodeIso3],
         adminLevel,
         parentPlaceCode,
         skip: !countryCodeIso3,
         onSuccess: handleAdminAreasSuccess,
+        onFailure: handleAdminAreasFailure,
     });
 
     // Fit the map to the admin areas of the level drilled into.
@@ -92,7 +94,8 @@ function NrwShapeLayer(props: {
         },
         [drillDown, drillUp, clearHover],
     );
-    useAdminAreaClick(id, isInteractive, handleClick);
+    // The last level stays on the map while the next loads, so hold clicks until then.
+    useAdminAreaClick(id, isInteractive && !pending, handleClick);
 
     if (isNotDefined(hoveredAdminArea) || !isVisible) {
         return null;
