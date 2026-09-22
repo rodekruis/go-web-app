@@ -92,10 +92,11 @@ export function getAdminAreasQuery(
     };
 }
 
-// Sanitize to a valid place code: an ISO_A2 country code followed by digits, e.g. SS0303.
+// Sanitize to a valid place code. The formats differ per country, e.g. SS0303 or KEN.8_1,
+// so only the characters are checked, which is what keeps the filter string safe.
 // Returns null if invalid.
 export function parsePlaceCode(value: unknown): PlaceCode | null {
-    const placeCodeRegex = /^[A-Z]{2}\d*$/;
+    const placeCodeRegex = /^[A-Za-z0-9._-]+$/;
     return typeof value === 'string' && placeCodeRegex.test(value) ? (value as PlaceCode) : null;
 }
 

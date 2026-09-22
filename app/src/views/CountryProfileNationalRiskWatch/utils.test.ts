@@ -135,9 +135,15 @@ describe('parseAdminAreaProperties', () => {
         expect(parseAdminAreaProperties(properties)?.population).toBeUndefined();
     });
 
+    test('accepts the place code formats of different countries', () => {
+        expect(parseAdminAreaProperties({ adminLevel: 1, placeCode: 'KEN.8_1', nameEn: 'HomaBay' })?.placeCode).toBe('KEN.8_1');
+        expect(parseAdminAreaProperties({ adminLevel: 1, placeCode: 'SS01', nameEn: 'x' })?.placeCode).toBe('SS01');
+    });
+
     test('returns null for invalid properties', () => {
         expect(parseAdminAreaProperties(null)).toBeNull();
         expect(parseAdminAreaProperties({ adminLevel: '1', placeCode: 'SS01', nameEn: 'x' })).toBeNull();
         expect(parseAdminAreaProperties({ adminLevel: 1, placeCode: "SS01' OR 1=1", nameEn: 'x' })).toBeNull();
+        expect(parseAdminAreaProperties({ adminLevel: 1, placeCode: '', nameEn: 'x' })).toBeNull();
     });
 });
