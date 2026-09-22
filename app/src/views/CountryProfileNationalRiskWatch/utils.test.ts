@@ -5,10 +5,16 @@ import {
 } from 'vitest';
 
 import {
+    type AdminLevel,
     type CountryCodeIso3,
     type NrwEvent,
+    type PlaceCode,
 } from './types';
-import { getEventCountries } from './utils';
+import {
+    getAdminAreasQuery,
+    getEventCountries,
+    parseAdminAreaProperties,
+} from './utils';
 
 function createEvent(countryCodeIso3: string): NrwEvent {
     return { countryCodeIso3 } as NrwEvent;
@@ -70,5 +76,68 @@ describe('getEventCountries', () => {
         const explicitCountries = ['ETH', 'PHL'] as CountryCodeIso3[];
 
         expect(getEventCountries(events)).toEqual(explicitCountries);
+    });
+});
+
+describe('getAdminAreasQuery', () => {
+    const countries = ['SSD' as CountryCodeIso3];
+
+    test('filters on the countries and admin level', () => {
+        const query = getAdminAreasQuery(countries, 1 as AdminLevel);
+
+        expect(query.filter).toBe("(countryCodeIso3='SSD') AND adminLevel=1");
+    });
+
+    test('filters on the parent place code one admin level up', () => {
+        const query = getAdminAreasQuery(countries, 2 as AdminLevel, 'SS03' as PlaceCode);
+
+        expect(query.filter).toBe("(countryCodeIso3='SSD') AND adminLevel=2 AND placeCodeLevel1='SS03'");
+    });
+
+    test('simplifies finer admin levels less', () => {
+        expect(getAdminAreasQuery(countries, 0 as AdminLevel).transform).toBe('simplify,0.5');
+        expect(getAdminAreasQuery(countries, 2 as AdminLevel).transform).toBe('simplify,0.001');
+        expect(getAdminAreasQuery(countries, 5 as AdminLevel).transform).toBe('simplify,0.0005');
+    });
+});
+
+describe('parseAdminAreaProperties', () => {
+    test('reads the admin area and its nested population', () => {
+        const properties = {
+            adminLevel: 2,
+            placeCode: 'SS0303',
+            nameEn: 'Bor South',
+            attributes: { POPULATION: 135195 },
+        };
+
+        expect(parseAdminAreaProperties(properties)).toEqual({
+            adminLevel: 2,
+            placeCode: 'SS0303',
+            name: 'Bor South',
+            population: 135195,
+        });
+    });
+
+    test('reads the population from attributes stringified by Mapbox', () => {
+        const properties = {
+            adminLevel: 1,
+            placeCode: 'SS01',
+            nameEn: 'Central Equatoria',
+            attributes: '{"POPULATION":1551967}',
+        };
+
+        expect(parseAdminAreaProperties(properties)?.population).toBe(1551967);
+    });
+
+    test('leaves the population undefined when it is missing', () => {
+        const properties = { adminLevel: 1, placeCode: 'SS01', nameEn: 'Central Equatoria' };
+
+        expect(parseAdminAreaProperties(properties)?.population).toBeUndefined();
+    });
+
+    test('returns null for invalid properties', () => {
+        expect(parseAdminAreaProperties(null)).toBeNull();
+        expect(parseAdminAreaProperties({ adminLevel: '1', placeCode: 'SS01', nameEn: 'x' })).toBeNull();
+        expect(parseAdminAreaProperties({ adminLevel: 1, placeCode: "SS01' OR 1=1", nameEn: 'x' })).toBeNull();
     });
 });

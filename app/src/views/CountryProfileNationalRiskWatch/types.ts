@@ -37,6 +37,25 @@ export type AdminLevel = number & {
     [validAdminLevel]: true;
 };
 
+declare const validPlaceCode: unique symbol;
+
+export type PlaceCode = string & {
+    [validPlaceCode]: true;
+};
+
+export type NrwAdminAreaFeatureCollection = NrwApiResponse<'/admin-areas'>;
+export type NrwAdminAreaProperties = NrwAdminAreaFeatureCollection['features'][number]['properties'];
+export type NrwAdminAreaAttributes = NrwAdminAreaProperties['attributes'];
+
+// The validated properties of an /admin-areas feature, narrowed from the API type.
+// Mapbox returns the rendered feature properties untyped, so they are parsed back into this.
+export interface AdminAreaProperties {
+    adminLevel: AdminLevel;
+    placeCode: PlaceCode;
+    name: NrwAdminAreaProperties['nameEn'];
+    population: NrwAdminAreaAttributes['POPULATION'];
+}
+
 // eslint-disable-next-line max-len
 export type MapViewChangeHandler = (newZoom: Zoom, newLatitude: Latitude, newLongitude: Longitude) => void;
 

@@ -5,13 +5,21 @@ import {
     useState,
 } from 'react';
 import { isNotDefined } from '@togglecorp/fujs';
-import mapboxgl, { type Marker as MapboxMarker } from 'mapbox-gl-v3';
+import mapboxgl, {
+    type Marker as MapboxMarker,
+    type MarkerOptions,
+} from 'mapbox-gl-v3';
 
 import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 
 import NrwMapContext from '../NrwMapContext';
 
-function useNrwMapMarker(coordinates: NrwLngLat): HTMLDivElement {
+export type NrwMarkerPlacement = Pick<MarkerOptions, 'anchor' | 'offset'>;
+
+function useNrwMapMarker(
+    coordinates: NrwLngLat,
+    placement: NrwMarkerPlacement = { anchor: 'bottom' },
+): HTMLDivElement {
     const { map } = useContext(NrwMapContext);
 
     const { lng, lat } = coordinates;
@@ -24,7 +32,7 @@ function useNrwMapMarker(coordinates: NrwLngLat): HTMLDivElement {
             return undefined;
         }
 
-        const marker = new mapboxgl.Marker({ element, anchor: 'bottom' })
+        const marker = new mapboxgl.Marker({ element, ...placement })
             .setLngLat([lng, lat])
             .addTo(map);
 

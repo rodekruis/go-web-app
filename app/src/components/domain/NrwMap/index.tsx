@@ -70,6 +70,7 @@ function NrwMap(props: {
     } = useContext(NrwEventsContext);
 
     const eventCountryCodeIso3 = parseCountryCode(selectedEvent?.countryCodeIso3);
+    const showLayers = isDefined(selectedEvent) && isDefined(eventCountryCodeIso3);
 
     const layerPanel = isDefined(eventCountryCodeIso3) ? (
         <NrwLayerPanel
@@ -85,10 +86,11 @@ function NrwMap(props: {
             onMapViewChange={onMapViewChange}
             layerPanel={layerPanel}
         >
-            {isDefined(eventCountryCodeIso3) && availableLayers?.map((layer) => (
+            {showLayers && availableLayers?.map((layer) => (
                 <NrwLayer
                     key={layer.name}
                     countryCodeIso3={eventCountryCodeIso3}
+                    alertClass={selectedEvent.alertClass}
                     layer={layer}
                     isVisible={visibleLayers.includes(layer.name)}
                 />

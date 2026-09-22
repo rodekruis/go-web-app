@@ -1,0 +1,25 @@
+.admin-area-tooltip {
+    border: 2px solid rgb(50 50 50 / 20%);
+    border-radius: var(--go-ui-border-radius-md);
+    background-color: var(--go-ui-color-white);
+    padding: var(--go-ui-spacing-4xs) var(--go-ui-spacing-2xs);
+    white-space: nowrap;
+    color: var(--go-ui-color-gray-90);
+    font-size: var(--go-ui-font-size-md);
+    /* Let the pointer keep hovering the admin area under the tooltip. */
+    pointer-events: none;
+
+    .name {
+        font-weight: var(--go-ui-font-weight-semibold);
+    }
+
+    /* NumberOutput renders a block, so lay the label and value out in a row. */
+    .population {
+        display: flex;
+        gap: var(--go-ui-spacing-4xs);
+    }
+
+    .value {
+        font-weight: var(--go-ui-font-weight-semibold);
+    }
+}

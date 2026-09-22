@@ -1,5 +1,6 @@
 import {
     type CountryCodeIso3,
+    type NrwEvent,
     type NrwLayer,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
@@ -12,19 +13,14 @@ function getMapLayerId(countryCodeIso3: CountryCodeIso3, name: NrwLayer['name'])
 
 function NrwLayer(props: {
     countryCodeIso3: CountryCodeIso3;
+    alertClass: NrwEvent['alertClass'];
     layer: NrwLayer;
     isVisible: boolean;
 }) {
-    const { countryCodeIso3, layer, isVisible } = props;
+    const {
+        countryCodeIso3, alertClass, layer, isVisible,
+    } = props;
 
-    /*  const x = {
-        id: 2,
-        name: 'exposedPopulation',
-        label: 'Exposed population',
-        type: 'shape',
-        hazardType: null,
-    };
- */
     if (layer.type === 'raster') {
         return (
             <NrwRasterLayer
@@ -39,7 +35,7 @@ function NrwLayer(props: {
             <NrwShapeLayer
                 id={getMapLayerId(countryCodeIso3, layer.name)}
                 countryCodeIso3={countryCodeIso3}
-                name={layer.name}
+                alertClass={alertClass}
                 isVisible={isVisible}
             />
         );
