@@ -1,0 +1,27 @@
+.export-button {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--go-ui-color-primary-blue);
+    border-radius: var(--go-ui-border-radius-full);
+    background-color: var(--go-ui-color-white);
+    cursor: pointer;
+    padding: var(--go-ui-spacing-2xs) var(--go-ui-spacing-md);
+    height: 40px;
+    color: var(--go-ui-color-primary-blue);
+    font-size: var(--go-ui-font-size-sm);
+    font-weight: var(--go-ui-font-weight-medium);
+    gap: var(--go-ui-spacing-2xs);
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
+
+    &:hover:not(:disabled) {
+        background-color: var(--go-ui-color-gray-20);
+    }
+}
+
+.icon {
+    font-size: 12px;
+}

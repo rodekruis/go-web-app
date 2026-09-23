@@ -1,8 +1,8 @@
 import 'mapbox-gl-v3/dist/mapbox-gl.css';
 
 import {
+    useContext,
     useEffect,
-    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -56,6 +56,7 @@ function NrwMapContainer(props: {
     const [southWest, northEast] = fitBounds ?? [];
 
     const strings = useTranslation(i18n);
+    const { setMap } = useContext(NrwMapContext);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
@@ -132,10 +133,9 @@ function NrwMapContainer(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mapboxMap, southWest?.lng, southWest?.lat, northEast?.lng, northEast?.lat]);
 
-    const mapContext = useMemo(
-        () => ({ map: mapLoadComplete ? mapboxMap : undefined }),
-        [mapboxMap, mapLoadComplete],
-    );
+    useEffect(() => {
+        setMap(mapLoadComplete ? mapboxMap : undefined);
+    }, [mapboxMap, mapLoadComplete, setMap]);
 
     return (
         <>
@@ -181,9 +181,7 @@ function NrwMapContainer(props: {
                     )}
                 </div>
             </div>
-            <NrwMapContext.Provider value={mapContext}>
-                {children}
-            </NrwMapContext.Provider>
+            {children}
         </>
     );
 }

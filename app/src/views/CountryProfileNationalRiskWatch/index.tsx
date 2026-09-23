@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import {
     Container,
     ListView,
@@ -7,7 +8,9 @@ import { isDefined } from '@togglecorp/fujs';
 
 import NrwEvents from '#components/domain/NrwEvents';
 import NrwMap from '#components/domain/NrwMap';
+import NrwMapContext, { useNrwMapContextValue } from '#components/domain/NrwMap/NrwMapContext';
 import NrwNavbar from '#components/domain/NrwNavbar';
+import NrwPdfExport from '#components/domain/NrwPdfExport';
 import Page from '#components/Page';
 import { nrwStandalone } from '#config';
 
@@ -69,46 +72,52 @@ export function Component() {
         onVisibleLayersChange: setLayersFromUrlParams,
     });
 
+    const nrwMapContext = useNrwMapContextValue();
+    const eventsPanelRef = useRef<HTMLDivElement>(null);
+
     const content = (
-        <NrwEventsContext.Provider value={nrwEventsContext}>
-            <Container
-                heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
+        <Container
+            heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
+        >
+            <ListView
+                layout="grid"
+                withSidebar
+                sidebarSize="lg"
+                gridContentClassName={styles.eventsHeight}
             >
-                <ListView
-                    layout="grid"
-                    withSidebar
-                    sidebarSize="lg"
-                    gridContentClassName={styles.eventsHeight}
-                >
-                    <NrwMap
-                        mapView={mapView}
-                        onMapViewChange={handleMapViewChange}
-                        availableLayers={availableLayers}
-                        visibleLayers={visibleLayers}
-                        onLayerToggle={handleLayerToggle}
-                    />
-                    <NrwEvents />
-                </ListView>
-            </Container>
-        </NrwEventsContext.Provider>
+                <NrwMap
+                    mapView={mapView}
+                    onMapViewChange={handleMapViewChange}
+                    availableLayers={availableLayers}
+                    visibleLayers={visibleLayers}
+                    onLayerToggle={handleLayerToggle}
+                />
+                <NrwEvents elementRef={eventsPanelRef} />
+            </ListView>
+        </Container>
     );
 
-    if (nrwStandalone) {
-        return (
-            <div className={styles.countryProfileNrwStandalone}>
-                <NrwNavbar />
-                <Page
-                    title={strings.nationalRiskWatchPageTitle}
-                    mainSectionContainerClassName={styles.mainSectionContainer}
-                    mainSectionClassName={styles.mainSection}
-                >
-                    {content}
-                </Page>
-            </div>
-        );
-    }
-
-    return content;
+    // Both providers wrap the navbar too, since the export button needs them.
+    return (
+        <NrwEventsContext.Provider value={nrwEventsContext}>
+            <NrwMapContext.Provider value={nrwMapContext}>
+                {nrwStandalone ? (
+                    <div className={styles.countryProfileNrwStandalone}>
+                        <NrwNavbar
+                            actions={<NrwPdfExport eventsPanelRef={eventsPanelRef} />}
+                        />
+                        <Page
+                            title={strings.nationalRiskWatchPageTitle}
+                            mainSectionContainerClassName={styles.mainSectionContainer}
+                            mainSectionClassName={styles.mainSection}
+                        >
+                            {content}
+                        </Page>
+                    </div>
+                ) : content}
+            </NrwMapContext.Provider>
+        </NrwEventsContext.Provider>
+    );
 }
 
 Component.displayName = 'CountryProfileNationalRiskWatch';

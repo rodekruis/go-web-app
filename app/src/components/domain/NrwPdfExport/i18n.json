@@ -1,0 +1,8 @@
+{
+    "namespace": "nrwPdfExport",
+    "strings": {
+        "nrwPdfExportButtonLabel": "Export view",
+        "nrwPdfExportExportingLabel": "Exporting…",
+        "nrwPdfExportFailedMessage": "Failed to export the National Risk Watch view"
+    }
+}
