@@ -3050,9 +3050,16 @@
             ]
           },
           "id": {
-            "type": "string",
             "description": "Feature identifier",
-            "example": "KEN.10_1"
+            "example": "KEN.10_1",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
           },
           "properties": {
             "$ref": "#/components/schemas/AdminAreaPropertiesDto"
@@ -3211,9 +3218,16 @@
             ]
           },
           "id": {
-            "type": "string",
             "description": "Feature identifier",
-            "example": "KEN.10_1"
+            "example": "KEN.10_1",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
           },
           "properties": {
             "type": "object",
