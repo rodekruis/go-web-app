@@ -65,7 +65,7 @@ export function Component() {
         visibleLayers,
         handleLayerToggle,
     } = useNrwLayers({
-        urlLayers: layersFromUrlParams,
+        visibleLayers: layersFromUrlParams,
         onVisibleLayersChange: setLayersFromUrlParams,
     });
 
