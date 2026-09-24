@@ -19,35 +19,35 @@ type MapLayer = NonNullable<Parameters<typeof useNrwMapLayer>[0]>;
 
 const isHovered: ExpressionSpecification = ['boolean', ['feature-state', 'hover'], false];
 
-// Mapbox stringifies nested GeoJSON properties, so read the flattened population.
-const population: ExpressionSpecification = ['coalesce', ['get', 'population'], 0];
+const exposedPopulation: ExpressionSpecification = ['coalesce', ['get', 'exposedPopulation'], 0];
 
-// Build the choropleth fill layer of the admin areas, coloured by population
-// in the ramp of the given alert class.
+// Build the choropleth fill layer of the admin areas, coloured by their
+// exposed population in the ramp of the given alert class.
 function getAdminAreaFillLayer(
     id: string,
     adminAreas: NrwAdminAreaFeatureCollection,
+    exposedPopulationByPlaceCode: Map<string, number>,
     alertClass: NrwEvent['alertClass'],
 ): MapLayer {
-    // Flatten the population, so the paint expressions can read it.
+    // Add the exposed population to the features, so the paint expressions can read it.
     const features = adminAreas.features.map((feature) => ({
         ...feature,
         properties: {
             ...feature.properties,
-            population: feature.properties.attributes.POPULATION,
+            exposedPopulation: exposedPopulationByPlaceCode.get(feature.properties.placeCode),
         },
     }));
-    const populations = features
-        .map((feature) => feature.properties.population)
+    const exposedPopulations = features
+        .map((feature) => feature.properties.exposedPopulation)
         .filter(isDefined);
-    const breaks = getEqualIntervalBreaks(populations);
+    const breaks = getEqualIntervalBreaks(exposedPopulations);
     const ramp = alertClassMapRamps[alertClass];
 
-    // The step stops must ascend, so a set without population gets a flat fill.
+    // The step stops must ascend, so a set without exposed population gets a flat fill.
     const fillColor: ExpressionSpecification | string = breaks[0] > 0
         ? [
             'step',
-            population,
+            exposedPopulation,
             ramp[0],
             breaks[0],
             ramp[1],

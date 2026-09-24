@@ -17,12 +17,13 @@ function useNrwAdminAreas(options: {
     countries: CountryCodeIso3[] | undefined;
     adminLevel: AdminLevel;
     parentPlaceCode?: PlaceCode;
+    placeCodes?: PlaceCode[];
     skip: boolean;
     onSuccess?: (adminAreas: NrwAdminAreaFeatureCollection) => void;
     onFailure?: () => void;
 }) {
     const {
-        countries, adminLevel, parentPlaceCode, skip, onSuccess, onFailure,
+        countries, adminLevel, parentPlaceCode, placeCodes, skip, onSuccess, onFailure,
     } = options;
 
     const [adminAreas, setAdminAreas] = useState<NrwAdminAreaFeatureCollection>();
@@ -41,7 +42,7 @@ function useNrwAdminAreas(options: {
         url: '/admin-areas',
         apiType: 'nrw',
         skip: skip || !countries?.length,
-        query: getAdminAreasQuery(countries ?? [], adminLevel, parentPlaceCode),
+        query: getAdminAreasQuery(countries ?? [], adminLevel, parentPlaceCode, placeCodes),
         preserveResponse: true,
         onSuccess: handleSuccess,
         onFailure,

@@ -1,6 +1,6 @@
 {
     "namespace": "nrwMap",
     "strings": {
-        "nrwShapeLayerPopulationLabel": "Population:"
+        "nrwShapeLayerExposedPopulationLabel": "Exposed population:"
     }
 }

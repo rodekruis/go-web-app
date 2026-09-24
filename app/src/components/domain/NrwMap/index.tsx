@@ -90,7 +90,6 @@ function NrwMap(props: {
                 <NrwLayer
                     key={layer.name}
                     countryCodeIso3={eventCountryCodeIso3}
-                    alertClass={selectedEvent.alertClass}
                     layer={layer}
                     isVisible={visibleLayers.includes(layer.name)}
                 />

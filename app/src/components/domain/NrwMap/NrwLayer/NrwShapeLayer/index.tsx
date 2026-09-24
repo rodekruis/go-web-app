@@ -1,5 +1,6 @@
 import {
     useCallback,
+    useContext,
     useMemo,
 } from 'react';
 import { NumberOutput } from '@ifrc-go/ui';
@@ -9,11 +10,16 @@ import {
     isNotDefined,
 } from '@togglecorp/fujs';
 
+import {
+    getNrwExposedAdminLevels,
+    getNrwExposedPlaceCodes,
+    getNrwExposedPopulationByPlaceCode,
+} from '#utils/nrw/events';
+import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import useNrwAdminAreas from '#views/CountryProfileNationalRiskWatch/hooks/useNrwAdminAreas';
 import {
     type AdminAreaProperties,
     type CountryCodeIso3,
-    type NrwEvent,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { getFeatureCollectionBounds } from '#views/CountryProfileNationalRiskWatch/utils';
 
@@ -35,15 +41,20 @@ const tooltipPlacement: NrwMarkerPlacement = { anchor: 'bottom-left', offset: [1
 function NrwShapeLayer(props: {
     id: string;
     countryCodeIso3: CountryCodeIso3;
-    // The ramp hue follows the alert class of the selected event.
-    alertClass: NrwEvent['alertClass'];
     isVisible: boolean;
 }) {
     const {
-        id, countryCodeIso3, alertClass, isVisible,
+        id, countryCodeIso3, isVisible,
     } = props;
 
+    const { selectedEvent } = useContext(NrwEventsContext);
+
     const strings = useTranslation(i18n);
+
+    const exposedAdminLevels = useMemo(
+        () => (isDefined(selectedEvent) ? getNrwExposedAdminLevels(selectedEvent) : []),
+        [selectedEvent],
+    );
 
     const {
         adminLevel,
@@ -52,13 +63,21 @@ function NrwShapeLayer(props: {
         drillUp,
         handleAdminAreasSuccess,
         handleAdminAreasFailure,
-    } = useAdminAreaDrill(countryCodeIso3);
+    } = useAdminAreaDrill(countryCodeIso3, exposedAdminLevels);
+
+    const exposedPlaceCodes = useMemo(
+        () => (isDefined(selectedEvent)
+            ? getNrwExposedPlaceCodes(selectedEvent, adminLevel)
+            : []),
+        [selectedEvent, adminLevel],
+    );
 
     const { adminAreas, pending } = useNrwAdminAreas({
         countries: [countryCodeIso3],
         adminLevel,
         parentPlaceCode,
-        skip: !countryCodeIso3,
+        placeCodes: exposedPlaceCodes,
+        skip: !countryCodeIso3 || exposedPlaceCodes.length === 0,
         onSuccess: handleAdminAreasSuccess,
         onFailure: handleAdminAreasFailure,
     });
@@ -70,11 +89,23 @@ function NrwShapeLayer(props: {
     );
     useNrwMapFitBounds(bounds);
 
+    const exposedPopulationByPlaceCode = useMemo(
+        () => (isDefined(selectedEvent)
+            ? getNrwExposedPopulationByPlaceCode(selectedEvent)
+            : new Map<string, number>()),
+        [selectedEvent],
+    );
+
     const mapLayer = useMemo(
-        () => (isDefined(adminAreas)
-            ? getAdminAreaFillLayer(id, adminAreas, alertClass)
+        () => (isDefined(adminAreas) && isDefined(selectedEvent)
+            ? getAdminAreaFillLayer(
+                id,
+                adminAreas,
+                exposedPopulationByPlaceCode,
+                selectedEvent.alertClass,
+            )
             : undefined),
-        [id, adminAreas, alertClass],
+        [id, adminAreas, exposedPopulationByPlaceCode, selectedEvent],
     );
     useNrwMapLayer(mapLayer, isVisible);
 
@@ -110,11 +141,11 @@ function NrwShapeLayer(props: {
                 <div className={styles.name}>
                     {hoveredAdminArea.name}
                 </div>
-                <div className={styles.population}>
-                    {strings.nrwShapeLayerPopulationLabel}
+                <div className={styles.exposedPopulation}>
+                    {strings.nrwShapeLayerExposedPopulationLabel}
                     <NumberOutput
                         className={styles.value}
-                        value={hoveredAdminArea.population}
+                        value={exposedPopulationByPlaceCode.get(hoveredAdminArea.placeCode)}
                         invalidText="--"
                     />
                 </div>

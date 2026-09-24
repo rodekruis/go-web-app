@@ -14,11 +14,12 @@ import {
 import { maxQueryableAdminLevel } from '#views/CountryProfileNationalRiskWatch/utils';
 
 // The whole country is one area, so start one level down.
-const minAdminLevel = 1 as AdminLevel;
+const defaultMinAdminLevel = 1 as AdminLevel;
 
 // Track the admin area drilled into, as a path of place codes
-// from the top admin level down.
-function useAdminAreaDrill(countryCodeIso3: CountryCodeIso3) {
+// from the top admin level down. Only the given admin levels can be
+// drilled into, starting at the least granular one.
+function useAdminAreaDrill(countryCodeIso3: CountryCodeIso3, adminLevels: AdminLevel[]) {
     // The path is kept with its country, so a country change starts over at the top.
     const [drill, setDrill] = useState<{
         countryCodeIso3: CountryCodeIso3;
@@ -30,6 +31,7 @@ function useAdminAreaDrill(countryCodeIso3: CountryCodeIso3) {
 
     const drillPath = drill.countryCodeIso3 === countryCodeIso3 ? drill.path : [];
     const parentPlaceCode = drillPath[drillPath.length - 1];
+    const minAdminLevel = adminLevels[0] ?? defaultMinAdminLevel;
     const adminLevel = (minAdminLevel + drillPath.length) as AdminLevel;
 
     const setDrillPath = useCallback(
@@ -44,14 +46,16 @@ function useAdminAreaDrill(countryCodeIso3: CountryCodeIso3) {
 
     const drillDown = useCallback(
         (placeCode: PlaceCode) => {
+            const nextAdminLevel = adminLevel + 1;
             if (
-                adminLevel < maxQueryableAdminLevel
+                nextAdminLevel <= maxQueryableAdminLevel
+                && adminLevels.includes(nextAdminLevel as AdminLevel)
                 && !childlessPlaceCodes.current.has(placeCode)
             ) {
                 setDrillPath((path) => [...path, placeCode]);
             }
         },
-        [setDrillPath, adminLevel],
+        [setDrillPath, adminLevel, adminLevels],
     );
 
     const drillUp = useCallback(

@@ -14,7 +14,7 @@
     }
 
     /* NumberOutput renders a block, so lay the label and value out in a row. */
-    .population {
+    .exposed-population {
         display: flex;
         gap: var(--go-ui-spacing-4xs);
     }

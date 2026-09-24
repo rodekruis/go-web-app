@@ -95,6 +95,13 @@ describe('getAdminAreasQuery', () => {
         expect(query.filter).toBe("(countryCodeIso3='SSD') AND adminLevel=2 AND placeCodeLevel1='SS03'");
     });
 
+    test('filters on the given place codes', () => {
+        const placeCodes = ['SS03', 'SS05'] as PlaceCode[];
+        const query = getAdminAreasQuery(countries, 1 as AdminLevel, undefined, placeCodes);
+
+        expect(query.filter).toBe("(countryCodeIso3='SSD') AND adminLevel=1 AND placeCode IN ('SS03','SS05')");
+    });
+
     test('simplifies finer admin levels less', () => {
         expect(getAdminAreasQuery(countries, 0 as AdminLevel).transform).toBe('simplify,0.5');
         expect(getAdminAreasQuery(countries, 2 as AdminLevel).transform).toBe('simplify,0.001');
@@ -116,7 +123,7 @@ describe('maxQueryableAdminLevel', () => {
 });
 
 describe('parseAdminAreaProperties', () => {
-    test('reads the admin area and its nested population', () => {
+    test('reads the admin area', () => {
         const properties = {
             adminLevel: 2,
             placeCode: 'SS0303',
@@ -128,25 +135,7 @@ describe('parseAdminAreaProperties', () => {
             adminLevel: 2,
             placeCode: 'SS0303',
             name: 'Bor South',
-            population: 135195,
         });
-    });
-
-    test('reads the population from attributes stringified by Mapbox', () => {
-        const properties = {
-            adminLevel: 1,
-            placeCode: 'SS01',
-            nameEn: 'Central Equatoria',
-            attributes: '{"POPULATION":1551967}',
-        };
-
-        expect(parseAdminAreaProperties(properties)?.population).toBe(1551967);
-    });
-
-    test('leaves the population undefined when it is missing', () => {
-        const properties = { adminLevel: 1, placeCode: 'SS01', nameEn: 'Central Equatoria' };
-
-        expect(parseAdminAreaProperties(properties)?.population).toBeUndefined();
     });
 
     test('accepts the place code formats of different countries', () => {

@@ -45,7 +45,6 @@ export type PlaceCode = string & {
 
 export type NrwAdminAreaFeatureCollection = NrwApiResponse<'/admin-areas'>;
 export type NrwAdminAreaProperties = NrwAdminAreaFeatureCollection['features'][number]['properties'];
-export type NrwAdminAreaAttributes = NrwAdminAreaProperties['attributes'];
 
 // The validated properties of an /admin-areas feature, narrowed from the API type.
 // Mapbox returns the rendered feature properties untyped, so they are parsed back into this.
@@ -53,7 +52,6 @@ export interface AdminAreaProperties {
     adminLevel: AdminLevel;
     placeCode: PlaceCode;
     name: NrwAdminAreaProperties['nameEn'];
-    population: NrwAdminAreaAttributes['POPULATION'];
 }
 
 // eslint-disable-next-line max-len
