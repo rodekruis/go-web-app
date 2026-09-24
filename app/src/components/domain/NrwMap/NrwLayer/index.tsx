@@ -4,6 +4,7 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwRasterLayer from './NrwRasterLayer';
+import NrwShapeLayer from './NrwShapeLayer';
 
 function getMapLayerId(countryCodeIso3: CountryCodeIso3, name: NrwLayer['name']) {
     return `layer-${countryCodeIso3}-${name}`;
@@ -14,7 +15,9 @@ function NrwLayer(props: {
     layer: NrwLayer;
     isVisible: boolean;
 }) {
-    const { countryCodeIso3, layer, isVisible } = props;
+    const {
+        countryCodeIso3, layer, isVisible,
+    } = props;
 
     if (layer.type === 'raster') {
         return (
@@ -22,6 +25,14 @@ function NrwLayer(props: {
                 id={getMapLayerId(countryCodeIso3, layer.name)}
                 countryCodeIso3={countryCodeIso3}
                 name={layer.name}
+                isVisible={isVisible}
+            />
+        );
+    } if (layer.type === 'shape') {
+        return (
+            <NrwShapeLayer
+                id={getMapLayerId(countryCodeIso3, layer.name)}
+                countryCodeIso3={countryCodeIso3}
                 isVisible={isVisible}
             />
         );

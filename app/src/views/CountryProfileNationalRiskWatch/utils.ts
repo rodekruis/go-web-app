@@ -4,17 +4,20 @@ import {
 } from '@togglecorp/fujs';
 
 import { getGeoJsonBounds } from '#utils/geo';
-import { type NrwApiResponse } from '#utils/restRequest';
 
 import NrwLngLat from './NrwLngLat';
 import {
+    type AdminAreaProperties,
     type AdminLevel,
     type CountryCodeIso3,
     type Latitude,
     type Longitude,
     type LongitudeLatitudeBounds,
     type MapView,
+    type NrwAdminAreaFeatureCollection,
+    type NrwAdminAreaProperties,
     type NrwEvent,
+    type PlaceCode,
     type Zoom,
 } from './types';
 
@@ -50,37 +53,99 @@ export function getMapView(
     };
 }
 
-// Build the pg_featureserv-style filter for the given admin levels
-// of the given countries. Country codes are already validated
-// as ISO_A3, so it's safe to interpolate them into the filter string.
-function getCountryAdminLevelFilter(countryCodes: CountryCodeIso3[], adminLevels: AdminLevel[]) {
+// The parent place code properties of an admin area, one per admin level.
+// Checked against the API schema, so a schema change shows up here.
+const placeCodeLevelKeys = [
+    'placeCodeLevel0',
+    'placeCodeLevel1',
+    'placeCodeLevel2',
+    'placeCodeLevel3',
+    'placeCodeLevel4',
+] as const satisfies readonly (keyof NrwAdminAreaProperties)[];
+
+// The deepest admin level whose areas can be fetched by parent,
+// as the parent must have a place code property.
+export const maxQueryableAdminLevel = placeCodeLevelKeys.length as AdminLevel;
+
+// Build the pg_featureserv-style filter for the given admin level
+// of the given countries. Country codes and place codes are already
+// validated, so it's safe to interpolate them into the filter string.
+function getCountryAdminLevelFilter(
+    countryCodes: CountryCodeIso3[],
+    adminLevel: AdminLevel,
+    parentPlaceCode: PlaceCode | undefined,
+    placeCodes: PlaceCode[] | undefined,
+) {
     const countryFilter = countryCodes
         .map((countryCode) => `countryCodeIso3='${countryCode}'`)
         .join(' OR ');
 
-    const adminLevelFilter = adminLevels
-        .map((adminLevel) => `adminLevel=${adminLevel}`)
-        .join(' OR ');
+    const parentPlaceCodeKey = placeCodeLevelKeys[adminLevel - 1];
+    const parentFilter = isDefined(parentPlaceCode) && isDefined(parentPlaceCodeKey)
+        ? ` AND ${parentPlaceCodeKey}='${parentPlaceCode}'`
+        : '';
 
-    return `(${countryFilter}) AND (${adminLevelFilter})`;
+    const placeCodesFilter = isDefined(placeCodes)
+        ? ` AND placeCode IN (${placeCodes.map((placeCode) => `'${placeCode}'`).join(',')})`
+        : '';
+
+    return `(${countryFilter}) AND adminLevel=${adminLevel}${parentFilter}${placeCodesFilter}`;
 }
 
+// Simplify less as the admin areas get smaller so the detail stays visible.
+// Indexed by admin level.
+const simplifyFactorByAdminLevel = [0.5, 0.01, 0.001, 0.0005];
+
 // Build the query to fetch country admin areas.
-// The pg_featureserv query parameters are not part
-// of the generated schema, so the query is untyped there.
-export function getAdminAreasQuery(countryCodes: CountryCodeIso3[], adminLevels: AdminLevel[]) {
-    const simplifyFactor = 0.05; // for admin level 0
+export function getAdminAreasQuery(
+    countryCodes: CountryCodeIso3[],
+    adminLevel: AdminLevel,
+    parentPlaceCode?: PlaceCode,
+    placeCodes?: PlaceCode[],
+) {
+    const simplifyFactor = simplifyFactorByAdminLevel[adminLevel]
+        ?? simplifyFactorByAdminLevel[simplifyFactorByAdminLevel.length - 1];
+
     return {
-        filter: getCountryAdminLevelFilter(countryCodes, adminLevels),
+        filter: getCountryAdminLevelFilter(countryCodes, adminLevel, parentPlaceCode, placeCodes),
         limit: 10000,
         transform: `simplify,${simplifyFactor}`,
+    };
+}
+
+// Sanitize to a valid place code. The formats differ per country, e.g. SS0303 or KEN.8_1,
+// so only the characters are checked, which is what keeps the filter string safe.
+// Returns null if invalid.
+export function parsePlaceCode(value: unknown): PlaceCode | null {
+    const placeCodeRegex = /^[A-Za-z0-9._-]+$/;
+    return typeof value === 'string' && placeCodeRegex.test(value) ? (value as PlaceCode) : null;
+}
+
+// Read the admin area properties of a rendered /admin-areas feature.
+// Mapbox returns these untyped, so they are validated here. Returns null if invalid.
+export function parseAdminAreaProperties(properties: unknown): AdminAreaProperties | null {
+    if (typeof properties !== 'object' || properties === null) {
+        return null;
+    }
+
+    const { adminLevel, placeCode, nameEn } = properties as Record<string, unknown>;
+    const parsedPlaceCode = parsePlaceCode(placeCode);
+
+    if (typeof adminLevel !== 'number' || parsedPlaceCode === null || typeof nameEn !== 'string') {
+        return null;
+    }
+
+    return {
+        adminLevel: adminLevel as AdminLevel,
+        placeCode: parsedPlaceCode,
+        name: nameEn,
     };
 }
 
 // Compute the combined lon/lat bounds of an admin-areas feature collection.
 // Returns undefined when the collection has no usable geometries.
 export function getFeatureCollectionBounds(
-    featureCollection: NrwApiResponse<'/admin-areas'>,
+    featureCollection: NrwAdminAreaFeatureCollection,
 ) {
     const [west, south, east, north] = getGeoJsonBounds(featureCollection);
 

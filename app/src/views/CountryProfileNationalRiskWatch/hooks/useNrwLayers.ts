@@ -9,15 +9,13 @@ import {
     type VisibleLayersChangeHandler,
 } from '../types';
 
-const defaultVisibleLayers: NrwLayerName[] = [];
-
 function useNrwLayers(props: {
-    urlLayers: NrwLayerName[] | undefined;
+    visibleLayers: NrwLayerName[];
     onVisibleLayersChange: VisibleLayersChangeHandler;
     hazardType?: NrwHazardType;
 }) {
     const {
-        urlLayers,
+        visibleLayers,
         onVisibleLayersChange,
         hazardType,
     } = props;
@@ -27,9 +25,6 @@ function useNrwLayers(props: {
         apiType: 'nrw',
         query: isDefined(hazardType) ? { hazardType } : undefined,
     });
-
-    // Layers preference: URL > default.
-    const visibleLayers = urlLayers ?? defaultVisibleLayers;
 
     const handleLayerToggle = useCallback(
         (name: NrwLayerName) => {

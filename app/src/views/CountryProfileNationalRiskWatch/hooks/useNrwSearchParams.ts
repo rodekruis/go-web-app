@@ -88,10 +88,12 @@ function serializeCountriesUrlParameter(countryCodes: CountryCodeIso3[]) {
     return countryCodes.join(',');
 }
 
-// Only accept layer names that are specifically supported by the frontend
-function parseLayersUrlParameter(value: UrlParameter): NrwLayerName[] | undefined {
+const defaultVisibleLayers: NrwLayerName[] = [supportedLayerNames.exposedPopulation];
+
+// Only accept layer names that are supported by the frontend.
+function parseLayersUrlParameter(value: UrlParameter): NrwLayerName[] {
     if (!value || value.trim() === '') {
-        return undefined; // fallback to default layers
+        return [];
     }
 
     const requestedNames = value.split(',').map((name) => name.trim());
@@ -179,8 +181,10 @@ function useNrwSearchParams() {
                 (prevParams) => {
                     if (isDefined(eventId)) {
                         prevParams.set('event', String(eventId));
+                        prevParams.set('layers', defaultVisibleLayers.join(','));
                     } else {
                         prevParams.delete('event');
+                        prevParams.delete('layers');
                     }
                     prevParams.delete('z');
                     prevParams.delete('lat');

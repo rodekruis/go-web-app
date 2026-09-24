@@ -63,6 +63,14 @@ function NrwMapContainer(props: {
     const [isLayerPanelOpen, setIsLayerPanelOpen] = useState(false);
     const [zoomLimits, setZoomLimits] = useState({ atMin: false, atMax: false });
 
+    // Close the panel when the event is unselected.
+    const hasLayerPanel = isDefined(layerPanel);
+    useEffect(() => {
+        if (!hasLayerPanel) {
+            setIsLayerPanelOpen(false);
+        }
+    }, [hasLayerPanel]);
+
     const onMapViewChangeRef = useRef(onMapViewChange);
     useEffect(() => {
         onMapViewChangeRef.current = onMapViewChange;
@@ -165,7 +173,7 @@ function NrwMapContainer(props: {
                             <FontAwesomeIcon icon={faMinus} />
                         </button>
                     </div>
-                    {isDefined(layerPanel) && (
+                    {hasLayerPanel && (
                         <>
                             <button
                                 type="button"
