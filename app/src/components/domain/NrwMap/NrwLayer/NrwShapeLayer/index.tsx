@@ -63,7 +63,7 @@ function NrwShapeLayer(props: {
         drillUp,
         handleAdminAreasSuccess,
         handleAdminAreasFailure,
-    } = useAdminAreaDrill(countryCodeIso3, exposedAdminLevels);
+    } = useAdminAreaDrill(selectedEvent?.eventId, exposedAdminLevels);
 
     const exposedPlaceCodes = useMemo(
         () => (isDefined(selectedEvent)

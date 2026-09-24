@@ -20,7 +20,7 @@ import { parseAdminAreaProperties } from '#views/CountryProfileNationalRiskWatch
 
 import NrwMapContext from '../../NrwMapContext';
 
-export interface HoveredAdminArea extends AdminAreaProperties {
+interface HoveredAdminArea extends AdminAreaProperties {
     coordinates: NrwLngLat;
 }
 
