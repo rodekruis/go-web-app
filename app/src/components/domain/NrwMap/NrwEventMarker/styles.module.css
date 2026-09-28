@@ -1,7 +1,7 @@
 .event-marker {
     position: relative;
-    width: 24px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
 
     .event-marker-inner {
         display: block;
@@ -23,7 +23,7 @@
 
     .hazard-icon {
         position: absolute;
-        top: 36.5%;
+        top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         line-height: 1;
@@ -87,7 +87,7 @@
 
     & :global(.event-marker-outline) {
         fill: none;
-        stroke: rgb(50 50 50 / 20%);
+        stroke: #a8a8a8;
         stroke-width: 2;
     }
 }
