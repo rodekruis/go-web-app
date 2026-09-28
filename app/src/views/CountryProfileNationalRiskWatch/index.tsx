@@ -49,7 +49,7 @@ export function Component() {
     const countries = urlCountries?.length ? urlCountries : eventCountries;
 
     const mapCountries = isDefined(selectedEvent)
-        ? getEventCountries([selectedEvent])
+        ? undefined // NrwShapeLayer will handle the map zoom when an event is selected.
         : countries;
 
     const mapView = useNrwMapView({
