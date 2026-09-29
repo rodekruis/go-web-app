@@ -102,6 +102,7 @@ export function getAdminAreasQuery(
     return {
         filter: getCountryAdminLevelFilter(countryCodes, adminLevel, parentPlaceCode, placeCodes),
         limit: 10000,
+        transform: adminLevel === 0 ? 'simplify,0.05' : undefined,
     };
 }
 
