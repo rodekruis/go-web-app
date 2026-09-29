@@ -9,17 +9,21 @@
     padding: var(--go-ui-spacing-sm);
     min-inline-size: 10.5rem;
 
+    /* The title and layer rows share an icon column, so the icons and labels line up. */
+    --icon-size: 14px;
+    --icon-gap: var(--go-ui-spacing-2xs);
+
     .title {
         display: flex;
         align-items: center;
-        gap: var(--go-ui-spacing-2xs);
+        gap: var(--icon-gap);
         color: var(--go-ui-color-primary-blue);
         font-weight: var(--go-ui-font-weight-semibold);
     }
 
     .title-icon {
-        inline-size: 12px;
-        height: 12px;
+        inline-size: var(--icon-size);
+        height: var(--icon-size);
     }
 
     .items {
@@ -34,11 +38,11 @@
     .layer-toggle {
         display: flex;
         align-items: center;
-        gap: var(--go-ui-spacing-3xs);
+        gap: var(--icon-gap);
         border: none;
         background: none;
         cursor: pointer;
-        padding: 0 0 0 var(--go-ui-spacing-5xs);
+        padding: 0;
         text-align: start;
         white-space: nowrap;
         color: inherit;
@@ -46,8 +50,8 @@
     }
 
     .checkbox {
-        inline-size: 14px;
-        height: 14px;
+        inline-size: var(--icon-size);
+        height: var(--icon-size);
         color: var(--go-ui-color-primary-blue);
     }
 }
