@@ -45,7 +45,7 @@ function useNrwMapView(props: {
 
     const { adminAreas } = useNrwAdminAreas({
         countries,
-        adminLevels: [0 as AdminLevel],
+        adminLevel: 0 as AdminLevel,
         skip: isDefined(urlMapView) || countriesPending,
     });
 

@@ -529,7 +529,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns events based on the active-status and request-timestamp",
+            "description": "Returns events based on the active-status and request-timestamp, ordered by start date (earliest first)",
             "content": {
               "application/json": {
                 "schema": {
@@ -715,7 +715,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GeoJsonFeatureCollectionDto"
+                  "$ref": "#/components/schemas/AdminAreaFeatureCollectionDto"
                 }
               }
             }
@@ -794,7 +794,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GeoJsonFeatureDto"
+                  "$ref": "#/components/schemas/AdminAreaFeatureDto"
                 }
               }
             }
@@ -2490,6 +2490,145 @@
           "resourceId"
         ]
       },
+      "WaterDischargeTimeSeriesEntryDto": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "example": "2026-03-20T00:00:00Z"
+          },
+          "end": {
+            "type": "string",
+            "example": "2026-03-20T23:59:59Z"
+          },
+          "median": {
+            "type": "number",
+            "example": 120
+          },
+          "low": {
+            "type": "number",
+            "example": 90
+          },
+          "high": {
+            "type": "number",
+            "example": 150
+          }
+        },
+        "required": [
+          "start",
+          "end",
+          "median",
+          "low",
+          "high"
+        ]
+      },
+      "EventFloodsAlertDetailsDto": {
+        "type": "object",
+        "properties": {
+          "timeSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaterDischargeTimeSeriesEntryDto"
+            }
+          },
+          "current": {
+            "type": "number",
+            "example": 100
+          },
+          "peakDay": {
+            "type": "string",
+            "example": "2026-03-23T00:00:00Z"
+          },
+          "peakValue": {
+            "type": "number",
+            "example": 150
+          },
+          "returnPeriod": {
+            "type": "number",
+            "example": 10,
+            "nullable": true
+          },
+          "probabilityOfExceedance": {
+            "type": "number",
+            "example": 0.62,
+            "nullable": true
+          }
+        },
+        "required": [
+          "timeSeries",
+          "current",
+          "peakDay",
+          "peakValue",
+          "returnPeriod",
+          "probabilityOfExceedance"
+        ]
+      },
+      "ReturnPeriodThresholdDto": {
+        "type": "object",
+        "properties": {
+          "returnPeriod": {
+            "type": "number",
+            "example": 5
+          },
+          "thresholdValue": {
+            "type": "number",
+            "example": 1800
+          },
+          "severityClass": {
+            "type": "string",
+            "enum": [
+              "singleThreshold",
+              "low",
+              "medium",
+              "high"
+            ],
+            "example": "medium",
+            "nullable": true
+          }
+        },
+        "required": [
+          "returnPeriod",
+          "thresholdValue",
+          "severityClass"
+        ]
+      },
+      "EventFloodsDetailsDto": {
+        "type": "object",
+        "properties": {
+          "stationCode": {
+            "type": "string",
+            "example": "G5142"
+          },
+          "stationName": {
+            "type": "string",
+            "example": "ATHI MUNYU (3DA02)",
+            "nullable": true
+          },
+          "alertDetails": {
+            "$ref": "#/components/schemas/EventFloodsAlertDetailsDto"
+          },
+          "returnPeriodThresholds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnPeriodThresholdDto"
+            }
+          }
+        },
+        "required": [
+          "stationCode",
+          "stationName",
+          "alertDetails",
+          "returnPeriodThresholds"
+        ]
+      },
+      "EventHazardTypeDetailsDto": {
+        "type": "object",
+        "properties": {
+          "floods": {
+            "$ref": "#/components/schemas/EventFloodsDetailsDto"
+          }
+        }
+      },
       "EventResponseDto": {
         "type": "object",
         "properties": {
@@ -2590,6 +2729,9 @@
             "items": {
               "$ref": "#/components/schemas/EventLayerDto"
             }
+          },
+          "hazardTypeDetails": {
+            "$ref": "#/components/schemas/EventHazardTypeDetailsDto"
           }
         },
         "required": [
@@ -2609,7 +2751,8 @@
           "lastUpdatedAt",
           "eventStatus",
           "exposedAdminAreas",
-          "availableLayers"
+          "availableLayers",
+          "hazardTypeDetails"
         ]
       },
       "ClassLevelDto": {
@@ -2671,7 +2814,7 @@
           },
           "spatialExtentPlaceCodes": {
             "example": [
-              "KE030"
+              "KEN.10_1"
             ],
             "type": "array",
             "items": {
@@ -2804,7 +2947,91 @@
           "type"
         ]
       },
-      "GeoJsonFeatureDto": {
+      "AdminAreaAttributesDto": {
+        "type": "object",
+        "properties": {
+          "POPULATION": {
+            "type": "number",
+            "example": 215293
+          }
+        }
+      },
+      "AdminAreaPropertiesDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 11430
+          },
+          "placeCode": {
+            "type": "string",
+            "example": "KEN.10_1"
+          },
+          "adminLevel": {
+            "type": "number",
+            "example": 1
+          },
+          "nameEn": {
+            "type": "string",
+            "example": "Nairobi"
+          },
+          "countryCodeIso3": {
+            "type": "string",
+            "example": "KEN"
+          },
+          "placeCodeLevel0": {
+            "type": "string",
+            "example": "KE"
+          },
+          "placeCodeLevel1": {
+            "type": "string",
+            "example": "KEN.10_1",
+            "nullable": true
+          },
+          "placeCodeLevel2": {
+            "type": "string",
+            "example": "KEN.10.1_1",
+            "nullable": true
+          },
+          "placeCodeLevel3": {
+            "type": "string",
+            "example": "KEN.10.1.1_1",
+            "nullable": true
+          },
+          "placeCodeLevel4": {
+            "type": "string",
+            "example": "KEN.10.1.1.1_1",
+            "nullable": true
+          },
+          "attributes": {
+            "$ref": "#/components/schemas/AdminAreaAttributesDto"
+          },
+          "created": {
+            "type": "string",
+            "example": "2026-09-21 10:16:32.766"
+          },
+          "updated": {
+            "type": "string",
+            "example": "2026-09-21 10:16:32.766"
+          }
+        },
+        "required": [
+          "id",
+          "placeCode",
+          "adminLevel",
+          "nameEn",
+          "countryCodeIso3",
+          "placeCodeLevel0",
+          "placeCodeLevel1",
+          "placeCodeLevel2",
+          "placeCodeLevel3",
+          "placeCodeLevel4",
+          "attributes",
+          "created",
+          "updated"
+        ]
+      },
+      "AdminAreaFeatureDto": {
         "type": "object",
         "properties": {
           "type": {
@@ -2823,18 +3050,19 @@
             ]
           },
           "id": {
-            "type": "object",
             "description": "Feature identifier",
-            "example": "KE030"
+            "example": "KEN.10_1",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
           },
           "properties": {
-            "type": "object",
-            "description": "Feature properties",
-            "example": {
-              "name": "Nairobi",
-              "adminLevel": 1
-            },
-            "nullable": true
+            "$ref": "#/components/schemas/AdminAreaPropertiesDto"
           }
         },
         "required": [
@@ -2843,7 +3071,7 @@
           "properties"
         ]
       },
-      "GeoJsonFeatureCollectionDto": {
+      "AdminAreaFeatureCollectionDto": {
         "type": "object",
         "properties": {
           "type": {
@@ -2855,7 +3083,7 @@
           "features": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/GeoJsonFeatureDto"
+              "$ref": "#/components/schemas/AdminAreaFeatureDto"
             }
           }
         },
@@ -2879,24 +3107,28 @@
             "type": "string",
             "example": "KEN"
           },
+          "placeCodeLevel0": {
+            "type": "string",
+            "example": "KE"
+          },
           "placeCodeLevel1": {
             "type": "object",
-            "example": "KE010",
+            "example": "KEN.10_1",
             "nullable": true
           },
           "placeCodeLevel2": {
             "type": "object",
-            "example": "KE010222",
+            "example": "KEN.10.1_1",
             "nullable": true
           },
           "placeCodeLevel3": {
             "type": "object",
-            "example": "KE010222333",
+            "example": "KEN.10.1.1_1",
             "nullable": true
           },
           "placeCodeLevel4": {
             "type": "object",
-            "example": "KE010222333444",
+            "example": "KEN.10.1.1.1_1",
             "nullable": true
           },
           "attributes": {
@@ -2966,6 +3198,74 @@
             "example": "Kenya"
           }
         }
+      },
+      "GeoJsonFeatureDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Feature"
+            ]
+          },
+          "geometry": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeoJsonGeometryDto"
+              }
+            ]
+          },
+          "id": {
+            "description": "Feature identifier",
+            "example": "KEN.10_1",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "properties": {
+            "type": "object",
+            "description": "Feature properties",
+            "example": {
+              "name": "Nairobi",
+              "adminLevel": 1
+            },
+            "additionalProperties": true,
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "geometry",
+          "properties"
+        ]
+      },
+      "GeoJsonFeatureCollectionDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "FeatureCollection"
+            ]
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeoJsonFeatureDto"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "features"
+        ]
       },
       "GeoFeatureUpdateDto": {
         "type": "object",

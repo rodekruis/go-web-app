@@ -6,13 +6,17 @@ import {
 
 import supportedLayerNames from '#utils/nrw/layers';
 import {
+    type AdminLevel,
     type NrwEvent,
     type NrwExposedAdminArea,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import {
     getNrwExposedAdminAreas,
+    getNrwExposedAdminLevels,
+    getNrwExposedPlaceCodes,
     getNrwExposedPopulation,
+    getNrwExposedPopulationByPlaceCode,
     getNrwTotalExposedPopulation,
 } from './events';
 
@@ -86,5 +90,54 @@ describe('getNrwTotalExposedPopulation', () => {
             createArea('MW2', 'Karonga', 430000),
         ])).toBe(1040000);
         expect(getNrwTotalExposedPopulation([])).toBe(0);
+    });
+});
+
+describe('getNrwExposedPopulationByPlaceCode', () => {
+    test('maps the place codes of every admin level to their exposed population', () => {
+        const event = createEvent({
+            0: [createArea('ET', 'Ethiopia', 61800)],
+            1: [createArea('ET02', 'Afar', 40000)],
+            2: [createArea('ET0201', 'Awsi Rasu', 30000), createArea('ET0202', 'Kilbet Rasu', 10000)],
+        });
+
+        expect(getNrwExposedPopulationByPlaceCode(event)).toEqual(new Map([
+            ['ET', 61800],
+            ['ET02', 40000],
+            ['ET0201', 30000],
+            ['ET0202', 10000],
+        ]));
+    });
+
+    test('skips areas without an exposed population layer', () => {
+        const area: NrwExposedAdminArea = {
+            placeCode: 'ET02', name: 'Afar', adminLevel: 1, exposure: [],
+        };
+
+        expect(getNrwExposedPopulationByPlaceCode(createEvent({ 1: [area] }))).toEqual(new Map());
+    });
+});
+
+describe('getNrwExposedAdminLevels', () => {
+    test('lists the sub-national admin levels with exposed areas, least granular first', () => {
+        const event = createEvent({
+            2: [createArea('ET0201', 'Awsi Rasu', 30000)],
+            0: [createArea('ET', 'Ethiopia', 61800)],
+            1: [createArea('ET02', 'Afar', 40000)],
+            3: [],
+        });
+
+        expect(getNrwExposedAdminLevels(event)).toEqual([1, 2]);
+    });
+});
+
+describe('getNrwExposedPlaceCodes', () => {
+    test('reads the valid place codes of the given admin level', () => {
+        const event = createEvent({
+            1: [createArea('ET02', 'Afar', 40000), createArea("ET'; DROP", 'Bad', 1)],
+        });
+
+        expect(getNrwExposedPlaceCodes(event, 1 as AdminLevel)).toEqual(['ET02']);
+        expect(getNrwExposedPlaceCodes(event, 2 as AdminLevel)).toEqual([]);
     });
 });

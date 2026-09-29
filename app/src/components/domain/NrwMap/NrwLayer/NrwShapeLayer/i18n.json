@@ -1,0 +1,6 @@
+{
+    "namespace": "nrwMap",
+    "strings": {
+        "nrwShapeLayerExposedPopulationLabel": "Exposed population:"
+    }
+}

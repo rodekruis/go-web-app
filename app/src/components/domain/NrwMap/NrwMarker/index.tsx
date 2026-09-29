@@ -2,15 +2,16 @@ import { createPortal } from 'react-dom';
 
 import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 
-import useNrwMapMarker from './useNrwMapMarker';
+import useNrwMapMarker, { type NrwMarkerPlacement } from './useNrwMapMarker';
 
 function NrwMarker(props: {
     coordinates: NrwLngLat;
+    placement?: NrwMarkerPlacement;
     children: React.ReactNode;
 }) {
-    const { coordinates, children } = props;
+    const { coordinates, placement, children } = props;
 
-    const element = useNrwMapMarker(coordinates);
+    const element = useNrwMapMarker(coordinates, placement);
 
     return createPortal(children, element);
 }
