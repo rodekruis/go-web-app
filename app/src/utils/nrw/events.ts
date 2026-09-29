@@ -19,16 +19,16 @@ export function getNrwExposedPopulation(area: NrwExposedAdminArea): number | und
 }
 
 export function getNrwExposedAdminAreas(event: NrwEvent): NrwExposedAdminArea[] {
-    const adminLevel = Object.keys(event.exposedAdminAreas)
+    const lowestAdminLevel = Object.keys(event.exposedAdminAreas)
         .map(Number)
         .filter((exposedAdminLevel) => exposedAdminLevel > 0) // only use sub-national admin levels
-        .sort((a, b) => a - b)[0]; // least granular to most granular
+        .sort((a, b) => a - b)[0];
 
-    if (isNotDefined(adminLevel)) {
+    if (isNotDefined(lowestAdminLevel)) {
         return [];
     }
 
-    return [...(event.exposedAdminAreas[String(adminLevel)] ?? [])].sort(
+    return [...(event.exposedAdminAreas[String(lowestAdminLevel)] ?? [])].sort(
         (a, b) => (getNrwExposedPopulation(b) ?? 0) - (getNrwExposedPopulation(a) ?? 0),
     );
 }
@@ -63,5 +63,5 @@ export function getNrwExposedAdminLevels(event: NrwEvent): AdminLevel[] {
 export function getNrwExposedPlaceCodes(event: NrwEvent, adminLevel: AdminLevel): PlaceCode[] {
     return (event.exposedAdminAreas[String(adminLevel)] ?? [])
         .map((area) => parsePlaceCode(area.placeCode))
-        .filter((placeCode): placeCode is PlaceCode => placeCode !== null);
+        .filter(isDefined);
 }
