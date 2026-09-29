@@ -101,12 +101,6 @@ describe('getAdminAreasQuery', () => {
 
         expect(query.filter).toBe("(countryCodeIso3='SSD') AND adminLevel=1 AND placeCode IN ('SS03','SS05')");
     });
-
-    test('simplifies finer admin levels less', () => {
-        expect(getAdminAreasQuery(countries, 0 as AdminLevel).transform).toBe('simplify,0.5');
-        expect(getAdminAreasQuery(countries, 2 as AdminLevel).transform).toBe('simplify,0.001');
-        expect(getAdminAreasQuery(countries, 5 as AdminLevel).transform).toBe('simplify,0.0005');
-    });
 });
 
 describe('maxQueryableAdminLevel', () => {

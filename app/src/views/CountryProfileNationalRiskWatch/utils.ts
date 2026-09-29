@@ -92,10 +92,6 @@ function getCountryAdminLevelFilter(
     return `(${countryFilter}) AND adminLevel=${adminLevel}${parentFilter}${placeCodesFilter}`;
 }
 
-// Simplify less as the admin areas get smaller so the detail stays visible.
-// Indexed by admin level.
-const simplifyFactorByAdminLevel = [0.5, 0.01, 0.001, 0.0005];
-
 // Build the query to fetch country admin areas.
 export function getAdminAreasQuery(
     countryCodes: CountryCodeIso3[],
@@ -103,13 +99,9 @@ export function getAdminAreasQuery(
     parentPlaceCode?: PlaceCode,
     placeCodes?: PlaceCode[],
 ) {
-    const simplifyFactor = simplifyFactorByAdminLevel[adminLevel]
-        ?? simplifyFactorByAdminLevel[simplifyFactorByAdminLevel.length - 1];
-
     return {
         filter: getCountryAdminLevelFilter(countryCodes, adminLevel, parentPlaceCode, placeCodes),
         limit: 10000,
-        transform: `simplify,${simplifyFactor}`,
     };
 }
 
