@@ -118,6 +118,7 @@ describe('maxQueryableAdminLevel', () => {
         const countries = ['SSD' as CountryCodeIso3];
         const query = getAdminAreasQuery(countries, 9 as AdminLevel, 'SS03' as PlaceCode);
 
+        // We remove the placecode if it is beyond the last parent place code level.
         expect(query.filter).toBe("(countryCodeIso3='SSD') AND adminLevel=9");
     });
 });

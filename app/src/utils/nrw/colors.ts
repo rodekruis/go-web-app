@@ -1,7 +1,8 @@
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
-// Figma "Map <colour> 65%" ramps, ordered from the lightest (10) to the darkest (90) tint.
-// Mapbox paint expressions need literal colours, so these mirror the tokens in nrw.css.
+// The design defines "Map <colour> 65%", ordered from the lightest (10) to the
+// darkest (90) tint. Mapbox paint expressions need literal colours, so these
+// mirror the tokens in nrw.css.
 export const alertClassMapRamps: Record<NrwEvent['alertClass'], readonly [
     string, string, string, string, string,
 ]> = {
