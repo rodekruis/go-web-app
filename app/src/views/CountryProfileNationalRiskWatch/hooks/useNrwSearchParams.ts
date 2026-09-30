@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import {
+    useNavigate,
     useParams,
-    useSearchParams,
 } from 'react-router-dom';
 import { isDefined } from '@togglecorp/fujs';
 
@@ -115,10 +115,7 @@ const roundZoomForUrl = (zoom: Zoom) => zoom.toFixed(2).toString();
 const roundLatitudeOrLongitudeForUrl = (value: Latitude | Longitude) => value.toFixed(6).toString();
 
 function useNrwSearchParams() {
-    // useUrlSearchState is limited: its setValue hook cannot handle setting
-    // multiple params in quick succession. Workaround: use setSearchParams for
-    // handling map view changes.
-    const [, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
     // Unlikely that these URL params will have invalid values, but let's be defensive.
     const [zoomFromUrlParams] = useUrlSearchState('z', parseZoomUrlParameter, () => '');
     const [latitudeFromUrlParams] = useUrlSearchState('lat', parseMapLatitudeParameter, () => '');
@@ -156,17 +153,23 @@ function useNrwSearchParams() {
         ? countriesFromUrlParams
         : countriesFromRouting;
 
+    // Update several params in one navigation, starting from the live URL.
+    const setSearchParams = useCallback(
+        (update: (params: URLSearchParams) => void) => {
+            const params = new URLSearchParams(window.location.search);
+            update(params);
+            navigate(`?${params}`, { replace: true });
+        },
+        [navigate],
+    );
+
     const handleMapViewChange: MapViewChangeHandler = useCallback(
         (newZoom, newLatitude, newLongitude) => {
-            setSearchParams(
-                (prevParams) => {
-                    prevParams.set('z', roundZoomForUrl(newZoom));
-                    prevParams.set('lat', roundLatitudeOrLongitudeForUrl(newLatitude));
-                    prevParams.set('lon', roundLatitudeOrLongitudeForUrl(newLongitude));
-                    return prevParams;
-                },
-                { replace: true },
-            );
+            setSearchParams((params) => {
+                params.set('z', roundZoomForUrl(newZoom));
+                params.set('lat', roundLatitudeOrLongitudeForUrl(newLatitude));
+                params.set('lon', roundLatitudeOrLongitudeForUrl(newLongitude));
+            });
         },
         [setSearchParams],
     );
@@ -177,22 +180,18 @@ function useNrwSearchParams() {
                 return;
             }
 
-            setSearchParams(
-                (prevParams) => {
-                    if (isDefined(eventId)) {
-                        prevParams.set('event', String(eventId));
-                        prevParams.set('layers', defaultVisibleLayers.join(','));
-                    } else {
-                        prevParams.delete('event');
-                        prevParams.delete('layers');
-                    }
-                    prevParams.delete('z');
-                    prevParams.delete('lat');
-                    prevParams.delete('lon');
-                    return prevParams;
-                },
-                { replace: true },
-            );
+            setSearchParams((params) => {
+                if (isDefined(eventId)) {
+                    params.set('event', String(eventId));
+                    params.set('layers', defaultVisibleLayers.join(','));
+                } else {
+                    params.delete('event');
+                    params.delete('layers');
+                }
+                params.delete('z');
+                params.delete('lat');
+                params.delete('lon');
+            });
         },
         [selectedEventId, setSearchParams],
     );
