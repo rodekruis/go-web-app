@@ -18,7 +18,7 @@ export type NrwMarkerPlacement = Pick<MarkerOptions, 'anchor' | 'offset'>;
 
 function useNrwMapMarker(
     coordinates: NrwLngLat,
-    placement: NrwMarkerPlacement = { anchor: 'bottom' },
+    placement: NrwMarkerPlacement = { anchor: 'center' },
 ): HTMLDivElement {
     const { map } = useContext(NrwMapContext);
 
