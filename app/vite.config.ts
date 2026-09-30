@@ -90,6 +90,7 @@ export default defineConfig(({ mode }) => {
         },
         test: {
             environment: 'happy-dom',
+            setupFiles: ['./vitest.setup.ts'],
             coverage: {
                 enabled: true,
                 reporter: 'html',

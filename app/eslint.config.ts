@@ -76,10 +76,12 @@ const appConfigs = compat.config({
             {
                 devDependencies: [
                     '**/*.test.{ts,tsx}',
+                    '**/utils/testing/**',
                     'eslint.config.js',
                     'postcss.config.cjs',
                     'stylelint.config.cjs',
                     'vite.config.ts',
+                    'vitest.setup.ts',
                 ],
                 optionalDependencies: false,
             },
