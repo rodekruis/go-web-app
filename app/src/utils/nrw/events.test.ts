@@ -12,12 +12,11 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import {
-    getNrwExposedAdminAreas,
     getNrwExposedAdminLevels,
     getNrwExposedPlaceCodes,
     getNrwExposedPopulation,
     getNrwExposedPopulationByPlaceCode,
-    getNrwTotalExposedPopulation,
+    getNrwInitialAdminLevel,
 } from './events';
 
 function createEvent(exposedAdminAreas: NrwEvent['exposedAdminAreas']): NrwEvent {
@@ -33,39 +32,6 @@ function createArea(placeCode: string, name: string, exposed: number): NrwExpose
     };
 }
 
-describe('getNrwExposedAdminAreas', () => {
-    test('reads the least granular sub-national admin level', () => {
-        const event = createEvent({
-            0: [createArea('ET', 'Ethiopia', 61800)],
-            1: [createArea('ET02', 'Afar', 40000)],
-            2: [createArea('ET0201', 'Awsi Rasu', 30000)],
-        });
-
-        expect(getNrwExposedAdminAreas(event)).toEqual([createArea('ET02', 'Afar', 40000)]);
-    });
-
-    test('orders the areas by exposed population, most exposed first', () => {
-        const event = createEvent({
-            2: [
-                createArea('MW201', 'Nkhata Bay', 54000),
-                createArea('MW202', 'Rumphi', 610000),
-                createArea('MW203', 'Mzimba', 210000),
-            ],
-        });
-
-        expect(getNrwExposedAdminAreas(event).map((area) => area.name)).toEqual([
-            'Rumphi',
-            'Mzimba',
-            'Nkhata Bay',
-        ]);
-    });
-
-    test('returns no areas without a sub-national admin level', () => {
-        expect(getNrwExposedAdminAreas(createEvent({}))).toEqual([]);
-        expect(getNrwExposedAdminAreas(createEvent({ 0: [createArea('MW', 'Malawi', 1)] }))).toEqual([]);
-    });
-});
-
 describe('getNrwExposedPopulation', () => {
     test('reads the exposed population layer', () => {
         expect(getNrwExposedPopulation(createArea('MW1', 'Northern', 12000))).toBe(12000);
@@ -80,16 +46,6 @@ describe('getNrwExposedPopulation', () => {
         };
 
         expect(getNrwExposedPopulation(area)).toBeUndefined();
-    });
-});
-
-describe('getNrwTotalExposedPopulation', () => {
-    test('adds up the exposed populations', () => {
-        expect(getNrwTotalExposedPopulation([
-            createArea('MW1', 'Rumphi', 610000),
-            createArea('MW2', 'Karonga', 430000),
-        ])).toBe(1040000);
-        expect(getNrwTotalExposedPopulation([])).toBe(0);
     });
 });
 
@@ -128,6 +84,43 @@ describe('getNrwExposedAdminLevels', () => {
         });
 
         expect(getNrwExposedAdminLevels(event)).toEqual([1, 2]);
+    });
+});
+
+describe('getNrwInitialAdminLevel', () => {
+    test('opens at the least granular level with more than one exposed area', () => {
+        const event = createEvent({
+            0: [createArea('SS', 'South Sudan', 300000)],
+            1: [createArea('SS03', 'Jonglei', 250000), createArea('SS04', 'Unity', 50000)],
+            2: [createArea('SS0301', 'Akobo', 250000), createArea('SS0401', 'Abiemnhom', 50000)],
+        });
+
+        expect(getNrwInitialAdminLevel(event)).toBe(1);
+    });
+
+    test('skips the levels with a single exposed area', () => {
+        const event = createEvent({
+            1: [createArea('MW2', 'Central', 640000)],
+            2: [createArea('MW202', 'Rumphi', 640000)],
+            3: [createArea('MW20201', 'Chikulamayembe', 430000), createArea('MW20202', 'Mzenga', 210000)],
+        });
+
+        expect(getNrwInitialAdminLevel(event)).toBe(3);
+    });
+
+    test('opens a single chain of exposed areas at its most granular level', () => {
+        const event = createEvent({
+            1: [createArea('MW2', 'Central', 21000)],
+            2: [createArea('MW202', 'Rumphi', 21000)],
+            3: [createArea('MW20201', 'Mzimba', 21000)],
+        });
+
+        expect(getNrwInitialAdminLevel(event)).toBe(3);
+    });
+
+    test('opens one level below the country without exposed sub-national areas', () => {
+        expect(getNrwInitialAdminLevel(createEvent({}))).toBe(1);
+        expect(getNrwInitialAdminLevel(createEvent({ 0: [createArea('MW', 'Malawi', 1)] }))).toBe(1);
     });
 });
 

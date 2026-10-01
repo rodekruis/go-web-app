@@ -46,6 +46,10 @@
         padding: 0 var(--go-ui-spacing-2xs);
     }
 
+    .back-button {
+        margin-left: auto;
+    }
+
     .data-source {
         border-top: var(--go-ui-width-separator-sm) solid var(--go-ui-color-gray-30);
         padding: var(--go-ui-spacing-3xs) var(--go-ui-spacing-2xs);

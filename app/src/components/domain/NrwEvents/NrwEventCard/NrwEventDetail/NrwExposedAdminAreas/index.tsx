@@ -1,21 +1,63 @@
-import { useMemo } from 'react';
-import { faLocationDot } from '@fortawesome/pro-regular-svg-icons';
+import {
+    useContext,
+    useMemo,
+} from 'react';
+import {
+    faLocationCrosshairs,
+    faLocationDot,
+} from '@fortawesome/pro-regular-svg-icons';
 import { faPersonRays } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NumberOutput } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import { resolveToString } from '@ifrc-go/ui/utils';
-import { _cs } from '@togglecorp/fujs';
+import {
+    _cs,
+    isDefined,
+    isNotDefined,
+    sum,
+} from '@togglecorp/fujs';
 
 import {
-    getNrwExposedAdminAreas,
-    getNrwExposedPopulation,
-    getNrwTotalExposedPopulation,
-} from '#utils/nrw/events';
-import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
+    alertClassMapRamps,
+    getEqualIntervalBreaks,
+    getRampColor,
+} from '#utils/nrw/colors';
+import { getNrwExposedPopulationByPlaceCode } from '#utils/nrw/events';
+import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
+import {
+    type NrwAdminAreaFeatureCollection,
+    type NrwEvent,
+} from '#views/CountryProfileNationalRiskWatch/types';
+import { parseAdminAreaProperties } from '#views/CountryProfileNationalRiskWatch/utils';
+
+import NrwExposedAdminAreaRow from './NrwExposedAdminAreaRow';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
+
+// The rows of the table, most exposed first, coloured as their map polygons.
+function getExposedAdminAreaRows(adminAreas: NrwAdminAreaFeatureCollection, event: NrwEvent) {
+    const exposedPopulationByPlaceCode = getNrwExposedPopulationByPlaceCode(event);
+    const rows = adminAreas.features
+        .map((feature) => parseAdminAreaProperties(feature.properties))
+        .filter(isDefined)
+        .map((adminArea) => ({
+            adminArea,
+            exposedPopulation: exposedPopulationByPlaceCode.get(adminArea.placeCode),
+        }))
+        .sort((a, b) => (b.exposedPopulation ?? 0) - (a.exposedPopulation ?? 0));
+
+    const breaks = getEqualIntervalBreaks(
+        rows.map((row) => row.exposedPopulation).filter(isDefined),
+    );
+    const ramp = alertClassMapRamps[event.alertClass];
+
+    return rows.map((row) => ({
+        ...row,
+        color: getRampColor(ramp, breaks, row.exposedPopulation),
+    }));
+}
 
 interface Props {
     className?: string;
@@ -26,33 +68,77 @@ function NrwExposedAdminAreas(props: Props) {
     const { className, event } = props;
 
     const strings = useTranslation(i18n);
+    const {
+        adminLevel,
+        adminLevelLabels,
+        adminAreas,
+        pending,
+        parentAdminArea,
+        hoveredPlaceCode,
+        onAdminAreaHoverChange,
+        canDrillDown,
+        drillDown,
+    } = useContext(NrwAdminAreasContext);
 
-    // TODO: use the admin level label from the event country once the country object provides it
-    const adminAreaLabel = strings.nrwExposedAdminAreasFallbackLabel;
+    const adminAreaLabel = adminLevelLabels?.[adminLevel]?.plural
+        ?? strings.nrwExposedAdminAreasFallbackLabel;
 
-    const exposedAdminAreas = useMemo(() => getNrwExposedAdminAreas(event), [event]);
-
-    const totalExposedPopulation = useMemo(
-        () => getNrwTotalExposedPopulation(exposedAdminAreas),
-        [exposedAdminAreas],
+    const rows = useMemo(
+        () => (isDefined(adminAreas) ? getExposedAdminAreaRows(adminAreas, event) : []),
+        [adminAreas, event],
     );
+    const totalExposedPopulation = sum(rows.map((row) => row.exposedPopulation ?? 0));
 
-    if (exposedAdminAreas.length === 0) {
+    if (isNotDefined(adminAreas) && pending) {
         return (
-            <div className={_cs(styles.nrwExposedAdminAreas, styles.emptyMessage, className)}>
+            <div className={_cs(styles.nrwExposedAdminAreas, styles.message, className)}>
+                {resolveToString(strings.nrwExposedAdminAreasPendingMessage, { adminAreaLabel })}
+            </div>
+        );
+    }
+
+    if (rows.length === 0) {
+        return (
+            <div className={_cs(styles.nrwExposedAdminAreas, styles.message, className)}>
                 {resolveToString(strings.nrwExposedAdminAreasEmptyMessage, { adminAreaLabel })}
             </div>
         );
     }
 
+    const parentAdminAreaLabel = isDefined(parentAdminArea)
+        ? adminLevelLabels?.[parentAdminArea.adminLevel]?.singular
+        : undefined;
+
     return (
         <div className={_cs(styles.nrwExposedAdminAreas, className)}>
-            <div className={styles.exposedAdminAreaTotals}>
+            {isDefined(parentAdminArea) && (
+                <div className={styles.selectedAdminArea}>
+                    <FontAwesomeIcon icon={faLocationCrosshairs} />
+                    {strings.nrwExposedAdminAreasSelectedAreaLabel}
+                    <span className={styles.selectedAdminAreaValue}>
+                        {isDefined(parentAdminAreaLabel)
+                            ? resolveToString(
+                                strings.nrwExposedAdminAreasSelectedAreaValue,
+                                {
+                                    name: parentAdminArea.name,
+                                    adminAreaLabel: parentAdminAreaLabel,
+                                },
+                            )
+                            : parentAdminArea.name}
+                    </span>
+                </div>
+            )}
+            <div
+                className={_cs(
+                    styles.exposedAdminAreaTotals,
+                    isDefined(parentAdminArea) && styles.indented,
+                )}
+            >
                 <div>
                     {resolveToString(strings.nrwExposedAdminAreasTotalAreas, { adminAreaLabel })}
                     <NumberOutput
                         className={styles.exposedAdminAreaTotalValue}
-                        value={exposedAdminAreas.length}
+                        value={rows.length}
                     />
                 </div>
                 <div>
@@ -85,20 +171,18 @@ function NrwExposedAdminAreas(props: Props) {
                     </tr>
                 </thead>
                 <tbody>
-                    {exposedAdminAreas.map((area) => (
-                        <tr key={area.placeCode}>
-                            <td>
-                                <span className={styles.adminAreaName}>
-                                    {area.name}
-                                </span>
-                            </td>
-                            <td>
-                                <NumberOutput
-                                    value={getNrwExposedPopulation(area)}
-                                    invalidText="--"
-                                />
-                            </td>
-                        </tr>
+                    {rows.map(({ adminArea, exposedPopulation, color }) => (
+                        <NrwExposedAdminAreaRow
+                            key={adminArea.placeCode}
+                            adminArea={adminArea}
+                            exposedPopulation={exposedPopulation}
+                            color={color}
+                            hovered={hoveredPlaceCode === adminArea.placeCode}
+                            drillable={canDrillDown(adminArea.placeCode)}
+                            disabled={pending}
+                            onHoverChange={onAdminAreaHoverChange}
+                            onDrillDown={drillDown}
+                        />
                     ))}
                 </tbody>
             </table>

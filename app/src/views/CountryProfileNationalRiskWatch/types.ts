@@ -71,6 +71,11 @@ export type NrwEvent = NrwApiResponse<'/events'>[number];
 export type NrwEventIdChangeHandler = (eventId: NrwEvent['eventId'] | undefined) => void;
 export type NrwExposedAdminArea = NrwEvent['exposedAdminAreas'][string][number];
 
+export type NrwCountry = NrwApiResponse<'/countries'>[number];
+export type NrwAdminLevelLabels = NonNullable<NrwCountry['adminLevelLabels']>;
+export type PlaceCodeChangeHandler = (placeCode: PlaceCode | undefined) => void;
+export type AdminAreaDrillDownHandler = (adminArea: AdminAreaProperties) => void;
+
 export type NrwLayer = NrwApiResponse<'/layers'>[number];
 export type NrwLayerName = NrwLayer['name'];
 export type NrwHazardType = NrwLayer['hazardType'];

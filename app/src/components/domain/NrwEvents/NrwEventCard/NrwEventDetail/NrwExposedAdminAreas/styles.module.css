@@ -3,9 +3,20 @@
     flex-direction: column;
     gap: var(--go-ui-spacing-2xs);
 
-    &.empty-message {
+    &.message {
         padding: 0 var(--go-ui-spacing-xl);
         color: var(--go-ui-color-gray-70);
+    }
+
+    .selected-admin-area {
+        display: flex;
+        align-items: center;
+        gap: var(--go-ui-spacing-3xs);
+        padding: 0 var(--go-ui-spacing-2xs);
+    }
+
+    .selected-admin-area-value {
+        font-weight: var(--go-ui-font-weight-semibold);
     }
 
     .exposed-admin-area-totals {
@@ -13,6 +24,10 @@
         flex-direction: column;
         gap: var(--go-ui-spacing-3xs);
         padding: 0 var(--go-ui-spacing-xl);
+
+        &.indented {
+            padding-left: var(--go-ui-spacing-2xl);
+        }
     }
 
     .exposed-admin-area-total-value {
@@ -24,20 +39,11 @@
         width: 100%;
         border-collapse: collapse;
 
-        th,
-        td {
+        th {
             padding: var(--go-ui-spacing-3xs) var(--go-ui-spacing-2xs);
             width: 50%;
             text-align: left;
             font-weight: inherit;
-        }
-
-        td {
-          text-indent: var(--go-ui-spacing-lg);
-        }
-
-        tbody tr {
-            border-top: var(--go-ui-width-separator-sm) solid var(--go-ui-color-gray-30);
         }
     }
 
@@ -46,9 +52,5 @@
         align-items: center;
         gap: var(--go-ui-spacing-3xs);
         font-weight: var(--go-ui-font-weight-medium);
-    }
-
-    .admin-area-name {
-        overflow-wrap: anywhere;
     }
 }
