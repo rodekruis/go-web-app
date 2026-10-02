@@ -67,8 +67,9 @@ function getAdminAreaFillLayer(
             type: 'geojson',
             // The generated GeoJSON type is looser than the Mapbox one.
             data: { ...adminAreas, features } as unknown as GeoJSON.FeatureCollection,
-            // Use properties.id, so the hover feature state can find the feature.
-            promoteId: 'id',
+            // Use properties.placeCode as the feature id, so the hover feature state
+            // can find the feature.
+            promoteId: 'placeCode',
         },
         paint: {
             'fill-color': fillColor,

@@ -9,6 +9,7 @@ import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
 const hazardIcons: Record<NrwEvent['hazardType'], IconDefinition> = {
     floods: faHouseFloodWater,
+    compoundFloods: faHouseFloodWater,
     drought: faSunPlantWilt,
     tropicalCyclone: faHurricane,
 };
