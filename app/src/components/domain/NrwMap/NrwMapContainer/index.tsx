@@ -45,10 +45,11 @@ function NrwMapContainer(props: {
     mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
     layerPanel?: React.ReactNode;
+    legend?: React.ReactNode;
     children?: React.ReactNode;
 }) {
     const {
-        mapView, onMapViewChange, layerPanel, children,
+        mapView, onMapViewChange, layerPanel, legend, children,
     } = props;
 
     const { zoom, center, fitBounds } = mapView;
@@ -188,6 +189,11 @@ function NrwMapContainer(props: {
                         </>
                     )}
                 </div>
+                {isDefined(legend) && (
+                    <div className={styles.mapLegend}>
+                        {legend}
+                    </div>
+                )}
             </div>
             <NrwMapContext.Provider value={mapContext}>
                 {children}

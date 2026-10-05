@@ -4,6 +4,7 @@ import {
     isNotDefined,
 } from '@togglecorp/fujs';
 
+import { type NrwLegendItem } from '#utils/nrw/legend';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
@@ -21,6 +22,7 @@ import NrwEventMarker from './NrwEventMarker';
 import NrwLayer from './NrwLayer';
 import NrwLayerPanel from './NrwLayerPanel';
 import NrwMapContainer from './NrwMapContainer';
+import NrwMapLegend from './NrwMapLegend';
 import NrwMarker from './NrwMarker';
 
 // This component knows nothing about Mapbox.
@@ -52,6 +54,7 @@ function NrwMap(props: {
     availableLayers: NrwLayerType[] | undefined;
     visibleLayers: NrwLayerName[];
     onLayerToggle: LayerToggleHandler;
+    legendItems: NrwLegendItem[];
 }) {
     const {
         mapView,
@@ -59,6 +62,7 @@ function NrwMap(props: {
         availableLayers,
         visibleLayers,
         onLayerToggle,
+        legendItems,
     } = props;
 
     const {
@@ -80,11 +84,16 @@ function NrwMap(props: {
         />
     ) : undefined;
 
+    const legend = legendItems.length > 0 ? (
+        <NrwMapLegend items={legendItems} />
+    ) : undefined;
+
     return (
         <NrwMapContainer
             mapView={mapView}
             onMapViewChange={onMapViewChange}
             layerPanel={layerPanel}
+            legend={legend}
         >
             {showLayers && availableLayers?.map((layer) => (
                 <NrwLayer

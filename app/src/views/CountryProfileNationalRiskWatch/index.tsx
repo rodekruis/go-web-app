@@ -14,6 +14,7 @@ import { nrwStandalone } from '#config';
 import NrwEventsContext from './contexts/NrwEventsContext';
 import useNrwEvents from './hooks/useNrwEvents';
 import useNrwLayers from './hooks/useNrwLayers';
+import useNrwLegend from './hooks/useNrwLegend';
 import useNrwMapView from './hooks/useNrwMapView';
 import useNrwSearchParams from './hooks/useNrwSearchParams';
 import { getEventCountries } from './utils';
@@ -69,6 +70,12 @@ export function Component() {
         onVisibleLayersChange: setLayersFromUrlParams,
     });
 
+    const { legendItems } = useNrwLegend({
+        availableLayers,
+        visibleLayers,
+        enabled: isDefined(selectedEvent),
+    });
+
     const content = (
         <NrwEventsContext.Provider value={nrwEventsContext}>
             <Container
@@ -86,6 +93,7 @@ export function Component() {
                         availableLayers={availableLayers}
                         visibleLayers={visibleLayers}
                         onLayerToggle={handleLayerToggle}
+                        legendItems={legendItems}
                     />
                     <NrwEvents />
                 </ListView>
