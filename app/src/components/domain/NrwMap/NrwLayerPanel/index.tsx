@@ -17,6 +17,13 @@ import {
 import i18n from './i18n.json';
 import styles from './styles.module.css';
 
+const layerPanelOrder: NrwLayerName[] = [
+    supportedLayerNames.exposedPopulation,
+    supportedLayerNames.floodDepth,
+    supportedLayerNames.clinics,
+    supportedLayerNames.populationDensity,
+];
+
 function NrwLayerPanel(props: {
     layers: NrwLayer[];
     visibleLayers: NrwLayerName[];
@@ -26,7 +33,7 @@ function NrwLayerPanel(props: {
 
     const strings = useTranslation(i18n);
 
-    const supportedLayers = Object.values(supportedLayerNames)
+    const supportedLayers = layerPanelOrder
         .map((name) => layers.find((layer) => layer.name === name))
         .filter(isDefined);
 
