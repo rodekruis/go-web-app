@@ -87,7 +87,7 @@ function NrwAdminAreasProvider(props: {
                 return { ...previous, shown: { path: previous.path, adminAreas } };
             }
 
-            // An admin area without children is the finest level, so stay on
+            // An admin area without children is the deepest level, so stay on
             // the shown level and remember it, so it is not requested again.
             const requestedAdminArea = previous.path.at(-1);
             return {
