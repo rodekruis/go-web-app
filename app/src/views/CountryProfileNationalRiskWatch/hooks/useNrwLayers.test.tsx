@@ -13,14 +13,14 @@ import {
 import { useNrwRequest } from '#utils/restRequest';
 
 import {
-    type NrwLayer,
     type NrwLayerName,
+    type NrwStaticLayer,
 } from '../types';
 import useNrwLayers from './useNrwLayers';
 
 vi.mock('#utils/restRequest', () => ({ useNrwRequest: vi.fn() }));
 
-const availableLayers: NrwLayer[] = [
+const availableLayers: NrwStaticLayer[] = [
     {
         id: 1,
         name: 'floodDepth',
@@ -89,6 +89,46 @@ describe('useNrwLayers', () => {
         });
 
         expect(onVisibleLayersChange).toHaveBeenCalledExactlyOnceWith(['floodDepth', 'clinics']);
+    });
+
+    test('includes both the static and the event layers', () => {
+        vi.mocked(useNrwRequest).mockReturnValue({
+            response: [availableLayers[1]],
+            pending: false,
+            error: undefined,
+        } as unknown as ReturnType<typeof useNrwRequest>);
+        const eventLayers = [{
+            resourceId: '10',
+            name: 'floodDepth',
+            label: 'Flood depth',
+            type: 'raster',
+        }] as const;
+        const { result } = renderNrwLayers({
+            selectedEvent: { availableLayers: [...eventLayers] },
+        });
+
+        expect(result.current.availableLayers).toHaveLength(2);
+        expect(result.current.availableLayers)
+            .toEqual(expect.arrayContaining([availableLayers[1], eventLayers[0]]));
+    });
+
+    test('shows event layers before static layers arrive', () => {
+        vi.mocked(useNrwRequest).mockReturnValue({
+            response: undefined,
+            pending: true,
+            error: undefined,
+        } as unknown as ReturnType<typeof useNrwRequest>);
+        const eventLayers = [{
+            resourceId: '10',
+            name: 'floodDepth',
+            label: 'Flood depth',
+            type: 'raster',
+        }] as const;
+        const { result } = renderNrwLayers({
+            selectedEvent: { availableLayers: [...eventLayers] },
+        });
+
+        expect(result.current.availableLayers).toEqual(eventLayers);
     });
 
     test('hides a visible layer after its toggle', () => {

@@ -15,20 +15,32 @@ function NrwRasterLayer(props: {
     id: string;
     countryCodeIso3: CountryCodeIso3;
     name: NrwLayer['name'];
+    resourceId?: string;
     isVisible: boolean;
+    beforeId?: string;
 }) {
     const {
-        id, countryCodeIso3, name, isVisible,
+        id, countryCodeIso3, name, resourceId, isVisible, beforeId,
     } = props;
 
-    const { response } = useNrwRequest({
+    const { response: staticRaster } = useNrwRequest({
         apiType: 'nrw',
         url: '/rasters/static/{countryCodeIso3}/{layer}',
         pathVariables: {
             countryCodeIso3,
             layer: name,
         },
+        skip: !isNotDefined(resourceId),
     });
+
+    const { response: alertRaster } = useNrwRequest({
+        apiType: 'nrw',
+        url: '/rasters/alert/{id}',
+        pathVariables: { id: Number(resourceId) },
+        skip: isNotDefined(resourceId),
+    });
+
+    const response = isNotDefined(resourceId) ? staticRaster : alertRaster;
 
     const mapLayer = useMemo<Parameters<typeof useNrwMapLayer>[0]>(
         () => {
@@ -45,7 +57,12 @@ function NrwRasterLayer(props: {
                 type: 'raster',
                 source: {
                     type: 'image',
-                    url: resolveUrl(nrwApi, `rasters/static/${countryCodeIso3}/${name}/image`),
+                    url: resolveUrl(
+                        nrwApi,
+                        isNotDefined(resourceId)
+                            ? `rasters/static/${countryCodeIso3}/${name}/image`
+                            : `rasters/alert/${resourceId}/image`,
+                    ),
                     coordinates: [
                         [xmin, ymax], // west north
                         [xmax, ymax], // east north
@@ -58,10 +75,10 @@ function NrwRasterLayer(props: {
                 },
             };
         },
-        [id, countryCodeIso3, name, response],
+        [id, countryCodeIso3, name, resourceId, response],
     );
 
-    useNrwMapLayer(mapLayer, isVisible);
+    useNrwMapLayer(mapLayer, isVisible, beforeId);
 
     return null;
 }

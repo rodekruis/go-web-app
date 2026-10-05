@@ -11,13 +11,13 @@ import {
 } from 'vitest';
 
 import TestProviders from '#utils/testing/TestProviders';
-import { type NrwLayer } from '#views/CountryProfileNationalRiskWatch/types';
+import { type NrwStaticLayer } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwLayerPanel from './index';
 
 import i18n from './i18n.json';
 
-function createLayer(name: NrwLayer['name'], label: string): NrwLayer {
+function createLayer(name: NrwStaticLayer['name'], label: string): NrwStaticLayer {
     return {
         id: label.length,
         name,
@@ -71,6 +71,24 @@ describe('NrwLayerPanel', () => {
         expect(
             screen.queryByText(i18n.strings.nrwLayerPanelNoLayersMessage),
         ).not.toBeInTheDocument();
+    });
+
+    test('shows the event flood depth raster as a checked layer', () => {
+        render(
+            <NrwLayerPanel
+                layers={[{
+                    resourceId: '10',
+                    name: 'floodDepth',
+                    label: 'Flood depth',
+                    type: 'raster',
+                }, exposedPopulation]}
+                visibleLayers={['floodDepth', 'exposedPopulation']}
+                onLayerToggle={vi.fn()}
+            />,
+            { wrapper: TestProviders },
+        );
+
+        expect(screen.getByRole('checkbox', { name: 'Flood depth' })).toBeChecked();
     });
 
     test('shows the empty message when no supported layer is available', () => {

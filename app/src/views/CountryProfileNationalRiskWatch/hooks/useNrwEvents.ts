@@ -1,4 +1,5 @@
 import {
+    useCallback,
     useMemo,
     useState,
 } from 'react';
@@ -10,13 +11,13 @@ import { type NrwEventsContextProps } from '../contexts/NrwEventsContext';
 import {
     type CountryCodeIso3,
     type NrwEvent,
-    type NrwEventIdChangeHandler,
+    type NrwEventSelectHandler,
 } from '../types';
 
 function useNrwEvents(props: {
     countries: CountryCodeIso3[] | undefined;
     selectedEventId: NrwEvent['eventId'] | undefined;
-    onSelectedEventIdChange: NrwEventIdChangeHandler;
+    onSelectedEventIdChange: NrwEventSelectHandler;
     active?: boolean;
 }): NrwEventsContextProps {
     const {
@@ -39,6 +40,14 @@ function useNrwEvents(props: {
 
     const [hoveredEventId, setHoveredEventId] = useState<NrwEvent['eventId'] | undefined>();
 
+    const handleEventSelect = useCallback(
+        (eventId: NrwEvent['eventId'] | undefined) => {
+            const event = events?.find((candidate) => candidate.eventId === eventId);
+            onSelectedEventIdChange(eventId, event?.hazardType);
+        },
+        [events, onSelectedEventIdChange],
+    );
+
     return useMemo(
         () => ({
             events,
@@ -46,7 +55,7 @@ function useNrwEvents(props: {
             errored: isDefined(error),
             selectedEvent,
             hoveredEventId,
-            onEventSelect: onSelectedEventIdChange,
+            onEventSelect: handleEventSelect,
             onEventHoverChange: setHoveredEventId,
         }),
         [
@@ -55,7 +64,7 @@ function useNrwEvents(props: {
             error,
             selectedEvent,
             hoveredEventId,
-            onSelectedEventIdChange,
+            handleEventSelect,
             setHoveredEventId,
         ],
     );

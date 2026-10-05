@@ -88,7 +88,7 @@ function NrwMap(props: {
         >
             {showLayers && availableLayers?.map((layer) => (
                 <NrwLayer
-                    key={layer.name}
+                    key={'resourceId' in layer ? `${layer.name}-${layer.resourceId}` : layer.name}
                     countryCodeIso3={eventCountryCodeIso3}
                     layer={layer}
                     isVisible={visibleLayers.includes(layer.name)}

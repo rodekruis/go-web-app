@@ -26,10 +26,10 @@ function createRasterLayer(id: string): MapLayer {
     };
 }
 
-function Layer(props: { mapLayer: MapLayer | undefined; isVisible: boolean }) {
-    const { mapLayer, isVisible } = props;
+function Layer(props: { mapLayer: MapLayer | undefined; isVisible: boolean; beforeId?: string }) {
+    const { mapLayer, isVisible, beforeId } = props;
 
-    useNrwMapLayer(mapLayer, isVisible);
+    useNrwMapLayer(mapLayer, isVisible, beforeId);
 
     return null;
 }
@@ -166,6 +166,46 @@ describe('useNrwMapLayer', () => {
             'removeLayer layer-MWI-floodDepth',
             'removeSource layer-MWI-floodDepth',
             'addLayer layer-MWI-floodDepth',
+        ]);
+    });
+
+    test('inserts the layer below its anchor, whatever the add order', () => {
+        const { map, getLayerOrder } = createFakeMapboxMap();
+        ['anchor-exposedPopulation', 'anchor-floodDepth'].forEach((id) => {
+            map.addLayer({ id, type: 'background' });
+        });
+
+        function Layers(props: { exposedPopulation: MapLayer }) {
+            const { exposedPopulation } = props;
+            const mapContext = useMemo(() => ({ map }), []);
+
+            return (
+                <NrwMapContext.Provider value={mapContext}>
+                    <Layer
+                        mapLayer={createRasterLayer('layer-MWI-floodDepth')}
+                        isVisible
+                        beforeId="anchor-floodDepth"
+                    />
+                    <Layer
+                        mapLayer={exposedPopulation}
+                        isVisible
+                        beforeId="anchor-exposedPopulation"
+                    />
+                </NrwMapContext.Provider>
+            );
+        }
+
+        const { rerender } = render(
+            <Layers exposedPopulation={createRasterLayer('layer-MWI-exposedPopulation')} />,
+        );
+        // A drill-down replaces the admin areas, which must stay below the flood depth.
+        rerender(<Layers exposedPopulation={createRasterLayer('layer-MWI-exposedPopulation')} />);
+
+        expect(getLayerOrder()).toEqual([
+            'layer-MWI-exposedPopulation',
+            'anchor-exposedPopulation',
+            'layer-MWI-floodDepth',
+            'anchor-floodDepth',
         ]);
     });
 

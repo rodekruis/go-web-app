@@ -21,6 +21,10 @@ import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 import { mbtoken } from '#config';
 import {
+    getLayerAnchorId,
+    layerDrawOrder,
+} from '#utils/nrw/layers';
+import {
     type Latitude,
     type Longitude,
     type MapView,
@@ -96,6 +100,14 @@ function NrwMapContainer(props: {
         map.dragRotate.disable();
         map.touchPitch.disable();
         map.on('style.load', () => {
+            // Empty layers that keep the NRW layers in draw order, whenever each is added.
+            layerDrawOrder.forEach((name) => {
+                map.addLayer({
+                    id: getLayerAnchorId(name),
+                    type: 'background',
+                    layout: { visibility: 'none' },
+                });
+            });
             setMapLoadComplete(true);
         });
 
