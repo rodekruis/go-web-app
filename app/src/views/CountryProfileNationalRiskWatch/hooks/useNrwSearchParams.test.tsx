@@ -238,7 +238,7 @@ describe('useNrwSearchParams', () => {
 
             expect(rendered.searchParams.get('layers')).toBe('exposedPopulation,floodDepth');
             expect(rendered.result.current.params.layersFromUrlParams)
-                .toEqual(['floodDepth', 'exposedPopulation']);
+                .toEqual(['exposedPopulation', 'floodDepth']);
         });
 
         test('clearing the event hides all layers and drops the map view', () => {

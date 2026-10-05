@@ -8,7 +8,7 @@ import { useNrwRequest } from '#utils/restRequest';
 
 import {
     type NrwEvent,
-    type NrwHazardType,
+    type NrwEventHazardType,
     type NrwLayer,
     type NrwLayerName,
     type VisibleLayersChangeHandler,
@@ -17,7 +17,7 @@ import {
 function useNrwLayers(props: {
     visibleLayers: NrwLayerName[];
     onVisibleLayersChange: VisibleLayersChangeHandler;
-    hazardType?: NrwHazardType;
+    hazardType?: NrwEventHazardType;
     selectedEvent?: Pick<NrwEvent, 'availableLayers'>;
 }) {
     const {
@@ -27,19 +27,18 @@ function useNrwLayers(props: {
         selectedEvent,
     } = props;
 
-    const { response: staticLayers } = useNrwRequest({
+    const { response: staticLayersResponse } = useNrwRequest({
         url: '/layers',
         apiType: 'nrw',
         query: isDefined(hazardType) ? { hazardType } : undefined,
     });
 
-    const availableLayers = useMemo<NrwLayer[] | undefined>(() => {
-        if (!selectedEvent?.availableLayers.length) {
-            return staticLayers;
-        }
+    const availableLayers = useMemo((): NrwLayer[] => {
+        const staticLayers = staticLayersResponse ?? [];
+        const eventLayers = selectedEvent?.availableLayers ?? [];
 
-        return [...(staticLayers ?? []), ...selectedEvent.availableLayers];
-    }, [staticLayers, selectedEvent]);
+        return [...staticLayers, ...eventLayers];
+    }, [staticLayersResponse, selectedEvent]);
 
     const handleLayerToggle = useCallback(
         (name: NrwLayerName) => {

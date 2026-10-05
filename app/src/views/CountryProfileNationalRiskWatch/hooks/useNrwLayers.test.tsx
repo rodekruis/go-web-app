@@ -68,7 +68,7 @@ describe('useNrwLayers', () => {
             apiType: 'nrw',
             query: undefined,
         });
-        expect(result.current.availableLayers).toBe(availableLayers);
+        expect(result.current.availableLayers).toEqual(availableLayers);
 
         renderNrwLayers({ hazardType: 'floods' });
 

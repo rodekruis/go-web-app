@@ -3,7 +3,10 @@ import {
     useMemo,
     useState,
 } from 'react';
-import { isDefined } from '@togglecorp/fujs';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 
 import { useNrwRequest } from '#utils/restRequest';
 
@@ -40,8 +43,13 @@ function useNrwEvents(props: {
 
     const [hoveredEventId, setHoveredEventId] = useState<NrwEvent['eventId'] | undefined>();
 
-    const handleEventSelect = useCallback(
+    const handleEventChange = useCallback(
         (eventId: NrwEvent['eventId'] | undefined) => {
+            if (isNotDefined(eventId)) {
+                onSelectedEventIdChange(undefined, undefined);
+                return;
+            }
+
             const event = events?.find((candidate) => candidate.eventId === eventId);
             onSelectedEventIdChange(eventId, event?.hazardType);
         },
@@ -55,7 +63,7 @@ function useNrwEvents(props: {
             errored: isDefined(error),
             selectedEvent,
             hoveredEventId,
-            onEventSelect: handleEventSelect,
+            onEventSelect: handleEventChange,
             onEventHoverChange: setHoveredEventId,
         }),
         [
@@ -64,7 +72,7 @@ function useNrwEvents(props: {
             error,
             selectedEvent,
             hoveredEventId,
-            handleEventSelect,
+            handleEventChange,
             setHoveredEventId,
         ],
     );
