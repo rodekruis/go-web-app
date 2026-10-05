@@ -42,7 +42,7 @@ function MapHost(props: {
 }) {
     const { map, mapLayer, isVisible } = props;
 
-    const mapContext = useMemo(() => ({ map }), [map]);
+    const mapContext = useMemo(() => ({ map, setMap: () => {} }), [map]);
 
     return (
         <NrwMapContext.Provider value={mapContext}>
