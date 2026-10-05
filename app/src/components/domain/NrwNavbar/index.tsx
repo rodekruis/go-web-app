@@ -15,11 +15,12 @@ import i18n from './i18n.json';
 import styles from './styles.module.css';
 
 interface Props {
-  className?: string;
+    className?: string;
+    actions?: React.ReactNode;
 }
 
 function NrwNavbar(props: Props) {
-    const { className } = props;
+    const { className, actions } = props;
 
     const strings = useTranslation(i18n);
 
@@ -36,7 +37,10 @@ function NrwNavbar(props: Props) {
                             {strings.nrwNavbarTitle}
                         </Heading>
                     </div>
-                    <FontAwesomeIcon icon={faCircleUser} className={styles.iconUser} />
+                    <div className={styles.userActions}>
+                        {actions}
+                        <FontAwesomeIcon icon={faCircleUser} className={styles.iconUser} />
+                    </div>
                 </ListView>
             </PageContainer>
         </nav>

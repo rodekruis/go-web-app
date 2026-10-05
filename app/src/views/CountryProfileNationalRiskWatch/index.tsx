@@ -1,13 +1,21 @@
 import {
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
+import {
     Container,
     ListView,
 } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import { isDefined } from '@togglecorp/fujs';
+import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 import NrwEvents from '#components/domain/NrwEvents';
 import NrwMap from '#components/domain/NrwMap';
+import NrwMapContext, { type NrwMapContextProps } from '#components/domain/NrwMap/NrwMapContext';
 import NrwNavbar from '#components/domain/NrwNavbar';
+import NrwPdfExport from '#components/domain/NrwPdfExport';
 import Page from '#components/Page';
 import { nrwStandalone } from '#config';
 
@@ -69,46 +77,54 @@ export function Component() {
         onVisibleLayersChange: setLayersFromUrlParams,
     });
 
+    const [map, setMap] = useState<MapboxMap>();
+    const nrwMapContext = useMemo<NrwMapContextProps>(() => ({ map, setMap }), [map]);
+    const eventsPanelRef = useRef<HTMLDivElement>(null);
+
+    const exportButton = countries.length > 0
+        ? <NrwPdfExport eventsPanelRef={eventsPanelRef} />
+        : undefined;
+
     const content = (
-        <NrwEventsContext.Provider value={nrwEventsContext}>
-            <Container
-                heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
+        <Container
+            heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
+        >
+            <ListView
+                layout="grid"
+                withSidebar
+                sidebarSize="lg"
+                gridContentClassName={styles.eventsHeight}
             >
-                <ListView
-                    layout="grid"
-                    withSidebar
-                    sidebarSize="lg"
-                    gridContentClassName={styles.eventsHeight}
-                >
-                    <NrwMap
-                        mapView={mapView}
-                        onMapViewChange={handleMapViewChange}
-                        availableLayers={availableLayers}
-                        visibleLayers={visibleLayers}
-                        onLayerToggle={handleLayerToggle}
-                    />
-                    <NrwEvents />
-                </ListView>
-            </Container>
-        </NrwEventsContext.Provider>
+                <NrwMap
+                    mapView={mapView}
+                    onMapViewChange={handleMapViewChange}
+                    availableLayers={availableLayers}
+                    visibleLayers={visibleLayers}
+                    onLayerToggle={handleLayerToggle}
+                />
+                <NrwEvents elementRef={eventsPanelRef} />
+            </ListView>
+        </Container>
     );
 
-    if (nrwStandalone) {
-        return (
-            <div className={styles.countryProfileNrwStandalone}>
-                <NrwNavbar />
-                <Page
-                    title={strings.nationalRiskWatchPageTitle}
-                    mainSectionContainerClassName={styles.mainSectionContainer}
-                    mainSectionClassName={styles.mainSection}
-                >
-                    {content}
-                </Page>
-            </div>
-        );
-    }
-
-    return content;
+    return (
+        <NrwEventsContext.Provider value={nrwEventsContext}>
+            <NrwMapContext.Provider value={nrwMapContext}>
+                {nrwStandalone ? (
+                    <div className={styles.countryProfileNrwStandalone}>
+                        <NrwNavbar actions={exportButton} />
+                        <Page
+                            title={strings.nationalRiskWatchPageTitle}
+                            mainSectionContainerClassName={styles.mainSectionContainer}
+                            mainSectionClassName={styles.mainSection}
+                        >
+                            {content}
+                        </Page>
+                    </div>
+                ) : content}
+            </NrwMapContext.Provider>
+        </NrwEventsContext.Provider>
+    );
 }
 
 Component.displayName = 'CountryProfileNationalRiskWatch';
