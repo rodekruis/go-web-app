@@ -1,20 +1,20 @@
 import {
-    act,
-    renderHook,
+  act,
+  renderHook,
 } from '@testing-library/react';
 import {
-    beforeEach,
-    describe,
-    expect,
-    test,
-    vi,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
 } from 'vitest';
 
 import { useNrwRequest } from '#utils/restRequest';
 
 import {
-    type CountryCodeIso3,
-    type NrwEvent,
+  type CountryCodeIso3,
+  type NrwEvent,
 } from '../types';
 import useNrwEvents from './useNrwEvents';
 
