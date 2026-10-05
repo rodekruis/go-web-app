@@ -10,17 +10,10 @@ import {
     isNotDefined,
 } from '@togglecorp/fujs';
 
-import {
-    getNrwExposedAdminLevels,
-    getNrwExposedPlaceCodes,
-    getNrwExposedPopulationByPlaceCode,
-} from '#utils/nrw/events';
+import { getNrwExposedPopulationByPlaceCode } from '#utils/nrw/events';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
-import useNrwAdminAreas from '#views/CountryProfileNationalRiskWatch/hooks/useNrwAdminAreas';
-import {
-    type AdminAreaProperties,
-    type CountryCodeIso3,
-} from '#views/CountryProfileNationalRiskWatch/types';
+import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
+import { type AdminAreaProperties } from '#views/CountryProfileNationalRiskWatch/types';
 import { getFeatureCollectionBounds } from '#views/CountryProfileNationalRiskWatch/utils';
 
 import NrwMarker from '../../NrwMarker';
@@ -29,7 +22,6 @@ import useNrwMapFitBounds from '../../useNrwMapFitBounds';
 import useNrwMapLayer from '../useNrwMapLayer';
 import getAdminAreaFillLayer from './getAdminAreaFillLayer';
 import useAdminAreaClick from './useAdminAreaClick';
-import useAdminAreaDrill from './useAdminAreaDrill';
 import useAdminAreaHover from './useAdminAreaHover';
 
 import i18n from './i18n.json';
@@ -40,47 +32,21 @@ const tooltipPlacement: NrwMarkerPlacement = { anchor: 'bottom-left', offset: [1
 
 function NrwShapeLayer(props: {
     id: string;
-    countryCodeIso3: CountryCodeIso3;
     isVisible: boolean;
 }) {
-    const {
-        id, countryCodeIso3, isVisible,
-    } = props;
+    const { id, isVisible } = props;
 
     const { selectedEvent } = useContext(NrwEventsContext);
-
-    const strings = useTranslation(i18n);
-
-    const exposedAdminLevels = useMemo(
-        () => (isDefined(selectedEvent) ? getNrwExposedAdminLevels(selectedEvent) : []),
-        [selectedEvent],
-    );
-
     const {
-        adminLevel,
-        parentPlaceCode,
+        adminAreas,
+        pending,
+        hoveredPlaceCode,
+        onAdminAreaHoverChange,
         drillDown,
         drillUp,
-        handleAdminAreasSuccess,
-        handleAdminAreasFailure,
-    } = useAdminAreaDrill(selectedEvent?.eventId, exposedAdminLevels);
+    } = useContext(NrwAdminAreasContext);
 
-    const exposedPlaceCodes = useMemo(
-        () => (isDefined(selectedEvent)
-            ? getNrwExposedPlaceCodes(selectedEvent, adminLevel)
-            : []),
-        [selectedEvent, adminLevel],
-    );
-
-    const { adminAreas, pending } = useNrwAdminAreas({
-        countries: [countryCodeIso3],
-        adminLevel,
-        parentPlaceCode,
-        placeCodes: exposedPlaceCodes,
-        skip: !countryCodeIso3 || exposedPlaceCodes.length === 0,
-        onSuccess: handleAdminAreasSuccess,
-        onFailure: handleAdminAreasFailure,
-    });
+    const strings = useTranslation(i18n);
 
     // Fit the map to the admin areas of the level drilled into.
     const bounds = useMemo(
@@ -110,7 +76,12 @@ function NrwShapeLayer(props: {
     useNrwMapLayer(mapLayer, isVisible);
 
     const isInteractive = isDefined(mapLayer) && isVisible;
-    const { hoveredAdminArea, clearHover } = useAdminAreaHover(id, isInteractive);
+    const { hoveredAdminArea, clearHover } = useAdminAreaHover(
+        id,
+        isInteractive,
+        hoveredPlaceCode,
+        onAdminAreaHoverChange,
+    );
 
     // Drill into the clicked admin area, or back up on a click beside them.
     const handleClick = useCallback(
@@ -121,7 +92,7 @@ function NrwShapeLayer(props: {
             }
 
             clearHover();
-            drillDown(adminArea.placeCode);
+            drillDown(adminArea);
         },
         [drillDown, drillUp, clearHover],
     );

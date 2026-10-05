@@ -1,4 +1,6 @@
+import { useContext } from 'react';
 import {
+    faChevronLeft,
     faCircleInfo,
     faClock,
     faDatabase,
@@ -6,14 +8,19 @@ import {
     faTriangleExclamation,
 } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Button } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import {
     formatDate,
     getNumberOfDays,
     resolveToString,
 } from '@ifrc-go/ui/utils';
-import { _cs } from '@togglecorp/fujs';
+import {
+    _cs,
+    isDefined,
+} from '@togglecorp/fujs';
 
+import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwExposedAdminAreas from './NrwExposedAdminAreas';
@@ -32,6 +39,7 @@ function NrwEventDetail(props: Props) {
     const { className, event } = props;
 
     const strings = useTranslation(i18n);
+    const { parentAdminArea, drillUp } = useContext(NrwAdminAreasContext);
 
     const now = new Date();
     const startAt = new Date(event.startAt);
@@ -88,6 +96,18 @@ function NrwEventDetail(props: Props) {
                     <div className={styles.panelHeading}>
                         <FontAwesomeIcon className={styles.icon} icon={faMap} />
                         {strings.nrwEventDetailExposedAdminAreasHeading}
+                        {isDefined(parentAdminArea) && (
+                            <Button
+                                className={styles.backButton}
+                                name={undefined}
+                                colorVariant="text"
+                                textSize="sm"
+                                before={<FontAwesomeIcon icon={faChevronLeft} />}
+                                onClick={drillUp}
+                            >
+                                {strings.nrwEventDetailBackButton}
+                            </Button>
+                        )}
                     </div>
                     <NrwExposedAdminAreas event={event} />
                 </div>

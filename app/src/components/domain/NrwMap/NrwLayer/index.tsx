@@ -32,7 +32,6 @@ function NrwLayer(props: {
         return (
             <NrwShapeLayer
                 id={getMapLayerId(countryCodeIso3, layer.name)}
-                countryCodeIso3={countryCodeIso3}
                 isVisible={isVisible}
             />
         );
