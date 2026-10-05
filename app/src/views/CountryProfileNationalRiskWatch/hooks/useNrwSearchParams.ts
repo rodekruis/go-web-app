@@ -88,7 +88,16 @@ function serializeCountriesUrlParameter(countryCodes: CountryCodeIso3[]) {
     return countryCodes.join(',');
 }
 
-const defaultVisibleLayers: NrwLayerName[] = [supportedLayerNames.exposedPopulation];
+// TODO: consider moving default visibility to a layer property in the NRW data model.
+function getDefaultVisibleLayers(hazardType: NrwEvent['hazardType'] | undefined): NrwLayerName[] {
+    const defaultVisibleLayers: NrwLayerName[] = [supportedLayerNames.exposedPopulation];
+
+    if (hazardType === 'floods') {
+        defaultVisibleLayers.push(supportedLayerNames.floodDepth);
+    }
+
+    return defaultVisibleLayers;
+}
 
 // Only accept layer names that are supported by the frontend.
 function parseLayersUrlParameter(value: UrlParameter): NrwLayerName[] {
@@ -175,7 +184,7 @@ function useNrwSearchParams() {
     );
 
     const handleSelectedEventIdChange = useCallback(
-        (eventId: NrwEvent['eventId'] | undefined) => {
+        (eventId: NrwEvent['eventId'] | undefined, hazardType?: NrwEvent['hazardType']) => {
             if (eventId === selectedEventId) {
                 return;
             }
@@ -183,7 +192,7 @@ function useNrwSearchParams() {
             setSearchParams((params) => {
                 if (isDefined(eventId)) {
                     params.set('event', String(eventId));
-                    params.set('layers', defaultVisibleLayers.join(','));
+                    params.set('layers', getDefaultVisibleLayers(hazardType).join(','));
                 } else {
                     params.delete('event');
                     params.delete('layers');

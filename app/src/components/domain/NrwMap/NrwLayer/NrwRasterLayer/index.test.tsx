@@ -56,8 +56,8 @@ function mockRasterResponse(response: StaticRasterResponse | undefined) {
     } as unknown as ReturnType<typeof useNrwRequest>);
 }
 
-function RasterHost(props: { map: MapboxMap; isVisible: boolean }) {
-    const { map, isVisible } = props;
+function RasterHost(props: { map: MapboxMap; isVisible: boolean; resourceId?: string }) {
+    const { map, isVisible, resourceId } = props;
 
     const mapContext = useMemo(() => ({ map }), [map]);
 
@@ -67,6 +67,7 @@ function RasterHost(props: { map: MapboxMap; isVisible: boolean }) {
                 id="layer-MWI-floodDepth"
                 countryCodeIso3={malawi}
                 name="floodDepth"
+                resourceId={resourceId}
                 isVisible={isVisible}
             />
         </NrwMapContext.Provider>
@@ -88,6 +89,30 @@ describe('NrwRasterLayer', () => {
             apiType: 'nrw',
             url: '/rasters/static/{countryCodeIso3}/{layer}',
             pathVariables: { countryCodeIso3: 'MWI', layer: 'floodDepth' },
+            skip: false,
+        });
+    });
+
+    test('loads the event raster using its resource id instead of the static raster', () => {
+        mockRasterResponse(floodDepthRaster);
+        const { map, getLayerSpecification } = createFakeMapboxMap();
+
+        render(<RasterHost map={map} isVisible resourceId="10" />);
+
+        expect(useNrwRequest).toHaveBeenCalledWith({
+            apiType: 'nrw',
+            url: '/rasters/alert/{id}',
+            pathVariables: { id: 10 },
+            skip: false,
+        });
+        expect(useNrwRequest).toHaveBeenCalledWith({
+            apiType: 'nrw',
+            url: '/rasters/static/{countryCodeIso3}/{layer}',
+            pathVariables: { countryCodeIso3: 'MWI', layer: 'floodDepth' },
+            skip: true,
+        });
+        expect(getLayerSpecification('layer-MWI-floodDepth')?.source).toMatchObject({
+            url: 'https://nrw.example.org/api/rasters/alert/10/image',
         });
     });
 

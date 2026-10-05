@@ -229,6 +229,18 @@ describe('useNrwSearchParams', () => {
                 .toEqual(['exposedPopulation']);
         });
 
+        test('selecting a flood event also shows the flood depth layer', () => {
+            const rendered = renderNrwSearchParams('/?countries=MWI&layers=clinics');
+
+            act(() => {
+                rendered.result.current.params.handleSelectedEventIdChange(42, 'floods');
+            });
+
+            expect(rendered.searchParams.get('layers')).toBe('exposedPopulation,floodDepth');
+            expect(rendered.result.current.params.layersFromUrlParams)
+                .toEqual(['floodDepth', 'exposedPopulation']);
+        });
+
         test('clearing the event hides all layers and drops the map view', () => {
             const rendered = renderNrwSearchParams(
                 '/?countries=MWI&event=42&layers=exposedPopulation&z=5&lat=-13&lon=34',
