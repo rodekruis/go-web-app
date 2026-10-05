@@ -68,10 +68,11 @@ export type MapView = {
 };
 
 export type NrwEvent = NrwApiResponse<'/events'>[number];
+export type NrwEventHazardType = NrwEvent['hazardType'];
 export type NrwEventIdChangeHandler = (eventId: NrwEvent['eventId'] | undefined) => void;
 export type NrwEventSelectHandler = (
     eventId: NrwEvent['eventId'] | undefined,
-    hazardType: NrwEvent['hazardType'] | undefined,
+    hazardType: NrwEventHazardType | undefined,
 ) => void;
 export type NrwExposedAdminArea = NrwEvent['exposedAdminAreas'][string][number];
 
@@ -84,6 +85,5 @@ export type NrwStaticLayer = NrwApiResponse<'/layers'>[number];
 export type NrwEventLayer = NrwEvent['availableLayers'][number];
 export type NrwLayer = NrwStaticLayer | NrwEventLayer;
 export type NrwLayerName = NrwLayer['name'];
-export type NrwHazardType = NrwStaticLayer['hazardType'];
 export type VisibleLayersChangeHandler = (layerNames: NrwLayerName[]) => void;
 export type LayerToggleHandler = (layerName: NrwLayerName) => void;

@@ -16,6 +16,7 @@ import {
     type Longitude,
     type MapViewChangeHandler,
     type NrwEvent,
+    type NrwEventHazardType,
     type NrwLayerName,
     type UrlParameter,
     type Zoom,
@@ -89,7 +90,7 @@ function serializeCountriesUrlParameter(countryCodes: CountryCodeIso3[]) {
 }
 
 // TODO: consider moving default visibility to a layer property in the NRW data model.
-function getDefaultVisibleLayers(hazardType: NrwEvent['hazardType'] | undefined): NrwLayerName[] {
+function getDefaultVisibleLayers(hazardType?: NrwEventHazardType): NrwLayerName[] {
     const defaultVisibleLayers: NrwLayerName[] = [supportedLayerNames.exposedPopulation];
 
     if (hazardType === 'floods') {
@@ -184,7 +185,7 @@ function useNrwSearchParams() {
     );
 
     const handleSelectedEventIdChange = useCallback(
-        (eventId: NrwEvent['eventId'] | undefined, hazardType?: NrwEvent['hazardType']) => {
+        (eventId: NrwEvent['eventId'] | undefined, hazardType?: NrwEventHazardType) => {
             if (eventId === selectedEventId) {
                 return;
             }

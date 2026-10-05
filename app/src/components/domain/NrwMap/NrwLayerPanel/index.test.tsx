@@ -50,10 +50,10 @@ describe('NrwLayerPanel', () => {
         );
 
         expect(getCheckboxLabels()).toEqual([
-            'Flood depth',
-            'Population density',
             'Exposed population',
+            'Flood depth',
             'Clinics',
+            'Population density',
         ]);
     });
 
@@ -92,25 +92,13 @@ describe('NrwLayerPanel', () => {
     });
 
     test('shows the empty message when no supported layer is available', () => {
-        const { rerender } = render(
+        render(
             <NrwLayerPanel
                 layers={[windSpeed]}
                 visibleLayers={[]}
                 onLayerToggle={vi.fn()}
             />,
             { wrapper: TestProviders },
-        );
-
-        expect(getCheckboxLabels()).toEqual([]);
-        expect(screen.getByText(i18n.strings.nrwLayerPanelNoLayersMessage)).toBeInTheDocument();
-
-        // The layers are not known yet while the request is pending.
-        rerender(
-            <NrwLayerPanel
-                layers={undefined}
-                visibleLayers={[]}
-                onLayerToggle={vi.fn()}
-            />,
         );
 
         expect(getCheckboxLabels()).toEqual([]);

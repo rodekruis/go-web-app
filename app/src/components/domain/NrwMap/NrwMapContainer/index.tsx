@@ -100,7 +100,9 @@ function NrwMapContainer(props: {
         map.dragRotate.disable();
         map.touchPitch.disable();
         map.on('style.load', () => {
-            // Empty layers that keep the NRW layers in draw order, whenever each is added.
+            // Use invisible 'anchor' layers with specific order
+            // .. so that later actual layers can be added at right position
+            // .. irrespective of when they are called.
             layerDrawOrder.forEach((name) => {
                 map.addLayer({
                     id: getLayerAnchorId(name),

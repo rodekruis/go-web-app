@@ -8,7 +8,10 @@ import {
 import { _cs } from '@togglecorp/fujs';
 
 import hazardIcons from '#utils/nrw/hazardIcons';
-import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
+import {
+    type NrwEvent,
+    type NrwEventHazardType,
+} from '#views/CountryProfileNationalRiskWatch/types';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
@@ -29,7 +32,7 @@ function NrwEventName(props: Props) {
 
     const strings = useTranslation(i18n);
 
-    const hazardLabels: Record<NrwEvent['hazardType'], string> = {
+    const hazardLabels: Record<NrwEventHazardType, string> = {
         floods: strings.nrwEventNameHazardFloods,
         compoundFloods: strings.nrwEventNameHazardFloods,
         drought: strings.nrwEventNameHazardDrought,

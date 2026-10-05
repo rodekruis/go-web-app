@@ -49,7 +49,7 @@ function parseCentroid(centroid: unknown): NrwLngLat | undefined {
 function NrwMap(props: {
     mapView: MapView;
     onMapViewChange: MapViewChangeHandler;
-    availableLayers: NrwLayerType[] | undefined;
+    availableLayers: NrwLayerType[];
     visibleLayers: NrwLayerName[];
     onLayerToggle: LayerToggleHandler;
 }) {
@@ -86,7 +86,7 @@ function NrwMap(props: {
             onMapViewChange={onMapViewChange}
             layerPanel={layerPanel}
         >
-            {showLayers && availableLayers?.map((layer) => (
+            {showLayers && availableLayers.map((layer) => (
                 <NrwLayer
                     key={'resourceId' in layer ? `${layer.name}-${layer.resourceId}` : layer.name}
                     countryCodeIso3={eventCountryCodeIso3}

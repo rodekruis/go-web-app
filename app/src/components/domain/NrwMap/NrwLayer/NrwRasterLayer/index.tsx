@@ -1,5 +1,8 @@
 import { useMemo } from 'react';
-import { isNotDefined } from '@togglecorp/fujs';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 
 import { nrwApi } from '#config';
 import { resolveUrl } from '#utils/resolveUrl';
@@ -23,6 +26,9 @@ function NrwRasterLayer(props: {
         id, countryCodeIso3, name, resourceId, isVisible, beforeId,
     } = props;
 
+    const isAlertRaster = isDefined(resourceId);
+    const isStaticRaster = !isAlertRaster;
+
     const { response: staticRaster } = useNrwRequest({
         apiType: 'nrw',
         url: '/rasters/static/{countryCodeIso3}/{layer}',
@@ -30,17 +36,17 @@ function NrwRasterLayer(props: {
             countryCodeIso3,
             layer: name,
         },
-        skip: !isNotDefined(resourceId),
+        skip: !isStaticRaster,
     });
 
     const { response: alertRaster } = useNrwRequest({
         apiType: 'nrw',
         url: '/rasters/alert/{id}',
         pathVariables: { id: Number(resourceId) },
-        skip: isNotDefined(resourceId),
+        skip: !isAlertRaster,
     });
 
-    const response = isNotDefined(resourceId) ? staticRaster : alertRaster;
+    const response = isAlertRaster ? alertRaster : staticRaster;
 
     const mapLayer = useMemo<Parameters<typeof useNrwMapLayer>[0]>(
         () => {
@@ -52,17 +58,18 @@ function NrwRasterLayer(props: {
                 xmin, ymin, xmax, ymax,
             } = response.metadata.data.extent;
 
+            const url = resolveUrl(
+                nrwApi,
+                isAlertRaster
+                    ? `rasters/alert/${resourceId}/image`
+                    : `rasters/static/${countryCodeIso3}/${name}/image`,
+            );
             return {
                 id,
                 type: 'raster',
                 source: {
                     type: 'image',
-                    url: resolveUrl(
-                        nrwApi,
-                        isNotDefined(resourceId)
-                            ? `rasters/static/${countryCodeIso3}/${name}/image`
-                            : `rasters/alert/${resourceId}/image`,
-                    ),
+                    url,
                     coordinates: [
                         [xmin, ymax], // west north
                         [xmax, ymax], // east north
@@ -75,7 +82,7 @@ function NrwRasterLayer(props: {
                 },
             };
         },
-        [id, countryCodeIso3, name, resourceId, response],
+        [id, countryCodeIso3, name, resourceId, isAlertRaster, response],
     );
 
     useNrwMapLayer(mapLayer, isVisible, beforeId);

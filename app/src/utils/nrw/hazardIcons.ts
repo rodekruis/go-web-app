@@ -5,9 +5,9 @@ import {
     type IconDefinition,
 } from '@fortawesome/pro-solid-svg-icons';
 
-import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
+import { type NrwEventHazardType } from '#views/CountryProfileNationalRiskWatch/types';
 
-const hazardIcons: Record<NrwEvent['hazardType'], IconDefinition> = {
+const hazardIcons: Record<NrwEventHazardType, IconDefinition> = {
     floods: faHouseFloodWater,
     compoundFloods: faHouseFloodWater,
     drought: faSunPlantWilt,

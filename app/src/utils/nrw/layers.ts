@@ -2,10 +2,10 @@ import { type NrwLayerName } from '#views/CountryProfileNationalRiskWatch/types'
 
 // Layers the frontend supports, in layer panel display order.
 const supportedLayerNames = {
-    floodDepth: 'floodDepth',
-    populationDensity: 'populationDensity',
     exposedPopulation: 'exposedPopulation',
+    floodDepth: 'floodDepth',
     clinics: 'clinics',
+    populationDensity: 'populationDensity',
 } as const satisfies { [Name in NrwLayerName]?: Name };
 
 // Bottom to top.

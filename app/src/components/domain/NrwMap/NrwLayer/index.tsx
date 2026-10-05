@@ -1,3 +1,5 @@
+import { isDefined } from '@togglecorp/fujs';
+
 import { getLayerAnchorId } from '#utils/nrw/layers';
 import {
     type CountryCodeIso3,
@@ -21,28 +23,40 @@ function NrwLayer(props: {
         countryCodeIso3, layer, isVisible,
     } = props;
 
-    if (layer.type === 'raster') {
-        return (
-            <NrwRasterLayer
-                id={getMapLayerId(countryCodeIso3, layer.name)}
-                countryCodeIso3={countryCodeIso3}
-                name={layer.name}
-                resourceId={'resourceId' in layer ? layer.resourceId : undefined}
-                beforeId={getLayerAnchorId(layer.name)}
-                isVisible={isVisible}
-            />
-        );
-    } if (layer.type === 'shape') {
-        return (
-            <NrwShapeLayer
-                id={getMapLayerId(countryCodeIso3, layer.name)}
-                isVisible={isVisible}
-                beforeId={getLayerAnchorId(layer.name)}
-            />
-        );
+    const resourceId = 'resourceId' in layer ? layer.resourceId : undefined;
+
+    if (layer.type === 'shape' && isDefined(resourceId)) {
+        // eslint-disable-next-line no-console
+        console.error(`NrwLayer: shape layer '${layer.name}' should not have a resourceId`);
+        return null;
     }
 
-    return null;
+    switch (layer.type) {
+        case 'raster':
+            return (
+                <NrwRasterLayer
+                    id={getMapLayerId(countryCodeIso3, layer.name)}
+                    countryCodeIso3={countryCodeIso3}
+                    name={layer.name}
+                    resourceId={resourceId}
+                    beforeId={getLayerAnchorId(layer.name)}
+                    isVisible={isVisible}
+                />
+            );
+        case 'shape':
+            return (
+                <NrwShapeLayer
+                    id={getMapLayerId(countryCodeIso3, layer.name)}
+                    isVisible={isVisible}
+                    beforeId={getLayerAnchorId(layer.name)}
+                />
+            );
+        case 'point':
+        case 'vectorTile':
+            return null;
+        default:
+            layer.type satisfies never;
+    }
 }
 
 export default NrwLayer;
