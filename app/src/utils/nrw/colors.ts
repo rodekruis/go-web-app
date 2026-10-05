@@ -1,3 +1,5 @@
+import { isNotDefined } from '@togglecorp/fujs';
+
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
 // The design defines "Map <colour> 65%", ordered from the lightest (10) to the
@@ -24,4 +26,19 @@ export function getEqualIntervalBreaks(values: number[]): [number, number, numbe
     const bandWidth = max / 5;
 
     return [bandWidth, 2 * bandWidth, 3 * bandWidth, 4 * bandWidth];
+}
+
+type MapRamp = (typeof alertClassMapRamps)[NrwEvent['alertClass']];
+
+// The ramp tint of a value, in the band it falls in. A band starts at its break,
+// like a Mapbox step expression, and a set without values shares the first tint.
+export function getRampColor(
+    ramp: MapRamp,
+    breaks: ReturnType<typeof getEqualIntervalBreaks>,
+    value: number | undefined,
+): string {
+    if (breaks[0] <= 0 || isNotDefined(value)) return ramp[0];
+
+    const bandIndex = breaks.filter((lowerBound) => value >= lowerBound).length;
+    return ramp[bandIndex] ?? ramp[0];
 }

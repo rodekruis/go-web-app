@@ -2,10 +2,13 @@
     "namespace": "nrwEvents",
     "strings": {
         "nrwExposedAdminAreasFallbackLabel": "areas",
+        "nrwExposedAdminAreasSelectedAreaLabel": "Selected area:",
+        "nrwExposedAdminAreasSelectedAreaValue": "{name} {adminAreaLabel}",
         "nrwExposedAdminAreasTotalAreas": "Total exposed {adminAreaLabel}:",
         "nrwExposedAdminAreasTotalPopulation": "Total exposed population:",
         "nrwExposedAdminAreasAreaColumn": "Exposed {adminAreaLabel}",
         "nrwExposedAdminAreasPopulationColumn": "Exposed population",
+        "nrwExposedAdminAreasPendingMessage": "Loading exposed {adminAreaLabel}...",
         "nrwExposedAdminAreasEmptyMessage": "No exposed {adminAreaLabel} are reported for this event."
     }
 }

@@ -1,8 +1,3 @@
-import {
-    useCallback,
-    useState,
-} from 'react';
-
 import { useNrwRequest } from '#utils/restRequest';
 
 import {
@@ -26,35 +21,22 @@ function useNrwAdminAreas(options: {
         countries, adminLevel, parentPlaceCode, placeCodes, skip, onSuccess, onFailure,
     } = options;
 
-    const [lastAdminAreas, setAdminAreas] = useState<NrwAdminAreaFeatureCollection>();
     const isQueryable = !skip && (countries?.length ?? 0) > 0;
 
-    // The last admin areas stay while the next level loads, also when it
-    // turns out to be empty, as the caller then backs up to the last level.
-    const handleSuccess = useCallback(
-        (response: NrwAdminAreaFeatureCollection) => {
-            if (response.features.length > 0) {
-                setAdminAreas(response);
-            }
-            onSuccess?.(response);
-        },
-        [onSuccess],
-    );
-
-    const { pending, error } = useNrwRequest({
+    const { response, pending } = useNrwRequest({
         url: '/admin-areas',
         apiType: 'nrw',
         skip: !isQueryable,
         query: getAdminAreasQuery(countries ?? [], adminLevel, parentPlaceCode, placeCodes),
         preserveResponse: true,
-        onSuccess: handleSuccess,
+        onSuccess,
         onFailure,
     });
 
     // Nothing to show when there is nothing to fetch.
-    const adminAreas = isQueryable ? lastAdminAreas : undefined;
+    const adminAreas = isQueryable ? response : undefined;
 
-    return { adminAreas, pending, error };
+    return { adminAreas, pending };
 }
 
 export default useNrwAdminAreas;

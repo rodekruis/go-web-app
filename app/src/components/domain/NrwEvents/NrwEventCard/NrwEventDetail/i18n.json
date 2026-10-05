@@ -11,6 +11,7 @@
         "nrwEventDetailAdvisoryTrigger": "Trigger - activate EAP",
         "nrwEventDetailAdvisoryAlert": "Alert - notify relevant stakeholders",
         "nrwEventDetailExposedAdminAreasHeading": "Exposed areas:",
+        "nrwEventDetailBackButton": "Back",
         "nrwEventDetailDataSourcesHeading": "Data sources:",
         "nrwEventDetailTimestamps": "Event created: {created}, Last updated: {updated}"
     }
