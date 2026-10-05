@@ -24,6 +24,7 @@ import useNrwEvents from './hooks/useNrwEvents';
 import useNrwLayers from './hooks/useNrwLayers';
 import useNrwMapView from './hooks/useNrwMapView';
 import useNrwSearchParams from './hooks/useNrwSearchParams';
+import NrwAdminAreasProvider from './NrwAdminAreasProvider';
 import { getEventCountries } from './utils';
 
 import i18n from './i18n.json';
@@ -86,25 +87,27 @@ export function Component() {
         : undefined;
 
     const content = (
-        <Container
-            heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
-        >
-            <ListView
-                layout="grid"
-                withSidebar
-                sidebarSize="lg"
-                gridContentClassName={styles.eventsHeight}
+        <NrwAdminAreasProvider event={selectedEvent}>
+            <Container
+                heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
             >
-                <NrwMap
-                    mapView={mapView}
-                    onMapViewChange={handleMapViewChange}
-                    availableLayers={availableLayers}
-                    visibleLayers={visibleLayers}
-                    onLayerToggle={handleLayerToggle}
-                />
-                <NrwEvents elementRef={eventsPanelRef} />
-            </ListView>
-        </Container>
+                <ListView
+                    layout="grid"
+                    withSidebar
+                    sidebarSize="lg"
+                    gridContentClassName={styles.eventsHeight}
+                >
+                    <NrwMap
+                        mapView={mapView}
+                        onMapViewChange={handleMapViewChange}
+                        availableLayers={availableLayers}
+                        visibleLayers={visibleLayers}
+                        onLayerToggle={handleLayerToggle}
+                    />
+                    <NrwEvents elementRef={eventsPanelRef} />
+                </ListView>
+            </Container>
+        </NrwAdminAreasProvider>
     );
 
     return (

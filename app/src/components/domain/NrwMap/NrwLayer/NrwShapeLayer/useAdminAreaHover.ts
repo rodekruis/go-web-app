@@ -15,6 +15,8 @@ import {
     type AdminAreaProperties,
     type Latitude,
     type Longitude,
+    type PlaceCode,
+    type PlaceCodeChangeHandler,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseAdminAreaProperties } from '#views/CountryProfileNationalRiskWatch/utils';
 
@@ -24,25 +26,24 @@ interface HoveredAdminArea extends AdminAreaProperties {
     coordinates: NrwLngLat;
 }
 
-// Highlight the admin area under the pointer through its hover feature state
-// and return it with the pointer position for a tooltip.
-function useAdminAreaHover(layerId: string, isEnabled: boolean) {
+function useAdminAreaHover(
+    layerId: string,
+    isEnabled: boolean,
+    hoveredPlaceCode: PlaceCode | undefined,
+    onHoverChange: PlaceCodeChangeHandler,
+) {
     const { map } = useContext(NrwMapContext);
     const [hoveredAdminArea, setHoveredAdminArea] = useState<HoveredAdminArea>();
 
     const clearHover = useCallback(
         () => {
-            if (isNotDefined(map)) {
-                return;
-            }
-
-            map.getCanvas().style.cursor = '';
-            if (isDefined(map.getSource(layerId))) {
-                map.removeFeatureState({ source: layerId });
+            if (isDefined(map)) {
+                map.getCanvas().style.cursor = '';
             }
             setHoveredAdminArea(undefined);
+            onHoverChange(undefined);
         },
-        [map, layerId],
+        [map, onHoverChange],
     );
 
     useEffect(
@@ -52,16 +53,13 @@ function useAdminAreaHover(layerId: string, isEnabled: boolean) {
             }
 
             const handleMouseMove = (event: MapMouseEvent) => {
-                const feature = event.features?.[0];
-                const properties = parseAdminAreaProperties(feature?.properties);
+                const properties = parseAdminAreaProperties(event.features?.[0]?.properties);
 
-                if (isNotDefined(feature?.id) || properties === null) {
+                if (properties === null) {
                     return;
                 }
 
                 map.getCanvas().style.cursor = 'pointer';
-                map.removeFeatureState({ source: layerId });
-                map.setFeatureState({ source: layerId, id: feature.id }, { hover: true });
                 setHoveredAdminArea({
                     ...properties,
                     coordinates: new NrwLngLat(
@@ -69,6 +67,7 @@ function useAdminAreaHover(layerId: string, isEnabled: boolean) {
                         event.lngLat.lat as Latitude,
                     ),
                 });
+                onHoverChange(properties.placeCode);
             };
 
             map.on('mousemove', layerId, handleMouseMove);
@@ -80,7 +79,27 @@ function useAdminAreaHover(layerId: string, isEnabled: boolean) {
                 clearHover();
             };
         },
-        [map, layerId, isEnabled, clearHover],
+        [map, layerId, isEnabled, clearHover, onHoverChange],
+    );
+
+    // Features are keyed by place code.
+    useEffect(
+        () => {
+            if (isNotDefined(map) || !isEnabled || isNotDefined(map.getSource(layerId))) {
+                return undefined;
+            }
+
+            if (isDefined(hoveredPlaceCode)) {
+                map.setFeatureState({ source: layerId, id: hoveredPlaceCode }, { hover: true });
+            }
+
+            return () => {
+                if (isDefined(map.getSource(layerId))) {
+                    map.removeFeatureState({ source: layerId });
+                }
+            };
+        },
+        [map, layerId, isEnabled, hoveredPlaceCode],
     );
 
     return { hoveredAdminArea, clearHover };

@@ -31,6 +31,7 @@ function NrwEventName(props: Props) {
 
     const hazardLabels: Record<NrwEvent['hazardType'], string> = {
         floods: strings.nrwEventNameHazardFloods,
+        compoundFloods: strings.nrwEventNameHazardFloods,
         drought: strings.nrwEventNameHazardDrought,
         tropicalCyclone: strings.nrwEventNameHazardTropicalCyclone,
     };

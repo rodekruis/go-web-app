@@ -4,7 +4,11 @@ import {
     test,
 } from 'vitest';
 
-import { getEqualIntervalBreaks } from './colors';
+import {
+    alertClassMapRamps,
+    getEqualIntervalBreaks,
+    getRampColor,
+} from './colors';
 
 describe('getEqualIntervalBreaks', () => {
     test('splits the range up to the maximum into five equal bands', () => {
@@ -17,5 +21,24 @@ describe('getEqualIntervalBreaks', () => {
 
     test('returns zero breaks when there are no values', () => {
         expect(getEqualIntervalBreaks([])).toEqual([0, 0, 0, 0]);
+    });
+});
+
+describe('getRampColor', () => {
+    const ramp = alertClassMapRamps.high;
+    const breaks = getEqualIntervalBreaks([100]);
+
+    test('picks the tint of the band the value falls in, starting at the break', () => {
+        expect(getRampColor(ramp, breaks, 0)).toBe(ramp[0]);
+        expect(getRampColor(ramp, breaks, 19)).toBe(ramp[0]);
+        expect(getRampColor(ramp, breaks, 20)).toBe(ramp[1]);
+        expect(getRampColor(ramp, breaks, 50)).toBe(ramp[2]);
+        expect(getRampColor(ramp, breaks, 79)).toBe(ramp[3]);
+        expect(getRampColor(ramp, breaks, 100)).toBe(ramp[4]);
+    });
+
+    test('uses the first tint for unknown values and when there are no breaks', () => {
+        expect(getRampColor(ramp, breaks, undefined)).toBe(ramp[0]);
+        expect(getRampColor(ramp, getEqualIntervalBreaks([]), 0)).toBe(ramp[0]);
     });
 });
