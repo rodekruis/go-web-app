@@ -23,7 +23,7 @@ const contentTopPx = 88;
 const mapColumnWidthPx = 1191;
 const mapHeightPx = 1073;
 const columnGapPx = 18;
-const footerTopPx = mapHeightPx + 10;
+const footerTopPx = mapHeightPx + 11;
 const titleFontPx = 18;
 const captionFontPx = 12;
 
