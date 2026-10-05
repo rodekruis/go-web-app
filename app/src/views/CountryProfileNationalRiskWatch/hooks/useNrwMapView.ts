@@ -1,4 +1,7 @@
-import { useMemo } from 'react';
+import {
+    useMemo,
+    useState,
+} from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
 import NrwLngLat from '../NrwLngLat';
@@ -8,6 +11,7 @@ import {
     type Latitude,
     type Longitude,
     type MapView,
+    type NrwEvent,
     type Zoom,
 } from '../types';
 import {
@@ -31,17 +35,31 @@ function useNrwMapView(props: {
     urlLongitude: Longitude | null;
     countries: CountryCodeIso3[] | undefined;
     countriesPending: boolean;
-}): MapView {
+    selectedEventId: NrwEvent['eventId'] | undefined;
+}) {
     const {
         urlZoom,
         urlLatitude,
         urlLongitude,
         countries,
         countriesPending,
+        selectedEventId,
     } = props;
 
     // Set from the longitude/latitude search params when they are present.
     const urlMapView = getMapView(urlLatitude, urlLongitude, urlZoom ?? defaultZoom);
+
+    // A deep link to an event with a view is deliberate, so the fit to that
+    // event's areas must not override it. Deselecting clears z/lat/lon, so
+    // reselecting the same event fits again.
+    const [deepLink] = useState(() => ({
+        eventId: selectedEventId,
+        hasView: isDefined(urlMapView),
+    }));
+    const preserveInitialView = deepLink.hasView
+        && isDefined(deepLink.eventId)
+        && selectedEventId === deepLink.eventId
+        && isDefined(urlMapView);
 
     const { adminAreas } = useNrwAdminAreas({
         countries,
@@ -63,7 +81,9 @@ function useNrwMapView(props: {
     );
 
     // MapView preference: URL > countries > default.
-    return urlMapView ?? countryMapView ?? defaultMapView;
+    const mapView: MapView = urlMapView ?? countryMapView ?? defaultMapView;
+
+    return { mapView, preserveInitialView };
 }
 
 export default useNrwMapView;

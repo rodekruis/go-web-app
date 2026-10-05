@@ -1,6 +1,7 @@
 import {
     useContext,
     useEffect,
+    useRef,
 } from 'react';
 import { isNotDefined } from '@togglecorp/fujs';
 
@@ -8,14 +9,13 @@ import { type LongitudeLatitudeBounds } from '#views/CountryProfileNationalRiskW
 
 import NrwMapContext from './NrwMapContext';
 
-const defaultPaddingPixels = 20;
+const paddingPixels = 20;
 
 // Fit the map to the given bounds whenever they change.
-function useNrwMapFitBounds(
-    bounds: LongitudeLatitudeBounds | undefined,
-    paddingPixels = defaultPaddingPixels,
-) {
-    const { map } = useContext(NrwMapContext);
+// While the initial view is preserved, the first bounds leave the map where it is.
+function useNrwMapFitBounds(bounds: LongitudeLatitudeBounds | undefined) {
+    const { map, preserveInitialView } = useContext(NrwMapContext);
+    const hasFitRef = useRef(false);
 
     useEffect(
         () => {
@@ -23,9 +23,15 @@ function useNrwMapFitBounds(
                 return;
             }
 
+            const isFirstFit = !hasFitRef.current;
+            hasFitRef.current = true;
+            if (isFirstFit && preserveInitialView) {
+                return;
+            }
+
             map.fitBounds(bounds, { padding: paddingPixels });
         },
-        [map, bounds, paddingPixels],
+        [map, bounds, preserveInitialView],
     );
 }
 
