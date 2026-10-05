@@ -16,6 +16,7 @@ import { isNotDefined } from '@togglecorp/fujs';
 import NrwMapContext from '#components/domain/NrwMap/NrwMapContext';
 import useAlert from '#hooks/useAlert';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
+import { type CountryCodeIso3 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import exportNrwToPdf from './exportNrwToPdf';
 
@@ -26,10 +27,11 @@ const dataFormat = 'dd MMM yyyy, hh:mm';
 
 interface Props {
     eventsPanelRef: RefObject<HTMLDivElement | null>;
+    countries: CountryCodeIso3[];
 }
 
 function NrwPdfExport(props: Props) {
-    const { eventsPanelRef } = props;
+    const { eventsPanelRef, countries } = props;
 
     const strings = useTranslation(i18n);
     const { map } = useContext(NrwMapContext);
@@ -43,7 +45,7 @@ function NrwPdfExport(props: Props) {
         }
         setExporting(true);
         try {
-            await exportNrwToPdf(map, eventsPanelRef.current, selectedEvent, {
+            await exportNrwToPdf(map, eventsPanelRef.current, selectedEvent, countries, {
                 title: strings.nrwPdfExportTitle,
                 generated: resolveToString(strings.nrwPdfExportGenerated, {
                     date: formatDate(new Date(), dataFormat) ?? '',
@@ -61,7 +63,7 @@ function NrwPdfExport(props: Props) {
         } finally {
             setExporting(false);
         }
-    }, [map, eventsPanelRef, selectedEvent, alert, strings]);
+    }, [map, eventsPanelRef, selectedEvent, countries, alert, strings]);
 
     return (
         <button

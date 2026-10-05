@@ -2,7 +2,10 @@ import { toPng } from 'html-to-image';
 import JsPDF from 'jspdf';
 import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
-import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
+import {
+    type CountryCodeIso3,
+    type NrwEvent,
+} from '#views/CountryProfileNationalRiskWatch/types';
 
 interface NrwPdfText {
     title: string;
@@ -60,18 +63,26 @@ function getDisplayArea(aspectRatio: number, maxWidth: number, maxHeight: number
     return { width, height };
 }
 
-function getFileName(selectedEvent: NrwEvent | undefined): string {
+function getFileName(
+    selectedEvent: NrwEvent | undefined,
+    countries: CountryCodeIso3[],
+): string {
     const date = new Date().toISOString().slice(0, 10);
-    if (!selectedEvent) {
-        return `national-risk-watch-${date}.pdf`;
+    if (selectedEvent) {
+        return `national-risk-watch-${selectedEvent.countryCodeIso3}-event${selectedEvent.eventId}-${date}.pdf`;
     }
-    return `national-risk-watch-${selectedEvent.countryCodeIso3}-event${selectedEvent.eventId}-${date}.pdf`;
+    if (countries.length === 1) {
+        return `national-risk-watch-${countries[0]}-${date}.pdf`;
+    }
+    // Fallback to using a generic file name (For multi-country map exports)
+    return `national-risk-watch-${date}.pdf`;
 }
 
 export default async function exportNrwToPdf(
     map: MapboxMap,
     eventsElement: HTMLElement | null | undefined,
     selectedEvent: NrwEvent | undefined,
+    countries: CountryCodeIso3[],
     text: NrwPdfText,
 ): Promise<void> {
     const [mapImage, eventsImage] = await Promise.all([
@@ -135,5 +146,5 @@ export default async function exportNrwToPdf(
     pdf.text(text.mapNote, margin + mapColumnWidth, footerY, { align: 'right', baseline: 'top' });
     pdf.text(text.pageLabel, rightEdge, footerY, { align: 'right', baseline: 'top' });
 
-    pdf.save(getFileName(selectedEvent));
+    pdf.save(getFileName(selectedEvent, countries));
 }

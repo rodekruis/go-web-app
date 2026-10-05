@@ -82,7 +82,7 @@ export function Component() {
     const eventsPanelRef = useRef<HTMLDivElement>(null);
 
     const exportButton = countries.length > 0
-        ? <NrwPdfExport eventsPanelRef={eventsPanelRef} />
+        ? <NrwPdfExport eventsPanelRef={eventsPanelRef} countries={countries} />
         : undefined;
 
     const content = (
