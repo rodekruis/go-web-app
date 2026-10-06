@@ -8,13 +8,22 @@ const supportedLayerNames = {
     populationDensity: 'populationDensity',
 } as const satisfies { [Name in NrwLayerName]?: Name };
 
+type SupportedLayerName = (typeof supportedLayerNames)[keyof typeof supportedLayerNames];
+
+export function getLayerOrder(
+    positions: Record<SupportedLayerName, number>,
+): NrwLayerName[] {
+    return Object.values(supportedLayerNames)
+        .toSorted((a, b) => positions[a] - positions[b]);
+}
+
 // TODO: consider moving this to NRW datamodel
-export const layerDrawOrder: NrwLayerName[] = [
-    supportedLayerNames.clinics,
-    supportedLayerNames.floodDepth,
-    supportedLayerNames.exposedPopulation,
-    supportedLayerNames.populationDensity,
-];
+export const layerDrawOrder = getLayerOrder({
+    clinics: 0,
+    floodDepth: 1,
+    exposedPopulation: 2,
+    populationDensity: 3,
+});
 
 export function getLayerAnchorId(name: NrwLayerName): string {
     return `anchor-${name}`;
