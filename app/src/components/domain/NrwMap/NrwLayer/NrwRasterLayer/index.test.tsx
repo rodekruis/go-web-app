@@ -56,8 +56,8 @@ function mockRasterResponse(response: StaticRasterResponse | undefined) {
     } as unknown as ReturnType<typeof useNrwRequest>);
 }
 
-function RasterHost(props: { map: MapboxMap; isVisible: boolean }) {
-    const { map, isVisible } = props;
+function RasterHost(props: { map: MapboxMap; isVisible: boolean; resourceId?: string }) {
+    const { map, isVisible, resourceId } = props;
 
     const mapContext = useMemo(() => ({ map }), [map]);
 
@@ -67,7 +67,9 @@ function RasterHost(props: { map: MapboxMap; isVisible: boolean }) {
                 id="layer-MWI-floodDepth"
                 countryCodeIso3={malawi}
                 name="floodDepth"
+                resourceId={resourceId}
                 isVisible={isVisible}
+                layerAnchorId="anchor-floodDepth"
             />
         </NrwMapContext.Provider>
     );
@@ -79,38 +81,77 @@ describe('NrwRasterLayer', () => {
     });
 
     test('requests the static raster metadata of the layer for the country', () => {
+        // Arrange
         mockRasterResponse(undefined);
         const { map } = createFakeMapboxMap();
 
+        // Act
         render(<RasterHost map={map} isVisible />);
 
+        // Assert
         expect(useNrwRequest).toHaveBeenCalledWith({
             apiType: 'nrw',
             url: '/rasters/static/{countryCodeIso3}/{layer}',
             pathVariables: { countryCodeIso3: 'MWI', layer: 'floodDepth' },
+            skip: false,
         });
     });
 
+    test('loads the event raster using its resource id instead of the static raster', () => {
+        // Arrange
+        mockRasterResponse(floodDepthRaster);
+        const { map, getLayerSpecification } = createFakeMapboxMap();
+
+        // Act
+        render(<RasterHost map={map} isVisible resourceId="10" />);
+
+        // Assert
+        expect(useNrwRequest).toHaveBeenCalledWith({
+            apiType: 'nrw',
+            url: '/rasters/alert/{id}',
+            pathVariables: { id: 10 },
+            skip: false,
+        });
+        expect(useNrwRequest).toHaveBeenCalledWith({
+            apiType: 'nrw',
+            url: '/rasters/static/{countryCodeIso3}/{layer}',
+            pathVariables: { countryCodeIso3: 'MWI', layer: 'floodDepth' },
+            skip: true,
+        });
+        expect(getLayerSpecification('layer-MWI-floodDepth')?.source).toHaveProperty(
+            'url',
+            'https://nrw.example.org/api/rasters/alert/10/image',
+        );
+    });
+
     test('adds nothing to the map until the metadata arrives', () => {
+        // Arrange
         mockRasterResponse(undefined);
         const { map, calls, getLayerSpecification } = createFakeMapboxMap();
 
+        // Act
         const { rerender } = render(<RasterHost map={map} isVisible />);
 
+        // Assert
         expect(calls).toEqual([]);
 
+        // Act
         mockRasterResponse(floodDepthRaster);
         rerender(<RasterHost map={map} isVisible />);
 
+        // Assert
         expect(getLayerSpecification('layer-MWI-floodDepth')).toBeDefined();
     });
 
     test('draws the coloured image over the data extent in degrees', () => {
+        // Arrange
         mockRasterResponse(floodDepthRaster);
         const { map, getLayerSpecification } = createFakeMapboxMap();
 
+        // Act
         render(<RasterHost map={map} isVisible />);
 
+        // Assert
         expect(getLayerSpecification('layer-MWI-floodDepth')).toEqual({
             id: 'layer-MWI-floodDepth',
             type: 'raster',
@@ -132,9 +173,11 @@ describe('NrwRasterLayer', () => {
     });
 
     test('adds the layer once and toggles its visibility for the same metadata', () => {
+        // Arrange
         mockRasterResponse(floodDepthRaster);
         const { map, calls, getVisibility } = createFakeMapboxMap();
 
+        // Act & Assert
         const { rerender } = render(<RasterHost map={map} isVisible />);
         expect(getVisibility('layer-MWI-floodDepth')).toBe('visible');
 
@@ -144,6 +187,7 @@ describe('NrwRasterLayer', () => {
         rerender(<RasterHost map={map} isVisible />);
         expect(getVisibility('layer-MWI-floodDepth')).toBe('visible');
 
+        // Assert
         expect(calls.filter((call) => call.startsWith('addLayer'))).toHaveLength(1);
     });
 });

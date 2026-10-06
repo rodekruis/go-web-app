@@ -68,6 +68,7 @@ export function Component() {
     } = useNrwLayers({
         visibleLayers: layersFromUrlParams,
         onVisibleLayersChange: setLayersFromUrlParams,
+        selectedEvent,
     });
 
     const content = (
