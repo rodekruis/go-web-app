@@ -69,6 +69,7 @@ function RasterHost(props: { map: MapboxMap; isVisible: boolean; resourceId?: st
                 name="floodDepth"
                 resourceId={resourceId}
                 isVisible={isVisible}
+                layerAnchorId="anchor-floodDepth"
             />
         </NrwMapContext.Provider>
     );

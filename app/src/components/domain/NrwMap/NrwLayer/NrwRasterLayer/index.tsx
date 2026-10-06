@@ -20,10 +20,10 @@ function NrwRasterLayer(props: {
     name: NrwLayer['name'];
     resourceId?: string;
     isVisible: boolean;
-    beforeId?: string; // Used to connect layer to statically ordered "anchor" layers in MapBox.
+    layerAnchorId: string; // Used to connect layer to statically ordered "anchor" layers in MapBox
 }) {
     const {
-        id, countryCodeIso3, name, resourceId, isVisible, beforeId,
+        id, countryCodeIso3, name, resourceId, isVisible, layerAnchorId,
     } = props;
 
     const isAlertRaster = isDefined(resourceId);
@@ -85,7 +85,7 @@ function NrwRasterLayer(props: {
         [id, countryCodeIso3, name, resourceId, isAlertRaster, response],
     );
 
-    useNrwMapLayer(mapLayer, isVisible, beforeId);
+    useNrwMapLayer(mapLayer, isVisible, layerAnchorId);
 
     return null;
 }

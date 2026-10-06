@@ -39,7 +39,7 @@ function NrwLayer(props: {
                     countryCodeIso3={countryCodeIso3}
                     name={layer.name}
                     resourceId={resourceId}
-                    beforeId={getLayerAnchorId(layer.name)}
+                    layerAnchorId={getLayerAnchorId(layer.name)}
                     isVisible={isVisible}
                 />
             );
@@ -48,7 +48,7 @@ function NrwLayer(props: {
                 <NrwShapeLayer
                     id={getMapLayerId(countryCodeIso3, layer.name)}
                     isVisible={isVisible}
-                    beforeId={getLayerAnchorId(layer.name)}
+                    layerAnchorId={getLayerAnchorId(layer.name)}
                 />
             );
         case 'point':

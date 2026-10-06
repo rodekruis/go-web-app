@@ -2,10 +2,7 @@ import {
     useContext,
     useEffect,
 } from 'react';
-import {
-    isDefined,
-    isNotDefined,
-} from '@togglecorp/fujs';
+import { isNotDefined } from '@togglecorp/fujs';
 import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 import NrwMapContext from '../NrwMapContext';
@@ -13,7 +10,7 @@ import NrwMapContext from '../NrwMapContext';
 function useNrwMapLayer(
     mapLayer: Parameters<MapboxMap['addLayer']>[0] | undefined,
     isVisible: boolean,
-    beforeId?: string,
+    layerAnchorId: string,
 ) {
     const { map } = useContext(NrwMapContext);
 
@@ -24,10 +21,7 @@ function useNrwMapLayer(
                 return undefined;
             }
 
-            map.addLayer(
-                mapLayer,
-                isDefined(beforeId) && map.getLayer(beforeId) ? beforeId : undefined,
-            );
+            map.addLayer(mapLayer, layerAnchorId);
 
             return () => {
                 const { id } = mapLayer;
@@ -36,7 +30,7 @@ function useNrwMapLayer(
                 if (map.getSource(id)) map.removeSource(id);
             };
         },
-        [map, mapLayer, beforeId],
+        [map, mapLayer, layerAnchorId],
     );
 
     // control visibility

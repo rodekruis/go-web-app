@@ -15,6 +15,8 @@ import useNrwMapLayer from './useNrwMapLayer';
 
 type MapLayer = Parameters<typeof useNrwMapLayer>[0];
 
+const layerAnchorId = 'anchor-floodDepth';
+
 function createRasterLayer(id: string): MapLayer {
     return {
         id,
@@ -27,10 +29,10 @@ function createRasterLayer(id: string): MapLayer {
     };
 }
 
-function Layer(props: { mapLayer: MapLayer | undefined; isVisible: boolean; beforeId?: string }) {
-    const { mapLayer, isVisible, beforeId } = props;
+function Layer(props: { mapLayer: MapLayer | undefined; isVisible: boolean }) {
+    const { mapLayer, isVisible } = props;
 
-    useNrwMapLayer(mapLayer, isVisible, beforeId);
+    useNrwMapLayer(mapLayer, isVisible, layerAnchorId);
 
     return null;
 }
@@ -40,17 +42,14 @@ function MapHost(props: {
     map: MapboxMap | undefined;
     mapLayer: MapLayer | undefined;
     isVisible: boolean;
-    beforeId?: string;
 }) {
-    const {
-        map, mapLayer, isVisible, beforeId,
-    } = props;
+    const { map, mapLayer, isVisible } = props;
 
     const mapContext = useMemo(() => ({ map }), [map]);
 
     return (
         <NrwMapContext.Provider value={mapContext}>
-            <Layer mapLayer={mapLayer} isVisible={isVisible} beforeId={beforeId} />
+            <Layer mapLayer={mapLayer} isVisible={isVisible} />
         </NrwMapContext.Provider>
     );
 }
@@ -199,32 +198,14 @@ describe('useNrwMapLayer', () => {
     test('adds the layer below its anchor', () => {
         // Arrange
         const { map } = createFakeMapboxMap();
-        map.addLayer({ id: 'anchor-floodDepth', type: 'background' });
         const addLayer = vi.spyOn(map, 'addLayer');
         const floodDepth = createRasterLayer('layer-MWI-floodDepth');
 
         // Act
-        render(
-            <MapHost map={map} mapLayer={floodDepth} isVisible beforeId="anchor-floodDepth" />,
-        );
+        render(<MapHost map={map} mapLayer={floodDepth} isVisible />);
 
         // Assert
-        expect(addLayer.mock.calls).toEqual([[floodDepth, 'anchor-floodDepth']]);
-    });
-
-    test('adds the layer on top when its anchor is missing', () => {
-        // Arrange
-        const { map } = createFakeMapboxMap();
-        const addLayer = vi.spyOn(map, 'addLayer');
-        const floodDepth = createRasterLayer('layer-MWI-floodDepth');
-
-        // Act
-        render(
-            <MapHost map={map} mapLayer={floodDepth} isVisible beforeId="anchor-floodDepth" />,
-        );
-
-        // Assert
-        expect(addLayer.mock.calls).toEqual([[floodDepth, undefined]]);
+        expect(addLayer.mock.calls).toEqual([[floodDepth, layerAnchorId]]);
     });
 
     test('removes the layer and its source on unmount', () => {
