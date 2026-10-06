@@ -33,7 +33,7 @@ const tooltipPlacement: NrwMarkerPlacement = { anchor: 'bottom-left', offset: [1
 function NrwShapeLayer(props: {
     id: string;
     isVisible: boolean;
-    beforeId?: string;
+    beforeId?: string; // Used to connect layer to statically ordered "anchor" layers in MapBox.
 }) {
     const { id, isVisible, beforeId } = props;
 

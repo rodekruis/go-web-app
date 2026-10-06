@@ -17,6 +17,7 @@ import {
     type MapViewChangeHandler,
     type NrwEvent,
     type NrwEventHazardType,
+    type NrwEventSelectHandler,
     type NrwLayerName,
     type UrlParameter,
     type Zoom,
@@ -184,8 +185,8 @@ function useNrwSearchParams() {
         [setSearchParams],
     );
 
-    const handleSelectedEventIdChange = useCallback(
-        (eventId: NrwEvent['eventId'] | undefined, hazardType?: NrwEventHazardType) => {
+    const handleSelectedEventIdChange: NrwEventSelectHandler = useCallback(
+        (eventId, hazardType) => {
             if (eventId === selectedEventId) {
                 return;
             }

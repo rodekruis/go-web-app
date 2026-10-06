@@ -5,6 +5,7 @@ import {
 import { faSquareCheck } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from '@ifrc-go/ui/hooks';
+import { isDefined } from '@togglecorp/fujs';
 
 import supportedLayerNames from '#utils/nrw/layers';
 import {
@@ -27,7 +28,7 @@ function NrwLayerPanel(props: {
 
     const supportedLayers = Object.values(supportedLayerNames)
         .map((name) => layers.find((layer) => layer.name === name))
-        .filter((layer) => layer !== undefined);
+        .filter(isDefined);
 
     const hasLayers = supportedLayers.length > 0;
 

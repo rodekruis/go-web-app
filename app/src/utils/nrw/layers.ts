@@ -8,13 +8,12 @@ const supportedLayerNames = {
     populationDensity: 'populationDensity',
 } as const satisfies { [Name in NrwLayerName]?: Name };
 
-// Bottom to top.
 // TODO: consider moving this to NRW datamodel
 export const layerDrawOrder: NrwLayerName[] = [
-    supportedLayerNames.populationDensity,
-    supportedLayerNames.exposedPopulation,
-    supportedLayerNames.floodDepth,
     supportedLayerNames.clinics,
+    supportedLayerNames.floodDepth,
+    supportedLayerNames.exposedPopulation,
+    supportedLayerNames.populationDensity,
 ];
 
 export function getLayerAnchorId(name: NrwLayerName): string {

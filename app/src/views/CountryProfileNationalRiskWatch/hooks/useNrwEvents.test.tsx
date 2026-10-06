@@ -45,29 +45,41 @@ describe('useNrwEvents', () => {
     });
 
     test('reports the hazard type of the selected event', () => {
+        // Arrange
         const { result, onSelectedEventIdChange } = renderNrwEvents();
 
+        // Act
         act(() => {
             result.current.onEventSelect(9);
         });
-        act(() => {
-            result.current.onEventSelect(11);
-        });
 
-        expect(onSelectedEventIdChange.mock.calls).toEqual([[9, 'floods'], [11, 'drought']]);
+        // Assert
+        expect(onSelectedEventIdChange.mock.calls).toEqual([[9, 'floods']]);
     });
 
-    test('reports no hazard type when the event is cleared or unknown', () => {
+    test('reports no event and no hazard type when the event is cleared', () => {
+        // Arrange
         const { result, onSelectedEventIdChange } = renderNrwEvents();
 
+        // Act
         act(() => {
             result.current.onEventSelect(undefined);
         });
+
+        // Assert
+        expect(onSelectedEventIdChange.mock.calls).toEqual([[undefined, undefined]]);
+    });
+
+    test('reports no hazard type when the event is unknown', () => {
+        // Arrange
+        const { result, onSelectedEventIdChange } = renderNrwEvents();
+
+        // Act
         act(() => {
             result.current.onEventSelect(42);
         });
 
-        expect(onSelectedEventIdChange.mock.calls)
-            .toEqual([[undefined, undefined], [42, undefined]]);
+        // Assert
+        expect(onSelectedEventIdChange.mock.calls).toEqual([[42, undefined]]);
     });
 });

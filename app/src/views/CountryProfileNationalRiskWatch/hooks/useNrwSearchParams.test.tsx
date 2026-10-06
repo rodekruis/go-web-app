@@ -77,6 +77,7 @@ describe('useNrwSearchParams', () => {
 
     describe('layers', () => {
         test('shows no layers when the url names none that is supported', () => {
+            // Act & Assert
             expect(renderNrwSearchParams('/').result.current.params.layersFromUrlParams)
                 .toEqual([]);
             expect(renderNrwSearchParams('/?layers=').result.current.params.layersFromUrlParams)
@@ -89,20 +90,25 @@ describe('useNrwSearchParams', () => {
         });
 
         test('keeps the supported layer names only, in the panel order', () => {
+            // Act
             const { result } = renderNrwSearchParams(
                 '/?layers=clinics,windSpeed,%20floodDepth%20,notALayer,clinics',
             );
 
+            // Assert
             expect(result.current.params.layersFromUrlParams).toEqual(['floodDepth', 'clinics']);
         });
 
         test('writes the visible layers to the url and keeps the other parameters', () => {
+            // Arrange
             const rendered = renderNrwSearchParams('/?z=5&countries=MWI');
 
+            // Act
             act(() => {
                 rendered.result.current.params.setLayersFromUrlParams(['floodDepth', 'clinics']);
             });
 
+            // Assert
             // A toggle must not add a history entry, or the back button steps through them.
             expect(rendered.result.current.navigationType).toBe('REPLACE');
             expect(rendered.searchParams.get('layers')).toBe('floodDepth,clinics');
@@ -113,23 +119,29 @@ describe('useNrwSearchParams', () => {
         });
 
         test('removes the layers parameter when no layer is visible', () => {
+            // Arrange
             const rendered = renderNrwSearchParams('/?layers=clinics');
 
+            // Act
             act(() => {
                 rendered.result.current.params.setLayersFromUrlParams([]);
             });
 
+            // Assert
             expect(rendered.searchParams.has('layers')).toBe(false);
             expect(rendered.result.current.params.layersFromUrlParams).toEqual([]);
         });
 
         test('reads the layers back in the panel order, whatever the toggle order', () => {
+            // Arrange
             const rendered = renderNrwSearchParams('/');
 
+            // Act
             act(() => {
                 rendered.result.current.params.setLayersFromUrlParams(['clinics', 'floodDepth']);
             });
 
+            // Assert
             expect(rendered.result.current.params.layersFromUrlParams)
                 .toEqual(['floodDepth', 'clinics']);
         });
@@ -137,25 +149,31 @@ describe('useNrwSearchParams', () => {
 
     describe('map view', () => {
         test('reads the zoom and the centre from the url', () => {
+            // Act
             const { result } = renderNrwSearchParams('/?z=5.5&lat=-13.25&lon=34.3');
 
+            // Assert
             expect(result.current.params.zoomFromUrlParams).toBe(5.5);
             expect(result.current.params.latitudeFromUrlParams).toBe(-13.25);
             expect(result.current.params.longitudeFromUrlParams).toBe(34.3);
         });
 
         test('rejects a zoom or a centre out of range', () => {
+            // Act
             const { result } = renderNrwSearchParams('/?z=24.1&lat=90.5&lon=-180.5');
 
+            // Assert
             expect(result.current.params.zoomFromUrlParams).toBeNull();
             expect(result.current.params.latitudeFromUrlParams).toBeNull();
             expect(result.current.params.longitudeFromUrlParams).toBeNull();
         });
 
         test('accepts a zoom and a centre on the range limits', () => {
+            // Act
             const low = renderNrwSearchParams('/?z=0&lat=-90&lon=-180').result.current.params;
             const high = renderNrwSearchParams('/?z=24&lat=90&lon=180').result.current.params;
 
+            // Assert
             expect([low.zoomFromUrlParams, low.latitudeFromUrlParams, low.longitudeFromUrlParams])
                 .toEqual([0, -90, -180]);
             expect([
@@ -166,16 +184,20 @@ describe('useNrwSearchParams', () => {
         });
 
         test('rejects a zoom or a centre that is not a finite number', () => {
+            // Act
             const { result } = renderNrwSearchParams('/?z=&lat=abc&lon=Infinity');
 
+            // Assert
             expect(result.current.params.zoomFromUrlParams).toBeNull();
             expect(result.current.params.latitudeFromUrlParams).toBeNull();
             expect(result.current.params.longitudeFromUrlParams).toBeNull();
         });
 
         test('writes the map view with a 2 decimal zoom and 6 decimal coordinates', () => {
+            // Arrange
             const rendered = renderNrwSearchParams('/?layers=clinics');
 
+            // Act
             act(() => {
                 rendered.result.current.params.handleMapViewChange(
                     5.126 as Zoom,
@@ -184,6 +206,7 @@ describe('useNrwSearchParams', () => {
                 );
             });
 
+            // Assert
             expect(rendered.result.current.navigationType).toBe('REPLACE');
             expect(rendered.searchParams.get('z')).toBe('5.13');
             expect(rendered.searchParams.get('lat')).toBe('-13.123457');
@@ -194,6 +217,7 @@ describe('useNrwSearchParams', () => {
 
     describe('selected event', () => {
         test('reads a positive integer event id only', () => {
+            // Act & Assert
             expect(renderNrwSearchParams('/?event=42').result.current.params.selectedEventId)
                 .toBe(42);
             expect(renderNrwSearchParams('/?event=0').result.current.params.selectedEventId)
@@ -207,15 +231,18 @@ describe('useNrwSearchParams', () => {
         });
 
         test('selecting an event shows the default layers and drops the map view', () => {
+            // Arrange
             const rendered = renderNrwSearchParams(
                 '/?countries=MWI&z=6.50&lat=-13.250000&lon=34.300000&layers=clinics',
             );
             const locationKey = rendered.result.current.location.key;
 
+            // Act
             act(() => {
                 rendered.result.current.params.handleSelectedEventIdChange(42);
             });
 
+            // Assert
             expect(rendered.result.current.location.key).not.toBe(locationKey);
             expect(rendered.result.current.navigationType).toBe('REPLACE');
             expect(rendered.searchParams.get('event')).toBe('42');
@@ -230,26 +257,32 @@ describe('useNrwSearchParams', () => {
         });
 
         test('selecting a flood event also shows the flood depth layer', () => {
+            // Arrange
             const rendered = renderNrwSearchParams('/?countries=MWI&layers=clinics');
 
+            // Act
             act(() => {
                 rendered.result.current.params.handleSelectedEventIdChange(42, 'floods');
             });
 
+            // Assert
             expect(rendered.searchParams.get('layers')).toBe('exposedPopulation,floodDepth');
             expect(rendered.result.current.params.layersFromUrlParams)
                 .toEqual(['exposedPopulation', 'floodDepth']);
         });
 
         test('clearing the event hides all layers and drops the map view', () => {
+            // Arrange
             const rendered = renderNrwSearchParams(
                 '/?countries=MWI&event=42&layers=exposedPopulation&z=5&lat=-13&lon=34',
             );
 
+            // Act
             act(() => {
                 rendered.result.current.params.handleSelectedEventIdChange(undefined);
             });
 
+            // Assert
             expect(rendered.result.current.navigationType).toBe('REPLACE');
             expect(Array.from(rendered.searchParams.keys())).toEqual(['countries']);
             expect(rendered.result.current.params.selectedEventId).toBeUndefined();
@@ -257,23 +290,28 @@ describe('useNrwSearchParams', () => {
         });
 
         test('selecting the selected event again does not navigate', () => {
+            // Arrange
             const rendered = renderNrwSearchParams('/?event=42&z=5&lat=-13&lon=34');
             const locationKey = rendered.result.current.location.key;
 
+            // Act
             act(() => {
                 rendered.result.current.params.handleSelectedEventIdChange(42);
             });
 
+            // Assert
             expect(rendered.result.current.location.key).toBe(locationKey);
             expect(rendered.searchParams.get('z')).toBe('5');
         });
 
         test('a map view change after selecting an event keeps the event and its layers', () => {
+            // Arrange
             const rendered = renderNrwSearchParams('/?countries=MWI');
-
             act(() => {
                 rendered.result.current.params.handleSelectedEventIdChange(1);
             });
+
+            // Act
             // The fit-bounds animation after a selection ends with a "moveend", so
             // this write must build on the url that the selection wrote.
             act(() => {
@@ -284,6 +322,7 @@ describe('useNrwSearchParams', () => {
                 );
             });
 
+            // Assert
             expect(Array.from(rendered.searchParams.keys()).sort())
                 .toEqual(['countries', 'event', 'lat', 'layers', 'lon', 'z']);
             expect(rendered.searchParams.get('event')).toBe('1');
@@ -293,8 +332,8 @@ describe('useNrwSearchParams', () => {
         });
 
         test('a map view change from before the event was unselected keeps it unselected', () => {
+            // Arrange
             const rendered = renderNrwSearchParams('/?countries=MWI');
-
             act(() => {
                 rendered.result.current.params.handleSelectedEventIdChange(1);
             });
@@ -306,10 +345,13 @@ describe('useNrwSearchParams', () => {
             act(() => {
                 rendered.result.current.params.handleSelectedEventIdChange(undefined);
             });
+
+            // Act
             act(() => {
                 handleMapViewChange(7.14 as Zoom, -15.314335 as Latitude, 35.083364 as Longitude);
             });
 
+            // Assert
             expect(Array.from(rendered.searchParams.keys()).sort())
                 .toEqual(['countries', 'lat', 'lon', 'z']);
             expect(rendered.searchParams.get('z')).toBe('7.14');
@@ -322,27 +364,38 @@ describe('useNrwSearchParams', () => {
 
     describe('countries', () => {
         test('standalone: reads the valid country codes from the url', () => {
+            // Act
             const { result } = renderNrwSearchParams('/?countries=mwi,%20KEN%20,XX,1234,');
 
+            // Assert
             expect(result.current.params.urlCountries).toEqual(['MWI', 'KEN']);
         });
 
         test('standalone: has no countries when the url names none', () => {
+            // Act & Assert
             expect(renderNrwSearchParams('/').result.current.params.urlCountries).toEqual([]);
         });
 
         test('embedded: takes the country of the route once it is known', () => {
+            // Arrange
             config.nrwStandalone = false;
+
+            // Act
             const { result } = renderNrwSearchParams('/countries/123?countries=KEN');
 
+            // Assert
             expect(useCountry).toHaveBeenCalledWith({ id: 123 });
             expect(result.current.params.urlCountries).toBeUndefined();
 
+            // Arrange
             vi.mocked(useCountry).mockReturnValue(
                 { iso3: 'MWI' } as ReturnType<typeof useCountry>,
             );
+
+            // Act
             const known = renderNrwSearchParams('/countries/123?countries=KEN');
 
+            // Assert
             expect(known.result.current.params.urlCountries).toEqual(['MWI']);
         });
     });

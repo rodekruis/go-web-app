@@ -40,6 +40,7 @@ function getCheckboxLabels() {
 
 describe('NrwLayerPanel', () => {
     test('lists the supported layers in the panel order, not the api order', () => {
+        // Act
         render(
             <NrwLayerPanel
                 layers={[clinics, exposedPopulation, populationDensity, floodDepth]}
@@ -49,6 +50,7 @@ describe('NrwLayerPanel', () => {
             { wrapper: TestProviders },
         );
 
+        // Assert
         expect(getCheckboxLabels()).toEqual([
             'Exposed population',
             'Flood depth',
@@ -58,6 +60,7 @@ describe('NrwLayerPanel', () => {
     });
 
     test('leaves out the layers the frontend does not support', () => {
+        // Act
         render(
             <NrwLayerPanel
                 layers={[windSpeed, clinics]}
@@ -67,13 +70,15 @@ describe('NrwLayerPanel', () => {
             { wrapper: TestProviders },
         );
 
+        // Assert
         expect(getCheckboxLabels()).toEqual(['Clinics']);
         expect(
             screen.queryByText(i18n.strings.nrwLayerPanelNoLayersMessage),
         ).not.toBeInTheDocument();
     });
 
-    test('shows the event flood depth raster as a checked layer', () => {
+    test('shows a checked and visible event layer', () => {
+        // Act
         render(
             <NrwLayerPanel
                 layers={[{
@@ -88,10 +93,12 @@ describe('NrwLayerPanel', () => {
             { wrapper: TestProviders },
         );
 
+        // Assert
         expect(screen.getByRole('checkbox', { name: 'Flood depth' })).toBeChecked();
     });
 
     test('shows the empty message when no supported layer is available', () => {
+        // Act
         render(
             <NrwLayerPanel
                 layers={[windSpeed]}
@@ -101,11 +108,13 @@ describe('NrwLayerPanel', () => {
             { wrapper: TestProviders },
         );
 
+        // Assert
         expect(getCheckboxLabels()).toEqual([]);
         expect(screen.getByText(i18n.strings.nrwLayerPanelNoLayersMessage)).toBeInTheDocument();
     });
 
     test('checks exactly the visible layers', () => {
+        // Act
         render(
             <NrwLayerPanel
                 layers={[floodDepth, populationDensity, clinics]}
@@ -115,14 +124,15 @@ describe('NrwLayerPanel', () => {
             { wrapper: TestProviders },
         );
 
+        // Assert
         expect(screen.getByRole('checkbox', { name: 'Flood depth' })).toBeChecked();
         expect(screen.getByRole('checkbox', { name: 'Population density' })).not.toBeChecked();
         expect(screen.getByRole('checkbox', { name: 'Clinics' })).toBeChecked();
     });
 
     test('reports the name of the clicked layer, checked or not', () => {
+        // Arrange
         const onLayerToggle = vi.fn();
-
         render(
             <NrwLayerPanel
                 layers={[floodDepth, clinics]}
@@ -132,9 +142,11 @@ describe('NrwLayerPanel', () => {
             { wrapper: TestProviders },
         );
 
+        // Act
         fireEvent.click(screen.getByRole('checkbox', { name: 'Flood depth' }));
         fireEvent.click(screen.getByRole('checkbox', { name: 'Clinics' }));
 
+        // Assert
         expect(onLayerToggle.mock.calls).toEqual([['floodDepth'], ['clinics']]);
     });
 });

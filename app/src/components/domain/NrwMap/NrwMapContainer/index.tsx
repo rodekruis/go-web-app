@@ -100,10 +100,11 @@ function NrwMapContainer(props: {
         map.dragRotate.disable();
         map.touchPitch.disable();
         map.on('style.load', () => {
-            // Use invisible 'anchor' layers with specific order
+            // Add invisible 'anchor' layers with specific order (from bottom to top)
             // .. so that later actual layers can be added at right position
-            // .. irrespective of when they are called.
-            layerDrawOrder.forEach((name) => {
+            // .. irrespective of when they are added to the map.
+
+            layerDrawOrder.toReversed().forEach((name) => {
                 map.addLayer({
                     id: getLayerAnchorId(name),
                     type: 'background',

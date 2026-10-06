@@ -20,7 +20,7 @@ function NrwRasterLayer(props: {
     name: NrwLayer['name'];
     resourceId?: string;
     isVisible: boolean;
-    beforeId?: string;
+    beforeId?: string; // Used to connect layer to statically ordered "anchor" layers in MapBox.
 }) {
     const {
         id, countryCodeIso3, name, resourceId, isVisible, beforeId,
