@@ -1,29 +1,20 @@
 import { type NrwLayerName } from '#views/CountryProfileNationalRiskWatch/types';
 
 // Layers the frontend supports.
-const supportedLayerNames = {
-    exposedPopulation: 'exposedPopulation',
-    floodDepth: 'floodDepth',
-    clinics: 'clinics',
-    populationDensity: 'populationDensity',
-} as const satisfies { [Name in NrwLayerName]?: Name };
+const supportedLayerNames = [
+    'exposedPopulation',
+    'floodDepth',
+    'clinics',
+    'populationDensity',
+] as const satisfies readonly NrwLayerName[];
+export type SupportedLayerName = (typeof supportedLayerNames)[number];
 
-type SupportedLayerName = (typeof supportedLayerNames)[keyof typeof supportedLayerNames];
-
-export function getLayerOrder(
-    positions: Record<SupportedLayerName, number>,
-): NrwLayerName[] {
-    return Object.values(supportedLayerNames)
-        .toSorted((a, b) => positions[a] - positions[b]);
-}
-
-// TODO: consider moving this to NRW datamodel
-export const layerDrawOrder = getLayerOrder({
-    clinics: 0,
-    floodDepth: 1,
-    exposedPopulation: 2,
-    populationDensity: 3,
-});
+export const layerDrawOrder: SupportedLayerName[] = [
+    'clinics',
+    'floodDepth',
+    'exposedPopulation',
+    'populationDensity',
+];
 
 export function getLayerAnchorId(name: NrwLayerName): string {
     return `anchor-${name}`;
