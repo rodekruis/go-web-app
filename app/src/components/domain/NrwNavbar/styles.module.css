@@ -23,11 +23,6 @@
         font-size: var(--go-ui-font-size-xl);
     }
 
-    .icon-user {
-        color: var(--go-ui-color-gray-70);
-        font-size: var(--go-ui-font-size-2xl);
-    }
-
     .heading {
         text-transform: uppercase;
     }

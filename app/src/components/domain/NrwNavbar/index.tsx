@@ -1,7 +1,4 @@
-import {
-    faBars,
-    faCircleUser,
-} from '@fortawesome/pro-solid-svg-icons';
+import { faBars } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     Heading,
@@ -39,7 +36,6 @@ function NrwNavbar(props: Props) {
                     </div>
                     <div className={styles.userActions}>
                         {actions}
-                        <FontAwesomeIcon icon={faCircleUser} className={styles.iconUser} />
                     </div>
                 </ListView>
             </PageContainer>
