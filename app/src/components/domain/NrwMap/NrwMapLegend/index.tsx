@@ -72,7 +72,7 @@ function NrwMapLegend(props: {
                     {strings.nrwMapLegendTitle}
                 </span>
                 <FontAwesomeIcon
-                    icon={isOpen ? faChevronUp : faChevronDown}
+                    icon={isOpen ? faChevronDown : faChevronUp}
                     className={styles.titleIcon}
                 />
             </button>
