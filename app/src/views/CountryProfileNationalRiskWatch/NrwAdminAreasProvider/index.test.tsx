@@ -91,6 +91,18 @@ const borSouth: AdminAreaProperties = {
     name: 'Bor South',
 };
 
+// One state with two counties, so the drill starts at the counties.
+const eventSplitAtCounties = {
+    ...event,
+    eventId: 9,
+    exposedAdminAreas: {
+        0: [createArea('SS', 'South Sudan')],
+        1: [createArea('SS03', 'Jonglei')],
+        2: [createArea('SS0303', 'Bor South'), createArea('SS0304', 'Twic East')],
+        3: [createArea('SS030301', 'Bor')],
+    },
+} as unknown as NrwEvent;
+
 const someAdminAreas = {
     type: 'FeatureCollection',
     features: [{ type: 'Feature', geometry: null, properties: {} }],
@@ -148,6 +160,12 @@ async function drillUp() {
     });
 }
 
+async function drillTo(adminLevel: number) {
+    await act(async () => {
+        adminAreas().drillTo(adminLevel as AdminLevel);
+    });
+}
+
 async function answer(response: NrwAdminAreaFeatureCollection | undefined) {
     await act(async () => {
         if (response) {
@@ -174,7 +192,9 @@ afterEach(async () => {
 });
 
 test('opens at the first level with several exposed areas', () => {
+    expect(adminAreas().initialAdminLevel).toBe(1);
     expect(adminAreas().adminLevel).toBe(1);
+    expect(adminAreas().drillPath).toEqual([]);
     expect(adminAreas().parentAdminArea).toBeUndefined();
     expect(adminAreas().adminAreas).toBeUndefined();
     expect(adminAreas().canDrillDown(jonglei.placeCode)).toBe(true);
@@ -188,10 +208,12 @@ test('shows the next level only once its admin areas have loaded', async () => {
         "(countryCodeIso3='SSD') AND adminLevel=2 AND placeCodeLevel1='SS03' AND placeCode IN ('SS0303','SS0401')",
     );
     expect(adminAreas().adminLevel).toBe(1);
+    expect(adminAreas().drillPath).toEqual([]);
     expect(adminAreas().parentAdminArea).toBeUndefined();
 
     await answer(someAdminAreas);
     expect(adminAreas().adminLevel).toBe(2);
+    expect(adminAreas().drillPath).toEqual([jonglei]);
     expect(adminAreas().parentAdminArea).toEqual(jonglei);
     expect(adminAreas().adminAreas).toBe(someAdminAreas);
 
@@ -244,6 +266,84 @@ test('does not drill up from the top', async () => {
 
     expect(adminAreas().adminLevel).toBe(1);
     expect(requestedFilter()).toContain('adminLevel=1 AND placeCode IN');
+});
+
+test('jumps back to a level drilled through', async () => {
+    await drillDown(jonglei);
+    await answer(someAdminAreas);
+    await drillDown(borSouth);
+    await answer(someAdminAreas);
+    expect(adminAreas().adminLevel).toBe(3);
+    expect(adminAreas().drillPath).toEqual([jonglei, borSouth]);
+
+    await drillTo(1);
+    expect(requestedFilter()).toBe("(countryCodeIso3='SSD') AND adminLevel=1 AND placeCode IN ('SS03','SS04')");
+    expect(adminAreas().adminLevel).toBe(3);
+    expect(adminAreas().drillPath).toEqual([jonglei, borSouth]);
+
+    await answer(someAdminAreas);
+    expect(adminAreas().initialAdminLevel).toBe(1);
+    expect(adminAreas().adminLevel).toBe(1);
+    expect(adminAreas().drillPath).toEqual([]);
+    expect(adminAreas().parentAdminArea).toBeUndefined();
+
+    await drillDown(jonglei);
+    await answer(someAdminAreas);
+    await drillDown(borSouth);
+    await answer(someAdminAreas);
+
+    await drillTo(2);
+    expect(requestedFilter()).toBe(
+        "(countryCodeIso3='SSD') AND adminLevel=2 AND placeCodeLevel1='SS03' AND placeCode IN ('SS0303','SS0401')",
+    );
+
+    await answer(someAdminAreas);
+    expect(adminAreas().adminLevel).toBe(2);
+    expect(adminAreas().drillPath).toEqual([jonglei]);
+    expect(adminAreas().parentAdminArea).toEqual(jonglei);
+});
+
+test('jumps only to levels above the shown level', async () => {
+    await drillDown(jonglei);
+    await answer(someAdminAreas);
+    expect(requestedFilter()).toContain('adminLevel=2 AND placeCodeLevel1');
+    const shown = adminAreas();
+
+    await drillTo(2);
+    expect(requestedFilter()).toContain('adminLevel=2 AND placeCodeLevel1');
+    expect(adminAreas()).toBe(shown);
+
+    await drillTo(3);
+    expect(requestedFilter()).toContain('adminLevel=2 AND placeCodeLevel1');
+    expect(adminAreas()).toBe(shown);
+
+    await drillTo(0);
+    expect(requestedFilter()).toContain('adminLevel=2 AND placeCodeLevel1');
+    expect(adminAreas()).toBe(shown);
+    expect(adminAreas().adminLevel).toBe(2);
+});
+
+test('jumps back to the first exposed level of the event', async () => {
+    await render(eventSplitAtCounties);
+    expect(adminAreas().initialAdminLevel).toBe(2);
+    expect(requestedFilter()).toBe("(countryCodeIso3='SSD') AND adminLevel=2 AND placeCode IN ('SS0303','SS0304')");
+    await answer(someAdminAreas);
+
+    await drillDown(borSouth);
+    await answer(someAdminAreas);
+    expect(adminAreas().adminLevel).toBe(3);
+    expect(adminAreas().drillPath).toEqual([borSouth]);
+    const shown = adminAreas();
+
+    await drillTo(1);
+    expect(adminAreas()).toBe(shown);
+
+    await drillTo(2);
+    expect(requestedFilter()).toBe("(countryCodeIso3='SSD') AND adminLevel=2 AND placeCode IN ('SS0303','SS0304')");
+
+    await answer(someAdminAreas);
+    expect(adminAreas().adminLevel).toBe(2);
+    expect(adminAreas().drillPath).toEqual([]);
 });
 
 test('starts over at the top for another event, or the same one again', async () => {
