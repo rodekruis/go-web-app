@@ -7,9 +7,10 @@
     cursor: pointer;
     padding: var(--go-ui-spacing-2xs) var(--go-ui-spacing-md);
     height: 40px;
+    line-height: var(--go-ui-line-height-md);
     color: var(--go-ui-color-primary-blue);
-    font-size: var(--go-ui-font-size-sm);
-    font-weight: var(--go-ui-font-weight-medium);
+    font-size: var(--go-ui-font-size-md);
+    font-weight: var(--go-ui-font-weight-semibold);
     gap: var(--go-ui-spacing-2xs);
 
     &:disabled {

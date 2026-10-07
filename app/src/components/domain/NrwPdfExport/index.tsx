@@ -4,7 +4,7 @@ import {
     useContext,
     useState,
 } from 'react';
-import { faDownload } from '@fortawesome/pro-solid-svg-icons';
+import { faDownToLine } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import {
@@ -72,7 +72,7 @@ function NrwPdfExport(props: Props) {
             disabled={isNotDefined(map) || exporting}
             onClick={handleClick}
         >
-            <FontAwesomeIcon icon={faDownload} className={styles.icon} />
+            <FontAwesomeIcon icon={faDownToLine} className={styles.icon} />
             {exporting
                 ? strings.nrwPdfExportExportingLabel
                 : strings.nrwPdfExportButtonLabel}
