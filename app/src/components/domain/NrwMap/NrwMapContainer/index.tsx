@@ -47,12 +47,13 @@ const paddingPixels = 20;
 
 function NrwMapContainer(props: {
     mapView: MapView;
+    preserveInitialView: boolean;
     onMapViewChange: MapViewChangeHandler;
     layerPanel?: React.ReactNode;
     children?: React.ReactNode;
 }) {
     const {
-        mapView, onMapViewChange, layerPanel, children,
+        mapView, preserveInitialView, onMapViewChange, layerPanel, children,
     } = props;
 
     const { zoom, center, fitBounds } = mapView;
@@ -156,8 +157,8 @@ function NrwMapContainer(props: {
     }, [mapboxMap, southWest?.lng, southWest?.lat, northEast?.lng, northEast?.lat]);
 
     const mapContext = useMemo(
-        () => ({ map: mapLoadComplete ? mapboxMap : undefined }),
-        [mapboxMap, mapLoadComplete],
+        () => ({ map: mapLoadComplete ? mapboxMap : undefined, preserveInitialView }),
+        [mapboxMap, mapLoadComplete, preserveInitialView],
     );
 
     return (

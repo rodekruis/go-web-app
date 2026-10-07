@@ -53,7 +53,7 @@ export function Component() {
         ? undefined // NrwShapeLayer will handle the map zoom when an event is selected.
         : countries;
 
-    const mapView = useNrwMapView({
+    const { mapView, preserveInitialView } = useNrwMapView({
         urlZoom: zoomFromUrlParams,
         urlLatitude: latitudeFromUrlParams,
         urlLongitude: longitudeFromUrlParams,
@@ -85,6 +85,7 @@ export function Component() {
                     >
                         <NrwMap
                             mapView={mapView}
+                            preserveInitialView={preserveInitialView}
                             onMapViewChange={handleMapViewChange}
                             availableLayers={availableLayers}
                             visibleLayers={visibleLayers}
