@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import { isDefined } from '@togglecorp/fujs';
 
-import supportedLayerNames from '#utils/nrw/layers';
+import { type SupportedLayerName } from '#utils/nrw/layers';
 import {
     type LayerToggleHandler,
     type NrwLayer,
@@ -16,6 +16,13 @@ import {
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
+
+const layerPanelOrder: SupportedLayerName[] = [
+    'exposedPopulation',
+    'floodDepth',
+    'clinics',
+    'populationDensity',
+];
 
 function NrwLayerPanel(props: {
     layers: NrwLayer[];
@@ -26,7 +33,7 @@ function NrwLayerPanel(props: {
 
     const strings = useTranslation(i18n);
 
-    const supportedLayers = Object.values(supportedLayerNames)
+    const supportedLayers = layerPanelOrder
         .map((name) => layers.find((layer) => layer.name === name))
         .filter(isDefined);
 
