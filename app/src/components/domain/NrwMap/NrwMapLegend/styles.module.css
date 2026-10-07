@@ -1,4 +1,4 @@
-.map-legend {
+.nrw-map-legend {
     display: flex;
     flex-direction: column;
     gap: var(--go-ui-spacing-xs);
@@ -16,14 +16,7 @@
         align-items: center;
         justify-content: space-between;
         gap: var(--go-ui-spacing-md);
-        border: none;
-        background: none;
-        cursor: pointer;
-        padding: 0;
-        text-align: start;
         color: var(--go-ui-color-primary-blue);
-        font: inherit;
-        font-size: var(--go-ui-font-size-md);
         font-weight: var(--go-ui-font-weight-semibold);
     }
 

@@ -5,6 +5,7 @@ import {
     faMap,
 } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { RawButton } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 
 import {
@@ -52,14 +53,10 @@ function NrwMapLegend(props: {
     const strings = useTranslation(i18n);
     const [isOpen, setIsOpen] = useState(true);
 
-    if (items.length === 0) {
-        return null;
-    }
-
     return (
-        <div className={styles.mapLegend}>
-            <button
-                type="button"
+        <div className={styles.nrwMapLegend}>
+            <RawButton
+                name={undefined}
                 className={styles.title}
                 aria-expanded={isOpen}
                 onClick={() => setIsOpen((open) => !open)}
@@ -75,7 +72,7 @@ function NrwMapLegend(props: {
                     icon={isOpen ? faChevronDown : faChevronUp}
                     className={styles.titleIcon}
                 />
-            </button>
+            </RawButton>
             {isOpen && (
                 <div className={styles.items}>
                     {items.map((item) => (
