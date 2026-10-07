@@ -4,25 +4,14 @@ import {
     test,
 } from 'vitest';
 
-import { type NrwLayer } from '#views/CountryProfileNationalRiskWatch/types';
+import createNrwLayer from '#utils/testing/createNrwLayer';
 
 import {
     getNrwLegendItems,
     NrwLegendType,
 } from './legend';
 
-function createLayer(name: NrwLayer['name'], label: string): NrwLayer {
-    return {
-        id: label.length,
-        name,
-        label,
-        type: 'raster',
-        description: undefined,
-        hazardType: undefined,
-    };
-}
-
-const populationDensity = createLayer('populationDensity', 'Population density');
+const populationDensity = createNrwLayer('populationDensity', 'Population density');
 
 describe('getNrwLegendItems', () => {
     test('returns a ramp item for a visible population density layer', () => {

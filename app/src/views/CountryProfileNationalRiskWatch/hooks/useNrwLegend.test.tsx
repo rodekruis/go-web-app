@@ -5,17 +5,12 @@ import {
     test,
 } from 'vitest';
 
+import createNrwLayer from '#utils/testing/createNrwLayer';
+
 import { type NrwLayer } from '../types';
 import useNrwLegend from './useNrwLegend';
 
-const populationDensity: NrwLayer = {
-    id: 1,
-    name: 'populationDensity',
-    label: 'Population density',
-    type: 'raster',
-    description: undefined,
-    hazardType: undefined,
-};
+const populationDensity = createNrwLayer('populationDensity', 'Population density');
 
 describe('useNrwLegend', () => {
     test('returns the legend items for the visible layers when enabled', () => {

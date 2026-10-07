@@ -10,29 +10,18 @@ import {
     vi,
 } from 'vitest';
 
+import createNrwLayer from '#utils/testing/createNrwLayer';
 import TestProviders from '#utils/testing/TestProviders';
-import { type NrwLayer } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwLayerPanel from './index';
 
 import i18n from './i18n.json';
 
-function createLayer(name: NrwLayer['name'], label: string): NrwLayer {
-    return {
-        id: label.length,
-        name,
-        label,
-        type: 'raster',
-        description: undefined,
-        hazardType: undefined,
-    };
-}
-
-const floodDepth = createLayer('floodDepth', 'Flood depth');
-const populationDensity = createLayer('populationDensity', 'Population density');
-const exposedPopulation = createLayer('exposedPopulation', 'Exposed population');
-const clinics = createLayer('clinics', 'Clinics');
-const windSpeed = createLayer('windSpeed', 'Wind speed');
+const floodDepth = createNrwLayer('floodDepth', 'Flood depth');
+const populationDensity = createNrwLayer('populationDensity', 'Population density');
+const exposedPopulation = createNrwLayer('exposedPopulation', 'Exposed population');
+const clinics = createNrwLayer('clinics', 'Clinics');
+const windSpeed = createNrwLayer('windSpeed', 'Wind speed');
 
 function getCheckboxLabels() {
     return screen.queryAllByRole('checkbox').map((checkbox) => checkbox.textContent);
