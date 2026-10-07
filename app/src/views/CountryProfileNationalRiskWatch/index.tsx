@@ -80,15 +80,10 @@ export function Component() {
     });
 
     const [map, setMap] = useState<MapboxMap>();
-    const nrwMapContext = useMemo<NrwMapContextProps>(() => ({ map, setMap }), [map]);
-    const eventsPanelRef = useRef<HTMLDivElement>(null);
-
-    const exportButton = countries.length > 0
-        ? <NrwPdfExport eventsPanelRef={eventsPanelRef} countries={countries} />
-        : undefined;
-
-    const [map, setMap] = useState<MapboxMap>();
-    const nrwMapContext = useMemo<NrwMapContextProps>(() => ({ map, setMap }), [map]);
+    const nrwMapContext = useMemo<NrwMapContextProps>(
+        () => ({ map, setMap, preserveInitialView }),
+        [map, preserveInitialView],
+    );
     const eventsPanelRef = useRef<HTMLDivElement>(null);
 
     const exportButton = countries.length > 0
@@ -108,7 +103,6 @@ export function Component() {
                 >
                     <NrwMap
                         mapView={mapView}
-                        preserveInitialView={preserveInitialView}
                         onMapViewChange={handleMapViewChange}
                         availableLayers={availableLayers}
                         visibleLayers={visibleLayers}
