@@ -6,6 +6,7 @@ import {
 } from 'react';
 import { faDownToLine } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Button } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import {
     formatDate,
@@ -21,7 +22,6 @@ import { type CountryCodeIso3 } from '#views/CountryProfileNationalRiskWatch/typ
 import exportNrwToPdf from './exportNrwToPdf';
 
 import i18n from './i18n.json';
-import styles from './styles.module.css';
 
 const dataFormat = 'dd MMM yyyy, hh:mm';
 
@@ -66,17 +66,19 @@ function NrwPdfExport(props: Props) {
     }, [map, eventsPanelRef, selectedEvent, countries, alert, strings]);
 
     return (
-        <button
-            type="button"
-            className={styles.exportButton}
+        <Button
+            name={undefined}
+            spacing="xl"
+            styleVariant="outline"
+            colorVariant="secondary"
             disabled={isNotDefined(map) || exporting}
             onClick={handleClick}
+            before={<FontAwesomeIcon icon={faDownToLine} />}
         >
-            <FontAwesomeIcon icon={faDownToLine} className={styles.icon} />
             {exporting
                 ? strings.nrwPdfExportExportingLabel
                 : strings.nrwPdfExportButtonLabel}
-        </button>
+        </Button>
     );
 }
 
