@@ -90,6 +90,7 @@ function NrwMapContainer(props: {
             style: nrwMapboxStyleUrl,
             projection: 'mercator',
             attributionControl: true,
+            logoPosition: 'bottom-right',
             center,
             zoom,
         });
