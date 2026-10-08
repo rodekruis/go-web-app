@@ -1,8 +1,6 @@
 {
     "namespace": "nrwMap",
     "strings": {
-        "nrwMapLegendTitle": "Map legend",
-        "nrwMapLegendLow": "Low",
-        "nrwMapLegendHigh": "High"
+        "nrwMapLegendTitle": "Map legend"
     }
 }

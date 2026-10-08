@@ -18,6 +18,7 @@ import {
 import NrwMapLegend from './index';
 
 import i18n from './i18n.json';
+import rampI18n from './NrwLegendRamp/i18n.json';
 
 const populationDensity: NrwLegendItem = {
     type: NrwLegendType.Gradient,
@@ -38,8 +39,8 @@ describe('NrwMapLegend', () => {
         const { container } = renderLegend();
 
         expect(screen.getByText('Population density:')).toBeInTheDocument();
-        expect(screen.getByText(i18n.strings.nrwMapLegendLow)).toBeInTheDocument();
-        expect(screen.getByText(i18n.strings.nrwMapLegendHigh)).toBeInTheDocument();
+        expect(screen.getByText(rampI18n.strings.nrwLegendRampLow)).toBeInTheDocument();
+        expect(screen.getByText(rampI18n.strings.nrwLegendRampHigh)).toBeInTheDocument();
         expect(container.querySelectorAll('[style*="background-color"]')).toHaveLength(3);
     });
 

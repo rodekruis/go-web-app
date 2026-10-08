@@ -8,42 +8,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { RawButton } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 
-import {
-    type NrwLegendItem,
-    type NrwLegendType,
-} from '#views/CountryProfileNationalRiskWatch/types';
+import { type NrwLegendItem } from '#views/CountryProfileNationalRiskWatch/types';
+
+import NrwLegendRamp from './NrwLegendRamp';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
-
-function NrwLegendRamp(props: {
-    item: Extract<NrwLegendItem, { type: NrwLegendType.Gradient }>;
-}) {
-    const { item } = props;
-
-    const strings = useTranslation(i18n);
-
-    return (
-        <div className={styles.item}>
-            <div className={styles.itemLabel}>
-                {`${item.label}:`}
-            </div>
-            <div className={styles.ramp}>
-                <span className={styles.rampLabel}>{strings.nrwMapLegendLow}</span>
-                <div className={styles.rampSwatches}>
-                    {item.colors.map((color) => (
-                        <div
-                            key={color}
-                            className={styles.rampSwatch}
-                            style={{ backgroundColor: color }}
-                        />
-                    ))}
-                </div>
-                <span className={styles.rampLabel}>{strings.nrwMapLegendHigh}</span>
-            </div>
-        </div>
-    );
-}
 
 function NrwMapLegend(props: {
     items: NrwLegendItem[];
