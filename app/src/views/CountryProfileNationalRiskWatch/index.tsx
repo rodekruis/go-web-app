@@ -19,10 +19,10 @@ import Page from '#components/Page';
 import { nrwStandalone } from '#config';
 
 import NrwEventsContext from './contexts/NrwEventsContext';
-import NrwScreenshotContext, {
-    type NrwScreenshotContextProps,
-    type NrwScreenshotHandler,
-} from './contexts/NrwScreenshotContext';
+import NrwScreenCaptureContext, {
+    type NrwScreenCaptureContextProps,
+    type NrwScreenCaptureHandler,
+} from './contexts/NrwScreenCaptureContext';
 import useNrwEvents from './hooks/useNrwEvents';
 import useNrwLayers from './hooks/useNrwLayers';
 import useNrwMapView from './hooks/useNrwMapView';
@@ -82,15 +82,15 @@ export function Component() {
         selectedEvent,
     });
 
-    const [takeScreenshot, setTakeScreenshot] = useState<NrwScreenshotHandler>();
+    const [takeScreenCapture, setTakeScreenCapture] = useState<NrwScreenCaptureHandler>();
     // Wrap in a plain callback: a raw state setter would invoke the handler
     // argument as a state updater function.
-    const registerScreenshot = useCallback((handler: NrwScreenshotHandler | undefined) => {
-        setTakeScreenshot(handler ? () => handler : undefined);
+    const registerScreenCapture = useCallback((handler: NrwScreenCaptureHandler | undefined) => {
+        setTakeScreenCapture(handler ? () => handler : undefined);
     }, []);
-    const nrwScreenshotContext = useMemo<NrwScreenshotContextProps>(
-        () => ({ takeScreenshot }),
-        [takeScreenshot],
+    const nrwScreenCaptureContext = useMemo<NrwScreenCaptureContextProps>(
+        () => ({ takeScreenCapture }),
+        [takeScreenCapture],
     );
     const eventsPanelRef = useRef<HTMLDivElement>(null);
 
@@ -116,7 +116,7 @@ export function Component() {
                         availableLayers={availableLayers}
                         visibleLayers={visibleLayers}
                         onLayerToggle={handleLayerToggle}
-                        registerScreenshot={registerScreenshot}
+                        registerScreenCapture={registerScreenCapture}
                     />
                     <NrwEvents elementRef={eventsPanelRef} />
                 </ListView>
@@ -126,7 +126,7 @@ export function Component() {
 
     return (
         <NrwEventsContext.Provider value={nrwEventsContext}>
-            <NrwScreenshotContext.Provider value={nrwScreenshotContext}>
+            <NrwScreenCaptureContext.Provider value={nrwScreenCaptureContext}>
                 {nrwStandalone ? (
                     <div className={styles.countryProfileNrwStandalone}>
                         <NrwNavbar actions={exportButton} />
@@ -139,7 +139,7 @@ export function Component() {
                         </Page>
                     </div>
                 ) : content}
-            </NrwScreenshotContext.Provider>
+            </NrwScreenCaptureContext.Provider>
         </NrwEventsContext.Provider>
     );
 }

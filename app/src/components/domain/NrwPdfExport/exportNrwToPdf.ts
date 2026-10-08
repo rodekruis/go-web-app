@@ -2,7 +2,7 @@ import JsPDF from 'jspdf';
 
 import {
     type NrwCapturedImage,
-} from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenshotContext';
+} from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenCaptureContext';
 import {
     type CountryCodeIso3,
     type NrwEvent,
