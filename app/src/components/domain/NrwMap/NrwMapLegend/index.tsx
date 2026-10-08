@@ -11,7 +11,7 @@ import { useTranslation } from '@ifrc-go/ui/hooks';
 import {
     type NrwLegendItem,
     type NrwLegendType,
-} from '#utils/nrw/legend';
+} from '#views/CountryProfileNationalRiskWatch/types';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';

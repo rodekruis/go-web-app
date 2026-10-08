@@ -4,7 +4,6 @@ import {
     isNotDefined,
 } from '@togglecorp/fujs';
 
-import { type NrwLegendItem } from '#utils/nrw/legend';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
@@ -15,6 +14,7 @@ import {
     type MapViewChangeHandler,
     type NrwLayer as NrwLayerType,
     type NrwLayerName,
+    type NrwLegendItem,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 

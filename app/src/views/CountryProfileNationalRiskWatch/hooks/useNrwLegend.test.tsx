@@ -7,21 +7,56 @@ import {
 
 import createNrwLayer from '#utils/testing/createNrwLayer';
 
-import { type NrwLayer } from '../types';
+import {
+    type NrwLayer,
+    NrwLegendType,
+} from '../types';
 import useNrwLegend from './useNrwLegend';
 
 const populationDensity = createNrwLayer('populationDensity', 'Population density');
 
 describe('useNrwLegend', () => {
-    test('returns the legend items for the visible layers when enabled', () => {
+    test('returns a ramp item for a visible population density layer when enabled', () => {
         const { result } = renderHook(() => useNrwLegend({
             availableLayers: [populationDensity],
             visibleLayers: ['populationDensity'],
             enabled: true,
         }));
 
-        expect(result.current.legendItems).toHaveLength(1);
-        expect(result.current.legendItems[0]?.layerName).toBe('populationDensity');
+        expect(result.current.legendItems).toEqual([
+            expect.objectContaining({
+                type: NrwLegendType.Gradient,
+                layerName: 'populationDensity',
+                label: 'Population density',
+            }),
+        ]);
+        expect(result.current.legendItems[0]?.colors).toHaveLength(5);
+    });
+
+    test('returns nothing when the layer is available but hidden', () => {
+        const { result } = renderHook(() => useNrwLegend({
+            availableLayers: [populationDensity],
+            visibleLayers: [],
+            enabled: true,
+        }));
+
+        expect(result.current.legendItems).toEqual([]);
+    });
+
+    test('returns nothing when the layer is visible but not available', () => {
+        const { result: empty } = renderHook(() => useNrwLegend({
+            availableLayers: [],
+            visibleLayers: ['populationDensity'],
+            enabled: true,
+        }));
+        const { result: undefinedLayers } = renderHook(() => useNrwLegend({
+            availableLayers: undefined,
+            visibleLayers: ['populationDensity'],
+            enabled: true,
+        }));
+
+        expect(empty.current.legendItems).toEqual([]);
+        expect(undefinedLayers.current.legendItems).toEqual([]);
     });
 
     test('returns no items when disabled, even if layers are visible', () => {

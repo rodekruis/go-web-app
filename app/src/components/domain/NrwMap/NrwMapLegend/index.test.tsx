@@ -9,11 +9,11 @@ import {
     test,
 } from 'vitest';
 
+import TestProviders from '#utils/testing/TestProviders';
 import {
     type NrwLegendItem,
     NrwLegendType,
-} from '#utils/nrw/legend';
-import TestProviders from '#utils/testing/TestProviders';
+} from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwMapLegend from './index';
 
