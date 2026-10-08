@@ -1,8 +1,8 @@
 import 'mapbox-gl-v3/dist/mapbox-gl.css';
 
 import {
-    useContext,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -25,6 +25,9 @@ import {
     layerDrawOrder,
 } from '#utils/nrw/layers';
 import {
+    type NrwScreenshotHandler,
+} from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenshotContext';
+import {
     type Latitude,
     type Longitude,
     type MapView,
@@ -32,6 +35,7 @@ import {
     type Zoom,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
+import captureNrwMapScreenshot from '../captureNrwMapScreenshot';
 import NrwMapContext from '../NrwMapContext';
 
 import i18n from './i18n.json';
@@ -47,12 +51,14 @@ const paddingPixels = 20;
 
 function NrwMapContainer(props: {
     mapView: MapView;
+    preserveInitialView: boolean;
     onMapViewChange: MapViewChangeHandler;
     layerPanel?: React.ReactNode;
+    registerScreenshot?: (handler: NrwScreenshotHandler | undefined) => void;
     children?: React.ReactNode;
 }) {
     const {
-        mapView, onMapViewChange, layerPanel, children,
+        mapView, preserveInitialView, onMapViewChange, layerPanel, registerScreenshot, children,
     } = props;
 
     const { zoom, center, fitBounds } = mapView;
@@ -60,7 +66,6 @@ function NrwMapContainer(props: {
     const [southWest, northEast] = fitBounds ?? [];
 
     const strings = useTranslation(i18n);
-    const { setMap } = useContext(NrwMapContext);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
@@ -157,9 +162,26 @@ function NrwMapContainer(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mapboxMap, southWest?.lng, southWest?.lat, northEast?.lng, northEast?.lat]);
 
+    const mapContext = useMemo(
+        () => ({ map: mapLoadComplete ? mapboxMap : undefined, preserveInitialView }),
+        [mapboxMap, mapLoadComplete, preserveInitialView],
+    );
+
+    // Expose the map screenshot capability once the map is ready, so that
+    // consumers (e.g. the PDF export) don't need to know about Mapbox.
     useEffect(() => {
-        setMap(mapLoadComplete ? mapboxMap : undefined);
-    }, [mapboxMap, mapLoadComplete, setMap]);
+        if (isNotDefined(registerScreenshot)) {
+            return undefined;
+        }
+
+        if (!mapLoadComplete || isNotDefined(mapboxMap)) {
+            registerScreenshot(undefined);
+            return undefined;
+        }
+
+        registerScreenshot(captureNrwMapScreenshot(mapboxMap));
+        return () => registerScreenshot(undefined);
+    }, [mapboxMap, mapLoadComplete, registerScreenshot]);
 
     return (
         <>
@@ -205,7 +227,9 @@ function NrwMapContainer(props: {
                     )}
                 </div>
             </div>
-            {children}
+            <NrwMapContext.Provider value={mapContext}>
+                {children}
+            </NrwMapContext.Provider>
         </>
     );
 }

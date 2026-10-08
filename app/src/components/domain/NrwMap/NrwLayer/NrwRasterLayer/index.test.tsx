@@ -59,7 +59,7 @@ function mockRasterResponse(response: StaticRasterResponse | undefined) {
 function RasterHost(props: { map: MapboxMap; isVisible: boolean; resourceId?: string }) {
     const { map, isVisible, resourceId } = props;
 
-    const mapContext = useMemo(() => ({ map, setMap: () => {} }), [map]);
+    const mapContext = useMemo(() => ({ map }), [map]);
 
     return (
         <NrwMapContext.Provider value={mapContext}>

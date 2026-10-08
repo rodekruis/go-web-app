@@ -6,6 +6,7 @@ import {
 
 import supportedLayerNames from '#utils/nrw/layers';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
+import { type NrwScreenshotHandler } from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenshotContext';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,
@@ -51,17 +52,21 @@ function parseCentroid(centroid: unknown): NrwLngLat | undefined {
 
 function NrwMap(props: {
     mapView: MapView;
+    preserveInitialView: boolean;
     onMapViewChange: MapViewChangeHandler;
     availableLayers: NrwLayerType[];
     visibleLayers: NrwLayerName[];
     onLayerToggle: LayerToggleHandler;
+    registerScreenshot?: (handler: NrwScreenshotHandler | undefined) => void;
 }) {
     const {
         mapView,
+        preserveInitialView,
         onMapViewChange,
         availableLayers,
         visibleLayers,
         onLayerToggle,
+        registerScreenshot,
     } = props;
 
     const {
@@ -86,8 +91,10 @@ function NrwMap(props: {
     return (
         <NrwMapContainer
             mapView={mapView}
+            preserveInitialView={preserveInitialView}
             onMapViewChange={onMapViewChange}
             layerPanel={layerPanel}
+            registerScreenshot={registerScreenshot}
         >
             {showLayers && availableLayers
                 .filter((layer) => supportedLayers.includes(layer.name))

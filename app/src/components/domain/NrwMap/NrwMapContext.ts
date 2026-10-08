@@ -4,12 +4,8 @@ import { type Map as MapboxMap } from 'mapbox-gl-v3';
 export interface NrwMapContextProps {
     map: MapboxMap | undefined;
     preserveInitialView?: boolean;
-    setMap: (map: MapboxMap | undefined) => void;
 }
 
-const NrwMapContext = createContext<NrwMapContextProps>({
-    map: undefined,
-    setMap: () => {},
-});
+const NrwMapContext = createContext<NrwMapContextProps>({ map: undefined });
 
 export default NrwMapContext;

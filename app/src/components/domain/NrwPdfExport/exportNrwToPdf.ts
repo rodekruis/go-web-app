@@ -1,7 +1,8 @@
-import { toPng } from 'html-to-image';
 import JsPDF from 'jspdf';
-import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
+import {
+    type NrwCapturedImage,
+} from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenshotContext';
 import {
     type CountryCodeIso3,
     type NrwEvent,
@@ -12,11 +13,6 @@ interface NrwPdfText {
     generated: string;
     mapNote: string;
     pageLabel: string;
-}
-
-interface CapturedImage {
-    dataUrl: string;
-    aspectRatio: number;
 }
 
 const frameWidthPx = 1757;
@@ -33,25 +29,6 @@ const captionFontPx = 12;
 const textPrimary = '#323232';
 const textSecondary = '#6f6f6f';
 const divider = '#c6c6c6';
-
-async function captureElement(
-    element: HTMLElement,
-    filter?: (node: HTMLElement) => boolean,
-): Promise<CapturedImage> {
-    const { width, height } = element.getBoundingClientRect();
-    if (width <= 0 || height <= 0) {
-        throw new Error('Element to capture has no size');
-    }
-
-    const dataUrl = await toPng(element, { cacheBust: true, pixelRatio: 2, filter });
-    return { dataUrl, aspectRatio: width / height };
-}
-
-function captureMap(map: MapboxMap): Promise<CapturedImage> {
-    const container = map.getContainer();
-    const controls = container.querySelector('.mapboxgl-control-container');
-    return captureElement(container, (node) => node !== controls);
-}
 
 function getDisplayArea(aspectRatio: number, maxWidth: number, maxHeight: number) {
     let width = maxWidth;
@@ -78,18 +55,13 @@ function getFileName(
     return `national-risk-watch-${date}.pdf`;
 }
 
-export default async function exportNrwToPdf(
-    map: MapboxMap,
-    eventsElement: HTMLElement | null | undefined,
+export default function exportNrwToPdf(
+    mapImage: NrwCapturedImage,
+    eventsImage: NrwCapturedImage | undefined,
     selectedEvent: NrwEvent | undefined,
     countries: CountryCodeIso3[],
     text: NrwPdfText,
-): Promise<void> {
-    const [mapImage, eventsImage] = await Promise.all([
-        captureMap(map),
-        eventsElement ? captureElement(eventsElement) : undefined,
-    ]);
-
+): void {
     const pdf = new JsPDF({
         orientation: 'landscape',
         unit: 'mm',

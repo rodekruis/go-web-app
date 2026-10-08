@@ -14,9 +14,10 @@ import {
 } from '@ifrc-go/ui/utils';
 import { isNotDefined } from '@togglecorp/fujs';
 
-import NrwMapContext from '#components/domain/NrwMap/NrwMapContext';
+import { captureElementScreenshot } from '#components/domain/NrwMap/captureNrwMapScreenshot';
 import useAlert from '#hooks/useAlert';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
+import NrwScreenshotContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenshotContext';
 import { type CountryCodeIso3 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import exportNrwToPdf from './exportNrwToPdf';
@@ -34,18 +35,24 @@ function NrwPdfExport(props: Props) {
     const { eventsPanelRef, countries } = props;
 
     const strings = useTranslation(i18n);
-    const { map } = useContext(NrwMapContext);
+    const { takeScreenshot } = useContext(NrwScreenshotContext);
     const { selectedEvent } = useContext(NrwEventsContext);
     const alert = useAlert();
     const [exporting, setExporting] = useState(false);
 
     const handleClick = useCallback(async () => {
-        if (isNotDefined(map)) {
+        if (isNotDefined(takeScreenshot)) {
             return;
         }
         setExporting(true);
         try {
-            await exportNrwToPdf(map, eventsPanelRef.current, selectedEvent, countries, {
+            const eventsElement = eventsPanelRef.current;
+            const [mapImage, eventsImage] = await Promise.all([
+                takeScreenshot(),
+                eventsElement ? captureElementScreenshot(eventsElement) : undefined,
+            ]);
+
+            exportNrwToPdf(mapImage, eventsImage, selectedEvent, countries, {
                 title: strings.nrwPdfExportTitle,
                 generated: resolveToString(strings.nrwPdfExportGenerated, {
                     date: formatDate(new Date(), dataFormat) ?? '',
@@ -63,7 +70,7 @@ function NrwPdfExport(props: Props) {
         } finally {
             setExporting(false);
         }
-    }, [map, eventsPanelRef, selectedEvent, countries, alert, strings]);
+    }, [takeScreenshot, eventsPanelRef, selectedEvent, countries, alert, strings]);
 
     return (
         <Button
@@ -71,7 +78,7 @@ function NrwPdfExport(props: Props) {
             spacing="xl"
             styleVariant="outline"
             colorVariant="secondary"
-            disabled={isNotDefined(map) || exporting}
+            disabled={isNotDefined(takeScreenshot) || exporting}
             onClick={handleClick}
             before={<FontAwesomeIcon icon={faDownToLine} />}
         >

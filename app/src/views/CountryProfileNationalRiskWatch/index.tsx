@@ -1,4 +1,5 @@
 import {
+    useCallback,
     useMemo,
     useRef,
     useState,
@@ -9,17 +10,19 @@ import {
 } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import { isDefined } from '@togglecorp/fujs';
-import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 import NrwEvents from '#components/domain/NrwEvents';
 import NrwMap from '#components/domain/NrwMap';
-import NrwMapContext, { type NrwMapContextProps } from '#components/domain/NrwMap/NrwMapContext';
 import NrwNavbar from '#components/domain/NrwNavbar';
 import NrwPdfExport from '#components/domain/NrwPdfExport';
 import Page from '#components/Page';
 import { nrwStandalone } from '#config';
 
 import NrwEventsContext from './contexts/NrwEventsContext';
+import NrwScreenshotContext, {
+    type NrwScreenshotContextProps,
+    type NrwScreenshotHandler,
+} from './contexts/NrwScreenshotContext';
 import useNrwEvents from './hooks/useNrwEvents';
 import useNrwLayers from './hooks/useNrwLayers';
 import useNrwMapView from './hooks/useNrwMapView';
@@ -79,10 +82,15 @@ export function Component() {
         selectedEvent,
     });
 
-    const [map, setMap] = useState<MapboxMap>();
-    const nrwMapContext = useMemo<NrwMapContextProps>(
-        () => ({ map, setMap, preserveInitialView }),
-        [map, preserveInitialView],
+    const [takeScreenshot, setTakeScreenshot] = useState<NrwScreenshotHandler>();
+    // Wrap in a plain callback: a raw state setter would invoke the handler
+    // argument as a state updater function.
+    const registerScreenshot = useCallback((handler: NrwScreenshotHandler | undefined) => {
+        setTakeScreenshot(handler ? () => handler : undefined);
+    }, []);
+    const nrwScreenshotContext = useMemo<NrwScreenshotContextProps>(
+        () => ({ takeScreenshot }),
+        [takeScreenshot],
     );
     const eventsPanelRef = useRef<HTMLDivElement>(null);
 
@@ -103,10 +111,12 @@ export function Component() {
                 >
                     <NrwMap
                         mapView={mapView}
+                        preserveInitialView={preserveInitialView}
                         onMapViewChange={handleMapViewChange}
                         availableLayers={availableLayers}
                         visibleLayers={visibleLayers}
                         onLayerToggle={handleLayerToggle}
+                        registerScreenshot={registerScreenshot}
                     />
                     <NrwEvents elementRef={eventsPanelRef} />
                 </ListView>
@@ -116,7 +126,7 @@ export function Component() {
 
     return (
         <NrwEventsContext.Provider value={nrwEventsContext}>
-            <NrwMapContext.Provider value={nrwMapContext}>
+            <NrwScreenshotContext.Provider value={nrwScreenshotContext}>
                 {nrwStandalone ? (
                     <div className={styles.countryProfileNrwStandalone}>
                         <NrwNavbar actions={exportButton} />
@@ -129,7 +139,7 @@ export function Component() {
                         </Page>
                     </div>
                 ) : content}
-            </NrwMapContext.Provider>
+            </NrwScreenshotContext.Provider>
         </NrwEventsContext.Provider>
     );
 }
