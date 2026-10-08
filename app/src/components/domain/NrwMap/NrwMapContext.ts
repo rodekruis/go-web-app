@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
-export interface NrwMapContextProps {
+interface NrwMapContextProps {
     map: MapboxMap | undefined;
     preserveInitialView?: boolean;
 }
