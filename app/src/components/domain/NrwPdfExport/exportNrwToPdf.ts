@@ -1,8 +1,6 @@
 import JsPDF from 'jspdf';
 
-import {
-    type NrwCapturedImage,
-} from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenCaptureContext';
+import { type NrwCapturedImage } from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenCaptureContext';
 import {
     type CountryCodeIso3,
     type NrwEvent,
@@ -15,6 +13,9 @@ interface NrwPdfText {
     pageLabel: string;
 }
 
+const mapAttribution = '© Mapbox © OpenStreetMap';
+
+// Values used to line up the layout elements in the PDF based on the Figma design css
 const frameWidthPx = 1757;
 const marginPx = 40;
 const headerHeightPx = 30; // 20px title line + 10px padding above the divider
@@ -25,10 +26,12 @@ const columnGapPx = 18;
 const footerTopPx = mapHeightPx + 11;
 const titleFontPx = 18;
 const captionFontPx = 12;
+const attributionPaddingPx = 4;
 
 const textPrimary = '#323232'; // go-ui-color-gray-90
 const textSecondary = '#6f6f6f'; // go-ui-color-gray-70
 const divider = '#c6c6c6'; // go-ui-color-gray-40
+const attributionBackground = '#f2f2f2'; // approximates Mapbox's translucent white attribution box
 
 function getDisplayArea(aspectRatio: number, maxWidth: number, maxHeight: number) {
     let width = maxWidth;
@@ -105,6 +108,21 @@ export default function exportNrwToPdf(
     const mapHeight = px(mapHeightPx);
     const mapSize = getDisplayArea(mapImage.aspectRatio, mapColumnWidth, mapHeight);
     pdf.addImage(mapImage.dataUrl, 'PNG', margin, contentTop, mapSize.width, mapSize.height);
+
+    // Map attribution overlaid on the bottom-left corner of the map
+    const attributionPadding = px(attributionPaddingPx);
+    const attributionTextHeight = px(captionFontPx);
+    const attributionWidth = pdf.getTextWidth(mapAttribution) + attributionPadding * 2;
+    const attributionHeight = attributionTextHeight + attributionPadding * 2;
+    const attributionY = contentTop + mapSize.height - attributionHeight;
+    pdf.setFillColor(attributionBackground);
+    pdf.rect(margin, attributionY, attributionWidth, attributionHeight, 'F');
+    pdf.text(
+        mapAttribution,
+        margin + attributionPadding,
+        attributionY + attributionPadding,
+        { baseline: 'top' },
+    );
 
     if (eventsImage) {
         const eventsX = margin + mapColumnWidth + px(columnGapPx);
