@@ -54,7 +54,7 @@ function NrwMapContainer(props: {
     preserveInitialView: boolean;
     onMapViewChange: MapViewChangeHandler;
     layerPanel?: React.ReactNode;
-    registerScreenCapture?: (handler: NrwScreenCaptureHandler | undefined) => void;
+    registerScreenCapture: (handler: NrwScreenCaptureHandler | undefined) => void;
     children?: React.ReactNode;
 }) {
     const {
@@ -170,10 +170,6 @@ function NrwMapContainer(props: {
     // Expose the map capture capability once the map is ready, so that
     // consumers (e.g. the PDF export) don't need to know about Mapbox.
     useEffect(() => {
-        if (isNotDefined(registerScreenCapture)) {
-            return undefined;
-        }
-
         if (!mapLoadComplete || isNotDefined(mapboxMap)) {
             registerScreenCapture(undefined);
             return undefined;

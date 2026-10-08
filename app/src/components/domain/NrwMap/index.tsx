@@ -57,7 +57,7 @@ function NrwMap(props: {
     availableLayers: NrwLayerType[];
     visibleLayers: NrwLayerName[];
     onLayerToggle: LayerToggleHandler;
-    registerScreenCapture?: (handler: NrwScreenCaptureHandler | undefined) => void;
+    registerScreenCapture: (handler: NrwScreenCaptureHandler | undefined) => void;
 }) {
     const {
         mapView,
