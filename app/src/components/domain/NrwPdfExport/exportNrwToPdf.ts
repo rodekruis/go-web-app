@@ -26,9 +26,9 @@ const footerTopPx = mapHeightPx + 11;
 const titleFontPx = 18;
 const captionFontPx = 12;
 
-const textPrimary = '#323232';
-const textSecondary = '#6f6f6f';
-const divider = '#c6c6c6';
+const textPrimary = '#323232'; // go-ui-color-gray-90
+const textSecondary = '#6f6f6f'; // go-ui-color-gray-70
+const divider = '#c6c6c6'; // go-ui-color-gray-40
 
 function getDisplayArea(aspectRatio: number, maxWidth: number, maxHeight: number) {
     let width = maxWidth;
