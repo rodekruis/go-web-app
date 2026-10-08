@@ -82,6 +82,12 @@ export function Component() {
         selectedEvent,
     });
 
+    // The actual screen capture function is down in the component tree and
+    // specific to the mapping library. It will be available after the map has
+    // loaded.
+    // We pass down registerScreenCapture which registers the mapping library
+    // specific code with NrwScreenCaptureContext. That context is then used by
+    // the PDF export button.
     const [takeScreenCapture, setTakeScreenCapture] = useState<NrwScreenCaptureHandler>();
     // Wrap in a plain callback: a raw state setter would invoke the handler
     // argument as a state updater function.
