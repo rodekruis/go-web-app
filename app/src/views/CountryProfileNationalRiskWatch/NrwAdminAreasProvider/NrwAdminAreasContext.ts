@@ -24,7 +24,7 @@ export interface NrwAdminAreasContextProps {
     canDrillDown: (placeCode: PlaceCode) => boolean;
     drillDown: AdminAreaDrillDownHandler;
     drillUp: () => void;
-    drillTo: AdminLevelDrillHandler;
+    drillUpTo: AdminLevelDrillHandler;
 }
 
 const NrwAdminAreasContext = createContext<NrwAdminAreasContextProps>({
@@ -49,9 +49,9 @@ const NrwAdminAreasContext = createContext<NrwAdminAreasContextProps>({
         // eslint-disable-next-line no-console
         console.warn('NrwAdminAreasContext::drillUp called before it was initialized');
     },
-    drillTo: () => {
+    drillUpTo: () => {
         // eslint-disable-next-line no-console
-        console.warn('NrwAdminAreasContext::drillTo called before it was initialized');
+        console.warn('NrwAdminAreasContext::drillUpTo called before it was initialized');
     },
 });
 

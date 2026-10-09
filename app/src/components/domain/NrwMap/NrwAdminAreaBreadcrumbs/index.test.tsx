@@ -73,13 +73,13 @@ describe('NrwAdminAreaBreadcrumbs', () => {
     });
 
     test('jumps back to the event or an admin area drilled through', () => {
-        const drillTo = vi.fn();
+        const drillUpTo = vi.fn();
         render(
             <Harness
                 adminAreas={{
                     initialAdminLevel: 1 as AdminLevel,
                     drillPath: [kilifi, magarini],
-                    drillTo,
+                    drillUpTo,
                 }}
             />,
         );
@@ -89,20 +89,20 @@ describe('NrwAdminAreaBreadcrumbs', () => {
         expect(getButtonLabels()).toEqual(['Kenya', 'Kilifi']);
 
         fireEvent.click(screen.getByRole('button', { name: 'Kilifi' }));
-        expect(drillTo).toHaveBeenLastCalledWith(2, expect.anything());
+        expect(drillUpTo).toHaveBeenLastCalledWith(2, expect.anything());
 
         fireEvent.click(screen.getByRole('button', { name: 'Kenya' }));
-        expect(drillTo).toHaveBeenLastCalledWith(1, expect.anything());
+        expect(drillUpTo).toHaveBeenLastCalledWith(1, expect.anything());
     });
 
     test('opens the first exposed level of the event from the event crumb', () => {
-        const drillTo = vi.fn();
+        const drillUpTo = vi.fn();
         render(
             <Harness
                 adminAreas={{
                     initialAdminLevel: 2 as AdminLevel,
                     drillPath: [magarini],
-                    drillTo,
+                    drillUpTo,
                 }}
             />,
         );
@@ -110,7 +110,7 @@ describe('NrwAdminAreaBreadcrumbs', () => {
         expect(getCrumbLabels()).toEqual(['Kenya', 'Magarini']);
 
         fireEvent.click(screen.getByRole('button', { name: 'Kenya' }));
-        expect(drillTo).toHaveBeenLastCalledWith(2, expect.anything());
+        expect(drillUpTo).toHaveBeenLastCalledWith(2, expect.anything());
     });
 
     test('holds jumps while the next level loads', () => {

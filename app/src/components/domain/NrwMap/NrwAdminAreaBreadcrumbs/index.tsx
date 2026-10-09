@@ -25,7 +25,7 @@ function NrwAdminAreaBreadcrumbs(props: {
         initialAdminLevel,
         drillPath,
         pending,
-        drillTo,
+        drillUpTo,
     } = useContext(NrwAdminAreasContext);
 
     // Each crumb jumps to the level it opened: the first exposed level for
@@ -67,7 +67,7 @@ function NrwAdminAreaBreadcrumbs(props: {
                     className={styles.crumbButton}
                     name={crumb.adminLevel}
                     disabled={pending}
-                    onClick={drillTo}
+                    onClick={drillUpTo}
                 >
                     {crumb.label}
                 </RawButton>

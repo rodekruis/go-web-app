@@ -160,9 +160,9 @@ async function drillUp() {
     });
 }
 
-async function drillTo(adminLevel: number) {
+async function drillUpTo(adminLevel: number) {
     await act(async () => {
-        adminAreas().drillTo(adminLevel as AdminLevel);
+        adminAreas().drillUpTo(adminLevel as AdminLevel);
     });
 }
 
@@ -276,7 +276,7 @@ test('jumps back to a level drilled through', async () => {
     expect(adminAreas().adminLevel).toBe(3);
     expect(adminAreas().drillPath).toEqual([jonglei, borSouth]);
 
-    await drillTo(1);
+    await drillUpTo(1);
     expect(requestedFilter()).toBe("(countryCodeIso3='SSD') AND adminLevel=1 AND placeCode IN ('SS03','SS04')");
     expect(adminAreas().adminLevel).toBe(3);
     expect(adminAreas().drillPath).toEqual([jonglei, borSouth]);
@@ -292,7 +292,7 @@ test('jumps back to a level drilled through', async () => {
     await drillDown(borSouth);
     await answer(someAdminAreas);
 
-    await drillTo(2);
+    await drillUpTo(2);
     expect(requestedFilter()).toBe(
         "(countryCodeIso3='SSD') AND adminLevel=2 AND placeCodeLevel1='SS03' AND placeCode IN ('SS0303','SS0401')",
     );
@@ -309,15 +309,15 @@ test('jumps only to levels above the shown level', async () => {
     expect(requestedFilter()).toContain('adminLevel=2 AND placeCodeLevel1');
     const shown = adminAreas();
 
-    await drillTo(2);
+    await drillUpTo(2);
     expect(requestedFilter()).toContain('adminLevel=2 AND placeCodeLevel1');
     expect(adminAreas()).toBe(shown);
 
-    await drillTo(3);
+    await drillUpTo(3);
     expect(requestedFilter()).toContain('adminLevel=2 AND placeCodeLevel1');
     expect(adminAreas()).toBe(shown);
 
-    await drillTo(0);
+    await drillUpTo(0);
     expect(requestedFilter()).toContain('adminLevel=2 AND placeCodeLevel1');
     expect(adminAreas()).toBe(shown);
     expect(adminAreas().adminLevel).toBe(2);
@@ -335,10 +335,10 @@ test('jumps back to the first exposed level of the event', async () => {
     expect(adminAreas().drillPath).toEqual([borSouth]);
     const shown = adminAreas();
 
-    await drillTo(1);
+    await drillUpTo(1);
     expect(adminAreas()).toBe(shown);
 
-    await drillTo(2);
+    await drillUpTo(2);
     expect(requestedFilter()).toBe("(countryCodeIso3='SSD') AND adminLevel=2 AND placeCode IN ('SS0303','SS0304')");
 
     await answer(someAdminAreas);

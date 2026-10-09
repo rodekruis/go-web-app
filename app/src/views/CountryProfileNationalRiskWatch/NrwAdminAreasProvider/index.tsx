@@ -117,7 +117,7 @@ function NrwAdminAreasProvider(props: {
                     && !childlessPlaceCodes.includes(placeCode);
             }
 
-            function drillTo(targetAdminLevel: AdminLevel) {
+            function drillUpTo(targetAdminLevel: AdminLevel) {
                 if (targetAdminLevel >= initialAdminLevel && targetAdminLevel < adminLevel) {
                     setDrill((previous) => ({
                         ...previous,
@@ -145,8 +145,8 @@ function NrwAdminAreasProvider(props: {
                         }));
                     }
                 },
-                drillUp: () => drillTo((adminLevel - 1) as AdminLevel),
-                drillTo,
+                drillUp: () => drillUpTo((adminLevel - 1) as AdminLevel),
+                drillUpTo,
             };
         },
         [
