@@ -101,7 +101,8 @@ function NrwEventDetail(props: Props) {
                                 className={styles.backButton}
                                 name={undefined}
                                 colorVariant="text"
-                                textSize="sm"
+                                textSize="md"
+                                spacingOffset={-2}
                                 before={<FontAwesomeIcon icon={faChevronLeft} />}
                                 onClick={drillUp}
                             >
