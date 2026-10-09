@@ -118,12 +118,14 @@ function NrwAdminAreasProvider(props: {
             }
 
             function drillUpTo(targetAdminLevel: AdminLevel) {
-                if (targetAdminLevel >= initialAdminLevel && targetAdminLevel < adminLevel) {
-                    setDrill((previous) => ({
-                        ...previous,
-                        path: previous.shown.path.slice(0, targetAdminLevel - initialAdminLevel),
-                    }));
+                if (targetAdminLevel < initialAdminLevel || targetAdminLevel >= adminLevel) {
+                    return;
                 }
+
+                setDrill((previous) => ({
+                    ...previous,
+                    path: previous.shown.path.slice(0, targetAdminLevel - initialAdminLevel),
+                }));
             }
 
             return {
