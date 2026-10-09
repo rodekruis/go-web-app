@@ -47,20 +47,32 @@ function NrwPdfExport(props: Props) {
         setExporting(true);
         try {
             const eventsElement = eventsPanelRef.current;
+            if (!eventsElement) {
+                throw new Error('Events panel element not found');
+            }
             const [mapImage, eventsImage] = await Promise.all([
                 takeScreenCapture(),
                 eventsElement ? captureElement(eventsElement) : undefined,
             ]);
 
-            exportNrwToPdf(mapImage, eventsImage, selectedEvent, countries, {
-                title: strings.nrwPdfExportTitle,
-                generated: resolveToString(strings.nrwPdfExportGenerated, {
-                    date: formatDate(new Date(), dataFormat) ?? '',
-                }),
-                mapNote: strings.nrwPdfExportMapNote,
-                // For now, the export is always a single page.
-                // This will change when we support longer data lists.
-                pageLabel: resolveToString(strings.nrwPdfExportPageLabel, { page: 1, total: 1 }),
+            exportNrwToPdf({
+                mapImage,
+                eventsImage,
+                selectedEvent,
+                countries,
+                text: {
+                    title: strings.nrwPdfExportTitle,
+                    generated: resolveToString(strings.nrwPdfExportGenerated, {
+                        date: formatDate(new Date(), dataFormat) ?? '',
+                    }),
+                    mapNote: strings.nrwPdfExportMapNote,
+                    // For now, the export is always a single page.
+                    // This will change when we support longer data lists.
+                    pageLabel: resolveToString(
+                        strings.nrwPdfExportPageLabel,
+                        { page: 1, total: 1 },
+                    ),
+                },
             });
         } catch (error) {
             alert.show(strings.nrwPdfExportFailedMessage, {

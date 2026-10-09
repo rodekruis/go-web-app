@@ -1,14 +1,10 @@
 import { toPng } from 'html-to-image';
 import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
-import {
-    type NrwCapturedImage,
-    type NrwScreenCaptureHandler,
-} from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenCaptureContext';
-
 const screenCapturePixelRatio = 2;
 
-export function captureElement(element: HTMLElement): Promise<NrwCapturedImage> {
+// Capture an individual HTML element as an image
+export function captureElement(element: HTMLElement) {
     const { width, height } = element.getBoundingClientRect();
     if (width <= 0 || height <= 0) {
         throw new Error('Element to capture has no size');
@@ -20,8 +16,8 @@ export function captureElement(element: HTMLElement): Promise<NrwCapturedImage> 
     }).then((dataUrl) => ({ dataUrl, aspectRatio: width / height }));
 }
 
-// The Mapbox controls (zoom buttons, attribution) are excluded from the capture.
-function captureNrwMap(map: MapboxMap): NrwScreenCaptureHandler {
+// Capture handler to fetch a filtered view of the NRW map
+function captureNrwMap(map: MapboxMap) {
     return () => {
         const container = map.getContainer();
         const controls = container.querySelector('.mapboxgl-control-container');

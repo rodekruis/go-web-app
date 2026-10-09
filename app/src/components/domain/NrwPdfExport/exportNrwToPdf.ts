@@ -33,7 +33,7 @@ const textSecondary = '#6f6f6f'; // go-ui-color-gray-70
 const divider = '#c6c6c6'; // go-ui-color-gray-40
 const attributionBackground = '#f2f2f2'; // approximates Mapbox's translucent white attribution box
 
-function getDisplayArea(aspectRatio: number, maxWidth: number, maxHeight: number) {
+function calculateDisplayArea(aspectRatio: number, maxWidth: number, maxHeight: number) {
     let width = maxWidth;
     let height = width / aspectRatio;
     if (height > maxHeight) {
@@ -43,7 +43,7 @@ function getDisplayArea(aspectRatio: number, maxWidth: number, maxHeight: number
     return { width, height };
 }
 
-function getFileName(
+function generateFileName(
     selectedEvent: NrwEvent | undefined,
     countries: CountryCodeIso3[],
 ): string {
@@ -58,60 +58,73 @@ function getFileName(
     return `national-risk-watch-${date}.pdf`;
 }
 
-export default function exportNrwToPdf(
-    mapImage: NrwCapturedImage,
-    eventsImage: NrwCapturedImage | undefined,
-    selectedEvent: NrwEvent | undefined,
-    countries: CountryCodeIso3[],
-    text: NrwPdfText,
-): void {
+function calculatePx(value: number, pageWidth: number) {
+    return (value * pageWidth) / frameWidthPx;
+}
+
+// jsPDF font sizes are always in px, (which is inch-based).
+// Keep settings in px for design consistency, but convert to px for export.
+function pxToPt(value: number, pageWidth: number) {
+    const pointsPerInch = 72;
+    const mmPerInch = 25.4;
+    const mm = calculatePx(value, pageWidth);
+    const inches = mm / mmPerInch;
+    return inches * pointsPerInch;
+}
+
+interface Props {
+    mapImage: NrwCapturedImage;
+    eventsImage: NrwCapturedImage | undefined;
+    selectedEvent: NrwEvent | undefined;
+    countries: CountryCodeIso3[];
+    text: NrwPdfText;
+}
+
+export default function exportNrwToPdf(props: Props) {
+    const {
+        mapImage,
+        eventsImage,
+        selectedEvent,
+        countries,
+        text,
+    } = props;
+
     const pdf = new JsPDF({
         orientation: 'landscape',
         unit: 'mm',
         format: 'a4',
     });
 
-    // jsPDF font sizes are always in px, (which is inch-based).
-    // Keep settings in px for design consistency, but convert to px for export.
-    function pxToPt(value: number): number {
-        const pointsPerInch = 72;
-        const mmPerInch = 25.4;
-        const mm = px(value);
-        const inches = mm / mmPerInch;
-        return inches * pointsPerInch;
-    }
-
     const pageWidth = pdf.internal.pageSize.getWidth();
-    const px = (value: number) => (value * pageWidth) / frameWidthPx;
-    const margin = px(marginPx);
+    const margin = calculatePx(marginPx, pageWidth);
     const rightEdge = pageWidth - margin;
 
     // Header
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(pxToPt(titleFontPx));
+    pdf.setFontSize(pxToPt(titleFontPx, pageWidth));
     pdf.setTextColor(textPrimary);
     pdf.text(text.title.toUpperCase(), margin, margin, { baseline: 'top' });
 
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(pxToPt(captionFontPx));
+    pdf.setFontSize(pxToPt(captionFontPx, pageWidth));
     pdf.setTextColor(textSecondary);
     pdf.text(text.generated, rightEdge, margin, { align: 'right', baseline: 'top' });
 
     pdf.setDrawColor(divider);
-    pdf.setLineWidth(px(1));
-    const dividerY = margin + px(headerHeightPx);
+    pdf.setLineWidth(calculatePx(1, pageWidth));
+    const dividerY = margin + calculatePx(headerHeightPx, pageWidth);
     pdf.line(margin, dividerY, rightEdge, dividerY);
 
     // Main content
-    const contentTop = px(contentTopPx);
-    const mapColumnWidth = px(mapColumnWidthPx);
-    const mapHeight = px(mapHeightPx);
-    const mapSize = getDisplayArea(mapImage.aspectRatio, mapColumnWidth, mapHeight);
+    const contentTop = calculatePx(contentTopPx, pageWidth);
+    const mapColumnWidth = calculatePx(mapColumnWidthPx, pageWidth);
+    const mapHeight = calculatePx(mapHeightPx, pageWidth);
+    const mapSize = calculateDisplayArea(mapImage.aspectRatio, mapColumnWidth, mapHeight);
     pdf.addImage(mapImage.dataUrl, 'PNG', margin, contentTop, mapSize.width, mapSize.height);
 
     // Map attribution overlaid on the bottom-left corner of the map
-    const attributionPadding = px(attributionPaddingPx);
-    const attributionTextHeight = px(captionFontPx);
+    const attributionPadding = calculatePx(attributionPaddingPx, pageWidth);
+    const attributionTextHeight = calculatePx(captionFontPx, pageWidth);
     const attributionWidth = pdf.getTextWidth(mapAttribution) + attributionPadding * 2;
     const attributionHeight = attributionTextHeight + attributionPadding * 2;
     const attributionY = contentTop + mapSize.height - attributionHeight;
@@ -125,16 +138,16 @@ export default function exportNrwToPdf(
     );
 
     if (eventsImage) {
-        const eventsX = margin + mapColumnWidth + px(columnGapPx);
+        const eventsX = margin + mapColumnWidth + calculatePx(columnGapPx, pageWidth);
         const eventsColumnWidth = rightEdge - eventsX;
-        const eventsSize = getDisplayArea(eventsImage.aspectRatio, eventsColumnWidth, mapHeight);
+        const eventsSize = calculateDisplayArea(eventsImage.aspectRatio, eventsColumnWidth, mapHeight);
         pdf.addImage(eventsImage.dataUrl, 'PNG', eventsX, contentTop, eventsSize.width, eventsSize.height);
     }
 
     // Footer
-    const footerY = contentTop + px(footerTopPx);
+    const footerY = contentTop + calculatePx(footerTopPx, pageWidth);
     pdf.text(text.mapNote, margin + mapColumnWidth, footerY, { align: 'right', baseline: 'top' });
     pdf.text(text.pageLabel, rightEdge, footerY, { align: 'right', baseline: 'top' });
 
-    pdf.save(getFileName(selectedEvent, countries));
+    pdf.save(generateFileName(selectedEvent, countries));
 }
