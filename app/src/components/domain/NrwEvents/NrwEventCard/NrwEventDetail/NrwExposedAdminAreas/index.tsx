@@ -135,7 +135,7 @@ function NrwExposedAdminAreas(props: Props) {
                 )}
             >
                 <div>
-                    {resolveToString(strings.nrwExposedAdminAreasTotalAreas, { adminAreaLabel })}
+                    {resolveToString(strings.nrwExposedAdminAreasTotalAreas, { adminAreaLabel: adminAreaLabel.toLowerCase() })}
                     <NumberOutput
                         className={styles.exposedAdminAreaTotalValue}
                         value={rows.length}
