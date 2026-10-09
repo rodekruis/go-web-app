@@ -262,8 +262,11 @@ test('drills down only into exposed admin levels', async () => {
 });
 
 test('does not drill up from the top', async () => {
+    const shown = adminAreas();
+
     await drillUp();
 
+    expect(adminAreas()).toBe(shown);
     expect(adminAreas().adminLevel).toBe(1);
     expect(requestedFilter()).toContain('adminLevel=1 AND placeCode IN');
 });
@@ -303,26 +306,6 @@ test('jumps back to a level drilled through', async () => {
     expect(adminAreas().parentAdminArea).toEqual(jonglei);
 });
 
-test('jumps only to levels above the shown level', async () => {
-    await drillDown(jonglei);
-    await answer(someAdminAreas);
-    expect(requestedFilter()).toContain('adminLevel=2 AND placeCodeLevel1');
-    const shown = adminAreas();
-
-    await drillUpTo(2);
-    expect(requestedFilter()).toContain('adminLevel=2 AND placeCodeLevel1');
-    expect(adminAreas()).toBe(shown);
-
-    await drillUpTo(3);
-    expect(requestedFilter()).toContain('adminLevel=2 AND placeCodeLevel1');
-    expect(adminAreas()).toBe(shown);
-
-    await drillUpTo(0);
-    expect(requestedFilter()).toContain('adminLevel=2 AND placeCodeLevel1');
-    expect(adminAreas()).toBe(shown);
-    expect(adminAreas().adminLevel).toBe(2);
-});
-
 test('jumps back to the first exposed level of the event', async () => {
     await render(eventSplitAtCounties);
     expect(adminAreas().initialAdminLevel).toBe(2);
@@ -333,10 +316,6 @@ test('jumps back to the first exposed level of the event', async () => {
     await answer(someAdminAreas);
     expect(adminAreas().adminLevel).toBe(3);
     expect(adminAreas().drillPath).toEqual([borSouth]);
-    const shown = adminAreas();
-
-    await drillUpTo(1);
-    expect(adminAreas()).toBe(shown);
 
     await drillUpTo(2);
     expect(requestedFilter()).toBe("(countryCodeIso3='SSD') AND adminLevel=2 AND placeCode IN ('SS0303','SS0304')");

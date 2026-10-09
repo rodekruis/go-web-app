@@ -118,10 +118,6 @@ function NrwAdminAreasProvider(props: {
             }
 
             function drillUpTo(targetAdminLevel: AdminLevel) {
-                if (targetAdminLevel < initialAdminLevel || targetAdminLevel >= adminLevel) {
-                    return;
-                }
-
                 setDrill((previous) => ({
                     ...previous,
                     path: previous.shown.path.slice(0, targetAdminLevel - initialAdminLevel),
@@ -147,7 +143,11 @@ function NrwAdminAreasProvider(props: {
                         }));
                     }
                 },
-                drillUp: () => drillUpTo((adminLevel - 1) as AdminLevel),
+                drillUp: () => {
+                    if (adminLevel > initialAdminLevel) {
+                        drillUpTo((adminLevel - 1) as AdminLevel);
+                    }
+                },
                 drillUpTo,
             };
         },
