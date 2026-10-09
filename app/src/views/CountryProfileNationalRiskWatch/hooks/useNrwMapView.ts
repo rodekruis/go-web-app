@@ -1,4 +1,7 @@
-import { useMemo } from 'react';
+import {
+    useMemo,
+    useState,
+} from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
 import NrwLngLat from '../NrwLngLat';
@@ -31,7 +34,7 @@ function useNrwMapView(props: {
     urlLongitude: Longitude | null;
     countries: CountryCodeIso3[] | undefined;
     countriesPending: boolean;
-}): MapView {
+}) {
     const {
         urlZoom,
         urlLatitude,
@@ -42,6 +45,9 @@ function useNrwMapView(props: {
 
     // Set from the longitude/latitude search params when they are present.
     const urlMapView = getMapView(urlLatitude, urlLongitude, urlZoom ?? defaultZoom);
+
+    const [mountedWithUrlMapView] = useState(isDefined(urlMapView));
+    const preserveInitialView = mountedWithUrlMapView && isDefined(urlMapView);
 
     const { adminAreas } = useNrwAdminAreas({
         countries,
@@ -63,7 +69,9 @@ function useNrwMapView(props: {
     );
 
     // MapView preference: URL > countries > default.
-    return urlMapView ?? countryMapView ?? defaultMapView;
+    const mapView: MapView = urlMapView ?? countryMapView ?? defaultMapView;
+
+    return { mapView, preserveInitialView };
 }
 
 export default useNrwMapView;

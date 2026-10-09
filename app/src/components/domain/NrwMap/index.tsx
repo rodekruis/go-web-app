@@ -4,6 +4,7 @@ import {
     isNotDefined,
 } from '@togglecorp/fujs';
 
+import supportedLayerNames from '#utils/nrw/layers';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
@@ -23,6 +24,8 @@ import NrwLayer from './NrwLayer';
 import NrwLayerPanel from './NrwLayerPanel';
 import NrwMapContainer from './NrwMapContainer';
 import NrwMarker from './NrwMarker';
+
+const supportedLayers: NrwLayerName[] = Object.values(supportedLayerNames);
 
 // This component knows nothing about Mapbox.
 
@@ -49,13 +52,15 @@ function parseCentroid(centroid: unknown): NrwLngLat | undefined {
 
 function NrwMap(props: {
     mapView: MapView;
+    preserveInitialView: boolean;
     onMapViewChange: MapViewChangeHandler;
-    availableLayers: NrwLayerType[] | undefined;
+    availableLayers: NrwLayerType[];
     visibleLayers: NrwLayerName[];
     onLayerToggle: LayerToggleHandler;
 }) {
     const {
         mapView,
+        preserveInitialView,
         onMapViewChange,
         availableLayers,
         visibleLayers,
@@ -88,18 +93,21 @@ function NrwMap(props: {
     return (
         <NrwMapContainer
             mapView={mapView}
+            preserveInitialView={preserveInitialView}
             onMapViewChange={onMapViewChange}
             breadcrumbs={breadcrumbs}
             layerPanel={layerPanel}
         >
-            {showLayers && availableLayers?.map((layer) => (
-                <NrwLayer
-                    key={layer.name}
-                    countryCodeIso3={eventCountryCodeIso3}
-                    layer={layer}
-                    isVisible={visibleLayers.includes(layer.name)}
-                />
-            ))}
+            {showLayers && availableLayers
+                .filter((layer) => supportedLayers.includes(layer.name))
+                .map((layer) => (
+                    <NrwLayer
+                        key={layer.name}
+                        countryCodeIso3={eventCountryCodeIso3}
+                        layer={layer}
+                        isVisible={visibleLayers.includes(layer.name)}
+                    />
+                ))}
             {isNotDefined(selectedEvent) && events?.map((event) => {
                 const coordinates = parseCentroid(event.centroid);
 

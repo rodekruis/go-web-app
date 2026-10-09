@@ -33,8 +33,9 @@ const tooltipPlacement: NrwMarkerPlacement = { anchor: 'bottom-left', offset: [1
 function NrwShapeLayer(props: {
     id: string;
     isVisible: boolean;
+    layerAnchorId: string; // Used to connect layer to statically ordered "anchor" layers in MapBox
 }) {
-    const { id, isVisible } = props;
+    const { id, isVisible, layerAnchorId } = props;
 
     const { selectedEvent } = useContext(NrwEventsContext);
     const {
@@ -73,7 +74,7 @@ function NrwShapeLayer(props: {
             : undefined),
         [id, adminAreas, exposedPopulationByPlaceCode, selectedEvent],
     );
-    useNrwMapLayer(mapLayer, isVisible);
+    useNrwMapLayer(mapLayer, isVisible, layerAnchorId);
 
     const isInteractive = isDefined(mapLayer) && isVisible;
     const { hoveredAdminArea, clearHover } = useAdminAreaHover(

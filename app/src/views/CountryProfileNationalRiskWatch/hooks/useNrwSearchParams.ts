@@ -16,6 +16,8 @@ import {
     type Longitude,
     type MapViewChangeHandler,
     type NrwEvent,
+    type NrwEventHazardType,
+    type NrwEventSelectHandler,
     type NrwLayerName,
     type UrlParameter,
     type Zoom,
@@ -88,7 +90,16 @@ function serializeCountriesUrlParameter(countryCodes: CountryCodeIso3[]) {
     return countryCodes.join(',');
 }
 
-const defaultVisibleLayers: NrwLayerName[] = [supportedLayerNames.exposedPopulation];
+// TODO: consider moving default visibility to a layer property in the NRW data model.
+function getDefaultVisibleLayers(hazardType?: NrwEventHazardType): NrwLayerName[] {
+    const defaultVisibleLayers: NrwLayerName[] = [supportedLayerNames.exposedPopulation];
+
+    if (hazardType === 'floods') {
+        defaultVisibleLayers.push(supportedLayerNames.floodDepth);
+    }
+
+    return defaultVisibleLayers;
+}
 
 // Only accept layer names that are supported by the frontend.
 function parseLayersUrlParameter(value: UrlParameter): NrwLayerName[] {
@@ -174,8 +185,8 @@ function useNrwSearchParams() {
         [setSearchParams],
     );
 
-    const handleSelectedEventIdChange = useCallback(
-        (eventId: NrwEvent['eventId'] | undefined) => {
+    const handleSelectedEventIdChange: NrwEventSelectHandler = useCallback(
+        (eventId, hazardType) => {
             if (eventId === selectedEventId) {
                 return;
             }
@@ -183,7 +194,7 @@ function useNrwSearchParams() {
             setSearchParams((params) => {
                 if (isDefined(eventId)) {
                     params.set('event', String(eventId));
-                    params.set('layers', defaultVisibleLayers.join(','));
+                    params.set('layers', getDefaultVisibleLayers(hazardType).join(','));
                 } else {
                     params.delete('event');
                     params.delete('layers');

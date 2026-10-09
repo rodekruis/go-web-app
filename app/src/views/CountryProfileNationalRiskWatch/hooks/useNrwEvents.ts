@@ -1,8 +1,12 @@
 import {
+    useCallback,
     useMemo,
     useState,
 } from 'react';
-import { isDefined } from '@togglecorp/fujs';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 
 import { useNrwRequest } from '#utils/restRequest';
 
@@ -10,13 +14,13 @@ import { type NrwEventsContextProps } from '../contexts/NrwEventsContext';
 import {
     type CountryCodeIso3,
     type NrwEvent,
-    type NrwEventIdChangeHandler,
+    type NrwEventSelectHandler,
 } from '../types';
 
 function useNrwEvents(props: {
     countries: CountryCodeIso3[] | undefined;
     selectedEventId: NrwEvent['eventId'] | undefined;
-    onSelectedEventIdChange: NrwEventIdChangeHandler;
+    onSelectedEventIdChange: NrwEventSelectHandler;
     active?: boolean;
 }): NrwEventsContextProps {
     const {
@@ -39,6 +43,19 @@ function useNrwEvents(props: {
 
     const [hoveredEventId, setHoveredEventId] = useState<NrwEvent['eventId'] | undefined>();
 
+    const handleEventChange = useCallback(
+        (eventId: NrwEvent['eventId'] | undefined) => {
+            if (isNotDefined(eventId)) {
+                onSelectedEventIdChange(undefined, undefined);
+                return;
+            }
+
+            const event = events?.find((candidate) => candidate.eventId === eventId);
+            onSelectedEventIdChange(eventId, event?.hazardType);
+        },
+        [events, onSelectedEventIdChange],
+    );
+
     return useMemo(
         () => ({
             events,
@@ -46,7 +63,7 @@ function useNrwEvents(props: {
             errored: isDefined(error),
             selectedEvent,
             hoveredEventId,
-            onEventSelect: onSelectedEventIdChange,
+            onEventSelect: handleEventChange,
             onEventHoverChange: setHoveredEventId,
         }),
         [
@@ -55,7 +72,7 @@ function useNrwEvents(props: {
             error,
             selectedEvent,
             hoveredEventId,
-            onSelectedEventIdChange,
+            handleEventChange,
             setHoveredEventId,
         ],
     );

@@ -68,7 +68,12 @@ export type MapView = {
 };
 
 export type NrwEvent = NrwApiResponse<'/events'>[number];
+export type NrwEventHazardType = NrwEvent['hazardType'];
 export type NrwEventIdChangeHandler = (eventId: NrwEvent['eventId'] | undefined) => void;
+export type NrwEventSelectHandler = (
+    eventId?: NrwEvent['eventId'],
+    hazardType?: NrwEventHazardType,
+) => void;
 export type NrwExposedAdminArea = NrwEvent['exposedAdminAreas'][string][number];
 
 export type NrwCountry = NrwApiResponse<'/countries'>[number];
@@ -77,8 +82,9 @@ export type PlaceCodeChangeHandler = (placeCode: PlaceCode | undefined) => void;
 export type AdminAreaDrillDownHandler = (adminArea: AdminAreaProperties) => void;
 export type AdminLevelDrillHandler = (adminLevel: AdminLevel) => void;
 
-export type NrwLayer = NrwApiResponse<'/layers'>[number];
+export type NrwStaticLayer = NrwApiResponse<'/layers'>[number];
+export type NrwEventLayer = NrwEvent['availableLayers'][number];
+export type NrwLayer = NrwStaticLayer | NrwEventLayer;
 export type NrwLayerName = NrwLayer['name'];
-export type NrwHazardType = NrwLayer['hazardType'];
 export type VisibleLayersChangeHandler = (layerNames: NrwLayerName[]) => void;
 export type LayerToggleHandler = (layerName: NrwLayerName) => void;

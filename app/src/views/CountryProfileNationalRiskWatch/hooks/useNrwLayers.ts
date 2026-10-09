@@ -1,10 +1,15 @@
-import { useCallback } from 'react';
+import {
+    useCallback,
+    useMemo,
+} from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
 import { useNrwRequest } from '#utils/restRequest';
 
 import {
-    type NrwHazardType,
+    type NrwEvent,
+    type NrwEventHazardType,
+    type NrwLayer,
     type NrwLayerName,
     type VisibleLayersChangeHandler,
 } from '../types';
@@ -12,19 +17,28 @@ import {
 function useNrwLayers(props: {
     visibleLayers: NrwLayerName[];
     onVisibleLayersChange: VisibleLayersChangeHandler;
-    hazardType?: NrwHazardType;
+    hazardType?: NrwEventHazardType;
+    selectedEvent?: Pick<NrwEvent, 'availableLayers'>;
 }) {
     const {
         visibleLayers,
         onVisibleLayersChange,
         hazardType,
+        selectedEvent,
     } = props;
 
-    const { response: availableLayers } = useNrwRequest({
+    const { response: staticLayersResponse } = useNrwRequest({
         url: '/layers',
         apiType: 'nrw',
         query: isDefined(hazardType) ? { hazardType } : undefined,
     });
+
+    const availableLayers = useMemo((): NrwLayer[] => {
+        const staticLayers = staticLayersResponse ?? [];
+        const eventLayers = selectedEvent?.availableLayers ?? [];
+
+        return [...staticLayers, ...eventLayers];
+    }, [staticLayersResponse, selectedEvent]);
 
     const handleLayerToggle = useCallback(
         (name: NrwLayerName) => {

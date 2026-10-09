@@ -21,6 +21,10 @@ import mapboxgl, { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 import { mbtoken } from '#config';
 import {
+    getLayerAnchorId,
+    layerDrawOrder,
+} from '#utils/nrw/layers';
+import {
     type Latitude,
     type Longitude,
     type MapView,
@@ -43,13 +47,14 @@ const paddingPixels = 20;
 
 function NrwMapContainer(props: {
     mapView: MapView;
+    preserveInitialView: boolean;
     onMapViewChange: MapViewChangeHandler;
     breadcrumbs?: React.ReactNode;
     layerPanel?: React.ReactNode;
     children?: React.ReactNode;
 }) {
     const {
-        mapView, onMapViewChange, breadcrumbs, layerPanel, children,
+        mapView, preserveInitialView, onMapViewChange, breadcrumbs, layerPanel, children,
     } = props;
 
     const { zoom, center, fitBounds } = mapView;
@@ -97,6 +102,17 @@ function NrwMapContainer(props: {
         map.dragRotate.disable();
         map.touchPitch.disable();
         map.on('style.load', () => {
+            // Add invisible 'anchor' layers with specific order (from bottom to top)
+            // .. so that later actual layers can be added at right position
+            // .. irrespective of when they are added to the map.
+
+            layerDrawOrder.toReversed().forEach((name) => {
+                map.addLayer({
+                    id: getLayerAnchorId(name),
+                    type: 'background',
+                    layout: { visibility: 'none' },
+                });
+            });
             setMapLoadComplete(true);
         });
 
@@ -142,8 +158,8 @@ function NrwMapContainer(props: {
     }, [mapboxMap, southWest?.lng, southWest?.lat, northEast?.lng, northEast?.lat]);
 
     const mapContext = useMemo(
-        () => ({ map: mapLoadComplete ? mapboxMap : undefined }),
-        [mapboxMap, mapLoadComplete],
+        () => ({ map: mapLoadComplete ? mapboxMap : undefined, preserveInitialView }),
+        [mapboxMap, mapLoadComplete, preserveInitialView],
     );
 
     return (
