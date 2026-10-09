@@ -18,6 +18,7 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
+import NrwAdminAreaBreadcrumbs from './NrwAdminAreaBreadcrumbs';
 import NrwEventMarker from './NrwEventMarker';
 import NrwLayer from './NrwLayer';
 import NrwLayerPanel from './NrwLayerPanel';
@@ -77,6 +78,10 @@ function NrwMap(props: {
     const eventCountryCodeIso3 = parseCountryCode(selectedEvent?.countryCodeIso3);
     const showLayers = isDefined(selectedEvent) && isDefined(eventCountryCodeIso3);
 
+    const breadcrumbs = isDefined(selectedEvent) ? (
+        <NrwAdminAreaBreadcrumbs event={selectedEvent} />
+    ) : undefined;
+
     const layerPanel = isDefined(eventCountryCodeIso3) ? (
         <NrwLayerPanel
             layers={availableLayers}
@@ -90,6 +95,7 @@ function NrwMap(props: {
             mapView={mapView}
             preserveInitialView={preserveInitialView}
             onMapViewChange={onMapViewChange}
+            breadcrumbs={breadcrumbs}
             layerPanel={layerPanel}
         >
             {showLayers && availableLayers
