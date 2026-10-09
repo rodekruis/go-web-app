@@ -50,10 +50,11 @@ function NrwMapContainer(props: {
     preserveInitialView: boolean;
     onMapViewChange: MapViewChangeHandler;
     layerPanel?: React.ReactNode;
+    legend?: React.ReactNode;
     children?: React.ReactNode;
 }) {
     const {
-        mapView, preserveInitialView, onMapViewChange, layerPanel, children,
+        mapView, preserveInitialView, onMapViewChange, layerPanel, legend, children,
     } = props;
 
     const { zoom, center, fitBounds } = mapView;
@@ -94,6 +95,7 @@ function NrwMapContainer(props: {
             style: nrwMapboxStyleUrl,
             projection: 'mercator',
             attributionControl: true,
+            logoPosition: 'bottom-right',
             center,
             zoom,
         });
@@ -204,6 +206,11 @@ function NrwMapContainer(props: {
                         </>
                     )}
                 </div>
+                {isDefined(legend) && (
+                    <div className={styles.mapLegend}>
+                        {legend}
+                    </div>
+                )}
             </div>
             <NrwMapContext.Provider value={mapContext}>
                 {children}

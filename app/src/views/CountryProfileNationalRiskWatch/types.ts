@@ -87,3 +87,14 @@ export type NrwLayer = NrwStaticLayer | NrwEventLayer;
 export type NrwLayerName = NrwLayer['name'];
 export type VisibleLayersChangeHandler = (layerNames: NrwLayerName[]) => void;
 export type LayerToggleHandler = (layerName: NrwLayerName) => void;
+
+export enum NrwLegendType {
+    Gradient = 'gradient',
+}
+
+export type NrwLegendItem = {
+    type: NrwLegendType.Gradient;
+    layerName: NrwLayerName;
+    label: NrwLayer['label'];
+    colors: readonly string[];
+};

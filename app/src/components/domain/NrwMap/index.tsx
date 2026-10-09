@@ -15,6 +15,7 @@ import {
     type MapViewChangeHandler,
     type NrwLayer as NrwLayerType,
     type NrwLayerName,
+    type NrwLegendItem,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
@@ -22,6 +23,7 @@ import NrwEventMarker from './NrwEventMarker';
 import NrwLayer from './NrwLayer';
 import NrwLayerPanel from './NrwLayerPanel';
 import NrwMapContainer from './NrwMapContainer';
+import NrwMapLegend from './NrwMapLegend';
 import NrwMarker from './NrwMarker';
 
 const supportedLayers: NrwLayerName[] = Object.values(supportedLayerNames);
@@ -56,6 +58,7 @@ function NrwMap(props: {
     availableLayers: NrwLayerType[];
     visibleLayers: NrwLayerName[];
     onLayerToggle: LayerToggleHandler;
+    legendItems: NrwLegendItem[];
 }) {
     const {
         mapView,
@@ -64,6 +67,7 @@ function NrwMap(props: {
         availableLayers,
         visibleLayers,
         onLayerToggle,
+        legendItems,
     } = props;
 
     const {
@@ -85,12 +89,17 @@ function NrwMap(props: {
         />
     ) : undefined;
 
+    const legend = legendItems.length > 0 ? (
+        <NrwMapLegend items={legendItems} />
+    ) : undefined;
+
     return (
         <NrwMapContainer
             mapView={mapView}
             preserveInitialView={preserveInitialView}
             onMapViewChange={onMapViewChange}
             layerPanel={layerPanel}
+            legend={legend}
         >
             {showLayers && availableLayers
                 .filter((layer) => supportedLayers.includes(layer.name))
