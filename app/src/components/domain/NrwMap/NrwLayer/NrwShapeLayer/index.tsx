@@ -30,6 +30,10 @@ import styles from './styles.module.css';
 // Show the tooltip just above-right of the pointer, as in the prototype.
 const tooltipPlacement: NrwMarkerPlacement = { anchor: 'bottom-left', offset: [14, -10] };
 
+// Drilling back up on a click beside the admin areas is disabled for now.
+// Set this to true to enable it again; the Back button in the event card always drills up.
+const drillUpOnOutsideClick = false;
+
 function NrwShapeLayer(props: {
     id: string;
     isVisible: boolean;
@@ -84,11 +88,13 @@ function NrwShapeLayer(props: {
         onAdminAreaHoverChange,
     );
 
-    // Drill into the clicked admin area, or back up on a click beside them.
+    // Drill into the clicked admin area, or (when enabled) back up on a click beside them.
     const handleClick = useCallback(
         (adminArea: AdminAreaProperties | null) => {
             if (adminArea === null) {
-                drillUp();
+                if (drillUpOnOutsideClick) {
+                    drillUp();
+                }
                 return;
             }
 
