@@ -43,6 +43,8 @@ function NrwAdminAreaBreadcrumbs(props: {
         })),
     ];
 
+    const lastCrumb = crumbs.pop();
+
     return (
         <Breadcrumbs
             className={styles.nrwAdminAreaBreadcrumbs}
@@ -53,25 +55,26 @@ function NrwAdminAreaBreadcrumbs(props: {
                 />
             )}
         >
-            {crumbs.map((crumb, index) => (index === crumbs.length - 1 ? (
-                <span
-                    key={crumb.key}
-                    className={styles.currentCrumb}
-                    aria-current="location"
-                >
-                    {crumb.label}
-                </span>
-            ) : (
+            {crumbs.map((crumb) => (
                 <RawButton
                     key={crumb.key}
                     className={styles.crumbButton}
                     name={crumb.adminLevel}
                     disabled={pending}
-                    onClick={drillUpTo}
+                    onClick={drillTo}
                 >
                     {crumb.label}
                 </RawButton>
-            )))}
+            ))}
+            {lastCrumb && (
+                <span
+                    key={lastCrumb.key}
+                    className={styles.currentCrumb}
+                    aria-current="location"
+                >
+                    {lastCrumb.label}
+                </span>
+            )}
         </Breadcrumbs>
     );
 }
