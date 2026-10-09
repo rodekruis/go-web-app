@@ -116,7 +116,6 @@ function NrwShapeLayer(props: {
                 <div className={styles.exposedPopulation}>
                     {strings.nrwShapeLayerExposedPopulationLabel}
                     <NumberOutput
-                        className={styles.value}
                         value={exposedPopulationByPlaceCode.get(hoveredAdminArea.placeCode)}
                         invalidText="--"
                     />
