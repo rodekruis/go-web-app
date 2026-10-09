@@ -128,12 +128,7 @@ function NrwExposedAdminAreas(props: Props) {
                     </span>
                 </div>
             )}
-            <div
-                className={_cs(
-                    styles.exposedAdminAreaTotals,
-                    isDefined(parentAdminArea) && styles.indented,
-                )}
-            >
+            <div className={styles.exposedAdminAreaTotals}>
                 <div>
                     {resolveToString(strings.nrwExposedAdminAreasTotalAreas, { adminAreaLabel: adminAreaLabel.toLowerCase() })}
                     <NumberOutput
