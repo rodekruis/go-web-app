@@ -2,11 +2,11 @@ import {
     useContext,
     useMemo,
 } from 'react';
+import { faLocationDot } from '@fortawesome/pro-regular-svg-icons';
 import {
     faLocationCrosshairs,
-    faLocationDot,
-} from '@fortawesome/pro-regular-svg-icons';
-import { faPersonRays } from '@fortawesome/pro-solid-svg-icons';
+    faPersonRays,
+} from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NumberOutput } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
