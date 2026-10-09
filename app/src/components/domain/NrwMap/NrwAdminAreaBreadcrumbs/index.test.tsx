@@ -65,15 +65,20 @@ function getButtonLabels() {
 
 describe('NrwAdminAreaBreadcrumbs', () => {
     test('shows only the event before drilling down', () => {
+        // Act
         render(<Harness adminAreas={{ initialAdminLevel: 1 as AdminLevel, drillPath: [] }} />);
 
+        // Assert
         expect(getCrumbLabels()).toEqual(['Kenya']);
         expect(screen.getByText('Kenya')).toHaveAttribute('aria-current', 'location');
         expect(getButtonLabels()).toEqual([]);
     });
 
     test('jumps back to the event or an admin area drilled through', () => {
+        // Arrange
         const drillUpTo = vi.fn();
+
+        // Act
         render(
             <Harness
                 adminAreas={{
@@ -84,10 +89,12 @@ describe('NrwAdminAreaBreadcrumbs', () => {
             />,
         );
 
+        // Assert
         expect(getCrumbLabels()).toEqual(['Kenya', 'Kilifi', 'Magarini']);
         expect(screen.getByText('Magarini')).toHaveAttribute('aria-current', 'location');
         expect(getButtonLabels()).toEqual(['Kenya', 'Kilifi']);
 
+        // Act & Assert
         fireEvent.click(screen.getByRole('button', { name: 'Kilifi' }));
         expect(drillUpTo).toHaveBeenLastCalledWith(2, expect.anything());
 
@@ -96,7 +103,10 @@ describe('NrwAdminAreaBreadcrumbs', () => {
     });
 
     test('opens the first exposed level of the event from the event crumb', () => {
+        // Arrange
         const drillUpTo = vi.fn();
+
+        // Act
         render(
             <Harness
                 adminAreas={{
@@ -107,13 +117,16 @@ describe('NrwAdminAreaBreadcrumbs', () => {
             />,
         );
 
+        // Assert
         expect(getCrumbLabels()).toEqual(['Kenya', 'Magarini']);
 
+        // Act & Assert
         fireEvent.click(screen.getByRole('button', { name: 'Kenya' }));
         expect(drillUpTo).toHaveBeenLastCalledWith(2, expect.anything());
     });
 
     test('holds jumps while the next level loads', () => {
+        // Act
         render(
             <Harness
                 adminAreas={{
@@ -124,6 +137,7 @@ describe('NrwAdminAreaBreadcrumbs', () => {
             />,
         );
 
+        // Assert
         expect(screen.getByRole('button', { name: 'Kenya' })).toBeDisabled();
     });
 });
