@@ -6,6 +6,7 @@ import {
 
 import supportedLayerNames from '#utils/nrw/layers';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
+import { type NrwScreenCaptureHandler } from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenCaptureContext';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,
@@ -56,6 +57,7 @@ function NrwMap(props: {
     availableLayers: NrwLayerType[];
     visibleLayers: NrwLayerName[];
     onLayerToggle: LayerToggleHandler;
+    registerScreenCapture: (handler: NrwScreenCaptureHandler | undefined) => void;
 }) {
     const {
         mapView,
@@ -64,6 +66,7 @@ function NrwMap(props: {
         availableLayers,
         visibleLayers,
         onLayerToggle,
+        registerScreenCapture,
     } = props;
 
     const {
@@ -91,6 +94,7 @@ function NrwMap(props: {
             preserveInitialView={preserveInitialView}
             onMapViewChange={onMapViewChange}
             layerPanel={layerPanel}
+            registerScreenCapture={registerScreenCapture}
         >
             {showLayers && availableLayers
                 .filter((layer) => supportedLayers.includes(layer.name))
