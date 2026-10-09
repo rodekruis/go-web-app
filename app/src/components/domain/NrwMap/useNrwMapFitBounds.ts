@@ -1,6 +1,7 @@
 import {
     useContext,
     useEffect,
+    useRef,
 } from 'react';
 import { isNotDefined } from '@togglecorp/fujs';
 
@@ -10,12 +11,11 @@ import NrwMapContext from './NrwMapContext';
 
 const defaultPaddingPixels = 20;
 
-// Fit the map to the given bounds whenever they change.
-function useNrwMapFitBounds(
-    bounds: LongitudeLatitudeBounds | undefined,
-    paddingPixels = defaultPaddingPixels,
-) {
-    const { map } = useContext(NrwMapContext);
+// Fit the map to the given bounds whenever they change
+// unless there is an overriding initial view (from the deeplink)
+function useNrwMapFitBounds(bounds: LongitudeLatitudeBounds | undefined) {
+    const { map, preserveInitialView } = useContext(NrwMapContext);
+    const isFirstCall = useRef(true);
 
     useEffect(
         () => {
@@ -23,9 +23,17 @@ function useNrwMapFitBounds(
                 return;
             }
 
-            map.fitBounds(bounds, { padding: paddingPixels });
+            // Only check for the deeplink override on first call of this effect
+            if (isFirstCall.current) {
+                isFirstCall.current = false;
+                if (preserveInitialView) {
+                    return;
+                }
+            }
+
+            map.fitBounds(bounds, { padding: defaultPaddingPixels });
         },
-        [map, bounds, paddingPixels],
+        [map, bounds, preserveInitialView],
     );
 }
 
