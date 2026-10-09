@@ -12,7 +12,6 @@ import {
 
 import createNrwLayer from '#utils/testing/createNrwLayer';
 import TestProviders from '#utils/testing/TestProviders';
-import { type NrwStaticLayer } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwLayerPanel from './index';
 
