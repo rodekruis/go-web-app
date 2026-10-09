@@ -1,9 +1,18 @@
+import { isDefined } from '@togglecorp/fujs';
 import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 type LayerSpecification = Parameters<MapboxMap['addLayer']>[0];
 
+// The source a layer uses. Mapbox registers an inline source under the id of its layer.
+function getSourceId(layer: LayerSpecification) {
+    if (!('source' in layer)) return undefined;
+
+    return typeof layer.source === 'object' ? layer.id : layer.source;
+}
+
 // The subset of the Mapbox map that the NRW layer hooks use. It records every
-// call in order so a test can assert the layer lifecycle sequence.
+// call in order so a test can assert the layer lifecycle sequence. Mapbox reports
+// a wrong source order as an error event; the fake throws so the test fails.
 interface FakeMapboxMap {
     map: MapboxMap;
     calls: string[];
@@ -23,11 +32,13 @@ function createFakeMapboxMap(): FakeMapboxMap {
             if (layers.has(layer.id)) {
                 throw new Error(`Layer with id "${layer.id}" already exists on this map`);
             }
+            if ('source' in layer && typeof layer.source === 'string' && !sources.has(layer.source)) {
+                throw new Error(`Source "${layer.source}" not found`);
+            }
             layers.set(layer.id, layer);
             // Mapbox shows a new layer unless its layout says otherwise.
             const visibility = 'layout' in layer ? layer.layout?.visibility : undefined;
             visibilities.set(layer.id, typeof visibility === 'string' ? visibility : 'visible');
-            // Mapbox registers an inline source under the id of its layer.
             if ('source' in layer && typeof layer.source === 'object') {
                 sources.add(layer.id);
             }
@@ -45,6 +56,10 @@ function createFakeMapboxMap(): FakeMapboxMap {
         },
         removeSource(id: string) {
             calls.push(`removeSource ${id}`);
+            const user = [...layers.values()].find((layer) => getSourceId(layer) === id);
+            if (isDefined(user)) {
+                throw new Error(`Source "${id}" cannot be removed while layer "${user.id}" is using it.`);
+            }
             sources.delete(id);
         },
         setLayoutProperty(id: string, name: string, value: string) {

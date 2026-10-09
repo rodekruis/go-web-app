@@ -19,8 +19,8 @@ import { getFeatureCollectionBounds } from '#views/CountryProfileNationalRiskWat
 import NrwMarker from '../../NrwMarker';
 import { type NrwMarkerPlacement } from '../../NrwMarker/useNrwMapMarker';
 import useNrwMapFitBounds from '../../useNrwMapFitBounds';
-import useNrwMapLayer from '../useNrwMapLayer';
-import getAdminAreaFillLayer from './getAdminAreaFillLayer';
+import useNrwMapLayers from '../useNrwMapLayers';
+import getAdminAreaLayer from './getAdminAreaLayer';
 import useAdminAreaClick from './useAdminAreaClick';
 import useAdminAreaHover from './useAdminAreaHover';
 
@@ -63,9 +63,9 @@ function NrwShapeLayer(props: {
         [selectedEvent],
     );
 
-    const mapLayer = useMemo(
+    const mapLayers = useMemo(
         () => (isDefined(adminAreas) && isDefined(selectedEvent)
-            ? getAdminAreaFillLayer(
+            ? getAdminAreaLayer(
                 id,
                 adminAreas,
                 exposedPopulationByPlaceCode,
@@ -74,9 +74,9 @@ function NrwShapeLayer(props: {
             : undefined),
         [id, adminAreas, exposedPopulationByPlaceCode, selectedEvent],
     );
-    useNrwMapLayer(mapLayer, isVisible, layerAnchorId);
+    useNrwMapLayers(mapLayers, isVisible, layerAnchorId);
 
-    const isInteractive = isDefined(mapLayer) && isVisible;
+    const isInteractive = isDefined(mapLayers) && isVisible;
     const { hoveredAdminArea, clearHover } = useAdminAreaHover(
         id,
         isInteractive,
