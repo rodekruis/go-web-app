@@ -130,7 +130,10 @@ function NrwExposedAdminAreas(props: Props) {
             )}
             <div className={styles.exposedAdminAreaTotals}>
                 <div>
-                    {resolveToString(strings.nrwExposedAdminAreasTotalAreas, { adminAreaLabel: adminAreaLabel.toLowerCase() })}
+                    {resolveToString(
+                        strings.nrwExposedAdminAreasTotalAreas,
+                        { adminAreaLabel: adminAreaLabel.toLowerCase() },
+                    )}
                     <NumberOutput
                         className={styles.exposedAdminAreaTotalValue}
                         value={rows.length}
