@@ -261,7 +261,22 @@ describe('useNrwMapLayers', () => {
     });
 
     // React runs the cleanup of NrwMapContainer (map.remove()) before the cleanup of
-    // this hook. Mapbox drops map.style on remove, so map.getLayer() throws in that
-    // cleanup today. Enable this test together with the fix.
-    test.todo('does not touch a map that was removed before the layer cleanup');
+    // this hook, so the cleanup can hold a removed map.
+    test('does not touch a map that was removed before the layer cleanup', () => {
+        // Arrange
+        const { map, calls } = createFakeMapboxMap();
+        const adminAreas = [
+            createFillLayer('layer-SSD-adminAreas'),
+            createOutlineLayer('layer-SSD-adminAreas'),
+        ];
+        const { unmount } = render(<MapHost map={map} mapLayers={adminAreas} isVisible />);
+        calls.length = 0;
+
+        // Act
+        map.remove();
+        unmount();
+
+        // Assert
+        expect(calls).toEqual(['remove']);
+    });
 });

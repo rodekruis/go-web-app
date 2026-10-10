@@ -28,6 +28,10 @@ function useNrwMapLayers(
             mapLayers.forEach((mapLayer) => map.addLayer(mapLayer, layerAnchorId));
 
             return () => {
+                if (isNotDefined(map.style)) {
+                    return;
+                }
+
                 // Mapbox keeps a source while a layer uses it, so every layer goes first.
                 mapLayers.toReversed().forEach(({ id }) => {
                     if (map.getLayer(id)) map.removeLayer(id);

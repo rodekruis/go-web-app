@@ -1,4 +1,7 @@
-import { isDefined } from '@togglecorp/fujs';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 type LayerSpecification = Parameters<MapboxMap['addLayer']>[0];
@@ -25,10 +28,21 @@ function createFakeMapboxMap(): FakeMapboxMap {
     const visibilities = new Map<string, string>();
     const sources = new Set<string>();
     const calls: string[] = [];
+    let style: object | undefined = {};
+
+    function assertStyle(method: string) {
+        if (isNotDefined(style)) {
+            throw new TypeError(`Cannot read map.style in ${method}(): the map was removed`);
+        }
+    }
 
     const fakeMap = {
+        get style() {
+            return style;
+        },
         addLayer(layer: LayerSpecification) {
             calls.push(`addLayer ${layer.id}`);
+            assertStyle('addLayer');
             if (layers.has(layer.id)) {
                 throw new Error(`Layer with id "${layer.id}" already exists on this map`);
             }
@@ -44,29 +58,40 @@ function createFakeMapboxMap(): FakeMapboxMap {
             }
         },
         getLayer(id: string) {
+            assertStyle('getLayer');
             return layers.get(id);
         },
         removeLayer(id: string) {
             calls.push(`removeLayer ${id}`);
+            assertStyle('removeLayer');
             layers.delete(id);
             visibilities.delete(id);
         },
         getSource(id: string) {
+            assertStyle('getSource');
             return sources.has(id) ? { id } : undefined;
         },
         removeSource(id: string) {
             calls.push(`removeSource ${id}`);
-            const user = [...layers.values()].find((layer) => getSourceId(layer) === id);
-            if (isDefined(user)) {
-                throw new Error(`Source "${id}" cannot be removed while layer "${user.id}" is using it.`);
+            assertStyle('removeSource');
+            const usingLayer = [...layers.values()].find((layer) => getSourceId(layer) === id);
+            if (isDefined(usingLayer)) {
+                throw new Error(
+                    `Source "${id}" cannot be removed while layer "${usingLayer.id}" is using it.`,
+                );
             }
             sources.delete(id);
         },
         setLayoutProperty(id: string, name: string, value: string) {
             calls.push(`setLayoutProperty ${id} ${name} ${value}`);
+            assertStyle('setLayoutProperty');
             if (name === 'visibility') {
                 visibilities.set(id, value);
             }
+        },
+        remove() {
+            calls.push('remove');
+            style = undefined;
         },
     };
 
