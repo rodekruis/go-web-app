@@ -140,7 +140,11 @@ export default function exportNrwToPdf(props: Props) {
     if (eventsImage) {
         const eventsX = margin + mapColumnWidth + calculatePx(columnGapPx, pageWidth);
         const eventsColumnWidth = rightEdge - eventsX;
-        const eventsSize = calculateDisplayArea(eventsImage.aspectRatio, eventsColumnWidth, mapHeight);
+        const eventsSize = calculateDisplayArea(
+            eventsImage.aspectRatio,
+            eventsColumnWidth,
+            mapHeight,
+        );
         pdf.addImage(eventsImage.dataUrl, 'PNG', eventsX, contentTop, eventsSize.width, eventsSize.height);
     }
 
