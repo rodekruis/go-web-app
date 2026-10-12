@@ -1,4 +1,4 @@
-/* Mapbox sets `font: 12px/20px Helvetica Neue` on the map, so restore the app typography. */
+/* Mapbox sets `font: Helvetica Neue` on the map, so restore the default app font and size */
 .marker {
     line-height: var(--go-ui-line-height-md);
     font-family: var(--go-ui-font-family-sans-serif);
