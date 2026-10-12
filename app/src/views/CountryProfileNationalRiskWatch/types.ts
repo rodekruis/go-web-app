@@ -80,6 +80,7 @@ export type NrwCountry = NrwApiResponse<'/countries'>[number];
 export type NrwAdminLevelLabels = NonNullable<NrwCountry['adminLevelLabels']>;
 export type PlaceCodeChangeHandler = (placeCode: PlaceCode | undefined) => void;
 export type AdminAreaDrillDownHandler = (adminArea: AdminAreaProperties) => void;
+export type AdminLevelDrillHandler = (adminLevel: AdminLevel) => void;
 
 export type NrwStaticLayer = NrwApiResponse<'/layers'>[number];
 export type NrwEventLayer = NrwEvent['availableLayers'][number];
@@ -87,3 +88,14 @@ export type NrwLayer = NrwStaticLayer | NrwEventLayer;
 export type NrwLayerName = NrwLayer['name'];
 export type VisibleLayersChangeHandler = (layerNames: NrwLayerName[]) => void;
 export type LayerToggleHandler = (layerName: NrwLayerName) => void;
+
+export enum NrwLegendType {
+    Gradient = 'gradient',
+}
+
+export type NrwLegendItem = {
+    type: NrwLegendType.Gradient;
+    layerName: NrwLayerName;
+    label: NrwLayer['label'];
+    colors: readonly string[];
+};

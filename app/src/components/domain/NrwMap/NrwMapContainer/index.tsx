@@ -53,12 +53,21 @@ function NrwMapContainer(props: {
     mapView: MapView;
     preserveInitialView: boolean;
     onMapViewChange: MapViewChangeHandler;
+    breadcrumbs?: React.ReactNode;
     layerPanel?: React.ReactNode;
+    legend?: React.ReactNode;
     registerScreenCapture: (handler: NrwScreenCaptureHandler | undefined) => void;
     children?: React.ReactNode;
 }) {
     const {
-        mapView, preserveInitialView, onMapViewChange, layerPanel, registerScreenCapture, children,
+        mapView,
+        preserveInitialView,
+        onMapViewChange,
+        breadcrumbs,
+        layerPanel,
+        legend,
+        registerScreenCapture,
+        children,
     } = props;
 
     const { zoom, center, fitBounds } = mapView;
@@ -99,6 +108,7 @@ function NrwMapContainer(props: {
             style: nrwMapboxStyleUrl,
             projection: 'mercator',
             attributionControl: true,
+            logoPosition: 'bottom-right',
             center,
             zoom,
             preserveDrawingBuffer: true,
@@ -186,6 +196,11 @@ function NrwMapContainer(props: {
                     ref={containerRef}
                     className={styles.nrwMapContainer}
                 />
+                {isDefined(breadcrumbs) && (
+                    <div className={styles.mapBreadcrumbs}>
+                        {breadcrumbs}
+                    </div>
+                )}
                 <div className={styles.mapControls}>
                     <div className={styles.zoomControls}>
                         <button
@@ -222,6 +237,11 @@ function NrwMapContainer(props: {
                         </>
                     )}
                 </div>
+                {isDefined(legend) && (
+                    <div className={styles.mapLegend}>
+                        {legend}
+                    </div>
+                )}
             </div>
             <NrwMapContext.Provider value={mapContext}>
                 {children}
