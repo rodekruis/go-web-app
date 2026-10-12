@@ -1,0 +1,8 @@
+{
+    "namespace": "nrwMap",
+    "strings": {
+        "nrwLegendClassesBelow": "<{value}",
+        "nrwLegendClassesRange": "{from}-{to}",
+        "nrwLegendClassesAbove": "{value}+"
+    }
+}

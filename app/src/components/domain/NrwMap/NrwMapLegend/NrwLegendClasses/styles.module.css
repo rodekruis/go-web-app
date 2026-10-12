@@ -1,0 +1,37 @@
+.nrw-legend-classes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--go-ui-spacing-3xs);
+
+    .label {
+        white-space: nowrap;
+        color: var(--go-ui-color-gray-90);
+        font-weight: var(--go-ui-font-weight-medium);
+    }
+
+    .classes {
+        display: flex;
+        align-items: center;
+        gap: var(--go-ui-spacing-xs);
+    }
+
+    .class {
+        display: flex;
+        align-items: center;
+        gap: var(--go-ui-spacing-3xs);
+    }
+
+    .swatch {
+        flex-shrink: 0;
+        opacity: 0.8;
+        border: 1px solid rgb(50 50 50 / 20%);
+        border-radius: 2px;
+        inline-size: 16px;
+        height: 16px;
+    }
+
+    .class-label {
+        white-space: nowrap;
+        color: var(--go-ui-color-gray-70);
+    }
+}

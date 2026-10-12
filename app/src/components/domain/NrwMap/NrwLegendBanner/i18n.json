@@ -1,0 +1,14 @@
+{
+    "namespace": "nrwMap",
+    "strings": {
+        "nrwLegendBannerAlertLevelLabel": "Alert level:",
+        "nrwLegendBannerAlertLow": "Low Warning",
+        "nrwLegendBannerAlertMedium": "Medium Warning",
+        "nrwLegendBannerAlertHigh": "High Warning",
+        "nrwLegendBannerEventTypeLabel": "Event type:",
+        "nrwLegendBannerHazardFloods": "Floods",
+        "nrwLegendBannerHazardDrought": "Drought",
+        "nrwLegendBannerHazardCyclone": "Cyclone",
+        "nrwLegendBannerNoLayersMessage": "Turn on layers to see event exposure on the map."
+    }
+}
