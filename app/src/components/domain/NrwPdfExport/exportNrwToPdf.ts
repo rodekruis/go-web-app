@@ -20,15 +20,15 @@ declare const pxUnit: unique symbol;
 declare const ptUnit: unique symbol;
 declare const mmUnit: unique symbol;
 
-export type Px = number & {
+type Px = number & {
     [pxUnit]: true;
 };
 
-export type Pt = number & {
+type Pt = number & {
     [ptUnit]: true;
 };
 
-export type Mm = number & {
+type Mm = number & {
     [mmUnit]: true;
 };
 
