@@ -25,6 +25,7 @@ import NrwScreenCaptureContext, {
 } from './contexts/NrwScreenCaptureContext';
 import useNrwEvents from './hooks/useNrwEvents';
 import useNrwLayers from './hooks/useNrwLayers';
+import useNrwLegend from './hooks/useNrwLegend';
 import useNrwMapView from './hooks/useNrwMapView';
 import useNrwSearchParams from './hooks/useNrwSearchParams';
 import NrwAdminAreasProvider from './NrwAdminAreasProvider';
@@ -82,6 +83,12 @@ export function Component() {
         selectedEvent,
     });
 
+    const { legendItems } = useNrwLegend({
+        availableLayers,
+        visibleLayers,
+        enabled: isDefined(selectedEvent),
+    });
+
     // The actual screen capture function is down in the component tree and
     // specific to the mapping library. It will be available after the map has
     // loaded.
@@ -123,6 +130,7 @@ export function Component() {
                         visibleLayers={visibleLayers}
                         onLayerToggle={handleLayerToggle}
                         registerScreenCapture={registerScreenCapture}
+                        legendItems={legendItems}
                     />
                     <NrwEvents elementRef={eventsPanelRef} />
                 </ListView>

@@ -1,0 +1,7 @@
+{
+    "namespace": "nrwMap",
+    "strings": {
+        "nrwLegendRampLow": "Low",
+        "nrwLegendRampHigh": "High"
+    }
+}
