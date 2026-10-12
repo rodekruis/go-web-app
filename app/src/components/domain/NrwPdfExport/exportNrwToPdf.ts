@@ -159,9 +159,14 @@ export default function exportNrwToPdf(props: Props) {
     );
 
     if (eventsImage) {
-        const eventsXMm = (marginMm + mapColumnWidthMm + calculateMm(columnGapPx, pageWidthMm)) as Mm;
+        const eventsXMm = (
+            marginMm + mapColumnWidthMm + calculateMm(columnGapPx, pageWidthMm)) as Mm;
         const eventsColumnWidthMm = (rightEdgeMm - eventsXMm) as Mm;
-        const eventsSize = calculateDisplayArea(eventsImage.aspectRatio, eventsColumnWidthMm, mapHeightMm);
+        const eventsSize = calculateDisplayArea(
+            eventsImage.aspectRatio,
+            eventsColumnWidthMm,
+            mapHeightMm,
+        );
         pdf.addImage(eventsImage.dataUrl, 'PNG', eventsXMm, contentTopMm, eventsSize.width, eventsSize.height);
     }
 
