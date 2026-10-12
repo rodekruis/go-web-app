@@ -9,8 +9,8 @@ import NrwMapContext from '../NrwMapContext';
 
 export type MapLayer = Parameters<MapboxMap['addLayer']>[0];
 
-// Add the layers in order below the anchor, so the last one draws on top. A layer
-// with a string source shares the source of an earlier layer in the list.
+// Add the layers in order after the anchor layer. A layer with
+// a string source shares the source of an earlier layer in the list.
 function useNrwMapLayers(
     mapLayers: MapLayer[] | undefined,
     isVisible: boolean,
