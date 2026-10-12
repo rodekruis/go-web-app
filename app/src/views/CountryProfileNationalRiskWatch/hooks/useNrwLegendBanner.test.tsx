@@ -55,22 +55,9 @@ const event = createEvent([createArea('SS01', 1000), createArea('SS02', 250)]);
 const adminAreas = createAdminAreas(['SS01', 'SS02']);
 
 describe('useNrwLegendBanner', () => {
-    test('is empty without a selected event or events', () => {
+    test('shows the countries legend without a selection', () => {
         const { result } = renderHook(() => useNrwLegendBanner({
             selectedEvent: undefined,
-            events: [],
-            adminAreas: undefined,
-            availableLayers,
-            visibleLayers: [],
-        }));
-
-        expect(result.current).toEqual({ state: NrwLegendBannerState.Empty });
-    });
-
-    test('shows the countries legend when events are listed without a selection', () => {
-        const { result } = renderHook(() => useNrwLegendBanner({
-            selectedEvent: undefined,
-            events: [event],
             adminAreas: undefined,
             availableLayers,
             visibleLayers: ['floodDepth'],
@@ -82,7 +69,6 @@ describe('useNrwLegendBanner', () => {
     test('asks to turn on layers when none of the exposure layers are visible', () => {
         const { result } = renderHook(() => useNrwLegendBanner({
             selectedEvent: event,
-            events: [event],
             adminAreas,
             availableLayers,
             visibleLayers: ['populationDensity'],
@@ -94,7 +80,6 @@ describe('useNrwLegendBanner', () => {
     test('shows flood depth before exposed population, scaled to the drawn admin areas', () => {
         const { result } = renderHook(() => useNrwLegendBanner({
             selectedEvent: event,
-            events: [event],
             adminAreas,
             availableLayers,
             visibleLayers: ['exposedPopulation', 'floodDepth'],
@@ -127,7 +112,6 @@ describe('useNrwLegendBanner', () => {
     test('scales exposed population to the admin areas on the map only', () => {
         const { result } = renderHook(() => useNrwLegendBanner({
             selectedEvent: event,
-            events: [event],
             adminAreas: createAdminAreas(['SS02']),
             availableLayers,
             visibleLayers: ['exposedPopulation'],
@@ -148,14 +132,12 @@ describe('useNrwLegendBanner', () => {
     test('leaves out exposed population when nothing is exposed or the areas are not loaded', () => {
         const { result: noExposure } = renderHook(() => useNrwLegendBanner({
             selectedEvent: createEvent([createArea('SS01', 0)]),
-            events: [event],
             adminAreas,
             availableLayers,
             visibleLayers: ['exposedPopulation'],
         }));
         const { result: noAdminAreas } = renderHook(() => useNrwLegendBanner({
             selectedEvent: event,
-            events: [event],
             adminAreas: undefined,
             availableLayers,
             visibleLayers: ['exposedPopulation'],
@@ -168,7 +150,6 @@ describe('useNrwLegendBanner', () => {
     test('ignores visible layers that are not available', () => {
         const { result } = renderHook(() => useNrwLegendBanner({
             selectedEvent: event,
-            events: [event],
             adminAreas,
             availableLayers: [populationDensity],
             visibleLayers: ['floodDepth'],

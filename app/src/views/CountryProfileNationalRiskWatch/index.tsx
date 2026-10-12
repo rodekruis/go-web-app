@@ -79,36 +79,41 @@ export function Component() {
         enabled: isDefined(selectedEvent),
     });
 
+    const mapAndLegend = (
+        <div className={styles.mapAndLegend}>
+            <ListView
+                className={styles.mapGrid}
+                layout="grid"
+                withSidebar
+                sidebarSize="lg"
+                gridContentClassName={styles.eventsHeight}
+            >
+                <NrwMap
+                    mapView={mapView}
+                    preserveInitialView={preserveInitialView}
+                    onMapViewChange={handleMapViewChange}
+                    availableLayers={availableLayers}
+                    visibleLayers={visibleLayers}
+                    onLayerToggle={handleLayerToggle}
+                    legendItems={legendItems}
+                />
+                <NrwEvents />
+            </ListView>
+            <NrwLegendBanner
+                availableLayers={availableLayers}
+                visibleLayers={visibleLayers}
+            />
+        </div>
+    );
+
     const content = (
         <NrwEventsContext.Provider value={nrwEventsContext}>
             <NrwAdminAreasProvider event={selectedEvent}>
-                <Container
-                    heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
-                >
-                    <div className={styles.mapAndLegend}>
-                        <ListView
-                            layout="grid"
-                            withSidebar
-                            sidebarSize="lg"
-                            gridContentClassName={styles.eventsHeight}
-                        >
-                            <NrwMap
-                                mapView={mapView}
-                                preserveInitialView={preserveInitialView}
-                                onMapViewChange={handleMapViewChange}
-                                availableLayers={availableLayers}
-                                visibleLayers={visibleLayers}
-                                onLayerToggle={handleLayerToggle}
-                                legendItems={legendItems}
-                            />
-                            <NrwEvents />
-                        </ListView>
-                        <NrwLegendBanner
-                            availableLayers={availableLayers}
-                            visibleLayers={visibleLayers}
-                        />
-                    </div>
-                </Container>
+                {nrwStandalone ? mapAndLegend : (
+                    <Container heading={strings.nationalRiskWatchHeading}>
+                        {mapAndLegend}
+                    </Container>
+                )}
             </NrwAdminAreasProvider>
         </NrwEventsContext.Provider>
     );
@@ -118,6 +123,7 @@ export function Component() {
             <div className={styles.countryProfileNrwStandalone}>
                 <NrwNavbar />
                 <Page
+                    className={styles.page}
                     title={strings.nationalRiskWatchPageTitle}
                     mainSectionContainerClassName={styles.mainSectionContainer}
                     mainSectionClassName={styles.mainSection}

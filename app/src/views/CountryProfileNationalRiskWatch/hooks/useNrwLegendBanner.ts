@@ -81,14 +81,12 @@ const nrwLegendBannerConfigs: NrwLegendBannerConfig[] = [
 // The content of the legend strip under the map.
 function useNrwLegendBanner(props: {
     selectedEvent: NrwEvent | undefined;
-    events: NrwEvent[] | undefined;
     adminAreas: NrwAdminAreaFeatureCollection | undefined;
     availableLayers: NrwLayer[] | undefined;
     visibleLayers: NrwLayerName[];
 }): NrwLegendBanner {
     const {
         selectedEvent,
-        events,
         adminAreas,
         availableLayers,
         visibleLayers,
@@ -97,9 +95,7 @@ function useNrwLegendBanner(props: {
     return useMemo(
         (): NrwLegendBanner => {
             if (isNotDefined(selectedEvent)) {
-                return isDefined(events) && events.length > 0
-                    ? { state: NrwLegendBannerState.Countries }
-                    : { state: NrwLegendBannerState.Empty };
+                return { state: NrwLegendBannerState.Countries };
             }
 
             const visibleConfigs = nrwLegendBannerConfigs.flatMap((config) => {
@@ -124,7 +120,7 @@ function useNrwLegendBanner(props: {
                 }),
             };
         },
-        [selectedEvent, events, adminAreas, availableLayers, visibleLayers],
+        [selectedEvent, adminAreas, availableLayers, visibleLayers],
     );
 }
 

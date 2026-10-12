@@ -96,7 +96,7 @@ export function NrwLegendBannerContent(props: {
                         <div className={styles.label}>
                             {strings.nrwLegendBannerEventTypeLabel}
                         </div>
-                        <div className={styles.entries}>
+                        <div className={_cs(styles.entries, styles.hazardEntries)}>
                             {hazardTypes.map((hazardType) => (
                                 <div
                                     key={hazardType}
@@ -125,8 +125,6 @@ export function NrwLegendBannerContent(props: {
                     {strings.nrwLegendBannerNoLayersMessage}
                 </div>
             );
-        case NrwLegendBannerState.Empty:
-            return null;
         default:
             banner satisfies never;
             return null;
@@ -140,12 +138,11 @@ function NrwLegendBanner(props: {
 }) {
     const { availableLayers, visibleLayers } = props;
 
-    const { events, selectedEvent } = useContext(NrwEventsContext);
+    const { selectedEvent } = useContext(NrwEventsContext);
     const { adminAreas } = useContext(NrwAdminAreasContext);
 
     const banner = useNrwLegendBanner({
         selectedEvent,
-        events,
         adminAreas,
         availableLayers,
         visibleLayers,

@@ -81,10 +81,4 @@ describe('NrwLegendBannerContent', () => {
 
         expect(screen.getByText(i18n.strings.nrwLegendBannerNoLayersMessage)).toBeInTheDocument();
     });
-
-    test('renders nothing when empty', () => {
-        const { container } = renderBanner({ state: NrwLegendBannerState.Empty });
-
-        expect(container).toBeEmptyDOMElement();
-    });
 });

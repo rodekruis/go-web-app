@@ -21,9 +21,19 @@
 
     .ramp-swatches {
         display: flex;
-        border: 1px solid rgb(50 50 50 / 20%);
+        position: relative;
         border-radius: 2px;
         overflow: hidden;
+
+        /* outline drawn over the swatches so each stays a full 16px */
+        &::after {
+            position: absolute;
+            border-radius: inherit;
+            box-shadow: inset 0 0 0 1px rgb(50 50 50 / 20%);
+            inset: 0;
+            content: "";
+            pointer-events: none;
+        }
     }
 
     .ramp-swatch {

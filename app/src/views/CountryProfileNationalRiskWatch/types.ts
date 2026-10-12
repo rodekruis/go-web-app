@@ -116,7 +116,6 @@ export enum NrwLegendBannerState {
     Event = 'event',
     Countries = 'countries',
     NoLayers = 'noLayers',
-    Empty = 'empty',
 }
 
 export type NrwLegendBanner = {
@@ -126,6 +125,4 @@ export type NrwLegendBanner = {
     state: NrwLegendBannerState.Countries;
 } | {
     state: NrwLegendBannerState.NoLayers;
-} | {
-    state: NrwLegendBannerState.Empty;
 };

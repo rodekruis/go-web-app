@@ -1,18 +1,19 @@
 .nrw-legend-banner {
     display: flex;
-    align-items: center;
-    gap: var(--go-ui-spacing-md) var(--go-ui-spacing-xl);
-    border-top: 1px solid rgb(50 50 50 / 20%);
-    background-color: var(--go-ui-color-gray-10);
+    align-items: flex-start;
+    flex-shrink: 0;
+    background-color: #f5f5f5;
     padding: var(--go-ui-spacing-xs) var(--go-ui-spacing-md);
-    block-size: var(--nrw-height-legend-banner);
     overflow-x: auto;
+    line-height: var(--go-ui-line-height-md);
     font-size: var(--go-ui-font-size-sm);
+    gap: var(--go-ui-spacing-md) var(--go-ui-spacing-lg);
+    block-size: var(--nrw-height-legend-banner);
 
     margin-inline: calc(50% - 50vw);
     padding-inline: calc(50vw - 50% + var(--go-ui-spacing-md));
 
-    --marker-size: 14px;
+    --marker-size: 16px;
 
     &.message {
         align-items: center;
@@ -41,12 +42,16 @@
         display: flex;
         align-items: center;
         gap: var(--go-ui-spacing-xs);
+
+        &.hazard-entries {
+            gap: var(--go-ui-spacing-2xs);
+        }
     }
 
     .entry {
         display: flex;
         align-items: center;
-        gap: var(--go-ui-spacing-3xs);
+        gap: var(--go-ui-spacing-2xs);
         white-space: nowrap;
         color: var(--go-ui-color-gray-70);
     }
@@ -77,13 +82,13 @@
         flex-shrink: 0;
         justify-content: center;
         border-radius: 50%;
-        background-color: var(--go-ui-color-gray-70);
+        background-color: var(--go-ui-color-gray-60);
         inline-size: var(--marker-size);
         height: var(--marker-size);
     }
 
     .hazard-icon {
         color: var(--go-ui-color-white);
-        font-size: 8px;
+        font-size: 10px;
     }
 }
