@@ -15,30 +15,48 @@ interface NrwPdfText {
 
 const mapAttribution = '© Mapbox © OpenStreetMap';
 
+// Opaque types.
+declare const pxUnit: unique symbol;
+declare const ptUnit: unique symbol;
+declare const mmUnit: unique symbol;
+
+export type Px = number & {
+    [pxUnit]: true;
+};
+
+export type Pt = number & {
+    [ptUnit]: true;
+};
+
+export type Mm = number & {
+    [mmUnit]: true;
+};
+
 // Values used to line up the layout elements in the PDF based on the Figma design css
-const frameWidthPx = 1757;
-const marginPx = 40;
-const headerHeightPx = 30; // 20px title line + 10px padding above the divider
-const contentTopPx = 88;
-const mapColumnWidthPx = 1191;
-const mapHeightPx = 1073;
-const columnGapPx = 18;
-const footerTopPx = mapHeightPx + 11;
-const titleFontPx = 18;
-const captionFontPx = 12;
-const attributionPaddingPx = 4;
+const frameWidthPx = 1757 as Px;
+const marginPx = 40 as Px;
+const headerHeightPx = 30 as Px; // 20px title line + 10px padding above the divider
+const contentTopPx = 88 as Px;
+const mapColumnWidthPx = 1191 as Px;
+const mapHeightPx = 1073 as Px;
+const columnGapPx = 18 as Px;
+const footerTopPx = (mapHeightPx + 11) as Px;
+const titleFontPx = 18 as Px;
+const captionFontPx = 12 as Px;
+const attributionPaddingPx = 4 as Px;
+const dividerLineWidthPx = 1 as Px;
 
 const textPrimary = '#323232'; // go-ui-color-gray-90
 const textSecondary = '#6f6f6f'; // go-ui-color-gray-70
 const divider = '#c6c6c6'; // go-ui-color-gray-40
 const attributionBackground = '#f2f2f2'; // approximates Mapbox's translucent white attribution box
 
-function calculateDisplayArea(aspectRatio: number, maxWidth: number, maxHeight: number) {
+function calculateDisplayArea(aspectRatio: number, maxWidth: Mm, maxHeight: Mm) {
     let width = maxWidth;
-    let height = width / aspectRatio;
+    let height = (width / aspectRatio) as Mm;
     if (height > maxHeight) {
         height = maxHeight;
-        width = height * aspectRatio;
+        width = (height * aspectRatio) as Mm;
     }
     return { width, height };
 }
@@ -58,18 +76,18 @@ function generateFileName(
     return `national-risk-watch-${date}.pdf`;
 }
 
-function calculatePx(value: number, pageWidth: number) {
-    return (value * pageWidth) / frameWidthPx;
+function calculateMm(value: Px, pageWidthMm: Mm): Mm {
+    return ((value * pageWidthMm) / frameWidthPx) as Mm;
 }
 
-// jsPDF font sizes are always in px, (which is inch-based).
-// Keep settings in px for design consistency, but convert to px for export.
-function pxToPt(value: number, pageWidth: number) {
+// jsPDF font sizes are always in pt (which is inch-based).
+// Keep settings in px for design consistency, but convert to pt for export.
+function pxToPt(value: Px, pageWidthMm: Mm): Pt {
     const pointsPerInch = 72;
     const mmPerInch = 25.4;
-    const mm = calculatePx(value, pageWidth);
+    const mm = calculateMm(value, pageWidthMm);
     const inches = mm / mmPerInch;
-    return inches * pointsPerInch;
+    return (inches * pointsPerInch) as Pt;
 }
 
 interface Props {
@@ -95,59 +113,62 @@ export default function exportNrwToPdf(props: Props) {
         format: 'a4',
     });
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const margin = calculatePx(marginPx, pageWidth);
-    const rightEdge = pageWidth - margin;
+    const pageWidthMm = pdf.internal.pageSize.getWidth() as Mm;
+    const marginMm = calculateMm(marginPx, pageWidthMm);
+    const rightEdgeMm = (pageWidthMm - marginMm) as Mm;
 
     // Header
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(pxToPt(titleFontPx, pageWidth));
+    const titleFontPt = pxToPt(titleFontPx, pageWidthMm);
+    pdf.setFontSize(titleFontPt);
     pdf.setTextColor(textPrimary);
-    pdf.text(text.title.toUpperCase(), margin, margin, { baseline: 'top' });
+    pdf.text(text.title.toUpperCase(), marginMm, marginMm, { baseline: 'top' });
 
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(pxToPt(captionFontPx, pageWidth));
+    const captionFontPt = pxToPt(captionFontPx, pageWidthMm);
+    pdf.setFontSize(captionFontPt);
     pdf.setTextColor(textSecondary);
-    pdf.text(text.generated, rightEdge, margin, { align: 'right', baseline: 'top' });
+    pdf.text(text.generated, rightEdgeMm, marginMm, { align: 'right', baseline: 'top' });
 
     pdf.setDrawColor(divider);
-    pdf.setLineWidth(calculatePx(1, pageWidth));
-    const dividerY = margin + calculatePx(headerHeightPx, pageWidth);
-    pdf.line(margin, dividerY, rightEdge, dividerY);
+    const dividerLineWidthMm = calculateMm(dividerLineWidthPx, pageWidthMm);
+    pdf.setLineWidth(dividerLineWidthMm);
+    const dividerYMm = (marginMm + calculateMm(headerHeightPx, pageWidthMm)) as Mm;
+    pdf.line(marginMm, dividerYMm, rightEdgeMm, dividerYMm);
 
     // Main content
-    const contentTop = calculatePx(contentTopPx, pageWidth);
-    const mapColumnWidth = calculatePx(mapColumnWidthPx, pageWidth);
-    const mapHeight = calculatePx(mapHeightPx, pageWidth);
-    const mapSize = calculateDisplayArea(mapImage.aspectRatio, mapColumnWidth, mapHeight);
-    pdf.addImage(mapImage.dataUrl, 'PNG', margin, contentTop, mapSize.width, mapSize.height);
+    const contentTopMm = calculateMm(contentTopPx, pageWidthMm);
+    const mapColumnWidthMm = calculateMm(mapColumnWidthPx, pageWidthMm);
+    const mapHeightMm = calculateMm(mapHeightPx, pageWidthMm);
+    const mapSize = calculateDisplayArea(mapImage.aspectRatio, mapColumnWidthMm, mapHeightMm);
+    pdf.addImage(mapImage.dataUrl, 'PNG', marginMm, contentTopMm, mapSize.width, mapSize.height);
 
     // Map attribution overlaid on the bottom-left corner of the map
-    const attributionPadding = calculatePx(attributionPaddingPx, pageWidth);
-    const attributionTextHeight = calculatePx(captionFontPx, pageWidth);
-    const attributionWidth = pdf.getTextWidth(mapAttribution) + attributionPadding * 2;
-    const attributionHeight = attributionTextHeight + attributionPadding * 2;
-    const attributionY = contentTop + mapSize.height - attributionHeight;
+    const attributionPaddingMm = calculateMm(attributionPaddingPx, pageWidthMm);
+    const attributionTextHeightMm = calculateMm(captionFontPx, pageWidthMm);
+    const attributionWidthMm = (pdf.getTextWidth(mapAttribution) + attributionPaddingMm * 2) as Mm;
+    const attributionHeightMm = (attributionTextHeightMm + attributionPaddingMm * 2) as Mm;
+    const attributionYMm = (contentTopMm + mapSize.height - attributionHeightMm) as Mm;
     pdf.setFillColor(attributionBackground);
-    pdf.rect(margin, attributionY, attributionWidth, attributionHeight, 'F');
+    pdf.rect(marginMm, attributionYMm, attributionWidthMm, attributionHeightMm, 'F');
     pdf.text(
         mapAttribution,
-        margin + attributionPadding,
-        attributionY + attributionPadding,
+        marginMm + attributionPaddingMm,
+        attributionYMm + attributionPaddingMm,
         { baseline: 'top' },
     );
 
     if (eventsImage) {
-        const eventsX = margin + mapColumnWidth + calculatePx(columnGapPx, pageWidth);
-        const eventsColumnWidth = rightEdge - eventsX;
-        const eventsSize = calculateDisplayArea(eventsImage.aspectRatio, eventsColumnWidth, mapHeight);
-        pdf.addImage(eventsImage.dataUrl, 'PNG', eventsX, contentTop, eventsSize.width, eventsSize.height);
+        const eventsXMm = (marginMm + mapColumnWidthMm + calculateMm(columnGapPx, pageWidthMm)) as Mm;
+        const eventsColumnWidthMm = (rightEdgeMm - eventsXMm) as Mm;
+        const eventsSize = calculateDisplayArea(eventsImage.aspectRatio, eventsColumnWidthMm, mapHeightMm);
+        pdf.addImage(eventsImage.dataUrl, 'PNG', eventsXMm, contentTopMm, eventsSize.width, eventsSize.height);
     }
 
     // Footer
-    const footerY = contentTop + calculatePx(footerTopPx, pageWidth);
-    pdf.text(text.mapNote, margin + mapColumnWidth, footerY, { align: 'right', baseline: 'top' });
-    pdf.text(text.pageLabel, rightEdge, footerY, { align: 'right', baseline: 'top' });
+    const footerYMm = (contentTopMm + calculateMm(footerTopPx, pageWidthMm)) as Mm;
+    pdf.text(text.mapNote, marginMm + mapColumnWidthMm, footerYMm, { align: 'right', baseline: 'top' });
+    pdf.text(text.pageLabel, rightEdgeMm, footerYMm, { align: 'right', baseline: 'top' });
 
     pdf.save(generateFileName(selectedEvent, countries));
 }
