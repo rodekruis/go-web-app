@@ -15,19 +15,19 @@ import {
     NrwLegendType,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
-import NrwLegendBanner from './index';
+import { NrwLegendBannerContent } from './index';
 
-import rampI18n from '../NrwMapLegend/NrwLegendRamp/i18n.json';
+import rampI18n from '../NrwMap/NrwMapLegend/NrwLegendRamp/i18n.json';
 import i18n from './i18n.json';
 
 function renderBanner(banner: NrwLegendBannerType) {
     return render(
-        <NrwLegendBanner banner={banner} />,
+        <NrwLegendBannerContent banner={banner} />,
         { wrapper: TestProviders },
     );
 }
 
-describe('NrwLegendBanner', () => {
+describe('NrwLegendBannerContent', () => {
     test('shows the visible exposure layers of the event', () => {
         const { container } = renderBanner({
             state: NrwLegendBannerState.Event,

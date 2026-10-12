@@ -1,12 +1,16 @@
 .nrw-legend-banner {
     display: flex;
-    align-items: flex-start;
-    flex-wrap: wrap;
+    align-items: center;
     gap: var(--go-ui-spacing-md) var(--go-ui-spacing-xl);
     border-top: 1px solid rgb(50 50 50 / 20%);
     background-color: var(--go-ui-color-gray-10);
     padding: var(--go-ui-spacing-xs) var(--go-ui-spacing-md);
+    block-size: var(--nrw-height-legend-banner);
+    overflow-x: auto;
     font-size: var(--go-ui-font-size-sm);
+
+    margin-inline: calc(50% - 50vw);
+    padding-inline: calc(50vw - 50% + var(--go-ui-spacing-md));
 
     --marker-size: 14px;
 

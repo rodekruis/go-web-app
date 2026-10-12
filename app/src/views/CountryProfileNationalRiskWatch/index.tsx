@@ -6,6 +6,7 @@ import { useTranslation } from '@ifrc-go/ui/hooks';
 import { isDefined } from '@togglecorp/fujs';
 
 import NrwEvents from '#components/domain/NrwEvents';
+import NrwLegendBanner from '#components/domain/NrwLegendBanner';
 import NrwMap from '#components/domain/NrwMap';
 import NrwNavbar from '#components/domain/NrwNavbar';
 import Page from '#components/Page';
@@ -84,23 +85,29 @@ export function Component() {
                 <Container
                     heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
                 >
-                    <ListView
-                        layout="grid"
-                        withSidebar
-                        sidebarSize="lg"
-                        gridContentClassName={styles.eventsHeight}
-                    >
-                        <NrwMap
-                            mapView={mapView}
-                            preserveInitialView={preserveInitialView}
-                            onMapViewChange={handleMapViewChange}
+                    <div className={styles.mapAndLegend}>
+                        <ListView
+                            layout="grid"
+                            withSidebar
+                            sidebarSize="lg"
+                            gridContentClassName={styles.eventsHeight}
+                        >
+                            <NrwMap
+                                mapView={mapView}
+                                preserveInitialView={preserveInitialView}
+                                onMapViewChange={handleMapViewChange}
+                                availableLayers={availableLayers}
+                                visibleLayers={visibleLayers}
+                                onLayerToggle={handleLayerToggle}
+                                legendItems={legendItems}
+                            />
+                            <NrwEvents />
+                        </ListView>
+                        <NrwLegendBanner
                             availableLayers={availableLayers}
                             visibleLayers={visibleLayers}
-                            onLayerToggle={handleLayerToggle}
-                            legendItems={legendItems}
                         />
-                        <NrwEvents />
-                    </ListView>
+                    </div>
                 </Container>
             </NrwAdminAreasProvider>
         </NrwEventsContext.Provider>

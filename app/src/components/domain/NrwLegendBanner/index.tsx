@@ -1,17 +1,22 @@
+import { useContext } from 'react';
 import { faCircleInfo } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import { _cs } from '@togglecorp/fujs';
 
+import NrwLegendItem from '#components/domain/NrwMap/NrwMapLegend/NrwLegendItem';
 import hazardIcons from '#utils/nrw/hazardIcons';
+import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
+import useNrwLegendBanner from '#views/CountryProfileNationalRiskWatch/hooks/useNrwLegendBanner';
+import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
 import {
     type NrwEvent,
     type NrwEventHazardType,
+    type NrwLayer,
+    type NrwLayerName,
     type NrwLegendBanner as NrwLegendBannerType,
     NrwLegendBannerState,
 } from '#views/CountryProfileNationalRiskWatch/types';
-
-import NrwLegendItem from '../NrwMapLegend/NrwLegendItem';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
@@ -30,7 +35,7 @@ const hazardTypes: Exclude<NrwEventHazardType, 'compoundFloods'>[] = [
     'tropicalCyclone',
 ];
 
-function NrwLegendBanner(props: {
+export function NrwLegendBannerContent(props: {
     banner: NrwLegendBannerType;
 }) {
     const { banner } = props;
@@ -126,6 +131,27 @@ function NrwLegendBanner(props: {
             banner satisfies never;
             return null;
     }
+}
+
+// The legend strip under the map, spanning the page width.
+function NrwLegendBanner(props: {
+    availableLayers: NrwLayer[] | undefined;
+    visibleLayers: NrwLayerName[];
+}) {
+    const { availableLayers, visibleLayers } = props;
+
+    const { events, selectedEvent } = useContext(NrwEventsContext);
+    const { adminAreas } = useContext(NrwAdminAreasContext);
+
+    const banner = useNrwLegendBanner({
+        selectedEvent,
+        events,
+        adminAreas,
+        availableLayers,
+        visibleLayers,
+    });
+
+    return <NrwLegendBannerContent banner={banner} />;
 }
 
 export default NrwLegendBanner;

@@ -11,6 +11,8 @@
     --nrw-color-alert-trigger: #c01825;
 
     --nrw-height-map: var(--go-ui-height-map-md);
+    /* fixed so the map height can account for it */
+    --nrw-height-legend-banner: 60px;
     /* hardcoded height because the header has dynamic height */
-    --nrw-height-map-standalone: calc(100vh - 140px);
+    --nrw-height-map-standalone: calc(100vh - 140px - var(--nrw-height-legend-banner));
 }

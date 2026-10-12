@@ -28,9 +28,10 @@ describe('useNrwLegend', () => {
                 type: NrwLegendType.Gradient,
                 layerName: 'populationDensity',
                 label: 'Population density',
+                colors: expect.any(Array),
             }),
         ]);
-        expect(result.current.legendItems[0]?.colors).toHaveLength(5);
+        expect(result.current.legendItems[0]).toHaveProperty('colors.length', 5);
     });
 
     test('returns nothing when the layer is available but hidden', () => {

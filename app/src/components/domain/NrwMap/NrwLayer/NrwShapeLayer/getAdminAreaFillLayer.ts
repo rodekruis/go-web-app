@@ -1,9 +1,8 @@
-import { isDefined } from '@togglecorp/fujs';
 import { type ExpressionSpecification } from 'mapbox-gl-v3';
 
 import {
     alertClassMapRamps,
-    getEqualIntervalBreaks,
+    getAdminAreaExposedPopulationBreaks,
     mapFillHoverOpacity,
     mapFillOpacity,
     mapOutlineColor,
@@ -37,10 +36,7 @@ function getAdminAreaFillLayer(
             exposedPopulation: exposedPopulationByPlaceCode.get(feature.properties.placeCode),
         },
     }));
-    const exposedPopulations = features
-        .map((feature) => feature.properties.exposedPopulation)
-        .filter(isDefined);
-    const breaks = getEqualIntervalBreaks(exposedPopulations);
+    const breaks = getAdminAreaExposedPopulationBreaks(adminAreas, exposedPopulationByPlaceCode);
     const ramp = alertClassMapRamps[alertClass];
 
     // The step stops must ascend, so a set without exposed population gets a flat fill.

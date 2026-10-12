@@ -2,6 +2,11 @@
     grid-template-rows: var(--nrw-height-map);
 }
 
+.map-and-legend {
+    display: flex;
+    flex-direction: column;
+}
+
 .country-profile-nrw-standalone {
     --nrw-height-map: var(--nrw-height-map-standalone);
 
