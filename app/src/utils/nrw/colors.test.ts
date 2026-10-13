@@ -28,7 +28,6 @@ function createArea(placeCode: string, exposed: number): NrwExposedAdminArea {
     };
 }
 
-// Only the fields the scale reads.
 function createEvent(areas: NrwExposedAdminArea[]): NrwEvent {
     return {
         eventId: 1,
