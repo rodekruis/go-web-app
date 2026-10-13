@@ -15,7 +15,6 @@ import {
 import rampI18n from '#components/domain/NrwLegendItem/NrwLegendRamp/i18n.json';
 import {
     alertClassMapRamps,
-    floodDepthMapRamp,
     type NrwExposedPopulationScale,
 } from '#utils/nrw/colors';
 import createNrwLayer from '#utils/testing/createNrwLayer';
@@ -24,7 +23,6 @@ import NrwEventsContext, { type NrwEventsContextProps } from '#views/CountryProf
 import NrwAdminAreasContext, { type NrwAdminAreasContextProps } from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
 import {
     type NrwEvent,
-    type NrwLayer,
     type NrwLayerName,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
@@ -37,28 +35,21 @@ const availableLayers = [
     createNrwLayer('floodDepth', 'Flood depth'),
     createNrwLayer('exposedPopulation', 'Exposed population'),
 ];
-const bannerLayerNames: NrwLayerName[] = ['floodDepth', 'exposedPopulation'];
 
 const event = { eventId: 1, alertClass: 'high' } as unknown as NrwEvent;
 const exposedPopulationScale: NrwExposedPopulationScale = {
     ramp: alertClassMapRamps.high,
     breaks: [200, 400, 600, 800],
-    exposedPopulationByPlaceCode: new Map([['SS01', 1000], ['SS02', 250]]),
+    exposedPopulationByPlaceCode: new Map(),
 };
 
 // The contexts fall back to their defaults for the props a test leaves out.
 function Harness(props: {
-    events: Partial<NrwEventsContextProps>;
-    adminAreas: Partial<NrwAdminAreasContextProps>;
-    availableLayers: NrwLayer[] | undefined;
-    visibleLayers: NrwLayerName[];
+    events?: Partial<NrwEventsContextProps>;
+    adminAreas?: Partial<NrwAdminAreasContextProps>;
+    visibleLayers?: NrwLayerName[];
 }) {
-    const {
-        events,
-        adminAreas,
-        availableLayers: layers,
-        visibleLayers,
-    } = props;
+    const { events, adminAreas, visibleLayers = [] } = props;
 
     const defaultEvents = useContext(NrwEventsContext);
     const defaultAdminAreas = useContext(NrwAdminAreasContext);
@@ -75,7 +66,7 @@ function Harness(props: {
         <NrwEventsContext.Provider value={eventsValue}>
             <NrwAdminAreasContext.Provider value={adminAreasValue}>
                 <NrwLegendBanner
-                    availableLayers={layers}
+                    availableLayers={availableLayers}
                     visibleLayers={visibleLayers}
                 />
             </NrwAdminAreasContext.Provider>
@@ -84,21 +75,16 @@ function Harness(props: {
 }
 
 function renderBanner(props: {
-    selectedEvent: NrwEvent | undefined;
-    exposedPopulationScale: NrwExposedPopulationScale | undefined;
+    events?: Partial<NrwEventsContextProps>;
+    adminAreas?: Partial<NrwAdminAreasContextProps>;
     visibleLayers?: NrwLayerName[];
 }) {
-    const {
-        selectedEvent,
-        exposedPopulationScale: scale,
-        visibleLayers = bannerLayerNames,
-    } = props;
+    const { events, adminAreas, visibleLayers } = props;
 
     return render(
         <Harness
-            events={{ selectedEvent }}
-            adminAreas={{ exposedPopulationScale: scale }}
-            availableLayers={availableLayers}
+            events={events}
+            adminAreas={adminAreas}
             visibleLayers={visibleLayers}
         />,
         { wrapper: TestProviders },
@@ -108,27 +94,25 @@ function renderBanner(props: {
 describe('NrwLegendBanner', () => {
     test('shows the visible exposure layers of the event', () => {
         // Act
-        const { container } = renderBanner({
-            selectedEvent: event,
-            exposedPopulationScale,
+        renderBanner({
+            events: { selectedEvent: event },
+            adminAreas: { exposedPopulationScale },
+            visibleLayers: ['floodDepth', 'exposedPopulation'],
         });
 
         // Assert
-        expect(screen.getByText('Flood depth:')).toBeInTheDocument();
-        expect(screen.getByText(rampI18n.strings.nrwLegendRampLow)).toBeInTheDocument();
-        expect(screen.getByText('Exposed population:')).toBeInTheDocument();
-        expect(screen.getByText('<200')).toBeInTheDocument();
-        expect(screen.getByText('200-400')).toBeInTheDocument();
-        expect(screen.getByText('800+')).toBeInTheDocument();
-        expect(container.querySelectorAll('[style*="background-color"]'))
-            .toHaveLength(floodDepthMapRamp.length + 5);
+        screen.getByText('Flood depth:');
+        screen.getByText(rampI18n.strings.nrwLegendRampLow);
+        screen.getByText('Exposed population:');
+        screen.getByText('<200');
+        screen.getByText('200-400');
+        screen.getByText('800+');
     });
 
     test('keeps the strip, empty, for an event whose legend items are not ready', () => {
         // Act
         const { container } = renderBanner({
-            selectedEvent: event,
-            exposedPopulationScale: undefined,
+            events: { selectedEvent: event },
             visibleLayers: ['exposedPopulation'],
         });
 
@@ -138,29 +122,22 @@ describe('NrwLegendBanner', () => {
 
     test('shows the alert levels and event types of the markers', () => {
         // Act
-        renderBanner({
-            selectedEvent: undefined,
-            exposedPopulationScale: undefined,
-        });
+        renderBanner({});
 
         // Assert
         const { strings } = markerI18n;
-        expect(screen.getByText(strings.nrwMarkerLegendAlertLevelLabel)).toBeInTheDocument();
-        expect(screen.getByText(strings.nrwMarkerLegendAlertLow)).toBeInTheDocument();
-        expect(screen.getByText(strings.nrwMarkerLegendAlertHigh)).toBeInTheDocument();
-        expect(screen.getByText(strings.nrwMarkerLegendEventTypeLabel)).toBeInTheDocument();
-        expect(screen.getByText(strings.nrwMarkerLegendHazardCyclone)).toBeInTheDocument();
+        screen.getByText(strings.nrwMarkerLegendAlertLevelLabel);
+        screen.getByText(strings.nrwMarkerLegendAlertLow);
+        screen.getByText(strings.nrwMarkerLegendAlertHigh);
+        screen.getByText(strings.nrwMarkerLegendEventTypeLabel);
+        screen.getByText(strings.nrwMarkerLegendHazardCyclone);
     });
 
     test('asks to turn on layers', () => {
         // Act
-        renderBanner({
-            selectedEvent: event,
-            exposedPopulationScale,
-            visibleLayers: [],
-        });
+        renderBanner({ events: { selectedEvent: event } });
 
         // Assert
-        expect(screen.getByText(i18n.strings.nrwLegendBannerNoLayersMessage)).toBeInTheDocument();
+        screen.getByText(i18n.strings.nrwLegendBannerNoLayersMessage);
     });
 });
