@@ -43,8 +43,7 @@ const exposedPopulationScale: NrwExposedPopulationScale = {
     exposedPopulationByPlaceCode: new Map(),
 };
 
-// The contexts fall back to their defaults for the props a test leaves out.
-function Harness(props: {
+function MockParentProviders(props: {
     events?: Partial<NrwEventsContextProps>;
     adminAreas?: Partial<NrwAdminAreasContextProps>;
     visibleLayers?: NrwLayerName[];
@@ -82,7 +81,7 @@ function renderBanner(props: {
     const { events, adminAreas, visibleLayers } = props;
 
     return render(
-        <Harness
+        <MockParentProviders
             events={events}
             adminAreas={adminAreas}
             visibleLayers={visibleLayers}
