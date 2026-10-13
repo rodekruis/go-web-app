@@ -45,6 +45,7 @@ function NrwShapeLayer(props: {
         pending,
         hoveredPlaceCode,
         onAdminAreaHoverChange,
+        canDrillDown,
         drillDown,
         drillUp,
     } = useContext(NrwAdminAreasContext);
@@ -72,6 +73,7 @@ function NrwShapeLayer(props: {
         isInteractive,
         hoveredPlaceCode,
         onAdminAreaHoverChange,
+        canDrillDown,
     );
 
     // Drill into the clicked admin area, or (when enabled) back up on a click beside them.
@@ -90,7 +92,7 @@ function NrwShapeLayer(props: {
         [drillDown, drillUp, clearHover],
     );
     // The last level stays on the map while the next loads, so hold clicks until then.
-    useAdminAreaClick(id, isInteractive && !pending, handleClick);
+    useAdminAreaClick(id, isInteractive && !pending, canDrillDown, handleClick);
 
     if (isNotDefined(hoveredAdminArea) || !isVisible) {
         return null;

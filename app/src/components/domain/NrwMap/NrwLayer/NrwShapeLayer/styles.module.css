@@ -1,6 +1,11 @@
 .admin-area-tooltip {
     border: 2px solid rgb(50 50 50 / 20%);
     border-radius: var(--go-ui-border-radius-md);
+    /*
+     * To make border transparent: let the map show through the translucent
+     * border instead of the tooltip's own background.
+     */
+    background-clip: padding-box;
     background-color: var(--go-ui-color-white);
     padding: var(--go-ui-spacing-4xs) var(--go-ui-spacing-2xs);
     white-space: nowrap;
