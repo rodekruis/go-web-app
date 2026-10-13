@@ -105,6 +105,14 @@ function NrwAdminAreasProvider(props: {
 
     const [hoveredPlaceCode, setHoveredPlaceCode] = useState<PlaceCode>();
 
+    const shownAdminAreas = drill.shown.adminAreas;
+    const exposedPopulationScale = useMemo(
+        () => (isDefined(event) && isDefined(shownAdminAreas)
+            ? getExposedPopulationScale(event, shownAdminAreas)
+            : undefined),
+        [event, shownAdminAreas],
+    );
+
     const value = useMemo<NrwAdminAreasContextProps>(
         () => {
             const exposedAdminLevels = isDefined(event) ? getNrwExposedAdminLevels(event) : [];
@@ -130,9 +138,7 @@ function NrwAdminAreasProvider(props: {
                 adminLevel,
                 adminLevelLabels,
                 adminAreas: shown.adminAreas,
-                exposedPopulationScale: isDefined(event) && isDefined(shown.adminAreas)
-                    ? getExposedPopulationScale(event, shown.adminAreas)
-                    : undefined,
+                exposedPopulationScale,
                 pending,
                 drillPath: shown.path,
                 parentAdminArea: shown.path.at(-1),
@@ -158,6 +164,7 @@ function NrwAdminAreasProvider(props: {
         [
             event,
             drill,
+            exposedPopulationScale,
             initialAdminLevel,
             adminLevel,
             adminLevelLabels,
