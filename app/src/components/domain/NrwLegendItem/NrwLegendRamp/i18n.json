@@ -1,5 +1,5 @@
 {
-    "namespace": "nrwMap",
+    "namespace": "nrwLegendItem",
     "strings": {
         "nrwLegendRampLow": "Low",
         "nrwLegendRampHigh": "High"

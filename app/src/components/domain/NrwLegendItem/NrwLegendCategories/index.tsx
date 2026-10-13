@@ -18,8 +18,8 @@ function formatBound(value: number): string {
     // @ifrc-go/ui declares the `number | null | undefined => undefined` overload of
     // formatNumber before the `number => string` one, so the type is undefined here
     // even though the call always returns a string. Keep the fallback for the types only.
-    return formatNumber(Math.round(value), { compact: true, maximumFractionDigits: 1 })
-        ?? String(Math.round(value));
+    return formatNumber(value, { compact: true, maximumFractionDigits: 1 })
+        ?? String(value);
 }
 
 function NrwLegendCategories(props: {

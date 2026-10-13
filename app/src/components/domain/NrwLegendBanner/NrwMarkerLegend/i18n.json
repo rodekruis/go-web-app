@@ -1,5 +1,5 @@
 {
-    "namespace": "nrwMap",
+    "namespace": "nrwLegendBanner",
     "strings": {
         "nrwMarkerLegendAlertLevelLabel": "Alert level:",
         "nrwMarkerLegendAlertLow": "Low Warning",

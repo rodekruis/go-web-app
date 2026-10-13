@@ -39,14 +39,17 @@ function createEvent(areas: NrwExposedAdminArea[]): NrwEvent {
 
 describe('getEqualIntervalBreaks', () => {
     test('splits the range up to the maximum into five equal bands', () => {
+        // Act & Assert
         expect(getEqualIntervalBreaks([10, 100, 40])).toEqual([20, 40, 60, 80]);
     });
 
     test('scales to the magnitude of the values', () => {
+        // Act & Assert
         expect(getEqualIntervalBreaks([2500000])).toEqual([500000, 1000000, 1500000, 2000000]);
     });
 
     test('returns zero breaks when there are no values', () => {
+        // Act & Assert
         expect(getEqualIntervalBreaks([])).toEqual([0, 0, 0, 0]);
     });
 });
@@ -56,6 +59,7 @@ describe('getRampColor', () => {
     const breaks = getEqualIntervalBreaks([100]);
 
     test('picks the tint of the band the value falls in, starting at the break', () => {
+        // Act & Assert
         expect(getRampColor(ramp, breaks, 0)).toBe(ramp[0]);
         expect(getRampColor(ramp, breaks, 19)).toBe(ramp[0]);
         expect(getRampColor(ramp, breaks, 20)).toBe(ramp[1]);
@@ -65,6 +69,7 @@ describe('getRampColor', () => {
     });
 
     test('uses the first tint for unknown values and when there are no breaks', () => {
+        // Act & Assert
         expect(getRampColor(ramp, breaks, undefined)).toBe(ramp[0]);
         expect(getRampColor(ramp, getEqualIntervalBreaks([]), 0)).toBe(ramp[0]);
     });
@@ -72,8 +77,10 @@ describe('getRampColor', () => {
 
 describe('getRampCategories', () => {
     test('pairs each tint with its band, open-ended at both ends', () => {
+        // Arrange
         const ramp = alertClassMapRamps.high;
 
+        // Act & Assert
         expect(getRampCategories(ramp, [200, 400, 600, 800])).toEqual([
             { color: ramp[0], from: undefined, to: 200 },
             { color: ramp[1], from: 200, to: 400 },
@@ -88,6 +95,7 @@ describe('getExposedPopulationScale', () => {
     const event = createEvent([createArea('SS01', 1000), createArea('SS02', 250)]);
 
     test('uses the ramp of the alert class and scales to the admin areas on the map only', () => {
+        // Act & Assert
         expect(getExposedPopulationScale(event, createNrwAdminAreas(['SS01', 'SS02']))).toEqual({
             ramp: alertClassMapRamps.high,
             breaks: [200, 400, 600, 800],
@@ -99,8 +107,10 @@ describe('getExposedPopulationScale', () => {
     });
 
     test('has no breaks when none of the areas has exposed population', () => {
+        // Arrange
         const noExposure = createEvent([createArea('SS01', 0)]);
 
+        // Act & Assert
         expect(getExposedPopulationScale(noExposure, createNrwAdminAreas(['SS01']))).toMatchObject({
             breaks: undefined,
         });

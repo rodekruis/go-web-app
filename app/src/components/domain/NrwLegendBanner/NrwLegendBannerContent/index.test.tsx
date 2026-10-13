@@ -30,6 +30,7 @@ function renderBanner(legend: NrwLegend) {
 
 describe('NrwLegendBannerContent', () => {
     test('shows the visible exposure layers of the event', () => {
+        // Act
         const { container } = renderBanner({
             state: NrwLegendState.Items,
             items: [
@@ -52,6 +53,7 @@ describe('NrwLegendBannerContent', () => {
             ],
         });
 
+        // Assert
         expect(screen.getByText('Flood depth:')).toBeInTheDocument();
         expect(screen.getByText(rampI18n.strings.nrwLegendRampLow)).toBeInTheDocument();
         expect(screen.getByText('Exposed population:')).toBeInTheDocument();
@@ -62,14 +64,18 @@ describe('NrwLegendBannerContent', () => {
     });
 
     test('keeps the strip, empty, for an event whose legend items are not ready', () => {
+        // Act
         const { container } = renderBanner({ state: NrwLegendState.Items, items: [] });
 
+        // Assert
         expect(container.firstChild).toBeEmptyDOMElement();
     });
 
     test('shows the alert levels and event types of the markers', () => {
+        // Act
         renderBanner({ state: NrwLegendState.NoEvent });
 
+        // Assert
         const { strings } = markerI18n;
         expect(screen.getByText(strings.nrwMarkerLegendAlertLevelLabel)).toBeInTheDocument();
         expect(screen.getByText(strings.nrwMarkerLegendAlertLow)).toBeInTheDocument();
@@ -79,8 +85,10 @@ describe('NrwLegendBannerContent', () => {
     });
 
     test('asks to turn on layers', () => {
+        // Act
         renderBanner({ state: NrwLegendState.NoLayers });
 
+        // Assert
         expect(screen.getByText(i18n.strings.nrwLegendBannerNoLayersMessage)).toBeInTheDocument();
     });
 });

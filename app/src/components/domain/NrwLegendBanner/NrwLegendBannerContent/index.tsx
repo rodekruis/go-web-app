@@ -15,8 +15,6 @@ import NrwMarkerLegend from '../NrwMarkerLegend';
 import i18n from './i18n.json';
 import styles from './styles.module.css';
 
-// The legend strip under the map. Always rendered, so the map keeps its height
-// while an event's legend items are still loading.
 function NrwLegendBannerContent(props: {
     legend: NrwLegend;
 }) {
