@@ -17,7 +17,6 @@ const alertClassStyles: Record<NrwEvent['alertClass'], string | undefined> = {
 
 const supportedHazardTypes = ['floods', 'drought', 'tropicalCyclone'] as const;
 
-// What the colour and icon of the event markers on the map mean.
 function NrwMarkerLegend() {
     const strings = useTranslation(i18n);
 

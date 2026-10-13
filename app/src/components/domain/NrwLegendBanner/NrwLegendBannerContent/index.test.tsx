@@ -16,10 +16,10 @@ import {
     NrwLegendType,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
-import NrwLegendBannerContent from './index';
+import { NrwLegendBannerContent } from '../index';
 
 import markerI18n from '../NrwMarkerLegend/i18n.json';
-import i18n from './i18n.json';
+import i18n from '../i18n.json';
 
 function renderBanner(legend: NrwLegend) {
     return render(

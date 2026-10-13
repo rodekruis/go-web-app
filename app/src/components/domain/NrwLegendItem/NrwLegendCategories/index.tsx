@@ -15,9 +15,6 @@ import i18n from './i18n.json';
 import styles from './styles.module.css';
 
 function formatBound(value: number): string {
-    // @ifrc-go/ui declares the `number | null | undefined => undefined` overload of
-    // formatNumber before the `number => string` one, so the type is undefined here
-    // even though the call always returns a string. Keep the fallback for the types only.
     return formatNumber(value, { compact: true, maximumFractionDigits: 1 })
         ?? String(value);
 }
