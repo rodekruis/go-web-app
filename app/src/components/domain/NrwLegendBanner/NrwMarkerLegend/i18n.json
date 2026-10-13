@@ -1,0 +1,13 @@
+{
+    "namespace": "nrwMap",
+    "strings": {
+        "nrwMarkerLegendAlertLevelLabel": "Alert level:",
+        "nrwMarkerLegendAlertLow": "Low Warning",
+        "nrwMarkerLegendAlertMedium": "Medium Warning",
+        "nrwMarkerLegendAlertHigh": "High Warning",
+        "nrwMarkerLegendEventTypeLabel": "Event type:",
+        "nrwMarkerLegendHazardFloods": "Floods",
+        "nrwMarkerLegendHazardDrought": "Drought",
+        "nrwMarkerLegendHazardCyclone": "Cyclone"
+    }
+}

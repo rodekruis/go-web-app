@@ -1,5 +1,7 @@
 import { createContext } from 'react';
 
+import { type NrwExposedPopulationScale } from '#utils/nrw/colors';
+
 import {
     type AdminAreaDrillDownHandler,
     type AdminAreaProperties,
@@ -16,6 +18,7 @@ export interface NrwAdminAreasContextProps {
     adminLevel: AdminLevel;
     adminLevelLabels: NrwAdminLevelLabels | undefined;
     adminAreas: NrwAdminAreaFeatureCollection | undefined;
+    exposedPopulationScale: NrwExposedPopulationScale | undefined;
     pending: boolean;
     drillPath: AdminAreaProperties[];
     parentAdminArea: AdminAreaProperties | undefined;
@@ -32,6 +35,7 @@ const NrwAdminAreasContext = createContext<NrwAdminAreasContextProps>({
     adminLevel: 1 as AdminLevel,
     adminLevelLabels: undefined,
     adminAreas: undefined,
+    exposedPopulationScale: undefined,
     pending: false,
     drillPath: [],
     parentAdminArea: undefined,

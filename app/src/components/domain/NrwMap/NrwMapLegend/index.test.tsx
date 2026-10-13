@@ -9,6 +9,7 @@ import {
     test,
 } from 'vitest';
 
+import rampI18n from '#components/domain/NrwLegendItem/NrwLegendRamp/i18n.json';
 import TestProviders from '#utils/testing/TestProviders';
 import {
     type NrwLegendItem,
@@ -18,7 +19,6 @@ import {
 import NrwMapLegend from './index';
 
 import i18n from './i18n.json';
-import rampI18n from './NrwLegendRamp/i18n.json';
 
 const populationDensity: NrwLegendItem = {
     type: NrwLegendType.Gradient,

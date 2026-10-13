@@ -13,4 +13,5 @@
     --nrw-height-map: var(--go-ui-height-map-md);
     /* hardcoded height because the header has dynamic height */
     --nrw-height-map-standalone: calc(100vh - 140px);
+    --nrw-height-legend-banner: 62px;
 }

@@ -11,19 +11,14 @@ import {
 import {
     alertClassMapRamps,
     mapOutlineWidth,
+    type NrwExposedPopulationScale,
 } from '#utils/nrw/colors';
-import { type NrwAdminAreaFeatureCollection } from '#views/CountryProfileNationalRiskWatch/types';
+import createNrwAdminAreas from '#utils/testing/createNrwAdminAreas';
 
 import { type MapLayer } from '../useNrwMapLayers';
 import getAdminAreaLayer from './getAdminAreaLayer';
 
-const adminAreas = {
-    type: 'FeatureCollection',
-    features: [
-        { type: 'Feature', geometry: null, properties: { placeCode: 'SS03' } },
-        { type: 'Feature', geometry: null, properties: { placeCode: 'SS04' } },
-    ],
-} as unknown as NrwAdminAreaFeatureCollection;
+const adminAreas = createNrwAdminAreas(['SS03', 'SS04']);
 
 // The Mapbox addLayer parameter type does not narrow the paint by the layer type.
 function getFillColor(layer: MapLayer | undefined) {
@@ -37,15 +32,14 @@ function getLineColor(layer: MapLayer | undefined) {
 describe('getAdminAreaLayer', () => {
     test('outlines each admin area in the colour of its fill, without transparency', () => {
         // Arrange
-        const exposedPopulationByPlaceCode = new Map([['SS03', 1000], ['SS04', 5000]]);
+        const scale: NrwExposedPopulationScale = {
+            ramp: alertClassMapRamps.high,
+            breaks: [1000, 2000, 3000, 4000],
+            exposedPopulationByPlaceCode: new Map([['SS03', 1000], ['SS04', 5000]]),
+        };
 
         // Act
-        const [fill, outline] = getAdminAreaLayer(
-            'layer-SSD-adminAreas',
-            adminAreas,
-            exposedPopulationByPlaceCode,
-            'high',
-        );
+        const [fill, outline] = getAdminAreaLayer('layer-SSD-adminAreas', adminAreas, scale);
 
         // Assert
         expect(fill).toMatchObject({ id: 'layer-SSD-adminAreas', type: 'fill' });
@@ -74,15 +68,14 @@ describe('getAdminAreaLayer', () => {
 
     test('outlines the admin areas in the flat fill colour when none has exposed population', () => {
         // Arrange
-        const exposedPopulationByPlaceCode = new Map<string, number>();
+        const scale: NrwExposedPopulationScale = {
+            ramp: alertClassMapRamps.low,
+            breaks: undefined,
+            exposedPopulationByPlaceCode: new Map<string, number>(),
+        };
 
         // Act
-        const [fill, outline] = getAdminAreaLayer(
-            'layer-SSD-adminAreas',
-            adminAreas,
-            exposedPopulationByPlaceCode,
-            'low',
-        );
+        const [fill, outline] = getAdminAreaLayer('layer-SSD-adminAreas', adminAreas, scale);
 
         // Assert
         expect(getFillColor(fill)).toBe(alertClassMapRamps.low[0]);

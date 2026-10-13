@@ -1,0 +1,8 @@
+{
+    "namespace": "nrwMap",
+    "strings": {
+        "nrwLegendCategoriesBelow": "<{value}",
+        "nrwLegendCategoriesRange": "{from}-{to}",
+        "nrwLegendCategoriesAbove": "{value}+"
+    }
+}

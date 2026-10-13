@@ -10,8 +10,6 @@ import {
     isNotDefined,
 } from '@togglecorp/fujs';
 
-import { getNrwExposedPopulationByPlaceCode } from '#utils/nrw/events';
-import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
 import { type AdminAreaProperties } from '#views/CountryProfileNationalRiskWatch/types';
 import { getFeatureCollectionBounds } from '#views/CountryProfileNationalRiskWatch/utils';
@@ -41,9 +39,9 @@ function NrwShapeLayer(props: {
 }) {
     const { id, isVisible, layerAnchorId } = props;
 
-    const { selectedEvent } = useContext(NrwEventsContext);
     const {
         adminAreas,
+        exposedPopulationScale,
         pending,
         hoveredPlaceCode,
         onAdminAreaHoverChange,
@@ -60,23 +58,11 @@ function NrwShapeLayer(props: {
     );
     useNrwMapFitBounds(bounds);
 
-    const exposedPopulationByPlaceCode = useMemo(
-        () => (isDefined(selectedEvent)
-            ? getNrwExposedPopulationByPlaceCode(selectedEvent)
-            : new Map<string, number>()),
-        [selectedEvent],
-    );
-
     const mapLayers = useMemo(
-        () => (isDefined(adminAreas) && isDefined(selectedEvent)
-            ? getAdminAreaLayer(
-                id,
-                adminAreas,
-                exposedPopulationByPlaceCode,
-                selectedEvent.alertClass,
-            )
+        () => (isDefined(adminAreas) && isDefined(exposedPopulationScale)
+            ? getAdminAreaLayer(id, adminAreas, exposedPopulationScale)
             : undefined),
-        [id, adminAreas, exposedPopulationByPlaceCode, selectedEvent],
+        [id, adminAreas, exposedPopulationScale],
     );
     useNrwMapLayers(mapLayers, isVisible, layerAnchorId);
 
@@ -122,7 +108,9 @@ function NrwShapeLayer(props: {
                 <div className={styles.exposedPopulation}>
                     {strings.nrwShapeLayerExposedPopulationLabel}
                     <NumberOutput
-                        value={exposedPopulationByPlaceCode.get(hoveredAdminArea.placeCode)}
+                        value={exposedPopulationScale?.exposedPopulationByPlaceCode.get(
+                            hoveredAdminArea.placeCode,
+                        )}
                         invalidText="--"
                     />
                 </div>

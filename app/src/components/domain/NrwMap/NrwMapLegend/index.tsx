@@ -8,15 +8,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { RawButton } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 
-import { type NrwLegendItem } from '#views/CountryProfileNationalRiskWatch/types';
-
-import NrwLegendRamp from './NrwLegendRamp';
+import NrwLegendItem from '#components/domain/NrwLegendItem';
+import { type NrwLegendItem as NrwLegendItemType } from '#views/CountryProfileNationalRiskWatch/types';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
 
 function NrwMapLegend(props: {
-    items: NrwLegendItem[];
+    items: NrwLegendItemType[];
 }) {
     const { items } = props;
 
@@ -46,7 +45,7 @@ function NrwMapLegend(props: {
             {isOpen && (
                 <div className={styles.items}>
                     {items.map((item) => (
-                        <NrwLegendRamp
+                        <NrwLegendItem
                             key={item.layerName}
                             item={item}
                         />

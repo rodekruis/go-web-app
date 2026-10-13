@@ -5,6 +5,7 @@ import {
 } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
+import { getExposedPopulationScale } from '#utils/nrw/colors';
 import {
     getNrwExposedAdminLevels,
     getNrwExposedPlaceCodes,
@@ -129,6 +130,9 @@ function NrwAdminAreasProvider(props: {
                 adminLevel,
                 adminLevelLabels,
                 adminAreas: shown.adminAreas,
+                exposedPopulationScale: isDefined(event) && isDefined(shown.adminAreas)
+                    ? getExposedPopulationScale(event, shown.adminAreas)
+                    : undefined,
                 pending,
                 drillPath: shown.path,
                 parentAdminArea: shown.path.at(-1),

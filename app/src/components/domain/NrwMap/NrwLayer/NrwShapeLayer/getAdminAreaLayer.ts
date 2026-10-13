@@ -2,16 +2,12 @@ import { isDefined } from '@togglecorp/fujs';
 import { type ExpressionSpecification } from 'mapbox-gl-v3';
 
 import {
-    alertClassMapRamps,
-    getEqualIntervalBreaks,
     mapFillHoverOpacity,
     mapFillOpacity,
     mapOutlineWidth,
+    type NrwExposedPopulationScale,
 } from '#utils/nrw/colors';
-import {
-    type NrwAdminAreaFeatureCollection,
-    type NrwEvent,
-} from '#views/CountryProfileNationalRiskWatch/types';
+import { type NrwAdminAreaFeatureCollection } from '#views/CountryProfileNationalRiskWatch/types';
 
 import { type MapLayer } from '../useNrwMapLayers';
 
@@ -25,9 +21,10 @@ const exposedPopulation: ExpressionSpecification = ['coalesce', ['get', 'exposed
 function getAdminAreaLayer(
     id: string,
     adminAreas: NrwAdminAreaFeatureCollection,
-    exposedPopulationByPlaceCode: Map<string, number>,
-    alertClass: NrwEvent['alertClass'],
+    scale: NrwExposedPopulationScale,
 ): MapLayer[] {
+    const { ramp, breaks, exposedPopulationByPlaceCode } = scale;
+
     // Add the exposed population to the features, so the paint expressions can read it.
     const features = adminAreas.features.map((feature) => ({
         ...feature,
@@ -36,14 +33,9 @@ function getAdminAreaLayer(
             exposedPopulation: exposedPopulationByPlaceCode.get(feature.properties.placeCode),
         },
     }));
-    const exposedPopulations = features
-        .map((feature) => feature.properties.exposedPopulation)
-        .filter(isDefined);
-    const breaks = getEqualIntervalBreaks(exposedPopulations);
-    const ramp = alertClassMapRamps[alertClass];
 
     // The step stops must ascend, so a set without exposed population gets a flat fill.
-    const fillColor: ExpressionSpecification | string = breaks[0] > 0
+    const fillColor: ExpressionSpecification | string = isDefined(breaks)
         ? [
             'step',
             exposedPopulation,

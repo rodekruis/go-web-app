@@ -91,11 +91,42 @@ export type LayerToggleHandler = (layerName: NrwLayerName) => void;
 
 export enum NrwLegendType {
     Gradient = 'gradient',
+    Categories = 'categories',
 }
 
-export type NrwLegendItem = {
-    type: NrwLegendType.Gradient;
+// One band of a stepped scale. The bounds are undefined on the open ends.
+export interface NrwLegendCategory {
+    color: string;
+    from: number | undefined;
+    to: number | undefined;
+}
+
+interface NrwLegendItemBase {
     layerName: NrwLayerName;
     label: NrwLayer['label'];
+}
+
+export type NrwLegendItem = NrwLegendItemBase & ({
+    type: NrwLegendType.Gradient;
     colors: readonly string[];
+} | {
+    type: NrwLegendType.Categories;
+    categories: NrwLegendCategory[];
+});
+
+export type NrwLegendPlacement = 'panel' | 'banner';
+
+export enum NrwLegendState {
+    NoEvent = 'noEvent',
+    NoLayers = 'noLayers',
+    Items = 'items',
+}
+
+export type NrwLegend = {
+    state: NrwLegendState.NoEvent;
+} | {
+    state: NrwLegendState.NoLayers;
+} | {
+    state: NrwLegendState.Items;
+    items: NrwLegendItem[];
 };

@@ -1,11 +1,24 @@
 import { useMemo } from 'react';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 
+import {
+    floodDepthMapRamp,
+    getRampCategories,
+    type NrwExposedPopulationScale,
+} from '#utils/nrw/colors';
 import supportedLayerNames from '#utils/nrw/layers';
 
 import {
+    type NrwEvent,
     type NrwLayer,
     type NrwLayerName,
+    type NrwLegend,
     type NrwLegendItem,
+    type NrwLegendPlacement,
+    NrwLegendState,
     NrwLegendType,
 } from '../types';
 
@@ -17,12 +30,51 @@ const populationDensityGradient = [
     'var(--go-ui-color-gray-70)',
 ] as const;
 
-interface NrwLegendConfig {
-    getItem: (layer: NrwLayer) => NrwLegendItem;
+interface NrwLegendContext {
+    exposedPopulationScale: NrwExposedPopulationScale | undefined;
 }
 
-const nrwLegendItemsConfig: Partial<Record<NrwLayerName, NrwLegendConfig>> = {
-    [supportedLayerNames.populationDensity]: {
+interface NrwLegendConfig {
+    layerName: NrwLayerName;
+    placement: NrwLegendPlacement;
+    // Returns undefined when the layer has nothing to show in the legend.
+    getItem: (layer: NrwLayer, context: NrwLegendContext) => NrwLegendItem | undefined;
+}
+
+// In display order within each placement.
+const nrwLegendConfigs: NrwLegendConfig[] = [
+    {
+        layerName: supportedLayerNames.floodDepth,
+        placement: 'banner',
+        getItem: (layer) => ({
+            type: NrwLegendType.Gradient,
+            layerName: layer.name,
+            label: layer.label,
+            colors: floodDepthMapRamp,
+        }),
+    },
+    {
+        layerName: supportedLayerNames.exposedPopulation,
+        placement: 'banner',
+        getItem: (layer, { exposedPopulationScale }) => {
+            // No scale until the areas load, and none when nothing is exposed (flat fill).
+            if (isNotDefined(exposedPopulationScale?.breaks)) {
+                return undefined;
+            }
+
+            const { ramp, breaks } = exposedPopulationScale;
+
+            return {
+                type: NrwLegendType.Categories,
+                layerName: layer.name,
+                label: layer.label,
+                categories: getRampCategories(ramp, breaks),
+            };
+        },
+    },
+    {
+        layerName: supportedLayerNames.populationDensity,
+        placement: 'panel',
         getItem: (layer) => ({
             type: NrwLegendType.Gradient,
             layerName: layer.name,
@@ -30,43 +82,58 @@ const nrwLegendItemsConfig: Partial<Record<NrwLayerName, NrwLegendConfig>> = {
             colors: populationDensityGradient,
         }),
     },
-};
+];
 
-// Legend content management for both the map panel and the footer
+// The legend content of one placement, for the visible layers of the selected event.
 function useNrwLegend(props: {
+    placement: NrwLegendPlacement;
+    selectedEvent: NrwEvent | undefined;
+    exposedPopulationScale: NrwExposedPopulationScale | undefined;
     availableLayers: NrwLayer[] | undefined;
     visibleLayers: NrwLayerName[];
-    enabled: boolean;
-}) {
-    const { availableLayers, visibleLayers, enabled } = props;
+}): NrwLegend {
+    const {
+        placement,
+        selectedEvent,
+        exposedPopulationScale,
+        availableLayers,
+        visibleLayers,
+    } = props;
 
-    const legendItems = useMemo(
-        (): NrwLegendItem[] => {
-            if (!enabled) {
-                return [];
+    return useMemo(
+        (): NrwLegend => {
+            if (isNotDefined(selectedEvent)) {
+                return { state: NrwLegendState.NoEvent };
             }
 
-            return Object.values(supportedLayerNames).flatMap((name) => {
-                const config = nrwLegendItemsConfig[name];
-                const layer = availableLayers?.find(
-                    (availableLayer) => availableLayer.name === name,
-                );
+            const visibleConfigs = nrwLegendConfigs.flatMap((config) => {
+                const layer = availableLayers?.find(({ name }) => name === config.layerName);
 
                 if (
-                    config === undefined
-                    || layer === undefined
-                    || !visibleLayers.includes(name)
+                    config.placement !== placement
+                    || isNotDefined(layer)
+                    || !visibleLayers.includes(config.layerName)
                 ) {
                     return [];
                 }
 
-                return [config.getItem(layer)];
+                return [{ config, layer }];
             });
-        },
-        [availableLayers, visibleLayers, enabled],
-    );
 
-    return { legendItems };
+            if (visibleConfigs.length === 0) {
+                return { state: NrwLegendState.NoLayers };
+            }
+
+            return {
+                state: NrwLegendState.Items,
+                items: visibleConfigs.flatMap(({ config, layer }) => {
+                    const item = config.getItem(layer, { exposedPopulationScale });
+                    return isDefined(item) ? [item] : [];
+                }),
+            };
+        },
+        [placement, selectedEvent, exposedPopulationScale, availableLayers, visibleLayers],
+    );
 }
 
 export default useNrwLegend;
