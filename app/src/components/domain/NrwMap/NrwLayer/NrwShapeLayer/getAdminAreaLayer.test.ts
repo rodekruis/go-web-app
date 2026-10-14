@@ -66,19 +66,27 @@ describe('getAdminAreaLayer', () => {
         expect(outline?.paint).not.toHaveProperty('line-opacity');
     });
 
-    test('outlines the admin areas in the flat fill colour when none has exposed population', () => {
-        // Arrange
+    describe('when none of the admin areas has exposed population', () => {
         const scale: NrwExposedPopulationScale = {
             ramp: alertClassMapRamps.low,
             breaks: undefined,
             exposedPopulationByPlaceCode: new Map<string, number>(),
         };
 
-        // Act
-        const [fill, outline] = getAdminAreaLayer('layer-SSD-adminAreas', adminAreas, scale);
+        test('fills the admin areas in the flat first tint', () => {
+            // Act
+            const [fill] = getAdminAreaLayer('layer-SSD-adminAreas', adminAreas, scale);
 
-        // Assert
-        expect(getFillColor(fill)).toBe(alertClassMapRamps.low[0]);
-        expect(getLineColor(outline)).toBe(alertClassMapRamps.low[0]);
+            // Assert
+            expect(getFillColor(fill)).toBe(alertClassMapRamps.low[0]);
+        });
+
+        test('outlines the admin areas in the flat first tint', () => {
+            // Act
+            const [, outline] = getAdminAreaLayer('layer-SSD-adminAreas', adminAreas, scale);
+
+            // Assert
+            expect(getLineColor(outline)).toBe(alertClassMapRamps.low[0]);
+        });
     });
 });

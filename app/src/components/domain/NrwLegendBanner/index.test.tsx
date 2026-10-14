@@ -91,7 +91,7 @@ function renderBanner(props: {
 }
 
 describe('NrwLegendBanner', () => {
-    test('shows the visible exposure layers of the event', () => {
+    test('shows the visible flood depth layer of the event as a ramp', () => {
         // Act
         renderBanner({
             events: { selectedEvent: event },
@@ -102,6 +102,17 @@ describe('NrwLegendBanner', () => {
         // Assert
         screen.getByText('Flood depth:');
         screen.getByText(rampI18n.strings.nrwLegendRampLow);
+    });
+
+    test('shows the visible exposed population layer of the event as categories', () => {
+        // Act
+        renderBanner({
+            events: { selectedEvent: event },
+            adminAreas: { exposedPopulationScale },
+            visibleLayers: ['floodDepth', 'exposedPopulation'],
+        });
+
+        // Assert
         screen.getByText('Exposed population:');
         screen.getByText('<200');
         screen.getByText('200-400');
@@ -119,7 +130,7 @@ describe('NrwLegendBanner', () => {
         expect(container.firstChild).toBeEmptyDOMElement();
     });
 
-    test('shows the alert levels and event types of the markers', () => {
+    test('shows the alert levels of the markers', () => {
         // Act
         renderBanner({});
 
@@ -128,6 +139,14 @@ describe('NrwLegendBanner', () => {
         screen.getByText(strings.nrwMarkerLegendAlertLevelLabel);
         screen.getByText(strings.nrwMarkerLegendAlertLow);
         screen.getByText(strings.nrwMarkerLegendAlertHigh);
+    });
+
+    test('shows the event types of the markers', () => {
+        // Act
+        renderBanner({});
+
+        // Assert
+        const { strings } = markerI18n;
         screen.getByText(strings.nrwMarkerLegendEventTypeLabel);
         screen.getByText(strings.nrwMarkerLegendHazardCyclone);
     });

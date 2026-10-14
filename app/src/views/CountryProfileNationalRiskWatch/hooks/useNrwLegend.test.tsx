@@ -101,40 +101,34 @@ function renderLegend(options: {
 }
 
 describe('useNrwLegend', () => {
-    test('reports no event without a selection, for either placement', () => {
+    test.each<[NrwLegendPlacement, NrwLayerName[]]>([
+        ['banner', ['floodDepth']],
+        ['panel', ['populationDensity']],
+    ])('reports no event without a selection, in the %s', (placement, visibleLayers) => {
         // Act
-        const { result: banner } = renderLegend({
-            placement: 'banner',
+        const { result } = renderLegend({
+            placement,
             selectedEvent: undefined,
             exposedPopulationScale: undefined,
-            visibleLayers: ['floodDepth'],
-        });
-        const { result: panel } = renderLegend({
-            placement: 'panel',
-            selectedEvent: undefined,
-            exposedPopulationScale: undefined,
-            visibleLayers: ['populationDensity'],
+            visibleLayers,
         });
 
         // Assert
-        expect(banner.current).toEqual({ state: NrwLegendState.NoEvent });
-        expect(panel.current).toEqual({ state: NrwLegendState.NoEvent });
+        expect(result.current).toEqual({ state: NrwLegendState.NoEvent });
     });
 
-    test('reports no layers when none of the placement\'s layers are visible', () => {
+    test.each<[NrwLegendPlacement, NrwLayerName[]]>([
+        ['banner', ['populationDensity']],
+        ['panel', ['floodDepth', 'exposedPopulation']],
+    ])('reports no layers when none of the %s\'s layers are visible', (placement, visibleLayers) => {
         // Act
-        const { result: banner } = renderLegend({
-            placement: 'banner',
-            visibleLayers: ['populationDensity'],
-        });
-        const { result: panel } = renderLegend({
-            placement: 'panel',
-            visibleLayers: ['floodDepth', 'exposedPopulation'],
+        const { result } = renderLegend({
+            placement,
+            visibleLayers,
         });
 
         // Assert
-        expect(banner.current).toEqual({ state: NrwLegendState.NoLayers });
-        expect(panel.current).toEqual({ state: NrwLegendState.NoLayers });
+        expect(result.current).toEqual({ state: NrwLegendState.NoLayers });
     });
 
     test('shows population density in the panel only', () => {
@@ -158,55 +152,89 @@ describe('useNrwLegend', () => {
         });
     });
 
-    test('shows flood depth before exposed population in the banner, as categories of the scale', () => {
-        // Act
-        const { result } = renderLegend({
+    describe('in the banner with every layer visible', () => {
+        const options: Parameters<typeof renderLegend>[0] = {
             placement: 'banner',
             visibleLayers: ['exposedPopulation', 'floodDepth', 'populationDensity'],
+        };
+
+        test('shows flood depth before exposed population, leaving out population density', () => {
+            // Act
+            const { result } = renderLegend(options);
+
+            // Assert
+            expect(result.current).toMatchObject({
+                state: NrwLegendState.Items,
+                items: [
+                    { layerName: 'floodDepth' },
+                    { layerName: 'exposedPopulation' },
+                ],
+            });
         });
 
-        // Assert
-        expect(result.current).toEqual({
-            state: NrwLegendState.Items,
-            items: [
-                {
-                    type: NrwLegendType.Gradient,
-                    layerName: 'floodDepth',
-                    label: 'Flood depth',
-                    colors: floodDepthMapRamp,
-                },
-                {
-                    type: NrwLegendType.Categories,
-                    layerName: 'exposedPopulation',
-                    label: 'Exposed population',
-                    categories: [
-                        { color: alertClassMapRamps.high[0], from: undefined, to: 200 },
-                        { color: alertClassMapRamps.high[1], from: 200, to: 400 },
-                        { color: alertClassMapRamps.high[2], from: 400, to: 600 },
-                        { color: alertClassMapRamps.high[3], from: 600, to: 800 },
-                        { color: alertClassMapRamps.high[4], from: 800, to: undefined },
-                    ],
-                },
-            ],
+        test('shows flood depth as a gradient of its ramp', () => {
+            // Act
+            const { result } = renderLegend(options);
+
+            // Assert
+            expect(result.current).toMatchObject({
+                items: [
+                    {
+                        type: NrwLegendType.Gradient,
+                        label: 'Flood depth',
+                        colors: floodDepthMapRamp,
+                    },
+                    {},
+                ],
+            });
+        });
+
+        test('shows exposed population as categories of the scale', () => {
+            // Act
+            const { result } = renderLegend(options);
+
+            // Assert
+            expect(result.current).toMatchObject({
+                items: [
+                    {},
+                    {
+                        type: NrwLegendType.Categories,
+                        label: 'Exposed population',
+                        categories: [
+                            { color: alertClassMapRamps.high[0], from: undefined, to: 200 },
+                            { color: alertClassMapRamps.high[1], from: 200, to: 400 },
+                            { color: alertClassMapRamps.high[2], from: 400, to: 600 },
+                            { color: alertClassMapRamps.high[3], from: 600, to: 800 },
+                            { color: alertClassMapRamps.high[4], from: 800, to: undefined },
+                        ],
+                    },
+                ],
+            });
         });
     });
 
-    test('leaves out exposed population without a scale or when nothing is exposed', () => {
+    test('leaves out exposed population without a scale', () => {
         // Act
-        const { result: noScale } = renderLegend({
+        const { result } = renderLegend({
             placement: 'banner',
             exposedPopulationScale: undefined,
             visibleLayers: ['exposedPopulation'],
         });
-        const { result: noExposure } = renderLegend({
+
+        // Assert
+        expect(result.current).toEqual({ state: NrwLegendState.Items, items: [] });
+    });
+
+    test('leaves out exposed population when nothing is exposed', () => {
+        // Act
+        const { result } = renderLegend({
             placement: 'banner',
             exposedPopulationScale: { ...exposedPopulationScale, breaks: undefined },
             visibleLayers: ['exposedPopulation'],
         });
 
         // Assert
-        expect(noScale.current).toEqual({ state: NrwLegendState.Items, items: [] });
-        expect(noExposure.current).toEqual({ state: NrwLegendState.Items, items: [] });
+        expect(result.current).toEqual({ state: NrwLegendState.Items, items: [] });
     });
 
     test('ignores visible layers that are not available', () => {
