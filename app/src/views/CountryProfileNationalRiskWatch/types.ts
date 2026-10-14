@@ -44,7 +44,8 @@ export type PlaceCode = string & {
 };
 
 export type NrwAdminAreaFeatureCollection = NrwApiResponse<'/admin-areas'>;
-export type NrwAdminAreaProperties = NrwAdminAreaFeatureCollection['features'][number]['properties'];
+export type NrwAdminAreaFeature = NrwAdminAreaFeatureCollection['features'][number];
+export type NrwAdminAreaProperties = NrwAdminAreaFeature['properties'];
 
 // The validated properties of an /admin-areas feature, narrowed from the API type.
 // Mapbox returns the rendered feature properties untyped, so they are parsed back into this.
