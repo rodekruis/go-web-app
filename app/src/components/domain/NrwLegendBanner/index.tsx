@@ -1,7 +1,4 @@
-import {
-    type ReactNode,
-    useContext,
-} from 'react';
+import { useContext } from 'react';
 import { faCircleInfo } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from '@ifrc-go/ui/hooks';
@@ -14,7 +11,6 @@ import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdmi
 import {
     type NrwLayer,
     type NrwLayerName,
-    type NrwLegend,
     NrwLegendState,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
@@ -41,46 +37,41 @@ function NrwLegendBanner(props: {
         visibleLayers,
     });
 
-    let content: ReactNode;
     switch (legend.state) {
-        case NrwLegendState.Items:
-            content = legend.items.map((item) => (
-                <NrwLegendItem
-                    key={item.layerName}
-                    item={item}
-                />
-            ));
-            break;
         case NrwLegendState.NoEvent:
-            content = <NrwMarkerLegend />;
-            break;
+            return (
+                <div className={styles.nrwLegendBannerContent}>
+                    <NrwMarkerLegend />
+                </div>
+            );
         case NrwLegendState.NoLayers:
-            content = (
-                <>
+            return (
+                <div className={_cs(styles.nrwLegendBannerContent, styles.message)}>
                     <FontAwesomeIcon
                         icon={faCircleInfo}
                         className={styles.messageIcon}
                     />
                     {strings.nrwLegendBannerNoLayersMessage}
-                </>
+                </div>
             );
-            break;
-        default:
+        case NrwLegendState.Items:
+            return (
+                <div className={styles.nrwLegendBannerContent}>
+                    {legend.items.map((item) => (
+                        <NrwLegendItem
+                            key={item.layerName}
+                            item={item}
+                        />
+                    ))}
+                </div>
+            );
+        default: {
+            const exhaustiveCheck: never = legend;
             throw new Error(
-                `NrwLegendBanner: unexpected legend state '${(legend as NrwLegend).state}'`,
+                `NrwLegendBanner: unexpected legend state '${exhaustiveCheck}'`,
             );
+        }
     }
-
-    return (
-        <div
-            className={_cs(
-                styles.nrwLegendBannerContent,
-                legend.state === NrwLegendState.NoLayers && styles.message,
-            )}
-        >
-            {content}
-        </div>
-    );
 }
 
 export default NrwLegendBanner;
