@@ -159,26 +159,18 @@ describe('useNrwLegend', () => {
         expect(noExposure.current).toEqual({ state: NrwLegendState.Items, items: [] });
     });
 
-    test('ignores visible layers that are not available, or not loaded yet', () => {
+    test('ignores visible layers that are not available', () => {
         // Act
-        const { result: notAvailable } = renderHook(() => useNrwLegend({
+        const { result } = renderHook(() => useNrwLegend({
             placement: 'banner',
             selectedEvent: event,
             exposedPopulationScale,
             availableLayers: [populationDensity],
             visibleLayers: ['floodDepth'],
         }));
-        const { result: notLoaded } = renderHook(() => useNrwLegend({
-            placement: 'banner',
-            selectedEvent: event,
-            exposedPopulationScale,
-            availableLayers: undefined,
-            visibleLayers: ['floodDepth'],
-        }));
 
         // Assert
-        expect(notAvailable.current).toEqual({ state: NrwLegendState.NoLayers });
-        expect(notLoaded.current).toEqual({ state: NrwLegendState.NoLayers });
+        expect(result.current).toEqual({ state: NrwLegendState.NoLayers });
     });
 
     test('keeps the same legend reference across rerenders with the same input', () => {

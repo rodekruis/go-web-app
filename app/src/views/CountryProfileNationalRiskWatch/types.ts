@@ -94,11 +94,15 @@ export enum NrwLegendType {
     Categories = 'categories',
 }
 
-// One band of a stepped scale. The bounds are undefined on the open ends.
+// Marks an open end of a stepped scale, e.g. "< 100" or "> 1000"
+type Unbounded = undefined;
+export const unbounded: Unbounded = undefined;
+
+// One band of a stepped scale.
 export interface NrwLegendCategory {
     color: string;
-    from: number | undefined;
-    to: number | undefined;
+    from: number | Unbounded;
+    to: number | Unbounded;
 }
 
 interface NrwLegendItemBase {

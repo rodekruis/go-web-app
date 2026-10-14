@@ -89,7 +89,7 @@ function useNrwLegend(props: {
     placement: NrwLegendPlacement;
     selectedEvent: NrwEvent | undefined;
     exposedPopulationScale: NrwExposedPopulationScale | undefined;
-    availableLayers: NrwLayer[] | undefined;
+    availableLayers: NrwLayer[];
     visibleLayers: NrwLayerName[];
 }): NrwLegend {
     const {
@@ -107,7 +107,7 @@ function useNrwLegend(props: {
             }
 
             const visibleConfigs = nrwLegendConfigs.flatMap((config) => {
-                const layer = availableLayers?.find(({ name }) => name === config.layerName);
+                const layer = availableLayers.find(({ name }) => name === config.layerName);
 
                 if (
                     config.placement !== placement

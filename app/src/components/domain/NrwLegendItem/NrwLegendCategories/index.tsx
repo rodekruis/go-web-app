@@ -3,12 +3,12 @@ import {
     formatNumber,
     resolveToString,
 } from '@ifrc-go/ui/utils';
-import { isDefined } from '@togglecorp/fujs';
 
 import {
     type NrwLegendCategory,
     type NrwLegendItem,
     type NrwLegendType,
+    unbounded,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import i18n from './i18n.json';
@@ -29,16 +29,16 @@ function NrwLegendCategories(props: {
     const getCategoryLabel = (category: NrwLegendCategory): string => {
         const { from, to } = category;
 
-        if (isDefined(from) && isDefined(to)) {
+        if (from !== unbounded && to !== unbounded) {
             return resolveToString(strings.nrwLegendCategoriesRange, {
                 from: formatBound(from),
                 to: formatBound(to),
             });
         }
-        if (isDefined(to)) {
+        if (to !== unbounded) {
             return resolveToString(strings.nrwLegendCategoriesBelow, { value: formatBound(to) });
         }
-        if (isDefined(from)) {
+        if (from !== unbounded) {
             return resolveToString(strings.nrwLegendCategoriesAbove, { value: formatBound(from) });
         }
         return '';

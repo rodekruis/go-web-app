@@ -20,7 +20,7 @@ import i18n from './i18n.json';
 import styles from './styles.module.css';
 
 function NrwLegendBanner(props: {
-    availableLayers: NrwLayer[] | undefined;
+    availableLayers: NrwLayer[];
     visibleLayers: NrwLayerName[];
 }) {
     const { availableLayers, visibleLayers } = props;
