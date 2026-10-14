@@ -1,4 +1,7 @@
-import { useMemo } from 'react';
+import {
+    useContext,
+    useMemo,
+} from 'react';
 import {
     isDefined,
     isNotDefined,
@@ -11,8 +14,9 @@ import {
 } from '#utils/nrw/colors';
 import supportedLayerNames from '#utils/nrw/layers';
 
+import NrwEventsContext from '../contexts/NrwEventsContext';
+import NrwAdminAreasContext from '../NrwAdminAreasProvider/NrwAdminAreasContext';
 import {
-    type NrwEvent,
     type NrwLayer,
     type NrwLayerName,
     type NrwLegend,
@@ -87,18 +91,17 @@ const nrwLegendEntries: NrwLegendEntry[] = [
 // The legend content of one placement, for the visible layers of the selected event.
 function useNrwLegend(props: {
     placement: NrwLegendPlacement;
-    selectedEvent: NrwEvent | undefined;
-    exposedPopulationScale: NrwExposedPopulationScale | undefined;
     availableLayers: NrwLayer[];
     visibleLayers: NrwLayerName[];
 }): NrwLegend {
     const {
         placement,
-        selectedEvent,
-        exposedPopulationScale,
         availableLayers,
         visibleLayers,
     } = props;
+
+    const { selectedEvent } = useContext(NrwEventsContext);
+    const { exposedPopulationScale } = useContext(NrwAdminAreasContext);
 
     return useMemo(
         (): NrwLegend => {

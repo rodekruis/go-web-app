@@ -8,7 +8,6 @@ import supportedLayerNames from '#utils/nrw/layers';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import { type NrwScreenCaptureHandler } from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenCaptureContext';
 import useNrwLegend from '#views/CountryProfileNationalRiskWatch/hooks/useNrwLegend';
-import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,
@@ -81,12 +80,9 @@ function NrwMap(props: {
         onEventHoverChange,
         onEventSelect,
     } = useContext(NrwEventsContext);
-    const { exposedPopulationScale } = useContext(NrwAdminAreasContext);
 
     const panelLegend = useNrwLegend({
         placement: 'panel',
-        selectedEvent,
-        exposedPopulationScale,
         availableLayers,
         visibleLayers,
     });

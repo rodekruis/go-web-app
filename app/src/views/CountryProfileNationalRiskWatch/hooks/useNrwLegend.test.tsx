@@ -1,3 +1,8 @@
+import {
+    type ReactNode,
+    useContext,
+    useMemo,
+} from 'react';
 import { renderHook } from '@testing-library/react';
 import {
     describe,
@@ -12,9 +17,12 @@ import {
 } from '#utils/nrw/colors';
 import createNrwLayer from '#utils/testing/createNrwLayer';
 
+import NrwEventsContext from '../contexts/NrwEventsContext';
+import NrwAdminAreasContext from '../NrwAdminAreasProvider/NrwAdminAreasContext';
 import {
     type NrwEvent,
     type NrwLayerName,
+    type NrwLegendPlacement,
     NrwLegendState,
     NrwLegendType,
 } from '../types';
@@ -32,23 +40,81 @@ const exposedPopulationScale: NrwExposedPopulationScale = {
     exposedPopulationByPlaceCode: new Map([['SS01', 1000], ['SS02', 250]]),
 };
 
+function MockParentProviders(props: {
+    selectedEvent: NrwEvent | undefined;
+    exposedPopulationScale: NrwExposedPopulationScale | undefined;
+    children: ReactNode;
+}) {
+    const { selectedEvent, exposedPopulationScale: scale, children } = props;
+
+    const defaultEvents = useContext(NrwEventsContext);
+    const defaultAdminAreas = useContext(NrwAdminAreasContext);
+    const eventsValue = useMemo(
+        () => ({ ...defaultEvents, selectedEvent }),
+        [defaultEvents, selectedEvent],
+    );
+    const adminAreasValue = useMemo(
+        () => ({ ...defaultAdminAreas, exposedPopulationScale: scale }),
+        [defaultAdminAreas, scale],
+    );
+
+    return (
+        <NrwEventsContext.Provider value={eventsValue}>
+            <NrwAdminAreasContext.Provider value={adminAreasValue}>
+                {children}
+            </NrwAdminAreasContext.Provider>
+        </NrwEventsContext.Provider>
+    );
+}
+
+function renderLegend(options: {
+    placement: NrwLegendPlacement;
+    visibleLayers: NrwLayerName[];
+    availableLayers?: typeof availableLayers;
+    selectedEvent?: NrwEvent | undefined;
+    exposedPopulationScale?: NrwExposedPopulationScale | undefined;
+}) {
+    const {
+        placement,
+        visibleLayers,
+        availableLayers: layers = availableLayers,
+    } = options;
+    // Explicit undefined must win over the defaults.
+    const selectedEvent = 'selectedEvent' in options ? options.selectedEvent : event;
+    const scale = 'exposedPopulationScale' in options
+        ? options.exposedPopulationScale
+        : exposedPopulationScale;
+
+    return renderHook(
+        () => useNrwLegend({ placement, availableLayers: layers, visibleLayers }),
+        {
+            wrapper: ({ children }) => (
+                <MockParentProviders
+                    selectedEvent={selectedEvent}
+                    exposedPopulationScale={scale}
+                >
+                    {children}
+                </MockParentProviders>
+            ),
+        },
+    );
+}
+
 describe('useNrwLegend', () => {
     test('reports no event without a selection, for either placement', () => {
         // Act
-        const { result: banner } = renderHook(() => useNrwLegend({
+        const { result: banner } = renderLegend({
             placement: 'banner',
             selectedEvent: undefined,
             exposedPopulationScale: undefined,
-            availableLayers,
             visibleLayers: ['floodDepth'],
-        }));
-        const { result: panel } = renderHook(() => useNrwLegend({
+        });
+        const { result: panel } = renderLegend({
             placement: 'panel',
             selectedEvent: undefined,
             exposedPopulationScale: undefined,
-            availableLayers,
             visibleLayers: ['populationDensity'],
-        }));
+        });
 
         // Assert
         expect(banner.current).toEqual({ state: NrwLegendState.NoEvent });
@@ -57,20 +123,14 @@ describe('useNrwLegend', () => {
 
     test('reports no layers when none of the placement\'s layers are visible', () => {
         // Act
-        const { result: banner } = renderHook(() => useNrwLegend({
+        const { result: banner } = renderLegend({
             placement: 'banner',
-            selectedEvent: event,
-            exposedPopulationScale,
-            availableLayers,
             visibleLayers: ['populationDensity'],
-        }));
-        const { result: panel } = renderHook(() => useNrwLegend({
+        });
+        const { result: panel } = renderLegend({
             placement: 'panel',
-            selectedEvent: event,
-            exposedPopulationScale,
-            availableLayers,
             visibleLayers: ['floodDepth', 'exposedPopulation'],
-        }));
+        });
 
         // Assert
         expect(banner.current).toEqual({ state: NrwLegendState.NoLayers });
@@ -79,13 +139,10 @@ describe('useNrwLegend', () => {
 
     test('shows population density in the panel only', () => {
         // Act
-        const { result } = renderHook(() => useNrwLegend({
+        const { result } = renderLegend({
             placement: 'panel',
-            selectedEvent: event,
-            exposedPopulationScale,
-            availableLayers,
             visibleLayers: ['populationDensity', 'floodDepth'],
-        }));
+        });
 
         // Assert
         expect(result.current).toEqual({
@@ -103,13 +160,10 @@ describe('useNrwLegend', () => {
 
     test('shows flood depth before exposed population in the banner, as categories of the scale', () => {
         // Act
-        const { result } = renderHook(() => useNrwLegend({
+        const { result } = renderLegend({
             placement: 'banner',
-            selectedEvent: event,
-            exposedPopulationScale,
-            availableLayers,
             visibleLayers: ['exposedPopulation', 'floodDepth', 'populationDensity'],
-        }));
+        });
 
         // Assert
         expect(result.current).toEqual({
@@ -139,20 +193,16 @@ describe('useNrwLegend', () => {
 
     test('leaves out exposed population without a scale or when nothing is exposed', () => {
         // Act
-        const { result: noScale } = renderHook(() => useNrwLegend({
+        const { result: noScale } = renderLegend({
             placement: 'banner',
-            selectedEvent: event,
             exposedPopulationScale: undefined,
-            availableLayers,
             visibleLayers: ['exposedPopulation'],
-        }));
-        const { result: noExposure } = renderHook(() => useNrwLegend({
+        });
+        const { result: noExposure } = renderLegend({
             placement: 'banner',
-            selectedEvent: event,
             exposedPopulationScale: { ...exposedPopulationScale, breaks: undefined },
-            availableLayers,
             visibleLayers: ['exposedPopulation'],
-        }));
+        });
 
         // Assert
         expect(noScale.current).toEqual({ state: NrwLegendState.Items, items: [] });
@@ -161,13 +211,11 @@ describe('useNrwLegend', () => {
 
     test('ignores visible layers that are not available', () => {
         // Act
-        const { result } = renderHook(() => useNrwLegend({
+        const { result } = renderLegend({
             placement: 'banner',
-            selectedEvent: event,
-            exposedPopulationScale,
             availableLayers: [populationDensity],
             visibleLayers: ['floodDepth'],
-        }));
+        });
 
         // Assert
         expect(result.current).toEqual({ state: NrwLegendState.NoLayers });
@@ -176,13 +224,10 @@ describe('useNrwLegend', () => {
     test('keeps the same legend reference across rerenders with the same input', () => {
         // Arrange
         const visibleLayers: NrwLayerName[] = ['populationDensity'];
-        const { result, rerender } = renderHook(() => useNrwLegend({
+        const { result, rerender } = renderLegend({
             placement: 'panel',
-            selectedEvent: event,
-            exposedPopulationScale,
-            availableLayers,
             visibleLayers,
-        }));
+        });
         const firstLegend = result.current;
 
         // Act
