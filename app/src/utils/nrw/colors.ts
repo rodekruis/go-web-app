@@ -10,18 +10,18 @@ import {
     type NrwLegendCategory,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
-export type MapRamp = readonly [string, string, string, string, string];
+type MapColorRamp = readonly [string, string, string, string, string];
 
 // The design defines "Map <colour> 65%", ordered from the lightest (10) to the
 // darkest (90) tint. Mapbox paint expressions need literal colours, so these
 // mirror the tokens in nrw.css.
-export const alertClassMapRamps: Record<NrwEvent['alertClass'], MapRamp> = {
+export const alertClassMapRamps: Record<NrwEvent['alertClass'], MapColorRamp> = {
     low: ['#fff9ea', '#ffedbc', '#ffdf8a', '#ffc635', '#d99a00'],
     medium: ['#fff5ea', '#ffd3aa', '#ffb066', '#ff6e00', '#c24e00'],
     high: ['#fef1f2', '#fcc6ca', '#fa999f', '#f5333f', '#c01825'],
 };
 
-export const floodDepthMapRamp: MapRamp = ['#cbddf2', '#9ebadc', '#6e96c5', '#467abc', '#3163a0'];
+export const floodDepthMapRamp: MapColorRamp = ['#cbddf2', '#9ebadc', '#6e96c5', '#467abc', '#3163a0'];
 
 export const mapFillOpacity = 0.65;
 export const mapFillHoverOpacity = 0.8;
@@ -42,7 +42,7 @@ export function getEqualIntervalBreaks(values: number[]): EqualIntervalBreaks {
 // The breaks of the choropleth of the admin areas on the map, scaled to the
 // exposed population of those areas only. Shared by the fill layer and the legend.
 export interface NrwExposedPopulationScale {
-    ramp: MapRamp;
+    ramp: MapColorRamp;
     // Undefined when none of the areas has exposed population, so the map draws a flat fill.
     breaks: EqualIntervalBreaks | undefined;
     exposedPopulationByPlaceCode: Map<string, number>;
@@ -69,7 +69,7 @@ export function getExposedPopulationScale(
 // The ramp tint of a value, in the band it falls in. A band starts at its break,
 // like a Mapbox step expression, and a set without values shares the first tint.
 export function getRampColor(
-    ramp: MapRamp,
+    ramp: MapColorRamp,
     breaks: EqualIntervalBreaks,
     value: number | undefined,
 ): string {
@@ -81,7 +81,7 @@ export function getRampColor(
 
 // The bands of the ramp as legend entries, the first and last open-ended.
 export function getRampCategories(
-    ramp: MapRamp,
+    ramp: MapColorRamp,
     breaks: EqualIntervalBreaks,
 ): NrwLegendCategory[] {
     const bounds = [undefined, ...breaks, undefined];

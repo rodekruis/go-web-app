@@ -34,7 +34,7 @@ interface NrwLegendContext {
     exposedPopulationScale: NrwExposedPopulationScale | undefined;
 }
 
-interface NrwLegendConfig {
+interface NrwLegendEntry {
     layerName: NrwLayerName;
     placement: NrwLegendPlacement;
     // Returns undefined when the layer has nothing to show in the legend.
@@ -42,7 +42,7 @@ interface NrwLegendConfig {
 }
 
 // In display order within each placement.
-const nrwLegendConfigs: NrwLegendConfig[] = [
+const nrwLegendEntries: NrwLegendEntry[] = [
     {
         layerName: supportedLayerNames.floodDepth,
         placement: 'banner',
@@ -106,28 +106,28 @@ function useNrwLegend(props: {
                 return { state: NrwLegendState.NoEvent };
             }
 
-            const visibleConfigs = nrwLegendConfigs.flatMap((config) => {
-                const layer = availableLayers.find(({ name }) => name === config.layerName);
+            const visibleEntries = nrwLegendEntries.flatMap((entry) => {
+                const layer = availableLayers.find(({ name }) => name === entry.layerName);
 
                 if (
-                    config.placement !== placement
+                    entry.placement !== placement
                     || isNotDefined(layer)
-                    || !visibleLayers.includes(config.layerName)
+                    || !visibleLayers.includes(entry.layerName)
                 ) {
                     return [];
                 }
 
-                return [{ config, layer }];
+                return [{ entry, layer }];
             });
 
-            if (visibleConfigs.length === 0) {
+            if (visibleEntries.length === 0) {
                 return { state: NrwLegendState.NoLayers };
             }
 
             return {
                 state: NrwLegendState.Items,
-                items: visibleConfigs.flatMap(({ config, layer }) => {
-                    const item = config.getItem(layer, { exposedPopulationScale });
+                items: visibleEntries.flatMap(({ entry, layer }) => {
+                    const item = entry.getItem(layer, { exposedPopulationScale });
                     return isDefined(item) ? [item] : [];
                 }),
             };

@@ -118,6 +118,8 @@ export type NrwLegendItem = NrwLegendItemBase & ({
     categories: NrwLegendCategory[];
 });
 
+// There are two possible placements for legend items:
+// a popup panel over the the map, or in a banner below the map.
 export type NrwLegendPlacement = 'panel' | 'banner';
 
 export enum NrwLegendState {
