@@ -59,9 +59,10 @@ export function getExposedPopulationScale(
             .filter(isDefined),
     );
 
+    const hasExposedPopulation = breaks[0] > 0;
     return {
         ramp: alertClassMapRamps[event.alertClass],
-        breaks: breaks[0] > 0 ? breaks : undefined,
+        breaks: hasExposedPopulation ? breaks : undefined,
         exposedPopulationByPlaceCode,
     };
 }

@@ -35,7 +35,7 @@ function getAdminAreaLayer(
     }));
 
     // The step stops must ascend, so a set without exposed population gets a flat fill.
-    const fillColor: ExpressionSpecification | string = isDefined(breaks)
+    const fillColorSpecification: ExpressionSpecification | string = isDefined(breaks)
         ? [
             'step',
             exposedPopulation,
@@ -64,7 +64,7 @@ function getAdminAreaLayer(
                 promoteId: 'placeCode',
             },
             paint: {
-                'fill-color': fillColor,
+                'fill-color': fillColorSpecification,
                 // The hovered admin area darkens.
                 'fill-opacity': ['case', isHovered, mapFillHoverOpacity, mapFillOpacity],
             },
@@ -76,7 +76,7 @@ function getAdminAreaLayer(
             source: id,
             paint: {
                 // The outline keeps the default full opacity, where the fill is translucent.
-                'line-color': fillColor,
+                'line-color': fillColorSpecification,
                 'line-width': mapOutlineWidth,
             },
         },
