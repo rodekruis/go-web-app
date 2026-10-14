@@ -156,7 +156,7 @@ function NrwExposedAdminAreas(props: Props) {
                                 <FontAwesomeIcon icon={faLocationDot} />
                                 {resolveToString(
                                     strings.nrwExposedAdminAreasAreaColumn,
-                                    { adminAreaLabel },
+                                    { adminAreaLabel: adminAreaLabel.toLowerCase() },
                                 )}
                             </span>
                         </th>
