@@ -3,7 +3,10 @@ import { useTranslation } from '@ifrc-go/ui/hooks';
 import { _cs } from '@togglecorp/fujs';
 
 import hazardIcons from '#utils/nrw/hazardIcons';
-import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
+import {
+    type NrwEvent,
+    type NrwEventHazardType,
+} from '#views/CountryProfileNationalRiskWatch/types';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
@@ -15,8 +18,6 @@ const alertClassStyles: Record<NrwEvent['alertClass'], string | undefined> = {
     high: styles.alertHigh,
 };
 
-const supportedHazardTypes = ['floods', 'drought', 'tropicalCyclone'] as const;
-
 function NrwMarkerLegend() {
     const strings = useTranslation(i18n);
 
@@ -25,11 +26,12 @@ function NrwMarkerLegend() {
         medium: strings.nrwMarkerLegendAlertMedium,
         high: strings.nrwMarkerLegendAlertHigh,
     };
-    const hazardTypeLabels = {
+    const hazardTypeLabels: Partial<Record<NrwEventHazardType, string>> = {
         floods: strings.nrwMarkerLegendHazardFloods,
         drought: strings.nrwMarkerLegendHazardDrought,
         tropicalCyclone: strings.nrwMarkerLegendHazardCyclone,
     };
+    const supportedHazardTypes = Object.keys(hazardTypeLabels) as NrwEventHazardType[];
 
     return (
         <div className={styles.nrwMarkerLegend}>
