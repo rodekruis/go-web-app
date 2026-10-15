@@ -15,3 +15,21 @@
     --nrw-height-map-standalone: calc(100vh - 140px);
     --nrw-height-legend-banner: 62px;
 }
+
+.nrw-alert-low {
+    --nrw-color-alert: var(--nrw-color-alert-low);
+    --nrw-color-alert-tint: var(--nrw-color-alert-low-tint);
+    --nrw-color-alert-contrast: var(--go-ui-color-gray-90);
+}
+
+.nrw-alert-medium {
+    --nrw-color-alert: var(--nrw-color-alert-medium);
+    --nrw-color-alert-tint: var(--nrw-color-alert-medium-tint);
+    --nrw-color-alert-contrast: var(--go-ui-color-white);
+}
+
+.nrw-alert-high {
+    --nrw-color-alert: var(--nrw-color-alert-high);
+    --nrw-color-alert-tint: var(--nrw-color-alert-high-tint);
+    --nrw-color-alert-contrast: var(--go-ui-color-white);
+}

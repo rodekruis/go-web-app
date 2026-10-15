@@ -7,6 +7,7 @@ import { RawButton } from '@ifrc-go/ui';
 import { _cs } from '@togglecorp/fujs';
 
 import useHoverChange from '#hooks/useHoverChange';
+import { alertClassNames } from '#utils/nrw/colors';
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwEventChips from '../NrwEventChips';
@@ -14,12 +15,6 @@ import NrwEventName from '../NrwEventName';
 import NrwEventDetail from './NrwEventDetail';
 
 import styles from './styles.module.css';
-
-const alertClassStyles: Record<NrwEvent['alertClass'], string | undefined> = {
-    low: styles.alertClassLow,
-    medium: styles.alertClassMedium,
-    high: styles.alertClassHigh,
-};
 
 interface Props {
     className?: string;
@@ -46,7 +41,7 @@ function NrwEventCard(props: Props) {
         <div
             className={_cs(
                 styles.nrwEventCard,
-                alertClassStyles[event.alertClass],
+                alertClassNames[event.alertClass],
                 expanded && styles.expanded,
                 hovered && styles.hovered,
                 className,

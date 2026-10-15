@@ -5,16 +5,11 @@ import {
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import { _cs } from '@togglecorp/fujs';
 
+import { alertClassNames } from '#utils/nrw/colors';
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
-
-const alertClassStyles: Record<NrwEvent['alertClass'], string | undefined> = {
-    low: styles.alertClassLow,
-    medium: styles.alertClassMedium,
-    high: styles.alertClassHigh,
-};
 
 // Pick NrwEvent props used in the NrwEventChips component
 type NrwEventChipsEvent = Pick<NrwEvent, 'alertClass' | 'eventStatus' | 'trigger'>;
@@ -56,7 +51,11 @@ function NrwEventChips(props: Props) {
     return (
         <div className={_cs(styles.nrwEventChips, className)}>
             <Chip
-                className={_cs(styles.chip, alertClassStyles[event.alertClass])}
+                className={_cs(
+                    styles.chip,
+                    styles.alertClassChip,
+                    alertClassNames[event.alertClass],
+                )}
                 name="alertClass"
                 label={alertClassLabels[event.alertClass]}
             />
