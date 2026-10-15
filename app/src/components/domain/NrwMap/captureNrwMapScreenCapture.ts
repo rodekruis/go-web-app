@@ -19,6 +19,8 @@ export function captureElementClone(element: HTMLElement) {
     host.style.left = `-${width * 2}px`;
     host.style.width = `${width}px`;
     host.style.pointerEvents = 'none';
+    host.setAttribute('aria-hidden', 'true');
+    host.setAttribute('inert', '');
 
     const clone = element.cloneNode(true) as HTMLElement;
     host.appendChild(clone);
