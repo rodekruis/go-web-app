@@ -25,6 +25,10 @@ export function captureElementClone(element: HTMLElement) {
     document.body.appendChild(host);
 
     const { height } = clone.getBoundingClientRect();
+    if (height <= 0) {
+        host.remove();
+        throw new Error('Element to capture has no size');
+    }
 
     return toPng(clone, {
         cacheBust: true,
