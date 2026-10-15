@@ -5,8 +5,8 @@
 
     &:not(.expanded):hover,
     &:not(.expanded).hovered {
-        box-shadow: inset var(--go-ui-width-separator-md) 0 0 var(--nrw-color-alert, var(--nrw-color-alert-high));
-        background-color: var(--nrw-color-alert-tint, var(--nrw-color-alert-high-tint));
+        box-shadow: inset var(--go-ui-width-separator-md) 0 0 var(--nrw-color-alert);
+        background-color: var(--nrw-color-alert-tint);
     }
 
     .header {
