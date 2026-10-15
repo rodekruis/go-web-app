@@ -426,7 +426,7 @@ export function Component() {
 
     return (
         <DomainContext.Provider value={domainContextValue}>
-            <div className={styles.root}>
+            <div className={_cs(styles.root, nrwStandalone && styles.nrwStandalone)}>
                 {(isLoading || isLoadingDebounced) && (
                     <div
                         className={_cs(

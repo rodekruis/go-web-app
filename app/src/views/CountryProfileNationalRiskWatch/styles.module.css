@@ -10,7 +10,8 @@
 .country-profile-nrw-standalone {
     display: flex;
     flex-direction: column;
-    height: 100dvh;
+    flex-grow: 1;
+    min-height: 0;
     --nrw-height-map: 100%;
 
     .page {
