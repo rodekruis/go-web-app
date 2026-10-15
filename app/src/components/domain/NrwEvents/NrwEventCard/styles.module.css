@@ -1,25 +1,12 @@
 .nrw-event-card {
-    --color-alert: var(--nrw-color-alert-high);
-    --color-alert-tint: var(--nrw-color-alert-high-tint);
-
     border-radius: var(--go-ui-border-radius-md);
     background-color: var(--go-ui-color-background);
     color: var(--go-ui-color-gray-90);
 
-    &.alert-class-low {
-        --color-alert: var(--nrw-color-alert-low);
-        --color-alert-tint: var(--nrw-color-alert-low-tint);
-    }
-
-    &.alert-class-medium {
-        --color-alert: var(--nrw-color-alert-medium);
-        --color-alert-tint: var(--nrw-color-alert-medium-tint);
-    }
-
     &:not(.expanded):hover,
     &:not(.expanded).hovered {
-        box-shadow: inset var(--go-ui-width-separator-md) 0 0 var(--color-alert);
-        background-color: var(--color-alert-tint);
+        box-shadow: inset var(--go-ui-width-separator-md) 0 0 var(--nrw-color-alert, var(--nrw-color-alert-high));
+        background-color: var(--nrw-color-alert-tint, var(--nrw-color-alert-high-tint));
     }
 
     .header {

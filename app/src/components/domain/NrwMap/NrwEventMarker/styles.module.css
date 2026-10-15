@@ -20,7 +20,7 @@
         overflow: visible;
         filter: drop-shadow(0 2px 3px rgb(0 0 0 / 25%));
         /* Set the color on the svg root so it can be exported to PDF*/
-        color: var(--color-alert);
+        color: var(--nrw-color-alert);
     }
 
     .hazard-icon {
@@ -58,29 +58,13 @@
         }
 
         .event-marker-graphic {
-            filter: drop-shadow(0 0 14px color-mix(in srgb, var(--color-alert) 40%, transparent));
+            filter: drop-shadow(0 0 14px color-mix(in srgb, var(--nrw-color-alert) 40%, transparent));
         }
 
         .popup {
             visibility: visible;
             opacity: 1;
         }
-    }
-
-    &.alert-low {
-        --color-alert: var(--nrw-color-alert-low);
-
-        .hazard-icon {
-            color: var(--go-ui-color-gray-90);
-        }
-    }
-
-    &.alert-medium {
-        --color-alert: var(--nrw-color-alert-medium);
-    }
-
-    &.alert-high {
-        --color-alert: var(--nrw-color-alert-high);
     }
 }
 

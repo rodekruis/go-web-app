@@ -10,6 +10,13 @@ import {
     type NrwLegendCategory,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
+// Global classes in nrw.css that set --nrw-color-alert, -tint and -contrast.
+export const alertClassNames: Record<NrwEvent['alertClass'], string> = {
+    low: 'nrw-alert-low',
+    medium: 'nrw-alert-medium',
+    high: 'nrw-alert-high',
+};
+
 type MapColorRamp = readonly [string, string, string, string, string];
 
 // The design defines "Map <colour> 65%", ordered from the lightest (10) to the

@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import { _cs } from '@togglecorp/fujs';
 
+import { alertClassNames } from '#utils/nrw/colors';
 import hazardIcons from '#utils/nrw/hazardIcons';
 import {
     type NrwEvent,
@@ -12,11 +13,6 @@ import i18n from './i18n.json';
 import styles from './styles.module.css';
 
 const alertClasses: NrwEvent['alertClass'][] = ['low', 'medium', 'high'];
-const alertClassStyles: Record<NrwEvent['alertClass'], string | undefined> = {
-    low: styles.alertLow,
-    medium: styles.alertMedium,
-    high: styles.alertHigh,
-};
 
 function NrwMarkerLegend() {
     const strings = useTranslation(i18n);
@@ -48,7 +44,7 @@ function NrwMarkerLegend() {
                             <span
                                 className={_cs(
                                     styles.alertMarker,
-                                    alertClassStyles[alertClass],
+                                    alertClassNames[alertClass],
                                 )}
                             />
                             {alertClassLabels[alertClass]}
