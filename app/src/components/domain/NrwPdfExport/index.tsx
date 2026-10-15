@@ -14,7 +14,7 @@ import {
 } from '@ifrc-go/ui/utils';
 import { isNotDefined } from '@togglecorp/fujs';
 
-import { captureElement } from '#components/domain/NrwMap/captureNrwMapScreenCapture';
+import { captureElementClone } from '#components/domain/NrwMap/captureNrwMapScreenCapture';
 import useAlert from '#hooks/useAlert';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import NrwScreenCaptureContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenCaptureContext';
@@ -52,7 +52,7 @@ function NrwPdfExport(props: Props) {
             }
             const [mapImage, eventsImage] = await Promise.all([
                 takeScreenCapture(),
-                eventsElement ? captureElement(eventsElement) : undefined,
+                eventsElement ? captureElementClone(eventsElement) : undefined,
             ]);
 
             exportNrwToPdf({
