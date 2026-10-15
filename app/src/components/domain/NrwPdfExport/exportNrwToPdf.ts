@@ -35,12 +35,13 @@ type Mm = number & {
 // Values used to line up the layout elements in the PDF based on the Figma design css
 const frameWidthPx = 1757 as Px;
 const marginPx = 40 as Px;
-const headerHeightPx = 30 as Px; // 20px title line + 10px padding above the divider
+const headerHeightPx = 20 as Px;
 const contentTopPx = 88 as Px;
 const mapColumnWidthPx = 1191 as Px;
-const mapHeightPx = 1073 as Px;
+const contentHeightPx = 1073 as Px;
 const columnGapPx = 18 as Px;
-const footerTopPx = (mapHeightPx + 11) as Px;
+const rowGapPx = 10 as Px;
+const legendGapPx = 8 as Px;
 const titleFontPx = 18 as Px;
 const captionFontPx = 12 as Px;
 const attributionPaddingPx = 4 as Px;
@@ -93,6 +94,7 @@ function pxToPt(value: Px, pageWidthMm: Mm): Pt {
 interface Props {
     mapImage: NrwCapturedImage;
     eventsImage: NrwCapturedImage | undefined;
+    legendImage: NrwCapturedImage | undefined;
     selectedEvent: NrwEvent | undefined;
     countries: CountryCodeIso3[];
     text: NrwPdfText;
@@ -102,6 +104,7 @@ export default function exportNrwToPdf(props: Props) {
     const {
         mapImage,
         eventsImage,
+        legendImage,
         selectedEvent,
         countries,
         text,
@@ -133,13 +136,23 @@ export default function exportNrwToPdf(props: Props) {
     pdf.setDrawColor(divider);
     const dividerLineWidthMm = calculateMm(dividerLineWidthPx, pageWidthMm);
     pdf.setLineWidth(dividerLineWidthMm);
-    const dividerYMm = (marginMm + calculateMm(headerHeightPx, pageWidthMm)) as Mm;
+    const dividerYMm = (marginMm
+        + calculateMm((headerHeightPx + rowGapPx) as Px, pageWidthMm)) as Mm;
     pdf.line(marginMm, dividerYMm, rightEdgeMm, dividerYMm);
 
     // Main content
     const contentTopMm = calculateMm(contentTopPx, pageWidthMm);
+    const contentWidthMm = (rightEdgeMm - marginMm) as Mm;
+    const contentHeightMm = calculateMm(contentHeightPx, pageWidthMm);
     const mapColumnWidthMm = calculateMm(mapColumnWidthPx, pageWidthMm);
-    const mapHeightMm = calculateMm(mapHeightPx, pageWidthMm);
+
+    // The legend panel size, calculated here so other content can make room for it
+    const legendHeightMm = legendImage
+        ? (contentWidthMm / legendImage.aspectRatio) as Mm
+        : 0 as Mm;
+    const legendGapMm = legendImage ? calculateMm(legendGapPx, pageWidthMm) : 0 as Mm;
+    const mapHeightMm = (contentHeightMm - legendGapMm - legendHeightMm) as Mm;
+
     const mapSize = calculateDisplayArea(mapImage.aspectRatio, mapColumnWidthMm, mapHeightMm);
     pdf.addImage(mapImage.dataUrl, 'PNG', marginMm, contentTopMm, mapSize.width, mapSize.height);
 
@@ -170,8 +183,16 @@ export default function exportNrwToPdf(props: Props) {
         pdf.addImage(eventsImage.dataUrl, 'PNG', eventsXMm, contentTopMm, eventsSize.width, eventsSize.height);
     }
 
+    if (legendImage) {
+        const legendYMm = (contentTopMm + mapHeightMm + legendGapMm) as Mm;
+        pdf.addImage(legendImage.dataUrl, 'PNG', marginMm, legendYMm, contentWidthMm, legendHeightMm);
+    }
+
     // Footer
-    const footerYMm = (contentTopMm + calculateMm(footerTopPx, pageWidthMm)) as Mm;
+    const footerYMm = (contentTopMm + calculateMm(
+        (contentHeightPx + rowGapPx) as Px,
+        pageWidthMm,
+    )) as Mm;
     pdf.text(text.mapNote, marginMm + mapColumnWidthMm, footerYMm, { align: 'right', baseline: 'top' });
     pdf.text(text.pageLabel, rightEdgeMm, footerYMm, { align: 'right', baseline: 'top' });
 
