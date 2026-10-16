@@ -1,43 +1,65 @@
-import { isNotDefined } from '@togglecorp/fujs';
+import { isDefined } from '@togglecorp/fujs';
 
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
-// The design defines "Map <colour> 65%", ordered from the lightest (10) to the
-// darkest (90) tint. Mapbox paint expressions need literal colours, so these
-// mirror the tokens in nrw.css.
-export const alertClassMapRamps: Record<NrwEvent['alertClass'], readonly [
-    string, string, string, string, string,
-]> = {
-    low: ['#fff9ea', '#ffedbc', '#ffdf8a', '#ffc635', '#d99a00'],
-    medium: ['#fff5ea', '#ffd3aa', '#ffb066', '#ff6e00', '#c24e00'],
-    high: ['#fef1f2', '#fcc6ca', '#fa999f', '#f5333f', '#c01825'],
-};
-
-export const mapFillOpacity = 0.65;
-export const mapFillHoverOpacity = 0.8;
-export const mapOutlineWidth = 2;
-
-// Split 0..max into five equal bands, one per ramp tint, so the scale fits any
-// magnitude (hundreds or millions) with the same method for every hazard and country.
-// Returns the four lower bounds of the bands above the first.
-export function getEqualIntervalBreaks(values: number[]): [number, number, number, number] {
-    const max = Math.max(0, ...values);
-    const bandWidth = max / 5;
-
-    return [bandWidth, 2 * bandWidth, 3 * bandWidth, 4 * bandWidth];
+export interface MapRampStep {
+    color: string;
+    opacity: number;
+    hoverOpacity: number;
 }
 
-type MapRamp = (typeof alertClassMapRamps)[NrwEvent['alertClass']];
+type MapRamp = readonly [MapRampStep, MapRampStep, MapRampStep, MapRampStep, MapRampStep];
 
-// The ramp tint of a value, in the band it falls in. A band starts at its break,
-// like a Mapbox step expression, and a set without values shares the first tint.
-export function getRampColor(
+// The design defines five steps per alert colour, from the lightest (10) to the darkest (90).
+export const alertClassMapRamps: Record<NrwEvent['alertClass'], MapRamp> = {
+    low: [
+        { color: '#ffb900', opacity: 0.15, hoverOpacity: 0.3 },
+        { color: '#ffba00', opacity: 0.3, hoverOpacity: 0.45 },
+        { color: '#ffb900', opacity: 0.5, hoverOpacity: 0.6 },
+        { color: '#ffb700', opacity: 0.7, hoverOpacity: 0.8 },
+        { color: '#d9a900', opacity: 0.8, hoverOpacity: 0.9 },
+    ],
+    medium: [
+        { color: '#ff7900', opacity: 0.15, hoverOpacity: 0.25 },
+        { color: '#ff7b00', opacity: 0.3, hoverOpacity: 0.4 },
+        { color: '#ff7b00', opacity: 0.45, hoverOpacity: 0.55 },
+        { color: '#ff6e00', opacity: 0.6, hoverOpacity: 0.7 },
+        { color: '#c24e00', opacity: 0.8, hoverOpacity: 0.9 },
+    ],
+    high: [
+        { color: '#f4000b', opacity: 0.15, hoverOpacity: 0.3 },
+        { color: '#f20012', opacity: 0.3, hoverOpacity: 0.45 },
+        { color: '#f3000f', opacity: 0.45, hoverOpacity: 0.55 },
+        { color: '#f3000f', opacity: 0.6, hoverOpacity: 0.7 },
+        { color: '#b9000e', opacity: 0.75, hoverOpacity: 0.85 },
+    ],
+};
+
+// Mapbox paint needs literal values, so these mirror --nrw-color-map-shadow-outline in nrw.css.
+export const mapOutlineColor = '#323232';
+export const mapOutlineOpacity = 0.2;
+export const mapOutlineWidth = 0.8;
+
+// Ramp step indices used for fewer distinct values than steps, lightest to darkest.
+const rampStepIndicesByValueCount: Record<number, readonly number[]> = {
+    1: [2],
+    2: [1, 3],
+    3: [0, 2, 4],
+    4: [0, 2, 3, 4],
+};
+
+// Rank the distinct values, so few values use spread-out steps and more values
+// fill all steps in classes of equal count. Unknown values get the lightest step.
+export function createRampStepGetter(
     ramp: MapRamp,
-    breaks: ReturnType<typeof getEqualIntervalBreaks>,
-    value: number | undefined,
-): string {
-    if (breaks[0] <= 0 || isNotDefined(value)) return ramp[0];
+    values: number[],
+): (value: number | undefined) => MapRampStep {
+    const distinctValues = [...new Set(values)].sort((a, b) => a - b);
+    const stepIndices = rampStepIndicesByValueCount[distinctValues.length];
+    const stepByValue = new Map(distinctValues.map((value, rank) => [
+        value,
+        ramp[stepIndices?.[rank] ?? Math.floor((rank * ramp.length) / distinctValues.length)],
+    ]));
 
-    const bandIndex = breaks.filter((lowerBound) => value >= lowerBound).length;
-    return ramp[bandIndex] ?? ramp[0];
+    return (value) => (isDefined(value) ? stepByValue.get(value) : undefined) ?? ramp[0];
 }

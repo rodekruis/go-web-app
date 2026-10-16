@@ -20,8 +20,7 @@ import {
 
 import {
     alertClassMapRamps,
-    getEqualIntervalBreaks,
-    getRampColor,
+    createRampStepGetter,
 } from '#utils/nrw/colors';
 import { getNrwExposedPopulationByPlaceCode } from '#utils/nrw/events';
 import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
@@ -48,14 +47,14 @@ function getExposedAdminAreaRows(adminAreas: NrwAdminAreaFeatureCollection, even
         }))
         .sort((a, b) => (b.exposedPopulation ?? 0) - (a.exposedPopulation ?? 0));
 
-    const breaks = getEqualIntervalBreaks(
+    const getRampStep = createRampStepGetter(
+        alertClassMapRamps[event.alertClass],
         rows.map((row) => row.exposedPopulation).filter(isDefined),
     );
-    const ramp = alertClassMapRamps[event.alertClass];
 
     return rows.map((row) => ({
         ...row,
-        color: getRampColor(ramp, breaks, row.exposedPopulation),
+        rampStep: getRampStep(row.exposedPopulation),
     }));
 }
 
@@ -172,12 +171,12 @@ function NrwExposedAdminAreas(props: Props) {
                     </tr>
                 </thead>
                 <tbody>
-                    {rows.map(({ adminArea, exposedPopulation, color }) => (
+                    {rows.map(({ adminArea, exposedPopulation, rampStep }) => (
                         <NrwExposedAdminAreaRow
                             key={adminArea.placeCode}
                             adminArea={adminArea}
                             exposedPopulation={exposedPopulation}
-                            color={color}
+                            rampStep={rampStep}
                             hovered={hoveredPlaceCode === adminArea.placeCode}
                             drillable={canDrillDown(adminArea.placeCode)}
                             disabled={pending}
