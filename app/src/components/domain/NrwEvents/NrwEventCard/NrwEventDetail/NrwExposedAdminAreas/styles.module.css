@@ -15,6 +15,10 @@
         padding: 0 var(--go-ui-spacing-2xs);
     }
 
+    .selected-admin-area-icon {
+        margin-right: var(--go-ui-spacing-4xs);
+    }
+
     .selected-admin-area-value {
         font-weight: var(--go-ui-font-weight-semibold);
     }

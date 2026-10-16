@@ -1,4 +1,8 @@
-import { useContext } from 'react';
+import {
+    useCallback,
+    useContext,
+    useState,
+} from 'react';
 import {
     faBullhorn,
     faChevronLeft,
@@ -19,9 +23,14 @@ import {
     isDefined,
 } from '@togglecorp/fujs';
 
+import { getNrwSortedForecastSources } from '#utils/nrw/events';
 import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
-import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
+import {
+    type NrwEvent,
+    type NrwForecastSource,
+} from '#views/CountryProfileNationalRiskWatch/types';
 
+import NrwDataSource from './NrwDataSource';
 import NrwExposedAdminAreas from './NrwExposedAdminAreas';
 
 import i18n from './i18n.json';
@@ -39,6 +48,16 @@ function NrwEventDetail(props: Props) {
 
     const strings = useTranslation(i18n);
     const { parentAdminArea, drillUp } = useContext(NrwAdminAreasContext);
+    const [
+        expandedForecastSourceName,
+        setExpandedForecastSourceName,
+    ] = useState<NrwForecastSource['name']>();
+
+    const handleForecastSourceToggle = useCallback((name: NrwForecastSource['name']) => {
+        setExpandedForecastSourceName(
+            (previousName) => (previousName === name ? undefined : name),
+        );
+    }, []);
 
     const now = new Date();
     const startAt = new Date(event.startAt);
@@ -108,17 +127,20 @@ function NrwEventDetail(props: Props) {
                     </div>
                     <NrwExposedAdminAreas event={event} />
                 </div>
-                {event.availableLayers.length > 0 && (
+                {event.forecastSources.length > 0 && (
                     <div className={styles.panel}>
                         <div className={styles.panelHeading}>
                             <FontAwesomeIcon className={styles.icon} icon={faDatabase} />
                             {strings.nrwEventDetailDataSourcesHeading}
                         </div>
                         <div>
-                            {event.availableLayers.map((layer) => (
-                                <div className={styles.dataSource} key={layer.name}>
-                                    {layer.label}
-                                </div>
+                            {getNrwSortedForecastSources(event).map((forecastSource) => (
+                                <NrwDataSource
+                                    key={forecastSource.name}
+                                    forecastSource={forecastSource}
+                                    expanded={forecastSource.name === expandedForecastSourceName}
+                                    onToggle={handleForecastSourceToggle}
+                                />
                             ))}
                         </div>
                     </div>

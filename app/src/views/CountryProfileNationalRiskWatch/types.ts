@@ -44,7 +44,8 @@ export type PlaceCode = string & {
 };
 
 export type NrwAdminAreaFeatureCollection = NrwApiResponse<'/admin-areas'>;
-export type NrwAdminAreaProperties = NrwAdminAreaFeatureCollection['features'][number]['properties'];
+export type NrwAdminAreaFeature = NrwAdminAreaFeatureCollection['features'][number];
+export type NrwAdminAreaProperties = NrwAdminAreaFeature['properties'];
 
 // The validated properties of an /admin-areas feature, narrowed from the API type.
 // Mapbox returns the rendered feature properties untyped, so they are parsed back into this.
@@ -75,6 +76,7 @@ export type NrwEventSelectHandler = (
     hazardType?: NrwEventHazardType,
 ) => void;
 export type NrwExposedAdminArea = NrwEvent['exposedAdminAreas'][string][number];
+export type NrwForecastSource = NrwEvent['forecastSources'][number];
 
 export type NrwCountry = NrwApiResponse<'/countries'>[number];
 export type NrwAdminLevelLabels = NonNullable<NrwCountry['adminLevelLabels']>;
