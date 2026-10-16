@@ -3,10 +3,11 @@
 # Uses the admin-only ActionHistoryRecord API and POST {EntityType}/action/restoreDeleted.
 set -euo pipefail
 
-BASE_URL='https://cea.feedbackmanagement.dev2.510.global/api/v1'
+#BASE_URL='https://cea.feedbackmanagement.dev2.510.global/api/v1'
+BASE_URL='https://feedback.510.global/api/v1'
 ENTITY_TYPE='CFeedbackData'
-HOURS_BACK="${HOURS_BACK:-2}"
-PAGE_SIZE=200
+HOURS_BACK="${HOURS_BACK:-4}"
+PAGE_SIZE=100
 
 read -rp 'EspoCRM admin username: ' USERNAME
 read -rsp 'Password: ' PASSWORD; echo
@@ -16,6 +17,7 @@ SINCE_ENCODED=$(printf '%s' "$SINCE" | jq -sRr @uri)
 
 OFFSET=0
 TOTAL=0
+FETCHED=0
 ROWS=''
 
 while :; do
@@ -36,15 +38,24 @@ while :; do
     exit 1
   fi
 
+  # EspoCRM returns total=-1 (has more) / -2 (no more) when it skips the count, so rely on page length.
   TOTAL=$(jq -r '.total' <<<"$RESPONSE")
+  PAGE_COUNT=$(jq -r '.list | length' <<<"$RESPONSE")
   PAGE_ROWS=$(jq -r '.list[] | "\(.createdAt)\t\(.targetId)\t\(.targetName // "-")\t\(.userName // "-")"' <<<"$RESPONSE")
   [[ -n "$PAGE_ROWS" ]] && ROWS+="${PAGE_ROWS}"$'\n'
+  FETCHED=$((FETCHED + PAGE_COUNT))
+  if [[ $PAGE_COUNT -gt 0 ]]; then
+    jq -r --arg off "$OFFSET" '
+      "page @\($off): \(.list | length) records, \(.list[-1].createdAt) .. \(.list[0].createdAt), by: "
+      + (.list | group_by(.userName) | map("\(.[0].userName // "-")=\(length)") | join(", "))' <<<"$RESPONSE"
+  fi
 
   OFFSET=$((OFFSET + PAGE_SIZE))
-  [[ $OFFSET -ge $TOTAL ]] && break
+  [[ $PAGE_COUNT -lt $PAGE_SIZE ]] && break
+  [[ $TOTAL -ge 0 && $OFFSET -ge $TOTAL ]] && break
 done
 
-echo "Deleted ${ENTITY_TYPE} records since ${SINCE} UTC: ${TOTAL}"
+echo "Deleted ${ENTITY_TYPE} records since ${SINCE} UTC: ${FETCHED}"
 echo
 
 if [[ -z "$ROWS" ]]; then
@@ -52,11 +63,13 @@ if [[ -z "$ROWS" ]]; then
   exit 0
 fi
 
-printf 'deletedAt\trecordId\trecordName\tdeletedBy\n%s' "$ROWS" | column -t -s $'\t'
+echo 'Deletions:'
+printf '%s' "$ROWS" | cut -f4 | sort | uniq -c | sort -rn
 echo
 
 # A record may appear more than once if deleted/restored repeatedly.
 RECORD_IDS=$(printf '%s' "$ROWS" | cut -f2 | sort -u)
+
 RECORD_COUNT=$(wc -l <<<"$RECORD_IDS" | tr -d ' ')
 
 read -rp "Restore these ${RECORD_COUNT} record(s)? [y/N] " CONFIRM
