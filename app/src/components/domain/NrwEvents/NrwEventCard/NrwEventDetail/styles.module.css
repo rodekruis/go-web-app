@@ -44,9 +44,11 @@
         align-items: center;
         gap: var(--go-ui-spacing-3xs);
         padding: 0 var(--go-ui-spacing-2xs);
+        block-size: 1lh;
     }
 
     .back-button {
+        align-self: flex-start;
         margin-left: auto;
     }
 
