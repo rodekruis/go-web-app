@@ -24,9 +24,7 @@ import {
     getLayerAnchorId,
     layerDrawOrder,
 } from '#utils/nrw/layers';
-import {
-    type NrwScreenCaptureHandler,
-} from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenCaptureContext';
+import { type NrwScreenCaptureHandler } from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenCaptureContext';
 import {
     type Latitude,
     type Longitude,
@@ -76,7 +74,9 @@ function NrwMapContainer(props: {
 
     const strings = useTranslation(i18n);
 
+    const wrapperRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const controlsRef = useRef<HTMLDivElement>(null);
     const [mapboxMap, setMapboxMap] = useState<MapboxMap | undefined>(undefined);
     const [mapLoadComplete, setMapLoadComplete] = useState(false);
     const [isLayerPanelOpen, setIsLayerPanelOpen] = useState(false);
@@ -180,18 +180,22 @@ function NrwMapContainer(props: {
     // Expose the map capture capability once the map is ready, so that
     // consumers (e.g. the PDF export) don't need to know about Mapbox.
     useEffect(() => {
-        if (!mapLoadComplete || isNotDefined(mapboxMap)) {
+        const wrapper = wrapperRef.current;
+        if (!mapLoadComplete || isNotDefined(mapboxMap) || !wrapper) {
             registerScreenCapture(undefined);
             return undefined;
         }
 
-        registerScreenCapture(captureNrwMap(mapboxMap));
+        registerScreenCapture(captureNrwMap(mapboxMap, wrapper, [controlsRef.current]));
         return () => registerScreenCapture(undefined);
     }, [mapboxMap, mapLoadComplete, registerScreenCapture]);
 
     return (
         <>
-            <div className={styles.mapWrapper}>
+            <div
+                ref={wrapperRef}
+                className={styles.mapWrapper}
+            >
                 <div
                     ref={containerRef}
                     className={styles.nrwMapContainer}
@@ -201,7 +205,10 @@ function NrwMapContainer(props: {
                         {breadcrumbs}
                     </div>
                 )}
-                <div className={styles.mapControls}>
+                <div
+                    ref={controlsRef}
+                    className={styles.mapControls}
+                >
                     <div className={styles.zoomControls}>
                         <button
                             type="button"
