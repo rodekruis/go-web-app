@@ -1,0 +1,10 @@
+{
+    "namespace": "nrwEvents",
+    "strings": {
+        "nrwDataSourceDatasetLabel": "Dataset:",
+        "nrwDataSourceProviderLabel": "Source:",
+        "nrwDataSourceLastUpdatedLabel": "Updated:",
+        "nrwDataSourceDescriptionLabel": "Description:",
+        "nrwDataSourceMoreInfoLabel": "More info:"
+    }
+}
