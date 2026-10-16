@@ -9,7 +9,6 @@ import {
 
 import {
     floodDepthMapRamp,
-    getRampCategories,
     type NrwExposedPopulationScale,
 } from '#utils/nrw/colors';
 import supportedLayerNames from '#utils/nrw/layers';
@@ -62,17 +61,15 @@ const nrwLegendEntries: NrwLegendEntry[] = [
         placement: 'banner',
         getItem: (layer, { exposedPopulationScale }) => {
             // No scale until the areas load, and none when nothing is exposed (flat fill).
-            if (isNotDefined(exposedPopulationScale?.breaks)) {
+            if (isNotDefined(exposedPopulationScale?.categories)) {
                 return undefined;
             }
-
-            const { ramp, breaks } = exposedPopulationScale;
 
             return {
                 type: NrwLegendType.Categories,
                 layerName: layer.name,
                 label: layer.label,
-                categories: getRampCategories(ramp, breaks),
+                categories: exposedPopulationScale.categories,
             };
         },
     },

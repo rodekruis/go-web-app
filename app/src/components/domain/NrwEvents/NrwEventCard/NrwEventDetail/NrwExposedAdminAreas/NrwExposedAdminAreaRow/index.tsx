@@ -9,6 +9,10 @@ import { _cs } from '@togglecorp/fujs';
 
 import useHoverChange from '#hooks/useHoverChange';
 import {
+    getRampStepCssColor,
+    type MapRampStep,
+} from '#utils/nrw/colors';
+import {
     type AdminAreaDrillDownHandler,
     type AdminAreaProperties,
     type PlaceCodeChangeHandler,
@@ -19,7 +23,7 @@ import styles from './styles.module.css';
 interface Props {
     adminArea: AdminAreaProperties;
     exposedPopulation: number | undefined;
-    color: string;
+    rampStep: MapRampStep;
     hovered: boolean;
     drillable: boolean;
     disabled: boolean;
@@ -31,7 +35,7 @@ function NrwExposedAdminAreaRow(props: Props) {
     const {
         adminArea,
         exposedPopulation,
-        color,
+        rampStep,
         hovered,
         drillable,
         disabled,
@@ -59,7 +63,7 @@ function NrwExposedAdminAreaRow(props: Props) {
                 <span className={styles.adminArea}>
                     <span
                         className={styles.colorDot}
-                        style={{ backgroundColor: color }}
+                        style={{ backgroundColor: getRampStepCssColor(rampStep) }}
                     />
                     {drillable ? (
                         <RawButton

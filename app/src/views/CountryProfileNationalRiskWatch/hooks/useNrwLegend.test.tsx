@@ -12,7 +12,9 @@ import {
 
 import {
     alertClassMapRamps,
+    createRampStepGetter,
     floodDepthMapRamp,
+    getRampCategories,
     type NrwExposedPopulationScale,
 } from '#utils/nrw/colors';
 import createNrwLayer from '#utils/testing/createNrwLayer';
@@ -35,8 +37,8 @@ const availableLayers = [floodDepth, exposedPopulation, populationDensity];
 
 const event = { eventId: 1, alertClass: 'high' } as unknown as NrwEvent;
 const exposedPopulationScale: NrwExposedPopulationScale = {
-    ramp: alertClassMapRamps.high,
-    breaks: [200, 400, 600, 800],
+    getRampStep: createRampStepGetter(alertClassMapRamps.high, [1000, 250]),
+    categories: getRampCategories(alertClassMapRamps.high, [1000, 250]),
     exposedPopulationByPlaceCode: new Map([['SS01', 1000], ['SS02', 250]]),
 };
 
@@ -200,13 +202,7 @@ describe('useNrwLegend', () => {
                     {
                         type: NrwLegendType.Categories,
                         label: 'Exposed population',
-                        categories: [
-                            { color: alertClassMapRamps.high[0], from: undefined, to: 200 },
-                            { color: alertClassMapRamps.high[1], from: 200, to: 400 },
-                            { color: alertClassMapRamps.high[2], from: 400, to: 600 },
-                            { color: alertClassMapRamps.high[3], from: 600, to: 800 },
-                            { color: alertClassMapRamps.high[4], from: 800, to: undefined },
-                        ],
+                        categories: exposedPopulationScale.categories,
                     },
                 ],
             });
@@ -229,7 +225,7 @@ describe('useNrwLegend', () => {
         // Act
         const { result } = renderLegend({
             placement: 'banner',
-            exposedPopulationScale: { ...exposedPopulationScale, breaks: undefined },
+            exposedPopulationScale: { ...exposedPopulationScale, categories: undefined },
             visibleLayers: ['exposedPopulation'],
         });
 
