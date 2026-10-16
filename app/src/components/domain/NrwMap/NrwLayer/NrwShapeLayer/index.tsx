@@ -20,13 +20,16 @@ import useNrwMapFitBounds from '../../useNrwMapFitBounds';
 import useNrwMapLayers from '../useNrwMapLayers';
 import getAdminAreaLayer from './getAdminAreaLayer';
 import useAdminAreaClick from './useAdminAreaClick';
-import useAdminAreaHover from './useAdminAreaHover';
+import useAdminAreaHover, { type HoveredAdminAreaAnchor } from './useAdminAreaHover';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
 
-// Show the tooltip just above-right of the pointer, as in the prototype.
-const tooltipPlacement: NrwMarkerPlacement = { anchor: 'bottom-left', offset: [14, -10] };
+// Place the admin area tooltip relative to an anchor point within the area.
+const tooltipPlacements: Record<HoveredAdminAreaAnchor, NrwMarkerPlacement> = {
+    pointer: { anchor: 'bottom-left', offset: [14, -10] },
+    area: { anchor: 'bottom', offset: [0, -10] },
+};
 
 // Drilling back up on a click beside the admin areas is disabled for now.
 // Set this to true to enable it again; the Back button in the event card always drills up.
@@ -71,6 +74,7 @@ function NrwShapeLayer(props: {
     const { hoveredAdminArea, clearHover } = useAdminAreaHover(
         id,
         isInteractive,
+        adminAreas,
         hoveredPlaceCode,
         onAdminAreaHoverChange,
         canDrillDown,
@@ -100,8 +104,9 @@ function NrwShapeLayer(props: {
 
     return (
         <NrwMarker
+            key={hoveredAdminArea.anchor}
             coordinates={hoveredAdminArea.coordinates}
-            placement={tooltipPlacement}
+            placement={tooltipPlacements[hoveredAdminArea.anchor]}
         >
             <div className={styles.adminAreaTooltip}>
                 <div className={styles.name}>

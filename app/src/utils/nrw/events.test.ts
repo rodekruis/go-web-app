@@ -9,6 +9,7 @@ import {
     type AdminLevel,
     type NrwEvent,
     type NrwExposedAdminArea,
+    type NrwForecastSource,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import {
@@ -17,6 +18,7 @@ import {
     getNrwExposedPopulation,
     getNrwExposedPopulationByPlaceCode,
     getNrwInitialAdminLevel,
+    getNrwSortedForecastSources,
 } from './events';
 
 function createEvent(exposedAdminAreas: NrwEvent['exposedAdminAreas']): NrwEvent {
@@ -31,6 +33,74 @@ function createArea(placeCode: string, name: string, exposed: number): NrwExpose
         exposure: [{ layerName: supportedLayerNames.exposedPopulation, total: null, exposed }],
     };
 }
+
+function createForecastSource(name: NrwForecastSource['name']): NrwForecastSource {
+    return {
+        name,
+        title: name,
+        dataset: name,
+        provider: name,
+        lastUpdated: name,
+        description: name,
+        moreInfoLabel: name,
+        moreInfoUrl: name,
+    };
+}
+
+function getForecastSourceNames(forecastSources: NrwForecastSource[]): NrwForecastSource['name'][] {
+    return forecastSources.map(({ name }) => name);
+}
+
+describe('getNrwSortedForecastSources', () => {
+    test('puts river discharge first, then flood hazard maps, then population', () => {
+        const event = {
+            forecastSources: [
+                createForecastSource('worldpop'),
+                createForecastSource('glofasFloodHazardMaps'),
+                createForecastSource('glofasRiverDischarge'),
+            ],
+        } as NrwEvent;
+
+        expect(getForecastSourceNames(getNrwSortedForecastSources(event))).toEqual([
+            'glofasRiverDischarge',
+            'glofasFloodHazardMaps',
+            'worldpop',
+        ]);
+    });
+
+    test('puts unordered sources last, keeping their backend order', () => {
+        const event = {
+            forecastSources: [
+                createForecastSource('ecmwfTropicalCyclone'),
+                createForecastSource('worldpop'),
+                createForecastSource('gefsTropicalCyclone'),
+                createForecastSource('glofasRiverDischarge'),
+            ],
+        } as NrwEvent;
+
+        expect(getForecastSourceNames(getNrwSortedForecastSources(event))).toEqual([
+            'glofasRiverDischarge',
+            'worldpop',
+            'ecmwfTropicalCyclone',
+            'gefsTropicalCyclone',
+        ]);
+    });
+
+    test('does not mutate the event', () => {
+        const forecastSources = [
+            createForecastSource('worldpop'),
+            createForecastSource('glofasRiverDischarge'),
+        ];
+        const event = { forecastSources } as NrwEvent;
+
+        getNrwSortedForecastSources(event);
+
+        expect(getForecastSourceNames(event.forecastSources)).toEqual([
+            'worldpop',
+            'glofasRiverDischarge',
+        ]);
+    });
+});
 
 describe('getNrwExposedPopulation', () => {
     test('reads the exposed population layer', () => {
