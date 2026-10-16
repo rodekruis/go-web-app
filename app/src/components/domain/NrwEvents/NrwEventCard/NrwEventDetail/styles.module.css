@@ -50,11 +50,6 @@
         margin-left: auto;
     }
 
-    .data-source {
-        border-top: var(--go-ui-width-separator-sm) solid var(--go-ui-color-gray-30);
-        padding: var(--go-ui-spacing-3xs) var(--go-ui-spacing-2xs);
-    }
-
     .timestamps {
         text-align: right;
         color: var(--go-ui-color-gray-70);

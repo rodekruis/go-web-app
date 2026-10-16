@@ -360,6 +360,20 @@
             "description": "If true, clear existing events for the given countries before creating new ones."
           },
           {
+            "name": "notify",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "false",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            },
+            "description": "If true, send notifications (e.g. Teams) for new and updated mock events, like for pipeline forecasts."
+          },
+          {
             "name": "issuedAt",
             "required": false,
             "in": "query",
@@ -1568,9 +1582,9 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/StaticRasterUploadDto"
+                "$ref": "#/components/schemas/StaticRasterUploadFormDto"
               }
             }
           }
@@ -1593,7 +1607,7 @@
             "description": "User does not have the right permission to access this endpoint. \n (User must be an admin.)"
           }
         },
-        "summary": "Upload or update a static raster (upsert). Admin endpoint for managing configuration.",
+        "summary": "Upload or update a static raster (upsert) from its data PNG and metadata JSON. The coloured image is generated server-side. Admin endpoint for managing configuration.",
         "tags": [
           "rasters"
         ]
@@ -2165,9 +2179,11 @@
             "items": {
               "type": "string",
               "enum": [
-                "glofas",
-                "ECMWF",
-                "GEFS",
+                "glofasRiverDischarge",
+                "glofasFloodHazardMaps",
+                "worldpop",
+                "gefsTropicalCyclone",
+                "ecmwfTropicalCyclone",
                 "DestinE"
               ]
             }
@@ -2437,14 +2453,16 @@
           "forecastSources": {
             "type": "array",
             "example": [
-              "glofas"
+              "glofasRiverDischarge"
             ],
             "items": {
               "type": "string",
               "enum": [
-                "glofas",
-                "ECMWF",
-                "GEFS",
+                "glofasRiverDischarge",
+                "glofasFloodHazardMaps",
+                "worldpop",
+                "gefsTropicalCyclone",
+                "ecmwfTropicalCyclone",
                 "DestinE"
               ]
             }
@@ -2523,6 +2541,61 @@
           "adminLevel",
           "name",
           "exposure"
+        ]
+      },
+      "EventForecastSourceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "glofasRiverDischarge",
+              "glofasFloodHazardMaps",
+              "worldpop",
+              "gefsTropicalCyclone",
+              "ecmwfTropicalCyclone",
+              "DestinE"
+            ],
+            "example": "glofasRiverDischarge"
+          },
+          "title": {
+            "type": "string",
+            "example": "Forecast River Discharge"
+          },
+          "dataset": {
+            "type": "string",
+            "example": "GloFAS Medium-range flood forecasts"
+          },
+          "provider": {
+            "type": "string",
+            "example": "Copernicus Emergency Management Service (GloFAS, ECMWF)"
+          },
+          "lastUpdated": {
+            "type": "string",
+            "description": "Update frequency for forecasts, or year of data for static datasets",
+            "example": "daily"
+          },
+          "description": {
+            "type": "string"
+          },
+          "moreInfoLabel": {
+            "type": "string",
+            "example": "WorldPop :: Population Counts"
+          },
+          "moreInfoUrl": {
+            "type": "string",
+            "example": "https://hub.worldpop.org/project/categories?id=3"
+          }
+        },
+        "required": [
+          "name",
+          "title",
+          "dataset",
+          "provider",
+          "lastUpdated",
+          "description",
+          "moreInfoLabel",
+          "moreInfoUrl"
         ]
       },
       "EventLayerDto": {
@@ -2732,13 +2805,7 @@
           "forecastSources": {
             "type": "array",
             "items": {
-              "type": "string",
-              "enum": [
-                "glofas",
-                "ECMWF",
-                "GEFS",
-                "DestinE"
-              ]
+              "$ref": "#/components/schemas/EventForecastSourceDto"
             }
           },
           "alertClass": {
@@ -3597,43 +3664,35 @@
           "metadata"
         ]
       },
-      "StaticRasterUploadDto": {
+      "StaticRasterUploadFormDto": {
         "type": "object",
         "properties": {
           "countryCodeIso3": {
             "type": "string",
-            "example": "KEN"
+            "example": "MWI"
           },
           "layer": {
             "type": "string",
             "enum": [
-              "populationDensity",
-              "exposedPopulation",
-              "redCrossBranches",
-              "clinics",
-              "floodDepth",
-              "glofasStations",
-              "windSpeed"
+              "populationDensity"
             ],
             "example": "populationDensity"
           },
-          "valueData": {
+          "data": {
             "type": "string",
-            "description": "Base64-encoded data PNG (RGBA-encoded float values)"
-          },
-          "valueColoured": {
-            "type": "string",
-            "description": "Base64-encoded coloured PNG image for display"
+            "format": "binary",
+            "description": "Data PNG (RGBA-encoded float values)"
           },
           "metadata": {
-            "$ref": "#/components/schemas/RasterMetadataDto"
+            "type": "string",
+            "format": "binary",
+            "description": "Metadata JSON with StaticRasterSourceMetadataDto fields, e.g. <ISO3>_population_metadata.json"
           }
         },
         "required": [
           "countryCodeIso3",
           "layer",
-          "valueData",
-          "valueColoured",
+          "data",
           "metadata"
         ]
       },
