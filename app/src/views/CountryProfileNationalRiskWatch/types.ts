@@ -93,11 +93,48 @@ export type LayerToggleHandler = (layerName: NrwLayerName) => void;
 
 export enum NrwLegendType {
     Gradient = 'gradient',
+    Categories = 'categories',
 }
 
-export type NrwLegendItem = {
-    type: NrwLegendType.Gradient;
+// Marks an open end of a stepped scale, e.g. "< 100" or "> 1000"
+type Unbounded = undefined;
+export const unbounded: Unbounded = undefined;
+
+// One band of a stepped scale.
+export interface NrwLegendCategory {
+    color: string;
+    from: number | Unbounded;
+    to: number | Unbounded;
+}
+
+interface NrwLegendItemBase {
     layerName: NrwLayerName;
     label: NrwLayer['label'];
+}
+
+export type NrwLegendItem = NrwLegendItemBase & ({
+    type: NrwLegendType.Gradient;
     colors: readonly string[];
+} | {
+    type: NrwLegendType.Categories;
+    categories: NrwLegendCategory[];
+});
+
+// There are two possible placements for legend items:
+// a popup panel over the the map, or in a banner below the map.
+export type NrwLegendPlacement = 'panel' | 'banner';
+
+export enum NrwLegendState {
+    NoEvent = 'noEvent',
+    NoLayers = 'noLayers',
+    Items = 'items',
+}
+
+export type NrwLegend = {
+    state: NrwLegendState.NoEvent;
+} | {
+    state: NrwLegendState.NoLayers;
+} | {
+    state: NrwLegendState.Items;
+    items: NrwLegendItem[];
 };

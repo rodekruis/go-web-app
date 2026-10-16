@@ -1,0 +1,73 @@
+.nrw-marker-legend {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--go-ui-spacing-md) var(--go-ui-spacing-lg);
+
+    --marker-size: 16px;
+
+    .group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--go-ui-spacing-3xs);
+    }
+
+    .label {
+        white-space: nowrap;
+        color: var(--go-ui-color-gray-90);
+        font-weight: var(--go-ui-font-weight-medium);
+    }
+
+    .entries {
+        display: flex;
+        align-items: center;
+        gap: var(--go-ui-spacing-xs);
+
+        &.hazard-entries {
+            gap: var(--go-ui-spacing-2xs);
+        }
+    }
+
+    .entry {
+        display: flex;
+        align-items: center;
+        gap: var(--go-ui-spacing-2xs);
+        white-space: nowrap;
+        color: var(--go-ui-color-gray-70);
+    }
+
+    .alert-marker {
+        flex-shrink: 0;
+        border-radius: 50%;
+        background-color: var(--color-alert);
+        inline-size: var(--marker-size);
+        height: var(--marker-size);
+
+        &.alert-low {
+            --color-alert: var(--nrw-color-alert-low);
+        }
+
+        &.alert-medium {
+            --color-alert: var(--nrw-color-alert-medium);
+        }
+
+        &.alert-high {
+            --color-alert: var(--nrw-color-alert-high);
+        }
+    }
+
+    .hazard-marker {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: var(--go-ui-color-gray-60);
+        inline-size: var(--marker-size);
+        height: var(--marker-size);
+    }
+
+    .hazard-icon {
+        color: var(--go-ui-color-white);
+        font-size: 10px;
+    }
+}

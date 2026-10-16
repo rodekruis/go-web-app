@@ -1,0 +1,23 @@
+.nrw-legend-banner-content {
+    display: flex;
+    align-items: flex-start;
+    flex-shrink: 0;
+    background-color: var(--go-ui-color-background);
+    padding: var(--go-ui-spacing-xs) var(--go-ui-spacing-md);
+    overflow-x: auto;
+    line-height: var(--go-ui-line-height-md);
+    font-size: var(--go-ui-font-size-sm);
+    gap: var(--go-ui-spacing-md) var(--go-ui-spacing-lg);
+    min-block-size: var(--nrw-height-legend-banner);
+
+    &.message {
+        align-items: center;
+        gap: var(--go-ui-spacing-2xs);
+        color: var(--go-ui-color-gray-90);
+    }
+
+    .message-icon {
+        inline-size: 16px;
+        height: 16px;
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "namespace": "nrwLegendBanner",
+    "strings": {
+        "nrwLegendBannerNoLayersMessage": "Turn on layers to see event exposure on the map."
+    }
+}

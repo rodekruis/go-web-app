@@ -9,6 +9,7 @@ import {
     test,
 } from 'vitest';
 
+import rampI18n from '#components/domain/NrwLegendItem/NrwLegendRamp/i18n.json';
 import TestProviders from '#utils/testing/TestProviders';
 import {
     type NrwLegendItem,
@@ -18,7 +19,6 @@ import {
 import NrwMapLegend from './index';
 
 import i18n from './i18n.json';
-import rampI18n from './NrwLegendRamp/i18n.json';
 
 const populationDensity: NrwLegendItem = {
     type: NrwLegendType.Gradient,
@@ -36,8 +36,10 @@ function renderLegend() {
 
 describe('NrwMapLegend', () => {
     test('shows a low-to-high ramp with one swatch per colour', () => {
+        // Act
         const { container } = renderLegend();
 
+        // Assert
         expect(screen.getByText('Population density:')).toBeInTheDocument();
         expect(screen.getByText(rampI18n.strings.nrwLegendRampLow)).toBeInTheDocument();
         expect(screen.getByText(rampI18n.strings.nrwLegendRampHigh)).toBeInTheDocument();
@@ -45,18 +47,22 @@ describe('NrwMapLegend', () => {
     });
 
     test('collapses and expands the items from the title', () => {
+        // Arrange
         renderLegend();
         const title = screen.getByRole('button', { name: i18n.strings.nrwMapLegendTitle });
-
         expect(title).toHaveAttribute('aria-expanded', 'true');
 
+        // Act
         fireEvent.click(title);
 
+        // Assert
         expect(title).toHaveAttribute('aria-expanded', 'false');
         expect(screen.queryByText('Population density:')).not.toBeInTheDocument();
 
+        // Act
         fireEvent.click(title);
 
+        // Assert
         expect(title).toHaveAttribute('aria-expanded', 'true');
         expect(screen.getByText('Population density:')).toBeInTheDocument();
     });

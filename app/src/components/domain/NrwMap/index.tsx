@@ -7,6 +7,7 @@ import {
 import supportedLayerNames from '#utils/nrw/layers';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import { type NrwScreenCaptureHandler } from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenCaptureContext';
+import useNrwLegend from '#views/CountryProfileNationalRiskWatch/hooks/useNrwLegend';
 import NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import {
     type Latitude,
@@ -16,7 +17,7 @@ import {
     type MapViewChangeHandler,
     type NrwLayer as NrwLayerType,
     type NrwLayerName,
-    type NrwLegendItem,
+    NrwLegendState,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
@@ -60,7 +61,6 @@ function NrwMap(props: {
     availableLayers: NrwLayerType[];
     visibleLayers: NrwLayerName[];
     onLayerToggle: LayerToggleHandler;
-    legendItems: NrwLegendItem[];
     registerScreenCapture: (handler: NrwScreenCaptureHandler | undefined) => void;
 }) {
     const {
@@ -70,7 +70,6 @@ function NrwMap(props: {
         availableLayers,
         visibleLayers,
         onLayerToggle,
-        legendItems,
         registerScreenCapture,
     } = props;
 
@@ -81,6 +80,12 @@ function NrwMap(props: {
         onEventHoverChange,
         onEventSelect,
     } = useContext(NrwEventsContext);
+
+    const panelLegend = useNrwLegend({
+        placement: 'panel',
+        availableLayers,
+        visibleLayers,
+    });
 
     const eventCountryCodeIso3 = parseCountryCode(selectedEvent?.countryCodeIso3);
     const showLayers = isDefined(selectedEvent) && isDefined(eventCountryCodeIso3);
@@ -97,8 +102,8 @@ function NrwMap(props: {
         />
     ) : undefined;
 
-    const legend = legendItems.length > 0 ? (
-        <NrwMapLegend items={legendItems} />
+    const legend = panelLegend.state === NrwLegendState.Items && panelLegend.items.length > 0 ? (
+        <NrwMapLegend items={panelLegend.items} />
     ) : undefined;
 
     return (

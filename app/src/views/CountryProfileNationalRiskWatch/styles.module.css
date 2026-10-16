@@ -2,13 +2,55 @@
     grid-template-rows: var(--nrw-height-map);
 }
 
+.map-and-legend {
+    display: flex;
+    flex-direction: column;
+}
+
 .country-profile-nrw-standalone {
-    --nrw-height-map: var(--nrw-height-map-standalone);
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    --nrw-height-map: 100%;
+
+    .page {
+        min-height: 0;
+    }
 
     .main-section-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+
         .main-section {
-            padding: 0 var(--go-ui-spacing-md);
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            padding: var(--go-ui-spacing-sm) var(--go-ui-spacing-md) 0;
             max-width: none;
+            min-height: 0;
+
+            /* Page wraps its children in an unclassed ListView, which must also stretch */
+            > * {
+                flex-grow: 1;
+                min-height: 0;
+            }
         }
+    }
+
+    .map-and-legend {
+        flex-grow: 1;
+        min-height: 0;
+    }
+
+    .map-grid {
+        flex-grow: 1;
+        min-height: 0;
+    }
+
+    .events-height {
+        flex-grow: 1;
+        grid-template-rows: minmax(0, 1fr);
+        min-height: 0;
     }
 }

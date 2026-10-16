@@ -12,6 +12,7 @@ import { useTranslation } from '@ifrc-go/ui/hooks';
 import { isDefined } from '@togglecorp/fujs';
 
 import NrwEvents from '#components/domain/NrwEvents';
+import NrwLegendBanner from '#components/domain/NrwLegendBanner';
 import NrwMap from '#components/domain/NrwMap';
 import NrwNavbar from '#components/domain/NrwNavbar';
 import NrwPdfExport from '#components/domain/NrwPdfExport';
@@ -25,7 +26,6 @@ import NrwScreenCaptureContext, {
 } from './contexts/NrwScreenCaptureContext';
 import useNrwEvents from './hooks/useNrwEvents';
 import useNrwLayers from './hooks/useNrwLayers';
-import useNrwLegend from './hooks/useNrwLegend';
 import useNrwMapView from './hooks/useNrwMapView';
 import useNrwSearchParams from './hooks/useNrwSearchParams';
 import NrwAdminAreasProvider from './NrwAdminAreasProvider';
@@ -83,12 +83,6 @@ export function Component() {
         selectedEvent,
     });
 
-    const { legendItems } = useNrwLegend({
-        availableLayers,
-        visibleLayers,
-        enabled: isDefined(selectedEvent),
-    });
-
     // The actual screen capture function is down in the component tree and
     // specific to the mapping library. It will be available after the map has
     // loaded.
@@ -113,10 +107,9 @@ export function Component() {
 
     const content = (
         <NrwAdminAreasProvider event={selectedEvent}>
-            <Container
-                heading={nrwStandalone ? '' : strings.nationalRiskWatchHeading}
-            >
+            <div className={styles.mapAndLegend}>
                 <ListView
+                    className={styles.mapGrid}
                     layout="grid"
                     withSidebar
                     sidebarSize="lg"
@@ -130,11 +123,14 @@ export function Component() {
                         visibleLayers={visibleLayers}
                         onLayerToggle={handleLayerToggle}
                         registerScreenCapture={registerScreenCapture}
-                        legendItems={legendItems}
                     />
                     <NrwEvents elementRef={eventsPanelRef} />
                 </ListView>
-            </Container>
+                <NrwLegendBanner
+                    availableLayers={availableLayers}
+                    visibleLayers={visibleLayers}
+                />
+            </div>
         </NrwAdminAreasProvider>
     );
 
@@ -145,6 +141,7 @@ export function Component() {
                     <div className={styles.countryProfileNrwStandalone}>
                         <NrwNavbar actions={exportButton} />
                         <Page
+                            className={styles.page}
                             title={strings.nationalRiskWatchPageTitle}
                             mainSectionContainerClassName={styles.mainSectionContainer}
                             mainSectionClassName={styles.mainSection}
@@ -152,7 +149,11 @@ export function Component() {
                             {content}
                         </Page>
                     </div>
-                ) : content}
+                ) : (
+                    <Container heading={strings.nationalRiskWatchHeading}>
+                        {content}
+                    </Container>
+                )}
             </NrwScreenCaptureContext.Provider>
         </NrwEventsContext.Provider>
     );

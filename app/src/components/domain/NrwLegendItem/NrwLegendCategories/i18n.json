@@ -1,0 +1,8 @@
+{
+    "namespace": "nrwLegendItem",
+    "strings": {
+        "nrwLegendCategoriesBelow": "<{value}",
+        "nrwLegendCategoriesRange": "{from}-{to}",
+        "nrwLegendCategoriesAbove": "{value}+"
+    }
+}
