@@ -1,4 +1,8 @@
-import { useContext } from 'react';
+import {
+    useCallback,
+    useContext,
+    useState,
+} from 'react';
 import {
     faBullhorn,
     faChevronLeft,
@@ -21,7 +25,10 @@ import {
 
 import { getNrwSortedForecastSources } from '#utils/nrw/events';
 import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
-import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
+import {
+    type NrwEvent,
+    type NrwForecastSource,
+} from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwDataSource from './NrwDataSource';
 import NrwExposedAdminAreas from './NrwExposedAdminAreas';
@@ -41,6 +48,16 @@ function NrwEventDetail(props: Props) {
 
     const strings = useTranslation(i18n);
     const { parentAdminArea, drillUp } = useContext(NrwAdminAreasContext);
+    const [
+        expandedForecastSourceName,
+        setExpandedForecastSourceName,
+    ] = useState<NrwForecastSource['name']>();
+
+    const handleForecastSourceToggle = useCallback((name: NrwForecastSource['name']) => {
+        setExpandedForecastSourceName(
+            (previousName) => (previousName === name ? undefined : name),
+        );
+    }, []);
 
     const now = new Date();
     const startAt = new Date(event.startAt);
@@ -121,6 +138,8 @@ function NrwEventDetail(props: Props) {
                                 <NrwDataSource
                                     key={forecastSource.name}
                                     forecastSource={forecastSource}
+                                    expanded={forecastSource.name === expandedForecastSourceName}
+                                    onToggle={handleForecastSourceToggle}
                                 />
                             ))}
                         </div>
