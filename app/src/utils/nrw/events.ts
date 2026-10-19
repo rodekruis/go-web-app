@@ -90,7 +90,7 @@ export function getNrwExposedPlaceCodes(event: NrwEvent, adminLevel: AdminLevel)
 }
 
 // The exposed admin area of the event with the given place code, at any admin level.
-function getExposedAdminArea(
+export function getExposedAdminArea(
     event: NrwEvent,
     placeCode: PlaceCode,
 ): AdminAreaProperties | undefined {
@@ -117,18 +117,6 @@ export function canNrwDrillBelow(event: NrwEvent, adminLevel: AdminLevel): boole
     return adminLevel >= getNrwInitialAdminLevel(event)
         && nextAdminLevel <= maxQueryableAdminLevel
         && getNrwExposedAdminLevels(event).includes(nextAdminLevel);
-}
-
-// The exposed admin area with the given place code, when the event can be drilled into below it.
-export function getNrwDrillableAdminArea(
-    event: NrwEvent,
-    placeCode: PlaceCode,
-): AdminAreaProperties | undefined {
-    const adminArea = getExposedAdminArea(event, placeCode);
-
-    return isDefined(adminArea) && canNrwDrillBelow(event, adminArea.adminLevel)
-        ? adminArea
-        : undefined;
 }
 
 // The admin areas drilled through to show the given admin area, from the initial admin

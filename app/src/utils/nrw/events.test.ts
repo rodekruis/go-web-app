@@ -15,7 +15,7 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import {
-    getNrwDrillableAdminArea,
+    getExposedAdminArea,
     getNrwDrillPath,
     getNrwExposedAdminLevels,
     getNrwExposedPlaceCodes,
@@ -209,7 +209,7 @@ describe('getNrwExposedPlaceCodes', () => {
     });
 });
 
-describe('getNrwDrillableAdminArea', () => {
+describe('getExposedAdminArea', () => {
     // Opens at level 1: Jonglei and Unity split the exposure.
     const event = createEvent({
         0: [createArea('SS', 'South Sudan', 300000)],
@@ -220,7 +220,7 @@ describe('getNrwDrillableAdminArea', () => {
 
     test('names the exposed admin area with the given place code at its admin level', () => {
         // Act & Assert
-        expect(getNrwDrillableAdminArea(event, 'SS0303' as PlaceCode)).toEqual({
+        expect(getExposedAdminArea(event, 'SS0303' as PlaceCode)).toEqual({
             adminLevel: 2,
             placeCode: 'SS0303',
             name: 'Bor South',
@@ -229,13 +229,13 @@ describe('getNrwDrillableAdminArea', () => {
 
     test('is unknown for an admin area that is not exposed', () => {
         // Act & Assert
-        expect(getNrwDrillableAdminArea(event, 'SS05' as PlaceCode)).toBeUndefined();
+        expect(getExposedAdminArea(event, 'SS05' as PlaceCode)).toBeUndefined();
     });
 
-    test('is unknown above the initial admin level and at the deepest exposed level', () => {
+    test('is known above the initial admin level and at the deepest exposed level', () => {
         // Act & Assert
-        expect(getNrwDrillableAdminArea(event, 'SS' as PlaceCode)).toBeUndefined();
-        expect(getNrwDrillableAdminArea(event, 'SS030301' as PlaceCode)).toBeUndefined();
+        expect(getExposedAdminArea(event, 'SS' as PlaceCode)?.name).toBe('South Sudan');
+        expect(getExposedAdminArea(event, 'SS030301' as PlaceCode)?.name).toBe('Anyidi');
     });
 });
 

@@ -50,7 +50,7 @@ function useAdminAreaClick(
                 const adminArea = parseAdminAreaProperties(feature?.properties);
 
                 if (adminArea !== null && !canDrillDownRef.current(adminArea.placeCode)) {
-                    // When we click the lowest admin area: we don't want anything to happen.
+                    // A click that cannot drill down, e.g. on the selected area, does nothing.
                     return;
                 }
 

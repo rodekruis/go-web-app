@@ -45,13 +45,17 @@
     &.hovered {
         background-color: var(--go-ui-color-gray-20);
         font-weight: var(--go-ui-font-weight-semibold);
+    }
 
+    &:hover,
+    &.hovered,
+    &.selected {
         .hover-icon {
             visibility: visible;
         }
     }
 
-    &.drillable:hover {
+    &:not(.selected):hover {
         cursor: pointer;
     }
 }
