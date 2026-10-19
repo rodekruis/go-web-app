@@ -14,7 +14,7 @@
 
     .details {
         margin: 0;
-        padding: var(--go-ui-spacing-3xs) var(--go-ui-spacing-2xs) var(--go-ui-spacing-sm) var(--go-ui-spacing-lg);
+        padding: var(--go-ui-spacing-3xs) var(--go-ui-spacing-2xs) var(--go-ui-spacing-sm) var(--go-ui-spacing-xl);
 
         li {
             margin: 0;
@@ -27,6 +27,6 @@
 
     .link {
         text-decoration: underline;
-        color: var(--go-ui-color-primary-red);
+        color: var(--go-ui-color-dark-blue-30);
     }
 }
