@@ -22,7 +22,7 @@ function NrwLegendBanner(props: {
     visibleLayers: NrwLayerName[];
     elementRef?: RefObject<HTMLDivElement | null>;
 }) {
-    const { availableLayers, visibleLayers } = props;
+    const { availableLayers, visibleLayers, elementRef } = props;
 
     const strings = useTranslation(i18n);
 
@@ -35,13 +35,16 @@ function NrwLegendBanner(props: {
     switch (legend.state) {
         case NrwLegendState.NoEvent:
             return (
-                <div className={styles.nrwLegendBannerContent}>
+                <div ref={elementRef} className={styles.nrwLegendBannerContent}>
                     <NrwMarkerLegend />
                 </div>
             );
         case NrwLegendState.NoLayers:
             return (
-                <div className={_cs(styles.nrwLegendBannerContent, styles.message)}>
+                <div
+                    ref={elementRef}
+                    className={_cs(styles.nrwLegendBannerContent, styles.message)}
+                >
                     <FontAwesomeIcon
                         icon={faCircleInfo}
                         className={styles.messageIcon}
@@ -51,7 +54,7 @@ function NrwLegendBanner(props: {
             );
         case NrwLegendState.Items:
             return (
-                <div className={styles.nrwLegendBannerContent}>
+                <div ref={elementRef} className={styles.nrwLegendBannerContent}>
                     {legend.items.map((item) => (
                         <NrwLegendItem
                             key={item.layerName}
