@@ -5,6 +5,7 @@
 .map-and-legend {
     display: flex;
     flex-direction: column;
+    gap: 14px;
 }
 
 .country-profile-nrw-standalone {
@@ -41,7 +42,6 @@
 
     .map-and-legend {
         flex-grow: 1;
-        gap: 14px;
         min-height: 0;
     }
 
