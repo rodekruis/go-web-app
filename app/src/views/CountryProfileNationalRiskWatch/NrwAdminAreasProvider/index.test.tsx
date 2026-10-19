@@ -85,10 +85,20 @@ const jonglei: AdminAreaProperties = {
     placeCode: 'SS03' as PlaceCode,
     name: 'Jonglei',
 };
+const lakes: AdminAreaProperties = {
+    adminLevel: 1 as AdminLevel,
+    placeCode: 'SS04' as PlaceCode,
+    name: 'Lakes',
+};
 const borSouth: AdminAreaProperties = {
     adminLevel: 2 as AdminLevel,
     placeCode: 'SS0303' as PlaceCode,
     name: 'Bor South',
+};
+const bor: AdminAreaProperties = {
+    adminLevel: 3 as AdminLevel,
+    placeCode: 'SS030301' as PlaceCode,
+    name: 'Bor',
 };
 
 // One state with two counties, so the drill starts at the counties.
@@ -112,6 +122,17 @@ const noAdminAreas = {
     features: [],
 } as unknown as NrwAdminAreaFeatureCollection;
 
+function createAdminAreas(adminLevel: number, placeCodes: string[]) {
+    return {
+        type: 'FeatureCollection',
+        features: placeCodes.map((placeCode) => ({
+            type: 'Feature',
+            geometry: null,
+            properties: { adminLevel, placeCode, nameEn: placeCode },
+        })),
+    } as unknown as NrwAdminAreaFeatureCollection;
+}
+
 let root: Root | undefined;
 let container: HTMLDivElement | undefined;
 let latest: NrwAdminAreasContextProps | undefined;
@@ -131,6 +152,12 @@ function adminAreas() {
         throw new Error('NrwAdminAreasProvider has not rendered');
     }
     return latest;
+}
+
+function unselectedPlaceCodes() {
+    return adminAreas().unselectedAdminAreas?.features.map(
+        ({ properties }) => properties.placeCode,
+    );
 }
 
 async function render(renderedEvent: NrwEvent | undefined) {
@@ -197,7 +224,7 @@ test('opens at the first level with several exposed areas', () => {
     expect(adminAreas().drillPath).toEqual([]);
     expect(adminAreas().parentAdminArea).toBeUndefined();
     expect(adminAreas().adminAreas).toBeUndefined();
-    expect(adminAreas().canDrillDown(jonglei.placeCode)).toBe(true);
+    expect(adminAreas().canDrillDown(jonglei)).toBe(true);
     expect(requestedFilter()).toBe("(countryCodeIso3='SSD') AND adminLevel=1 AND placeCode IN ('SS03','SS04')");
 });
 
@@ -232,7 +259,7 @@ test('stays on the shown level when the requested admin areas do not load', asyn
 
     expect(requestedFilter()).toContain('adminLevel=1 AND placeCode IN');
     expect(adminAreas().adminLevel).toBe(1);
-    expect(adminAreas().canDrillDown(jonglei.placeCode)).toBe(true);
+    expect(adminAreas().canDrillDown(jonglei)).toBe(true);
 });
 
 test('remembers an admin area without children as the finest level', async () => {
@@ -243,8 +270,8 @@ test('remembers an admin area without children as the finest level', async () =>
     expect(requestedFilter()).toContain('adminLevel=1 AND placeCode IN');
     expect(adminAreas().adminLevel).toBe(1);
     expect(adminAreas().adminAreas).toBe(someAdminAreas);
-    expect(adminAreas().canDrillDown(jonglei.placeCode)).toBe(false);
-    expect(adminAreas().canDrillDown('SS04' as PlaceCode)).toBe(true);
+    expect(adminAreas().canDrillDown(jonglei)).toBe(false);
+    expect(adminAreas().canDrillDown(lakes)).toBe(true);
 
     // Not requested again.
     await drillDown(jonglei);
@@ -258,7 +285,47 @@ test('drills down only into exposed admin levels', async () => {
     await answer(someAdminAreas);
 
     expect(adminAreas().adminLevel).toBe(3);
-    expect(adminAreas().canDrillDown('SS030301' as PlaceCode)).toBe(false);
+    expect(adminAreas().canDrillDown(bor)).toBe(false);
+});
+
+test('shows the unselected admin areas around the drill path, up to the initial level', async () => {
+    await answer(createAdminAreas(1, ['SS03', 'SS04']));
+    expect(adminAreas().unselectedAdminAreas).toBeUndefined();
+
+    await drillDown(jonglei);
+    await answer(createAdminAreas(2, ['SS0303', 'SS0304']));
+    expect(unselectedPlaceCodes()).toEqual(['SS04']);
+
+    await drillDown(borSouth);
+    await answer(createAdminAreas(3, ['SS030301']));
+    expect(unselectedPlaceCodes()).toEqual(['SS04', 'SS0304']);
+
+    await drillUpTo(2);
+    await answer(createAdminAreas(2, ['SS0303', 'SS0304']));
+    expect(unselectedPlaceCodes()).toEqual(['SS04']);
+
+    await drillUpTo(1);
+    await answer(createAdminAreas(1, ['SS03', 'SS04']));
+    expect(adminAreas().unselectedAdminAreas).toBeUndefined();
+});
+
+test('drills up and sideways into an unselected admin area', async () => {
+    await answer(createAdminAreas(1, ['SS03', 'SS04']));
+    await drillDown(jonglei);
+    await answer(createAdminAreas(2, ['SS0303', 'SS0304']));
+    await drillDown(borSouth);
+    await answer(createAdminAreas(3, ['SS030301']));
+    expect(adminAreas().canDrillDown(lakes)).toBe(true);
+
+    await drillDown(lakes);
+    expect(requestedFilter()).toBe(
+        "(countryCodeIso3='SSD') AND adminLevel=2 AND placeCodeLevel1='SS04' AND placeCode IN ('SS0303','SS0401')",
+    );
+
+    await answer(createAdminAreas(2, ['SS0401']));
+    expect(adminAreas().adminLevel).toBe(2);
+    expect(adminAreas().drillPath).toEqual([lakes]);
+    expect(unselectedPlaceCodes()).toEqual(['SS03']);
 });
 
 test('does not drill up from the top', async () => {

@@ -43,7 +43,7 @@ function useAdminAreaHover(
     adminAreas: NrwAdminAreaFeatureCollection | undefined,
     hoveredPlaceCode: PlaceCode | undefined,
     onHoverChange: PlaceCodeChangeHandler,
-    canDrillDown: (placeCode: PlaceCode) => boolean,
+    canDrillDown: (adminArea: AdminAreaProperties) => boolean,
 ) {
     const { map } = useContext(NrwMapContext);
     const [hoveredAdminArea, setHoveredAdminArea] = useState<HoveredAdminArea>();
@@ -84,7 +84,7 @@ function useAdminAreaHover(
 
                 // Show "clickable" pointer cursor only for admin areas that can
                 // be drilled into. Default to drag cursor.
-                map.getCanvas().style.cursor = canDrillDownRef.current(properties.placeCode) ? 'pointer' : '';
+                map.getCanvas().style.cursor = canDrillDownRef.current(properties) ? 'pointer' : '';
                 setHoveredAdminArea({
                     ...properties,
                     coordinates: new NrwLngLat(

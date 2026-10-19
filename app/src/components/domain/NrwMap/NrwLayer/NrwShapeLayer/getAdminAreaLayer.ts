@@ -5,6 +5,10 @@ import {
     mapFillHoverOpacity,
     mapFillOpacity,
     mapOutlineWidth,
+    mapUnselectedColor,
+    mapUnselectedFillHoverOpacity,
+    mapUnselectedFillOpacity,
+    mapUnselectedOutlineWidth,
     type NrwExposedPopulationScale,
 } from '#utils/nrw/colors';
 import { type NrwAdminAreaFeatureCollection } from '#views/CountryProfileNationalRiskWatch/types';
@@ -78,6 +82,37 @@ function getAdminAreaLayer(
                 // The outline keeps the default full opacity, where the fill is translucent.
                 'line-color': fillColorSpecification,
                 'line-width': mapOutlineWidth,
+            },
+        },
+    ];
+}
+
+// Build the grey layer of the unselected admin areas around the ones drilled into.
+export function getUnselectedAdminAreaLayer(
+    id: string,
+    adminAreas: NrwAdminAreaFeatureCollection,
+): MapLayer[] {
+    return [
+        {
+            id,
+            type: 'fill',
+            source: {
+                type: 'geojson',
+                data: adminAreas as unknown as GeoJSON.FeatureCollection,
+                promoteId: 'placeCode',
+            },
+            paint: {
+                'fill-color': mapUnselectedColor,
+                'fill-opacity': ['case', isHovered, mapUnselectedFillHoverOpacity, mapUnselectedFillOpacity],
+            },
+        },
+        {
+            id: `${id}-outline`,
+            type: 'line',
+            source: id,
+            paint: {
+                'line-color': mapUnselectedColor,
+                'line-width': mapUnselectedOutlineWidth,
             },
         },
     ];

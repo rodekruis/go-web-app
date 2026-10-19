@@ -17,6 +17,7 @@ import useNrwAdminAreas from '../hooks/useNrwAdminAreas';
 import {
     type AdminAreaProperties,
     type AdminLevel,
+    type NrwAdminAreaFeature,
     type NrwAdminAreaFeatureCollection,
     type NrwEvent,
     type PlaceCode,
@@ -33,6 +34,7 @@ interface Drill {
     shown: {
         path: AdminAreaProperties[];
         adminAreas: NrwAdminAreaFeatureCollection | undefined;
+        higherLevelAdminAreas: NrwAdminAreaFeature[];
     };
     childlessPlaceCodes: PlaceCode[];
 }
@@ -41,9 +43,18 @@ function newDrill(event: NrwEvent | undefined): Drill {
     return {
         eventId: event?.eventId,
         path: [],
-        shown: { path: [], adminAreas: undefined },
+        shown: { path: [], adminAreas: undefined, higherLevelAdminAreas: [] },
         childlessPlaceCodes: [],
     };
+}
+
+// The admin areas drilled through so far that lie above the given admin level.
+function getHigherLevelAdminAreas(
+    shown: Drill['shown'],
+    adminLevel: AdminLevel,
+): NrwAdminAreaFeature[] {
+    return [...shown.higherLevelAdminAreas, ...(shown.adminAreas?.features ?? [])]
+        .filter((feature) => feature.properties.adminLevel < adminLevel);
 }
 
 function NrwAdminAreasProvider(props: {
@@ -85,7 +96,18 @@ function NrwAdminAreasProvider(props: {
         skip: exposedPlaceCodes.length === 0,
         onSuccess: (adminAreas) => setDrill((previous) => {
             if (adminAreas.features.length > 0) {
-                return { ...previous, shown: { path: previous.path, adminAreas } };
+                const shownAdminLevel = (initialAdminLevel + previous.path.length) as AdminLevel;
+                return {
+                    ...previous,
+                    shown: {
+                        path: previous.path,
+                        adminAreas,
+                        higherLevelAdminAreas: getHigherLevelAdminAreas(
+                            previous.shown,
+                            shownAdminLevel,
+                        ),
+                    },
+                };
             }
 
             // An admin area without children is the deepest level, so stay on
@@ -106,6 +128,22 @@ function NrwAdminAreasProvider(props: {
     const [hoveredPlaceCode, setHoveredPlaceCode] = useState<PlaceCode>();
 
     const shownAdminAreas = drill.shown.adminAreas;
+
+    // The admin areas around the drill path, up to the initial admin level.
+    const unselectedAdminAreas = useMemo<NrwAdminAreaFeatureCollection | undefined>(
+        () => {
+            const selectedPlaceCodes: string[] = drill.shown.path.map(
+                ({ placeCode }) => placeCode,
+            );
+            const features = drill.shown.higherLevelAdminAreas.filter(
+                ({ properties }) => !selectedPlaceCodes.includes(properties.placeCode),
+            );
+
+            return features.length > 0 ? { type: 'FeatureCollection', features } : undefined;
+        },
+        [drill.shown],
+    );
+
     const exposedPopulationScale = useMemo(
         () => (isDefined(event) && isDefined(shownAdminAreas)
             ? getExposedPopulationScale(event, shownAdminAreas)
@@ -118,18 +156,23 @@ function NrwAdminAreasProvider(props: {
             const exposedAdminLevels = isDefined(event) ? getNrwExposedAdminLevels(event) : [];
             const { shown, childlessPlaceCodes } = drill;
 
-            function canDrillDown(placeCode: PlaceCode) {
-                const nextAdminLevel = (adminLevel + 1) as AdminLevel;
+            function canDrillDown(adminArea: AdminAreaProperties) {
+                const nextAdminLevel = (adminArea.adminLevel + 1) as AdminLevel;
 
                 return nextAdminLevel <= maxQueryableAdminLevel
                     && exposedAdminLevels.includes(nextAdminLevel)
-                    && !childlessPlaceCodes.includes(placeCode);
+                    && !childlessPlaceCodes.includes(adminArea.placeCode);
+            }
+
+            // The part of the drill path above the given admin level.
+            function getPathAbove(path: AdminAreaProperties[], targetAdminLevel: AdminLevel) {
+                return path.slice(0, targetAdminLevel - initialAdminLevel);
             }
 
             function drillUpTo(targetAdminLevel: AdminLevel) {
                 setDrill((previous) => ({
                     ...previous,
-                    path: previous.shown.path.slice(0, targetAdminLevel - initialAdminLevel),
+                    path: getPathAbove(previous.shown.path, targetAdminLevel),
                 }));
             }
 
@@ -138,6 +181,7 @@ function NrwAdminAreasProvider(props: {
                 adminLevel,
                 adminLevelLabels,
                 adminAreas: shown.adminAreas,
+                unselectedAdminAreas,
                 exposedPopulationScale,
                 pending,
                 drillPath: shown.path,
@@ -145,11 +189,15 @@ function NrwAdminAreasProvider(props: {
                 hoveredPlaceCode,
                 onAdminAreaHoverChange: setHoveredPlaceCode,
                 canDrillDown,
+                // An unselected admin area drills sideways, and up if above the parent level.
                 drillDown: (adminArea) => {
-                    if (canDrillDown(adminArea.placeCode)) {
+                    if (canDrillDown(adminArea)) {
                         setDrill((previous) => ({
                             ...previous,
-                            path: [...previous.shown.path, adminArea],
+                            path: [
+                                ...getPathAbove(previous.shown.path, adminArea.adminLevel),
+                                adminArea,
+                            ],
                         }));
                     }
                 },
@@ -164,6 +212,7 @@ function NrwAdminAreasProvider(props: {
         [
             event,
             drill,
+            unselectedAdminAreas,
             exposedPopulationScale,
             initialAdminLevel,
             adminLevel,

@@ -1,5 +1,4 @@
 import {
-    useCallback,
     useContext,
     useMemo,
 } from 'react';
@@ -11,16 +10,15 @@ import {
 } from '@togglecorp/fujs';
 
 import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
-import { type AdminAreaProperties } from '#views/CountryProfileNationalRiskWatch/types';
 import { getFeatureCollectionBounds } from '#views/CountryProfileNationalRiskWatch/utils';
 
 import NrwMarker from '../../NrwMarker';
 import { type NrwMarkerPlacement } from '../../NrwMarker/useNrwMapMarker';
 import useNrwMapFitBounds from '../../useNrwMapFitBounds';
 import useNrwMapLayers from '../useNrwMapLayers';
-import getAdminAreaLayer from './getAdminAreaLayer';
-import useAdminAreaClick from './useAdminAreaClick';
-import useAdminAreaHover, { type HoveredAdminAreaAnchor } from './useAdminAreaHover';
+import getAdminAreaLayer, { getUnselectedAdminAreaLayer } from './getAdminAreaLayer';
+import { type HoveredAdminAreaAnchor } from './useAdminAreaHover';
+import useAdminAreaHoverAndDrill from './useAdminAreaHoverAndDrill';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
@@ -31,10 +29,6 @@ const tooltipPlacements: Record<HoveredAdminAreaAnchor, NrwMarkerPlacement> = {
     area: { anchor: 'bottom', offset: [0, -10] },
 };
 
-// Drilling back up on a click beside the admin areas is disabled for now.
-// Set this to true to enable it again; the Back button in the event card always drills up.
-const drillUpOnOutsideClick = false;
-
 function NrwShapeLayer(props: {
     id: string;
     isVisible: boolean;
@@ -44,16 +38,12 @@ function NrwShapeLayer(props: {
 
     const {
         adminAreas,
+        unselectedAdminAreas,
         exposedPopulationScale,
-        pending,
-        hoveredPlaceCode,
-        onAdminAreaHoverChange,
-        canDrillDown,
-        drillDown,
-        drillUp,
     } = useContext(NrwAdminAreasContext);
 
     const strings = useTranslation(i18n);
+    const unselectedId = `${id}-unselected`;
 
     // Fit the map to the admin areas of the level drilled into.
     const bounds = useMemo(
@@ -62,41 +52,38 @@ function NrwShapeLayer(props: {
     );
     useNrwMapFitBounds(bounds);
 
+    // The unselected admin areas go first, so they are drawn below the selected ones.
     const mapLayers = useMemo(
-        () => (isDefined(adminAreas) && isDefined(exposedPopulationScale)
-            ? getAdminAreaLayer(id, adminAreas, exposedPopulationScale)
-            : undefined),
-        [id, adminAreas, exposedPopulationScale],
+        () => {
+            if (isNotDefined(adminAreas) || isNotDefined(exposedPopulationScale)) {
+                return undefined;
+            }
+
+            const unselectedMapLayers = isDefined(unselectedAdminAreas)
+                ? getUnselectedAdminAreaLayer(unselectedId, unselectedAdminAreas)
+                : [];
+            const selectedMapLayers = getAdminAreaLayer(id, adminAreas, exposedPopulationScale);
+
+            return [...unselectedMapLayers, ...selectedMapLayers];
+        },
+        [id, unselectedId, adminAreas, unselectedAdminAreas, exposedPopulationScale],
     );
     useNrwMapLayers(mapLayers, isVisible, layerAnchorId);
 
     const isInteractive = isDefined(mapLayers) && isVisible;
-    const { hoveredAdminArea, clearHover } = useAdminAreaHover(
+    // A click drills down into a selected admin area, or sideways (maybe up) into unselected ones.
+    const { hoveredAdminArea: hoveredSelectedAdminArea } = useAdminAreaHoverAndDrill(
         id,
         isInteractive,
         adminAreas,
-        hoveredPlaceCode,
-        onAdminAreaHoverChange,
-        canDrillDown,
+    );
+    const { hoveredAdminArea: hoveredUnselectedAdminArea } = useAdminAreaHoverAndDrill(
+        unselectedId,
+        isInteractive && isDefined(unselectedAdminAreas),
+        unselectedAdminAreas,
     );
 
-    // Drill into the clicked admin area, or (when enabled) back up on a click beside them.
-    const handleClick = useCallback(
-        (adminArea: AdminAreaProperties | null) => {
-            if (adminArea === null) {
-                if (drillUpOnOutsideClick) {
-                    drillUp();
-                }
-                return;
-            }
-
-            clearHover();
-            drillDown(adminArea);
-        },
-        [drillDown, drillUp, clearHover],
-    );
-    // The last level stays on the map while the next loads, so hold clicks until then.
-    useAdminAreaClick(id, isInteractive && !pending, canDrillDown, handleClick);
+    const hoveredAdminArea = hoveredSelectedAdminArea ?? hoveredUnselectedAdminArea;
 
     if (isNotDefined(hoveredAdminArea) || !isVisible) {
         return null;

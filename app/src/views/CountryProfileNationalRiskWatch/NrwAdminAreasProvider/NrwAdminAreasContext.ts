@@ -18,13 +18,14 @@ export interface NrwAdminAreasContextProps {
     adminLevel: AdminLevel;
     adminLevelLabels: NrwAdminLevelLabels | undefined;
     adminAreas: NrwAdminAreaFeatureCollection | undefined;
+    unselectedAdminAreas: NrwAdminAreaFeatureCollection | undefined;
     exposedPopulationScale: NrwExposedPopulationScale | undefined;
     pending: boolean;
     drillPath: AdminAreaProperties[];
     parentAdminArea: AdminAreaProperties | undefined;
     hoveredPlaceCode: PlaceCode | undefined;
     onAdminAreaHoverChange: PlaceCodeChangeHandler;
-    canDrillDown: (placeCode: PlaceCode) => boolean;
+    canDrillDown: (adminArea: AdminAreaProperties) => boolean;
     drillDown: AdminAreaDrillDownHandler;
     drillUp: () => void;
     drillUpTo: AdminLevelDrillHandler;
@@ -35,6 +36,7 @@ const NrwAdminAreasContext = createContext<NrwAdminAreasContextProps>({
     adminLevel: 1 as AdminLevel,
     adminLevelLabels: undefined,
     adminAreas: undefined,
+    unselectedAdminAreas: undefined,
     exposedPopulationScale: undefined,
     pending: false,
     drillPath: [],

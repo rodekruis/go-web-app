@@ -28,6 +28,12 @@ export const mapFillOpacity = 0.65;
 export const mapFillHoverOpacity = 0.8;
 export const mapOutlineWidth = 2;
 
+// The design shows the unselected admin areas in grey 40 at 30% opacity.
+export const mapUnselectedColor = '#c6c6c6';
+export const mapUnselectedFillOpacity = 0.3;
+export const mapUnselectedFillHoverOpacity = 0.4;
+export const mapUnselectedOutlineWidth = 1;
+
 export type EqualIntervalBreaks = [number, number, number, number];
 
 // Split 0..max into five equal bands, one per ramp tint, so the scale fits any
