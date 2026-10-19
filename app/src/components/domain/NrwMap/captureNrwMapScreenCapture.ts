@@ -3,13 +3,6 @@ import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 const screenCapturePixelRatio = 2;
 
-// Elements with this attribute are left out of captured images (e.g. interactive buttons)
-const screenCaptureExcludeAttribute = 'data-nrw-capture-exclude';
-
-function isNotExcluded(node: HTMLElement) {
-    return !(node instanceof Element && node.hasAttribute(screenCaptureExcludeAttribute));
-}
-
 // Render an off-screen clone of the html element and capture that as an image
 // This prevents issues like the browser window being too narrow to show the whole element
 export function captureElementClone(element: HTMLElement) {
@@ -26,17 +19,22 @@ export function captureElementClone(element: HTMLElement) {
     host.style.left = `-${width * 2}px`;
     host.style.width = `${width}px`;
     host.style.pointerEvents = 'none';
+    host.setAttribute('aria-hidden', 'true');
+    host.setAttribute('inert', '');
 
     const clone = element.cloneNode(true) as HTMLElement;
     host.appendChild(clone);
     document.body.appendChild(host);
 
     const { height } = clone.getBoundingClientRect();
+    if (height <= 0) {
+        host.remove();
+        throw new Error('Element to capture has no size');
+    }
 
     return toPng(clone, {
         cacheBust: true,
         pixelRatio: screenCapturePixelRatio,
-        filter: isNotExcluded,
     })
         .then((dataUrl) => ({ dataUrl, aspectRatio: width / height }))
         .finally(() => host.remove());
@@ -61,7 +59,7 @@ function captureNrwMap(
         return toPng(wrapper, {
             cacheBust: true,
             pixelRatio: screenCapturePixelRatio,
-            filter: (node) => !excluded.has(node) && isNotExcluded(node),
+            filter: (node) => !excluded.has(node),
         }).then((dataUrl) => ({ dataUrl, aspectRatio: width / height }));
     };
 }
