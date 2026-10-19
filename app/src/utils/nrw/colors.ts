@@ -8,6 +8,7 @@ import {
     type NrwAdminAreaFeatureCollection,
     type NrwEvent,
     type NrwLegendCategory,
+    unbounded,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 type MapColorRamp = readonly [string, string, string, string, string];
@@ -85,7 +86,7 @@ export function getRampCategories(
     ramp: MapColorRamp,
     breaks: EqualIntervalBreaks,
 ): NrwLegendCategory[] {
-    const bounds = [undefined, ...breaks, undefined];
+    const bounds = [unbounded, ...breaks, unbounded];
 
     return ramp.map((color, index) => ({
         color,

@@ -63,6 +63,14 @@
     .footer {
         flex-shrink: 0;
     }
+
+    &.nrw-standalone {
+        height: 100dvh;
+
+        .page-content {
+            min-height: 0;
+        }
+    }
 }
 
 @keyframes bounce-back-and-forth {

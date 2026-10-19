@@ -11,9 +11,9 @@ export type SupportedLayerName = (typeof supportedLayerNames)[keyof typeof suppo
 
 export const layerDrawOrder: SupportedLayerName[] = [
     'clinics',
+    'populationDensity',
     'floodDepth',
     'exposedPopulation',
-    'populationDensity',
 ];
 
 export function getLayerAnchorId(name: NrwLayerName): string {

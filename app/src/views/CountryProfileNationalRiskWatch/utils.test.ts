@@ -7,10 +7,12 @@ import {
 import {
     type AdminLevel,
     type CountryCodeIso3,
+    type NrwAdminAreaFeature,
     type NrwEvent,
     type PlaceCode,
 } from './types';
 import {
+    getAdminAreaAnchor,
     getAdminAreasQuery,
     getEventCountries,
     maxQueryableAdminLevel,
@@ -148,5 +150,48 @@ describe('parseAdminAreaProperties', () => {
         expect(parseAdminAreaProperties({ adminLevel: '1', placeCode: 'SS01', nameEn: 'x' })).toBeNull();
         expect(parseAdminAreaProperties({ adminLevel: 1, placeCode: "SS01' OR 1=1", nameEn: 'x' })).toBeNull();
         expect(parseAdminAreaProperties({ adminLevel: 1, placeCode: '', nameEn: 'x' })).toBeNull();
+    });
+});
+
+describe('getAdminAreaAnchor', () => {
+    // The generated DTO types the coordinates loosely, so the geometry is built untyped.
+    function createFeature(geometry: unknown): NrwAdminAreaFeature {
+        return {
+            type: 'Feature',
+            geometry,
+            properties: { adminLevel: 1, placeCode: 'SS01', nameEn: 'x' },
+        } as unknown as NrwAdminAreaFeature;
+    }
+
+    test('anchors a convex area at its centre', () => {
+        const square = createFeature({
+            type: 'Polygon',
+            coordinates: [[[30, 6], [32, 6], [32, 8], [30, 8], [30, 6]]],
+        });
+
+        const anchor = getAdminAreaAnchor(square);
+
+        expect(anchor?.lng).toBeCloseTo(31);
+        expect(anchor?.lat).toBeCloseTo(7);
+    });
+
+    test('keeps the anchor on a concave area whose bounding box centre lies outside it', () => {
+        // A U shape; its bounding box centre (31, 7) is in the gap.
+        const uShape = createFeature({
+            type: 'Polygon',
+            coordinates: [[
+                [30, 6], [32, 6], [32, 8], [31.5, 8], [31.5, 6.5],
+                [30.5, 6.5], [30.5, 8], [30, 8], [30, 6],
+            ]],
+        });
+
+        const anchor = getAdminAreaAnchor(uShape);
+
+        expect(anchor).toBeDefined();
+        expect(anchor?.lat).toBeLessThanOrEqual(6.5);
+    });
+
+    test('has no anchor for a feature without geometry', () => {
+        expect(getAdminAreaAnchor(createFeature(null))).toBeUndefined();
     });
 });

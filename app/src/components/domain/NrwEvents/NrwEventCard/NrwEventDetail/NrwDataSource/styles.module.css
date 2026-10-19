@@ -1,0 +1,32 @@
+.nrw-data-source {
+    border-top: var(--go-ui-width-separator-sm) solid var(--go-ui-color-gray-30);
+
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--go-ui-spacing-3xs);
+        padding: var(--go-ui-spacing-2xs);
+        width: 100%;
+        text-align: left;
+        font-weight: var(--go-ui-font-weight-semibold);
+    }
+
+    .details {
+        margin: 0;
+        padding: var(--go-ui-spacing-3xs) var(--go-ui-spacing-2xs) var(--go-ui-spacing-sm) var(--go-ui-spacing-xl);
+
+        li {
+            margin: 0;
+        }
+    }
+
+    .value {
+        margin-left: var(--go-ui-spacing-4xs);
+    }
+
+    .link {
+        text-decoration: underline;
+        color: var(--go-ui-color-dark-blue-30);
+    }
+}

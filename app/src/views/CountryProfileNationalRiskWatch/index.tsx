@@ -100,9 +100,16 @@ export function Component() {
         [takeScreenCapture],
     );
     const eventsPanelRef = useRef<HTMLDivElement>(null);
+    const legendBannerRef = useRef<HTMLDivElement>(null);
 
     const exportButton = countries.length > 0
-        ? <NrwPdfExport eventsPanelRef={eventsPanelRef} countries={countries} />
+        ? (
+            <NrwPdfExport
+                eventsPanelRef={eventsPanelRef}
+                legendBannerRef={legendBannerRef}
+                countries={countries}
+            />
+        )
         : undefined;
 
     const content = (
@@ -129,6 +136,7 @@ export function Component() {
                 <NrwLegendBanner
                     availableLayers={availableLayers}
                     visibleLayers={visibleLayers}
+                    elementRef={legendBannerRef}
                 />
             </div>
         </NrwAdminAreasProvider>

@@ -1,4 +1,9 @@
-import { render } from '@testing-library/react';
+import {
+    act,
+    render,
+    screen,
+} from '@testing-library/react';
+import { isDefined } from '@togglecorp/fujs';
 import {
     describe,
     expect,
@@ -13,27 +18,62 @@ import {
     createAdminAreaProperties,
 } from '#utils/testing/nrwAdminAreaTesting';
 import NrwMapTestHost from '#utils/testing/NrwMapTestHost';
-import { type PlaceCode } from '#views/CountryProfileNationalRiskWatch/types';
+import {
+    type NrwAdminAreaFeatureCollection,
+    type PlaceCode,
+} from '#views/CountryProfileNationalRiskWatch/types';
 
 import useAdminAreaHover from './useAdminAreaHover';
 
+// One square admin area around (31, 7), as returned by /admin-areas.
+const adminAreas = {
+    type: 'FeatureCollection',
+    features: [{
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [[[30, 6], [32, 6], [32, 8], [30, 8], [30, 6]]] },
+        properties: createAdminAreaProperties('SSD.1', 1),
+    }],
+} as unknown as NrwAdminAreaFeatureCollection;
+
 function HoverLayer(props: {
     isEnabled: boolean;
+    hoveredPlaceCode: PlaceCode | undefined;
     canDrillDown: (placeCode: PlaceCode) => boolean;
     onHoverChange: (placeCode: PlaceCode | undefined) => void;
 }) {
-    const { isEnabled, canDrillDown, onHoverChange } = props;
+    const {
+        isEnabled,
+        hoveredPlaceCode,
+        canDrillDown,
+        onHoverChange,
+    } = props;
 
-    useAdminAreaHover(adminAreaLayerId, isEnabled, undefined, onHoverChange, canDrillDown);
+    const { hoveredAdminArea } = useAdminAreaHover(
+        adminAreaLayerId,
+        isEnabled,
+        adminAreas,
+        hoveredPlaceCode,
+        onHoverChange,
+        canDrillDown,
+    );
 
-    return null;
+    if (!isDefined(hoveredAdminArea)) {
+        return null;
+    }
+
+    return (
+        <div role="tooltip">
+            {`${hoveredAdminArea.name} at ${hoveredAdminArea.coordinates.lng}, ${hoveredAdminArea.coordinates.lat} (${hoveredAdminArea.anchor})`}
+        </div>
+    );
 }
 
 function setup(options: {
     isEnabled?: boolean;
+    hoveredPlaceCode?: PlaceCode;
     canDrillDown: (placeCode: PlaceCode) => boolean;
 }) {
-    const { isEnabled = true, canDrillDown } = options;
+    const { isEnabled = true, hoveredPlaceCode, canDrillDown } = options;
 
     const fake = createFakeMapboxMap();
     const onHoverChange = vi.fn();
@@ -41,6 +81,7 @@ function setup(options: {
         <NrwMapTestHost map={fake.map}>
             <HoverLayer
                 isEnabled={isEnabled}
+                hoveredPlaceCode={hoveredPlaceCode}
                 canDrillDown={canDrillDown}
                 onHoverChange={onHoverChange}
             />
@@ -48,10 +89,12 @@ function setup(options: {
     );
 
     function hoverOver(properties: unknown) {
-        fake.simulateEvent('mousemove', {
-            features: [createAdminAreaFeature(properties)],
-            lngLat: { lng: 31.3, lat: 6.8 },
-        }, adminAreaLayerId);
+        act(() => {
+            fake.simulateEvent('mousemove', {
+                features: [createAdminAreaFeature(properties)],
+                lngLat: { lng: 31.3, lat: 6.8 },
+            }, adminAreaLayerId);
+        });
     }
 
     function rerenderHoverLayer(newCanDrillDown: (placeCode: PlaceCode) => boolean) {
@@ -59,6 +102,7 @@ function setup(options: {
             <NrwMapTestHost map={fake.map}>
                 <HoverLayer
                     isEnabled={isEnabled}
+                    hoveredPlaceCode={hoveredPlaceCode}
                     canDrillDown={newCanDrillDown}
                     onHoverChange={onHoverChange}
                 />
@@ -153,5 +197,32 @@ describe('useAdminAreaHover', () => {
 
         // Assert
         expect(fake.canvas.style.cursor).toBe('');
+    });
+
+    test('anchors the tooltip on the area when its row is hovered outside the map', () => {
+        // Arrange & Act
+        setup({ hoveredPlaceCode: 'SSD.1' as PlaceCode, canDrillDown: () => true });
+
+        // Assert
+        expect(screen.getByRole('tooltip')).toHaveTextContent('Name of SSD.1 at 31, 7 (area)');
+    });
+
+    test('follows the pointer instead while it is over the map', () => {
+        // Arrange
+        const { hoverOver } = setup({ hoveredPlaceCode: 'SSD.1' as PlaceCode, canDrillDown: () => true });
+
+        // Act
+        hoverOver(createAdminAreaProperties('SSD.1', 1));
+
+        // Assert
+        expect(screen.getByRole('tooltip')).toHaveTextContent('Name of SSD.1 at 31.3, 6.8 (pointer)');
+    });
+
+    test('shows no tooltip for a hovered place code that is not on the map', () => {
+        // Arrange & Act
+        setup({ hoveredPlaceCode: 'SSD.9' as PlaceCode, canDrillDown: () => true });
+
+        // Assert
+        expect(screen.queryByRole('tooltip')).toBeNull();
     });
 });
