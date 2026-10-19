@@ -1,5 +1,5 @@
 import { type RefObject } from 'react';
-import { faCircleInfo } from '@fortawesome/pro-regular-svg-icons';
+import { faCircleExclamation } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import { _cs } from '@togglecorp/fujs';
@@ -46,7 +46,7 @@ function NrwLegendBanner(props: {
                     className={_cs(styles.nrwLegendBannerContent, styles.message)}
                 >
                     <FontAwesomeIcon
-                        icon={faCircleInfo}
+                        icon={faCircleExclamation}
                         className={styles.messageIcon}
                     />
                     {strings.nrwLegendBannerNoLayersMessage}

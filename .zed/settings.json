@@ -1,0 +1,42 @@
+{
+  "lsp": {
+    "eslint": {
+      "settings": {
+        "workingDirectories": [
+          { "directory": "app", "changeProcessCWD": true },
+        ],
+      },
+    },
+    "stylelint-lsp": {
+      "settings": {
+        "stylelint": {},
+      },
+    },
+  },
+  "languages": {
+    "TypeScript": {
+      "formatter": {
+        "code_actions": {
+          "source.fixAll.eslint": true,
+        },
+      },
+    },
+    "TSX": {
+      "formatter": {
+        "code_actions": {
+          "source.fixAll.eslint": true,
+        },
+      },
+    },
+    "JavaScript": {
+      "formatter": {
+        "code_actions": {
+          "source.fixAll.eslint": true,
+        },
+      },
+    },
+    "CSS": {
+      "tab_size": 4,
+    },
+  },
+}
