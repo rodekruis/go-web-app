@@ -783,3 +783,16 @@ test('stays on the shown level when the siblings of the admin area in the url do
     expect(adminAreas().selectedAdminArea).toBeUndefined();
     expect(fetches).toHaveLength(fetched + 1);
 });
+
+test('stays on the shown level when the siblings of the admin area in the url are not found', async () => {
+    // Arrange
+    await openUrl('SS030301');
+    await answer(lookedUpAdminArea(jonglei, borSouth, bor));
+
+    // Act: nothing is shown yet, so the top is requested.
+    await answer(noAdminAreas);
+
+    // Assert
+    expect(url?.placeCode).toBeUndefined();
+    expect(requestedFilter()).toContain('adminLevel=1 AND placeCode IN');
+});

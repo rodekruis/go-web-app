@@ -202,7 +202,7 @@ function NrwAdminAreasProvider(props: {
 
             // An admin area without children is the deepest level: remember it, so it is selected.
             const { parentPlaceCode } = request;
-            if (isDefined(parentPlaceCode)) {
+            if (isDefined(parentPlaceCode) && parentPlaceCode === urlAdminArea?.placeCode) {
                 setDrill((previous) => ({
                     ...previous,
                     childlessPlaceCodes: [...previous.childlessPlaceCodes, parentPlaceCode],
