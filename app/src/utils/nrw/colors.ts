@@ -28,11 +28,22 @@ export const mapFillOpacity = 0.65;
 export const mapFillHoverOpacity = 0.8;
 export const mapOutlineWidth = 2;
 
-// The design shows the unselected admin areas in grey 40 at 30% opacity.
-export const mapUnselectedColor = '#c6c6c6';
-export const mapUnselectedFillOpacity = 0.3;
-export const mapUnselectedFillHoverOpacity = 0.4;
-export const mapUnselectedOutlineWidth = 1;
+export interface MapFlatStyle {
+    fillColor: string;
+    fillOpacity: number;
+    fillHoverOpacity: number;
+    outlineColor: string;
+    outlineWidth: number;
+}
+
+// Grey 40 with the map shadow outline.
+export const mapUnselectedStyle: MapFlatStyle = {
+    fillColor: '#c6c6c6',
+    fillOpacity: 0.5,
+    fillHoverOpacity: 0.8,
+    outlineColor: 'rgba(50, 50, 50, 0.2)',
+    outlineWidth: 2,
+};
 
 export type EqualIntervalBreaks = [number, number, number, number];
 

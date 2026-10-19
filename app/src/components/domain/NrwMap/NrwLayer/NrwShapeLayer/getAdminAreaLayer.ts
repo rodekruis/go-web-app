@@ -4,11 +4,8 @@ import { type ExpressionSpecification } from 'mapbox-gl-v3';
 import {
     mapFillHoverOpacity,
     mapFillOpacity,
+    type MapFlatStyle,
     mapOutlineWidth,
-    mapUnselectedColor,
-    mapUnselectedFillHoverOpacity,
-    mapUnselectedFillOpacity,
-    mapUnselectedOutlineWidth,
     type NrwExposedPopulationScale,
 } from '#utils/nrw/colors';
 import { type NrwAdminAreaFeatureCollection } from '#views/CountryProfileNationalRiskWatch/types';
@@ -87,10 +84,11 @@ function getAdminAreaLayer(
     ];
 }
 
-// Build the grey layer of the unselected admin areas around the ones drilled into.
-export function getUnselectedAdminAreaLayer(
+// Build a layer of admin areas in one flat style, around the ones drilled into.
+export function getFlatAdminAreaLayer(
     id: string,
     adminAreas: NrwAdminAreaFeatureCollection,
+    style: MapFlatStyle,
 ): MapLayer[] {
     return [
         {
@@ -102,8 +100,8 @@ export function getUnselectedAdminAreaLayer(
                 promoteId: 'placeCode',
             },
             paint: {
-                'fill-color': mapUnselectedColor,
-                'fill-opacity': ['case', isHovered, mapUnselectedFillHoverOpacity, mapUnselectedFillOpacity],
+                'fill-color': style.fillColor,
+                'fill-opacity': ['case', isHovered, style.fillHoverOpacity, style.fillOpacity],
             },
         },
         {
@@ -111,8 +109,8 @@ export function getUnselectedAdminAreaLayer(
             type: 'line',
             source: id,
             paint: {
-                'line-color': mapUnselectedColor,
-                'line-width': mapUnselectedOutlineWidth,
+                'line-color': style.outlineColor,
+                'line-width': style.outlineWidth,
             },
         },
     ];

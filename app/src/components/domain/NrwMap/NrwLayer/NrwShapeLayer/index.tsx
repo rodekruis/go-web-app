@@ -9,6 +9,7 @@ import {
     isNotDefined,
 } from '@togglecorp/fujs';
 
+import { mapUnselectedStyle } from '#utils/nrw/colors';
 import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
 import { getFeatureCollectionBounds } from '#views/CountryProfileNationalRiskWatch/utils';
 
@@ -16,7 +17,7 @@ import NrwMarker from '../../NrwMarker';
 import { type NrwMarkerPlacement } from '../../NrwMarker/useNrwMapMarker';
 import useNrwMapFitBounds from '../../useNrwMapFitBounds';
 import useNrwMapLayers from '../useNrwMapLayers';
-import getAdminAreaLayer, { getUnselectedAdminAreaLayer } from './getAdminAreaLayer';
+import getAdminAreaLayer, { getFlatAdminAreaLayer } from './getAdminAreaLayer';
 import { type HoveredAdminAreaAnchor } from './useAdminAreaHover';
 import useAdminAreaHoverAndDrill from './useAdminAreaHoverAndDrill';
 
@@ -40,6 +41,7 @@ function NrwShapeLayer(props: {
         adminAreas,
         unselectedAdminAreas,
         exposedPopulationScale,
+        adminLevelLabels,
     } = useContext(NrwAdminAreasContext);
 
     const strings = useTranslation(i18n);
@@ -60,7 +62,7 @@ function NrwShapeLayer(props: {
             }
 
             const unselectedMapLayers = isDefined(unselectedAdminAreas)
-                ? getUnselectedAdminAreaLayer(unselectedId, unselectedAdminAreas)
+                ? getFlatAdminAreaLayer(unselectedId, unselectedAdminAreas, mapUnselectedStyle)
                 : [];
             const selectedMapLayers = getAdminAreaLayer(id, adminAreas, exposedPopulationScale);
 
@@ -89,6 +91,9 @@ function NrwShapeLayer(props: {
         return null;
     }
 
+    // The grey admin areas can be of several levels, so the tooltip names the level.
+    const adminLevelLabel = adminLevelLabels?.[hoveredAdminArea.adminLevel]?.singular;
+
     return (
         <NrwMarker
             key={hoveredAdminArea.anchor}
@@ -96,8 +101,15 @@ function NrwShapeLayer(props: {
             placement={tooltipPlacements[hoveredAdminArea.anchor]}
         >
             <div className={styles.adminAreaTooltip}>
-                <div className={styles.name}>
-                    {hoveredAdminArea.name}
+                <div className={styles.heading}>
+                    <span className={styles.name}>
+                        {hoveredAdminArea.name}
+                    </span>
+                    {isDefined(adminLevelLabel) && (
+                        <span className={styles.adminLevel}>
+                            {adminLevelLabel}
+                        </span>
+                    )}
                 </div>
                 <div className={styles.exposedPopulation}>
                     {strings.nrwShapeLayerExposedPopulationLabel}
