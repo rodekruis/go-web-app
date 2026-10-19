@@ -60,7 +60,7 @@ export function getMapView(
 
 // The parent place code properties of an admin area, one per admin level.
 // Checked against the API schema, so a schema change shows up here.
-const placeCodeLevelKeys = [
+export const placeCodeLevelKeys = [
     'placeCodeLevel0',
     'placeCodeLevel1',
     'placeCodeLevel2',

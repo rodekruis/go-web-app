@@ -7,7 +7,9 @@ import { isDefined } from '@togglecorp/fujs';
 
 import { getExposedPopulationScale } from '#utils/nrw/colors';
 import {
-    getNrwExposedAdminLevels,
+    canNrwDrillBelow,
+    getNrwDrillableAdminArea,
+    getNrwDrillPath,
     getNrwExposedPlaceCodes,
     getNrwInitialAdminLevel,
 } from '#utils/nrw/events';
@@ -20,16 +22,13 @@ import {
     type NrwAdminAreaFeatureCollection,
     type NrwEvent,
     type PlaceCode,
+    type PlaceCodeChangeHandler,
 } from '../types';
-import {
-    maxQueryableAdminLevel,
-    parseCountryCode,
-} from '../utils';
+import { parseCountryCode } from '../utils';
 import NrwAdminAreasContext, { type NrwAdminAreasContextProps } from './NrwAdminAreasContext';
 
 interface Drill {
     eventId: NrwEvent['eventId'] | undefined;
-    path: AdminAreaProperties[];
     shown: {
         path: AdminAreaProperties[];
         adminAreas: NrwAdminAreaFeatureCollection | undefined;
@@ -40,7 +39,6 @@ interface Drill {
 function newDrill(event: NrwEvent | undefined): Drill {
     return {
         eventId: event?.eventId,
-        path: [],
         shown: { path: [], adminAreas: undefined },
         childlessPlaceCodes: [],
     };
@@ -48,9 +46,16 @@ function newDrill(event: NrwEvent | undefined): Drill {
 
 function NrwAdminAreasProvider(props: {
     event: NrwEvent | undefined;
+    urlPlaceCode: PlaceCode | undefined;
+    onUrlPlaceCodeChange: PlaceCodeChangeHandler;
     children: ReactNode;
 }) {
-    const { event, children } = props;
+    const {
+        event,
+        urlPlaceCode,
+        onUrlPlaceCodeChange,
+        children,
+    } = props;
 
     const countryCodeIso3 = parseCountryCode(event?.countryCodeIso3);
 
@@ -72,35 +77,50 @@ function NrwAdminAreasProvider(props: {
     // at the level where the exposure splits into several areas.
     const initialAdminLevel = isDefined(event) ? getNrwInitialAdminLevel(event) : 1 as AdminLevel;
     const adminLevel = (initialAdminLevel + drill.shown.path.length) as AdminLevel;
-    const requestedAdminLevel = (initialAdminLevel + drill.path.length) as AdminLevel;
+
+    // The admin areas below the admin area in the url are requested, when the
+    // event exposes it and it can be drilled into, else the initial level.
+    const requestedAdminArea = isDefined(event) && isDefined(urlPlaceCode)
+        ? getNrwDrillableAdminArea(event, urlPlaceCode)
+        : undefined;
+    const requestedAdminLevel = isDefined(requestedAdminArea)
+        ? (requestedAdminArea.adminLevel + 1) as AdminLevel
+        : initialAdminLevel;
     const exposedPlaceCodes = isDefined(event)
         ? getNrwExposedPlaceCodes(event, requestedAdminLevel)
         : [];
 
+    // Stay on the shown level when the requested admin areas do not load.
+    const shownPlaceCode = drill.shown.path.at(-1)?.placeCode;
+
     const { pending } = useNrwAdminAreas({
         countries: countryCodeIso3 === null ? undefined : [countryCodeIso3],
         adminLevel: requestedAdminLevel,
-        parentPlaceCode: drill.path.at(-1)?.placeCode,
+        parentPlaceCode: requestedAdminArea?.placeCode,
         placeCodes: exposedPlaceCodes,
         skip: exposedPlaceCodes.length === 0,
-        onSuccess: (adminAreas) => setDrill((previous) => {
-            if (adminAreas.features.length > 0) {
-                return { ...previous, shown: { path: previous.path, adminAreas } };
+        onSuccess: (adminAreas) => {
+            const [adminArea] = adminAreas.features;
+            if (isDefined(adminArea) && isDefined(event)) {
+                const path = getNrwDrillPath(event, initialAdminLevel, adminArea.properties);
+                setDrill((previous) => ({ ...previous, shown: { path, adminAreas } }));
+                return;
             }
 
             // An admin area without children is the deepest level, so stay on
             // the shown level and remember it, so it is not requested again.
-            const requestedAdminArea = previous.path.at(-1);
-            return {
-                ...previous,
-                path: previous.shown.path,
-                childlessPlaceCodes: isDefined(requestedAdminArea)
-                    ? [...previous.childlessPlaceCodes, requestedAdminArea.placeCode]
-                    : previous.childlessPlaceCodes,
-            };
-        }),
-        // Stay on the shown level when the requested admin areas do not load.
-        onFailure: () => setDrill((previous) => ({ ...previous, path: previous.shown.path })),
+            if (isDefined(requestedAdminArea)) {
+                setDrill((previous) => ({
+                    ...previous,
+                    childlessPlaceCodes: [
+                        ...previous.childlessPlaceCodes,
+                        requestedAdminArea.placeCode,
+                    ],
+                }));
+            }
+            onUrlPlaceCodeChange(shownPlaceCode);
+        },
+        onFailure: () => onUrlPlaceCodeChange(shownPlaceCode),
     });
 
     const [hoveredPlaceCode, setHoveredPlaceCode] = useState<PlaceCode>();
@@ -115,22 +135,17 @@ function NrwAdminAreasProvider(props: {
 
     const value = useMemo<NrwAdminAreasContextProps>(
         () => {
-            const exposedAdminLevels = isDefined(event) ? getNrwExposedAdminLevels(event) : [];
             const { shown, childlessPlaceCodes } = drill;
 
             function canDrillDown(placeCode: PlaceCode) {
-                const nextAdminLevel = (adminLevel + 1) as AdminLevel;
-
-                return nextAdminLevel <= maxQueryableAdminLevel
-                    && exposedAdminLevels.includes(nextAdminLevel)
+                return isDefined(event)
+                    && canNrwDrillBelow(event, adminLevel)
                     && !childlessPlaceCodes.includes(placeCode);
             }
 
             function drillUpTo(targetAdminLevel: AdminLevel) {
-                setDrill((previous) => ({
-                    ...previous,
-                    path: previous.shown.path.slice(0, targetAdminLevel - initialAdminLevel),
-                }));
+                const parentAdminArea = shown.path[targetAdminLevel - initialAdminLevel - 1];
+                onUrlPlaceCodeChange(parentAdminArea?.placeCode);
             }
 
             return {
@@ -147,10 +162,7 @@ function NrwAdminAreasProvider(props: {
                 canDrillDown,
                 drillDown: (adminArea) => {
                     if (canDrillDown(adminArea.placeCode)) {
-                        setDrill((previous) => ({
-                            ...previous,
-                            path: [...previous.shown.path, adminArea],
-                        }));
+                        onUrlPlaceCodeChange(adminArea.placeCode);
                     }
                 },
                 drillUp: () => {
@@ -170,6 +182,7 @@ function NrwAdminAreasProvider(props: {
             adminLevelLabels,
             pending,
             hoveredPlaceCode,
+            onUrlPlaceCodeChange,
         ],
     );
 

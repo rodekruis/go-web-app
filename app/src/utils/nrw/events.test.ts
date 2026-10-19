@@ -7,12 +7,16 @@ import {
 import supportedLayerNames from '#utils/nrw/layers';
 import {
     type AdminLevel,
+    type NrwAdminAreaProperties,
     type NrwEvent,
     type NrwExposedAdminArea,
     type NrwForecastSource,
+    type PlaceCode,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import {
+    getNrwDrillableAdminArea,
+    getNrwDrillPath,
     getNrwExposedAdminLevels,
     getNrwExposedPlaceCodes,
     getNrwExposedPopulation,
@@ -202,5 +206,100 @@ describe('getNrwExposedPlaceCodes', () => {
 
         expect(getNrwExposedPlaceCodes(event, 1 as AdminLevel)).toEqual(['ET02']);
         expect(getNrwExposedPlaceCodes(event, 2 as AdminLevel)).toEqual([]);
+    });
+});
+
+describe('getNrwDrillableAdminArea', () => {
+    // Opens at level 1: Jonglei and Unity split the exposure.
+    const event = createEvent({
+        0: [createArea('SS', 'South Sudan', 300000)],
+        1: [createArea('SS03', 'Jonglei', 250000), createArea('SS04', 'Unity', 50000)],
+        2: [createArea('SS0303', 'Bor South', 250000), createArea('SS0401', 'Abiemnhom', 50000)],
+        3: [createArea('SS030301', 'Anyidi', 250000)],
+    });
+
+    test('names the exposed admin area with the given place code at its admin level', () => {
+        // Act & Assert
+        expect(getNrwDrillableAdminArea(event, 'SS0303' as PlaceCode)).toEqual({
+            adminLevel: 2,
+            placeCode: 'SS0303',
+            name: 'Bor South',
+        });
+    });
+
+    test('is unknown for an admin area that is not exposed', () => {
+        // Act & Assert
+        expect(getNrwDrillableAdminArea(event, 'SS05' as PlaceCode)).toBeUndefined();
+    });
+
+    test('is unknown above the initial admin level and at the deepest exposed level', () => {
+        // Act & Assert
+        expect(getNrwDrillableAdminArea(event, 'SS' as PlaceCode)).toBeUndefined();
+        expect(getNrwDrillableAdminArea(event, 'SS030301' as PlaceCode)).toBeUndefined();
+    });
+});
+
+describe('getNrwDrillPath', () => {
+    const event = createEvent({
+        1: [createArea('SS03', 'Jonglei', 250000), createArea('SS04', 'Unity', 50000)],
+        2: [createArea('SS0303', 'Bor South', 250000)],
+    });
+
+    function createAdminArea(adminLevel: number, parents: Record<string, string | null>) {
+        return {
+            adminLevel,
+            placeCode: 'SS030301',
+            placeCodeLevel0: 'SS',
+            placeCodeLevel1: null,
+            placeCodeLevel2: null,
+            placeCodeLevel3: null,
+            placeCodeLevel4: null,
+            ...parents,
+        } as NrwAdminAreaProperties;
+    }
+
+    test('lists the parents from the initial admin level down, named by the event', () => {
+        // Arrange
+        const adminArea = createAdminArea(3, {
+            placeCodeLevel1: 'SS03',
+            placeCodeLevel2: 'SS0303',
+            placeCodeLevel3: 'SS030301',
+        });
+
+        // Act & Assert
+        expect(getNrwDrillPath(event, 1 as AdminLevel, adminArea)).toEqual([
+            { adminLevel: 1, placeCode: 'SS03', name: 'Jonglei' },
+            { adminLevel: 2, placeCode: 'SS0303', name: 'Bor South' },
+        ]);
+    });
+
+    test('is empty at the initial admin level', () => {
+        // Arrange
+        const adminArea = createAdminArea(1, { placeCodeLevel1: 'SS03' });
+
+        // Act & Assert
+        expect(getNrwDrillPath(event, 1 as AdminLevel, adminArea)).toEqual([]);
+    });
+
+    test('falls back to the place code of a parent the event does not expose', () => {
+        // Arrange
+        const adminArea = createAdminArea(3, {
+            placeCodeLevel1: 'SS04',
+            placeCodeLevel2: 'SS0401',
+            placeCodeLevel3: 'SS040101',
+        });
+
+        // Act & Assert
+        expect(getNrwDrillPath(event, 2 as AdminLevel, adminArea)).toEqual([
+            { adminLevel: 2, placeCode: 'SS0401', name: 'SS0401' },
+        ]);
+    });
+
+    test('skips a parent place code that is not safe for the admin areas filter', () => {
+        // Arrange
+        const adminArea = createAdminArea(2, { placeCodeLevel1: "SS03'" });
+
+        // Act & Assert
+        expect(getNrwDrillPath(event, 1 as AdminLevel, adminArea)).toEqual([]);
     });
 });

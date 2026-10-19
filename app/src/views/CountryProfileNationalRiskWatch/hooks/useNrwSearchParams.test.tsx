@@ -25,6 +25,7 @@ import useCountry from '#hooks/domain/useCountry';
 import {
     type Latitude,
     type Longitude,
+    type PlaceCode,
     type Zoom,
 } from '../types';
 import useNrwSearchParams from './useNrwSearchParams';
@@ -233,7 +234,7 @@ describe('useNrwSearchParams', () => {
         test('selecting an event shows the default layers and drops the map view', () => {
             // Arrange
             const rendered = renderNrwSearchParams(
-                '/?countries=MWI&z=6.50&lat=-13.250000&lon=34.300000&layers=clinics',
+                '/?countries=MWI&z=6.50&lat=-13.250000&lon=34.300000&layers=clinics&placeCode=MW201',
             );
             const locationKey = rendered.result.current.location.key;
 
@@ -250,10 +251,12 @@ describe('useNrwSearchParams', () => {
             expect(rendered.searchParams.has('z')).toBe(false);
             expect(rendered.searchParams.has('lat')).toBe(false);
             expect(rendered.searchParams.has('lon')).toBe(false);
+            expect(rendered.searchParams.has('placeCode')).toBe(false);
             expect(rendered.searchParams.get('countries')).toBe('MWI');
             expect(rendered.result.current.params.selectedEventId).toBe(42);
             expect(rendered.result.current.params.layersFromUrlParams)
                 .toEqual(['exposedPopulation']);
+            expect(rendered.result.current.params.placeCodeFromUrlParams).toBeUndefined();
         });
 
         test('selecting a flood event also shows the flood depth layer', () => {
@@ -274,7 +277,7 @@ describe('useNrwSearchParams', () => {
         test('clearing the event hides all layers and drops the map view', () => {
             // Arrange
             const rendered = renderNrwSearchParams(
-                '/?countries=MWI&event=42&layers=exposedPopulation&z=5&lat=-13&lon=34',
+                '/?countries=MWI&event=42&layers=exposedPopulation&z=5&lat=-13&lon=34&placeCode=MW201',
             );
 
             // Act
@@ -359,6 +362,48 @@ describe('useNrwSearchParams', () => {
             expect(rendered.searchParams.get('lon')).toBe('35.083364');
             expect(rendered.searchParams.get('countries')).toBe('MWI');
             expect(rendered.result.current.params.selectedEventId).toBeUndefined();
+        });
+    });
+
+    describe('drilled admin area', () => {
+        test('reads a place code that is safe for the admin areas filter only', () => {
+            // Arrange
+            const placeCodeAt = (url: string) => (
+                renderNrwSearchParams(url).result.current.params.placeCodeFromUrlParams
+            );
+
+            // Act & Assert
+            expect(placeCodeAt('/?placeCode=KEN.10_1')).toBe('KEN.10_1');
+            expect(placeCodeAt('/?placeCode=')).toBeUndefined();
+            expect(placeCodeAt("/?placeCode=MW201'")).toBeUndefined();
+            expect(placeCodeAt('/')).toBeUndefined();
+        });
+
+        test('drilling into an admin area keeps it in the url, drilling up to the top drops it', () => {
+            // Arrange
+            const rendered = renderNrwSearchParams('/?event=42&layers=exposedPopulation&z=5');
+
+            // Act
+            act(() => {
+                rendered.result.current.params.handleUrlPlaceCodeChange('MW201' as PlaceCode);
+            });
+
+            // Assert
+            expect(rendered.result.current.navigationType).toBe('REPLACE');
+            expect(rendered.searchParams.get('placeCode')).toBe('MW201');
+            expect(Array.from(rendered.searchParams.keys()).sort())
+                .toEqual(['event', 'layers', 'placeCode', 'z']);
+            expect(rendered.result.current.params.placeCodeFromUrlParams).toBe('MW201');
+
+            // Act
+            act(() => {
+                rendered.result.current.params.handleUrlPlaceCodeChange(undefined);
+            });
+
+            // Assert
+            expect(rendered.searchParams.has('placeCode')).toBe(false);
+            expect(rendered.searchParams.get('z')).toBe('5');
+            expect(rendered.result.current.params.placeCodeFromUrlParams).toBeUndefined();
         });
     });
 
