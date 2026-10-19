@@ -120,6 +120,7 @@ function NrwEventDetail(props: Props) {
                                 spacingOffset={-2}
                                 before={<FontAwesomeIcon icon={faChevronLeft} />}
                                 onClick={drillUp}
+                                data-nrw-capture-exclude
                             >
                                 {strings.nrwEventDetailBackButton}
                             </Button>
