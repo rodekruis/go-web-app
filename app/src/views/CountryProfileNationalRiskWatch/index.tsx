@@ -136,7 +136,6 @@ export function Component() {
                 <NrwLegendBanner
                     availableLayers={availableLayers}
                     visibleLayers={visibleLayers}
-                    elementRef={legendBannerRef}
                 />
             </div>
         </NrwAdminAreasProvider>

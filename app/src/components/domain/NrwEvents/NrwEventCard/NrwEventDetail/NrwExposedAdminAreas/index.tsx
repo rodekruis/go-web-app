@@ -113,7 +113,10 @@ function NrwExposedAdminAreas(props: Props) {
         <div className={_cs(styles.nrwExposedAdminAreas, className)}>
             {isDefined(parentAdminArea) && (
                 <div className={styles.selectedAdminArea}>
-                    <FontAwesomeIcon icon={faLocationCrosshairs} />
+                    <FontAwesomeIcon
+                        className={styles.selectedAdminAreaIcon}
+                        icon={faLocationCrosshairs}
+                    />
                     {strings.nrwExposedAdminAreasSelectedAreaLabel}
                     <span className={styles.selectedAdminAreaValue}>
                         {isDefined(parentAdminAreaLabel)
@@ -156,7 +159,7 @@ function NrwExposedAdminAreas(props: Props) {
                                 <FontAwesomeIcon icon={faLocationDot} />
                                 {resolveToString(
                                     strings.nrwExposedAdminAreasAreaColumn,
-                                    { adminAreaLabel },
+                                    { adminAreaLabel: adminAreaLabel.toLowerCase() },
                                 )}
                             </span>
                         </th>

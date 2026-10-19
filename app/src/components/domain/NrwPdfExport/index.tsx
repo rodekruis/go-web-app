@@ -57,8 +57,7 @@ function NrwPdfExport(props: Props) {
             }
             const [mapImage, eventsImage, legendImage] = await Promise.all([
                 takeScreenCapture(),
-                captureElementClone(eventsElement),
-                captureElementClone(legendElement),
+                eventsElement ? captureElementClone(eventsElement) : undefined,
             ]);
 
             exportNrwToPdf({
