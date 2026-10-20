@@ -29,7 +29,7 @@
         left: 50%;
         transform: translate(-50%, -50%);
         line-height: 1;
-        color: var(--go-ui-color-white);
+        color: var(--nrw-color-alert-contrast);
         font-size: 14px;
     }
 
