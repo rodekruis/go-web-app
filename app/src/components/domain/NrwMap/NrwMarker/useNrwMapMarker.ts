@@ -6,6 +6,7 @@ import {
 } from 'react';
 import {
     _cs,
+    isDefined,
     isNotDefined,
 } from '@togglecorp/fujs';
 import mapboxgl, {
@@ -36,12 +37,22 @@ function useNrwMapMarker(
     });
     const markerRef = useRef<MapboxMarker | undefined>(undefined);
 
+    // Placement can be new every render, use numeric values to avoid
+    // unnecessary marker recreation.
+    const { anchor, offset: placementOffset } = placement;
+    const offsetX = placementOffset?.[0];
+    const offsetY = placementOffset?.[1];
+
     useEffect(() => {
         if (isNotDefined(map)) {
             return undefined;
         }
 
-        const marker = new mapboxgl.Marker({ element, ...placement })
+        const offset: mapboxgl.PointLike | undefined = isDefined(offsetX) && isDefined(offsetY)
+            ? [offsetX, offsetY]
+            : undefined;
+
+        const marker = new mapboxgl.Marker({ element, anchor, offset })
             .setLngLat([lng, lat])
             .addTo(map);
 
@@ -52,7 +63,7 @@ function useNrwMapMarker(
             marker.remove();
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [map, element, placement.anchor, placement.offset]);
+    }, [map, element, anchor, offsetX, offsetY]);
 
     useEffect(() => {
         markerRef.current?.setLngLat([lng, lat]);
