@@ -45,6 +45,14 @@ export const mapUnselectedStyle: MapFlatStyle = {
     outlineWidth: 2,
 };
 
+export const mapUnexposedStyle: MapFlatStyle = {
+    fillColor: '#ffffff',
+    fillOpacity: 0.4,
+    fillHoverOpacity: 0.6,
+    outlineColor: 'rgba(77, 77, 77, 0.25)',
+    outlineWidth: 0.8,
+};
+
 export type EqualIntervalBreaks = [number, number, number, number];
 
 // Split 0..max into five equal bands, one per ramp tint, so the scale fits any

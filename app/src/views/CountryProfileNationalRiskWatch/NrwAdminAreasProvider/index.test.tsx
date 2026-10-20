@@ -113,10 +113,6 @@ const eventSplitAtCounties = {
     },
 } as unknown as NrwEvent;
 
-const someAdminAreas = {
-    type: 'FeatureCollection',
-    features: [{ type: 'Feature', geometry: null, properties: {} }],
-} as unknown as NrwAdminAreaFeatureCollection;
 const noAdminAreas = {
     type: 'FeatureCollection',
     features: [],
@@ -132,6 +128,15 @@ function createAdminAreas(adminLevel: number, placeCodes: string[]) {
         })),
     } as unknown as NrwAdminAreaFeatureCollection;
 }
+
+const states = createAdminAreas(1, ['SS03', 'SS04']);
+// Twic East is not exposed in the event.
+const jongleiCounties = createAdminAreas(2, ['SS0303', 'SS0304']);
+const lakesCounties = createAdminAreas(2, ['SS0401']);
+const borSouthPayams = createAdminAreas(3, ['SS030301']);
+
+// Only the exposed admin areas of the initial level are requested.
+const statesFilter = "(countryCodeIso3='SSD') AND adminLevel=1 AND placeCode IN ('SS03','SS04')";
 
 let root: Root | undefined;
 let container: HTMLDivElement | undefined;
@@ -158,6 +163,16 @@ function unselectedPlaceCodes() {
     return adminAreas().unselectedAdminAreas?.features.map(
         ({ properties }) => properties.placeCode,
     );
+}
+
+function unexposedPlaceCodes() {
+    return adminAreas().unexposedAdminAreas?.features.map(
+        ({ properties }) => properties.placeCode,
+    );
+}
+
+function shownPlaceCodes() {
+    return adminAreas().adminAreas?.features.map(({ properties }) => properties.placeCode);
 }
 
 async function render(renderedEvent: NrwEvent | undefined) {
@@ -225,30 +240,30 @@ test('opens at the first level with several exposed areas', () => {
     expect(adminAreas().parentAdminArea).toBeUndefined();
     expect(adminAreas().adminAreas).toBeUndefined();
     expect(adminAreas().canDrillDown(jonglei)).toBe(true);
-    expect(requestedFilter()).toBe("(countryCodeIso3='SSD') AND adminLevel=1 AND placeCode IN ('SS03','SS04')");
+    expect(requestedFilter()).toBe(statesFilter);
 });
 
 test('shows the next level only once its admin areas have loaded', async () => {
-    await answer(someAdminAreas);
+    await answer(states);
     await drillDown(jonglei);
     expect(requestedFilter()).toBe(
-        "(countryCodeIso3='SSD') AND adminLevel=2 AND placeCodeLevel1='SS03' AND placeCode IN ('SS0303','SS0401')",
+        "(countryCodeIso3='SSD') AND adminLevel=2 AND placeCodeLevel1='SS03'",
     );
     expect(adminAreas().adminLevel).toBe(1);
     expect(adminAreas().drillPath).toEqual([]);
     expect(adminAreas().parentAdminArea).toBeUndefined();
 
-    await answer(someAdminAreas);
+    await answer(jongleiCounties);
     expect(adminAreas().adminLevel).toBe(2);
     expect(adminAreas().drillPath).toEqual([jonglei]);
     expect(adminAreas().parentAdminArea).toEqual(jonglei);
-    expect(adminAreas().adminAreas).toBe(someAdminAreas);
+    expect(shownPlaceCodes()).toEqual(['SS0303']);
 
     await drillUp();
-    expect(requestedFilter()).toContain('adminLevel=1 AND placeCode IN');
+    expect(requestedFilter()).toBe(statesFilter);
     expect(adminAreas().adminLevel).toBe(2);
 
-    await answer(someAdminAreas);
+    await answer(states);
     expect(adminAreas().adminLevel).toBe(1);
     expect(adminAreas().parentAdminArea).toBeUndefined();
 });
@@ -257,72 +272,95 @@ test('stays on the shown level when the requested admin areas do not load', asyn
     await drillDown(jonglei);
     await answer(undefined);
 
-    expect(requestedFilter()).toContain('adminLevel=1 AND placeCode IN');
+    expect(requestedFilter()).toBe(statesFilter);
     expect(adminAreas().adminLevel).toBe(1);
     expect(adminAreas().canDrillDown(jonglei)).toBe(true);
 });
 
-test('remembers an admin area without children as the finest level', async () => {
-    await answer(someAdminAreas);
+test('remembers an admin area without exposed children as the finest level', async () => {
+    await answer(states);
     await drillDown(jonglei);
-    await answer(noAdminAreas);
+    await answer(createAdminAreas(2, ['SS0304']));
 
-    expect(requestedFilter()).toContain('adminLevel=1 AND placeCode IN');
+    expect(requestedFilter()).toBe(statesFilter);
     expect(adminAreas().adminLevel).toBe(1);
-    expect(adminAreas().adminAreas).toBe(someAdminAreas);
+    expect(shownPlaceCodes()).toEqual(['SS03', 'SS04']);
     expect(adminAreas().canDrillDown(jonglei)).toBe(false);
     expect(adminAreas().canDrillDown(lakes)).toBe(true);
 
+    await drillDown(lakes);
+    await answer(noAdminAreas);
+    expect(adminAreas().canDrillDown(lakes)).toBe(false);
+
     // Not requested again.
     await drillDown(jonglei);
-    expect(requestedFilter()).toContain('adminLevel=1 AND placeCode IN');
+    expect(requestedFilter()).toBe(statesFilter);
 });
 
 test('drills down only into exposed admin levels', async () => {
     await drillDown(jonglei);
-    await answer(someAdminAreas);
+    await answer(jongleiCounties);
     await drillDown(borSouth);
-    await answer(someAdminAreas);
+    await answer(borSouthPayams);
 
     expect(adminAreas().adminLevel).toBe(3);
     expect(adminAreas().canDrillDown(bor)).toBe(false);
 });
 
+test('shows the unexposed admin areas apart, not drillable', async () => {
+    const twicEast: AdminAreaProperties = {
+        adminLevel: 2 as AdminLevel,
+        placeCode: 'SS0304' as PlaceCode,
+        name: 'Twic East',
+    };
+
+    await answer(states);
+    await drillDown(jonglei);
+    await answer(jongleiCounties);
+
+    expect(shownPlaceCodes()).toEqual(['SS0303']);
+    expect(unselectedPlaceCodes()).toEqual(['SS04']);
+    expect(unexposedPlaceCodes()).toEqual(['SS0304']);
+    expect(adminAreas().canDrillDown(twicEast)).toBe(false);
+
+    await drillDown(borSouth);
+    await answer(createAdminAreas(3, ['SS030301', 'SS030302']));
+    expect(unselectedPlaceCodes()).toEqual(['SS04']);
+    expect(unexposedPlaceCodes()).toEqual(['SS0304', 'SS030302']);
+});
+
 test('shows the unselected admin areas around the drill path, up to the initial level', async () => {
-    await answer(createAdminAreas(1, ['SS03', 'SS04']));
+    await answer(states);
     expect(adminAreas().unselectedAdminAreas).toBeUndefined();
 
     await drillDown(jonglei);
-    await answer(createAdminAreas(2, ['SS0303', 'SS0304']));
+    await answer(createAdminAreas(2, ['SS0303']));
     expect(unselectedPlaceCodes()).toEqual(['SS04']);
 
     await drillDown(borSouth);
-    await answer(createAdminAreas(3, ['SS030301']));
-    expect(unselectedPlaceCodes()).toEqual(['SS04', 'SS0304']);
-
-    await drillUpTo(2);
-    await answer(createAdminAreas(2, ['SS0303', 'SS0304']));
+    await answer(borSouthPayams);
     expect(unselectedPlaceCodes()).toEqual(['SS04']);
 
     await drillUpTo(1);
-    await answer(createAdminAreas(1, ['SS03', 'SS04']));
+    await answer(states);
     expect(adminAreas().unselectedAdminAreas).toBeUndefined();
 });
 
 test('drills up and sideways into an unselected admin area', async () => {
-    await answer(createAdminAreas(1, ['SS03', 'SS04']));
+    await answer(states);
     await drillDown(jonglei);
-    await answer(createAdminAreas(2, ['SS0303', 'SS0304']));
+    await answer(jongleiCounties);
     await drillDown(borSouth);
-    await answer(createAdminAreas(3, ['SS030301']));
+    await answer(borSouthPayams);
+    expect(unselectedPlaceCodes()).toEqual(['SS04']);
     expect(adminAreas().canDrillDown(lakes)).toBe(true);
 
     await drillDown(lakes);
     expect(requestedFilter()).toBe(
-        "(countryCodeIso3='SSD') AND adminLevel=2 AND placeCodeLevel1='SS04' AND placeCode IN ('SS0303','SS0401')",
+        "(countryCodeIso3='SSD') AND adminLevel=2 AND placeCodeLevel1='SS04'",
     );
 
-    await answer(createAdminAreas(2, ['SS0401']));
+    await answer(lakesCounties);
     expect(adminAreas().adminLevel).toBe(2);
     expect(adminAreas().drillPath).toEqual([lakes]);
     expect(unselectedPlaceCodes()).toEqual(['SS03']);
@@ -335,39 +373,39 @@ test('does not drill up from the top', async () => {
 
     expect(adminAreas()).toBe(shown);
     expect(adminAreas().adminLevel).toBe(1);
-    expect(requestedFilter()).toContain('adminLevel=1 AND placeCode IN');
+    expect(requestedFilter()).toBe(statesFilter);
 });
 
 test('jumps back to a level drilled through', async () => {
     await drillDown(jonglei);
-    await answer(someAdminAreas);
+    await answer(jongleiCounties);
     await drillDown(borSouth);
-    await answer(someAdminAreas);
+    await answer(borSouthPayams);
     expect(adminAreas().adminLevel).toBe(3);
     expect(adminAreas().drillPath).toEqual([jonglei, borSouth]);
 
     await drillUpTo(1);
-    expect(requestedFilter()).toBe("(countryCodeIso3='SSD') AND adminLevel=1 AND placeCode IN ('SS03','SS04')");
+    expect(requestedFilter()).toBe(statesFilter);
     expect(adminAreas().adminLevel).toBe(3);
     expect(adminAreas().drillPath).toEqual([jonglei, borSouth]);
 
-    await answer(someAdminAreas);
+    await answer(states);
     expect(adminAreas().initialAdminLevel).toBe(1);
     expect(adminAreas().adminLevel).toBe(1);
     expect(adminAreas().drillPath).toEqual([]);
     expect(adminAreas().parentAdminArea).toBeUndefined();
 
     await drillDown(jonglei);
-    await answer(someAdminAreas);
+    await answer(jongleiCounties);
     await drillDown(borSouth);
-    await answer(someAdminAreas);
+    await answer(borSouthPayams);
 
     await drillUpTo(2);
     expect(requestedFilter()).toBe(
-        "(countryCodeIso3='SSD') AND adminLevel=2 AND placeCodeLevel1='SS03' AND placeCode IN ('SS0303','SS0401')",
+        "(countryCodeIso3='SSD') AND adminLevel=2 AND placeCodeLevel1='SS03'",
     );
 
-    await answer(someAdminAreas);
+    await answer(jongleiCounties);
     expect(adminAreas().adminLevel).toBe(2);
     expect(adminAreas().drillPath).toEqual([jonglei]);
     expect(adminAreas().parentAdminArea).toEqual(jonglei);
@@ -377,24 +415,24 @@ test('jumps back to the first exposed level of the event', async () => {
     await render(eventSplitAtCounties);
     expect(adminAreas().initialAdminLevel).toBe(2);
     expect(requestedFilter()).toBe("(countryCodeIso3='SSD') AND adminLevel=2 AND placeCode IN ('SS0303','SS0304')");
-    await answer(someAdminAreas);
+    await answer(jongleiCounties);
 
     await drillDown(borSouth);
-    await answer(someAdminAreas);
+    await answer(borSouthPayams);
     expect(adminAreas().adminLevel).toBe(3);
     expect(adminAreas().drillPath).toEqual([borSouth]);
 
     await drillUpTo(2);
     expect(requestedFilter()).toBe("(countryCodeIso3='SSD') AND adminLevel=2 AND placeCode IN ('SS0303','SS0304')");
 
-    await answer(someAdminAreas);
+    await answer(jongleiCounties);
     expect(adminAreas().adminLevel).toBe(2);
     expect(adminAreas().drillPath).toEqual([]);
 });
 
 test('starts over at the top for another event, or the same one again', async () => {
     await drillDown(jonglei);
-    await answer(someAdminAreas);
+    await answer(jongleiCounties);
     expect(adminAreas().adminLevel).toBe(2);
 
     await render(undefined);
@@ -406,5 +444,5 @@ test('starts over at the top for another event, or the same one again', async ()
     expect(adminAreas().adminLevel).toBe(1);
     expect(adminAreas().parentAdminArea).toBeUndefined();
     expect(adminAreas().adminAreas).toBeUndefined();
-    expect(requestedFilter()).toContain('adminLevel=1 AND placeCode IN');
+    expect(requestedFilter()).toBe(statesFilter);
 });

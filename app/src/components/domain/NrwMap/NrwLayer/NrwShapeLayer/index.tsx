@@ -9,7 +9,10 @@ import {
     isNotDefined,
 } from '@togglecorp/fujs';
 
-import { mapUnselectedStyle } from '#utils/nrw/colors';
+import {
+    mapUnexposedStyle,
+    mapUnselectedStyle,
+} from '#utils/nrw/colors';
 import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
 import { getFeatureCollectionBounds } from '#views/CountryProfileNationalRiskWatch/utils';
 
@@ -40,12 +43,14 @@ function NrwShapeLayer(props: {
     const {
         adminAreas,
         unselectedAdminAreas,
+        unexposedAdminAreas,
         exposedPopulationScale,
         adminLevelLabels,
     } = useContext(NrwAdminAreasContext);
 
     const strings = useTranslation(i18n);
     const unselectedId = `${id}-unselected`;
+    const unexposedId = `${id}-unexposed`;
 
     // Fit the map to the admin areas of the level drilled into.
     const bounds = useMemo(
@@ -54,21 +59,32 @@ function NrwShapeLayer(props: {
     );
     useNrwMapFitBounds(bounds);
 
-    // The unselected admin areas go first, so they are drawn below the selected ones.
+    // The grey admin areas go first, so they are drawn below the selected ones.
     const mapLayers = useMemo(
         () => {
             if (isNotDefined(adminAreas) || isNotDefined(exposedPopulationScale)) {
                 return undefined;
             }
 
+            const unexposedMapLayers = isDefined(unexposedAdminAreas)
+                ? getFlatAdminAreaLayer(unexposedId, unexposedAdminAreas, mapUnexposedStyle)
+                : [];
             const unselectedMapLayers = isDefined(unselectedAdminAreas)
                 ? getFlatAdminAreaLayer(unselectedId, unselectedAdminAreas, mapUnselectedStyle)
                 : [];
             const selectedMapLayers = getAdminAreaLayer(id, adminAreas, exposedPopulationScale);
 
-            return [...unselectedMapLayers, ...selectedMapLayers];
+            return [...unexposedMapLayers, ...unselectedMapLayers, ...selectedMapLayers];
         },
-        [id, unselectedId, adminAreas, unselectedAdminAreas, exposedPopulationScale],
+        [
+            id,
+            unselectedId,
+            unexposedId,
+            adminAreas,
+            unselectedAdminAreas,
+            unexposedAdminAreas,
+            exposedPopulationScale,
+        ],
     );
     useNrwMapLayers(mapLayers, isVisible, layerAnchorId);
 
@@ -84,8 +100,16 @@ function NrwShapeLayer(props: {
         isInteractive && isDefined(unselectedAdminAreas),
         unselectedAdminAreas,
     );
+    // Unexposed admin areas cannot be drilled into, so they only show the tooltip.
+    const { hoveredAdminArea: hoveredUnexposedAdminArea } = useAdminAreaHoverAndDrill(
+        unexposedId,
+        isInteractive && isDefined(unexposedAdminAreas),
+        unexposedAdminAreas,
+    );
 
-    const hoveredAdminArea = hoveredSelectedAdminArea ?? hoveredUnselectedAdminArea;
+    const hoveredAdminArea = hoveredSelectedAdminArea
+        ?? hoveredUnselectedAdminArea
+        ?? hoveredUnexposedAdminArea;
 
     if (isNotDefined(hoveredAdminArea) || !isVisible) {
         return null;
@@ -114,10 +138,10 @@ function NrwShapeLayer(props: {
                 <div className={styles.exposedPopulation}>
                     {strings.nrwShapeLayerExposedPopulationLabel}
                     <NumberOutput
+                        // Unexposed admin areas have no exposed population.
                         value={exposedPopulationScale?.exposedPopulationByPlaceCode.get(
                             hoveredAdminArea.placeCode,
-                        )}
-                        invalidText="--"
+                        ) ?? 0}
                     />
                 </div>
             </div>
