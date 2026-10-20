@@ -81,6 +81,7 @@ function createArea(placeCode: string, name: string): NrwExposedAdminArea {
 const event = {
     eventId: 8,
     countryCodeIso3: 'SSD',
+    alertClass: 'high',
     exposedAdminAreas: {
         0: [createArea('SS', 'South Sudan')],
         1: [createArea('SS03', 'Jonglei'), createArea('SS04', 'Lakes')],

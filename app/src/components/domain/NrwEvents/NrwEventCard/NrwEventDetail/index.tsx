@@ -130,7 +130,7 @@ function NrwEventDetail(props: Props) {
                             </Button>
                         )}
                     </div>
-                    <NrwExposedAdminAreas event={event} />
+                    <NrwExposedAdminAreas />
                 </div>
                 {event.forecastSources.length > 0 && (
                     <div className={styles.panel}>

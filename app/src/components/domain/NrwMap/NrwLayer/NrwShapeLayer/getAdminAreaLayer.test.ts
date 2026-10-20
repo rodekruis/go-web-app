@@ -1,6 +1,6 @@
 import {
     type FillLayerSpecification,
-    type LineLayerSpecification,
+    type GeoJSONSourceSpecification,
 } from 'mapbox-gl-v3';
 import {
     describe,
@@ -10,6 +10,9 @@ import {
 
 import {
     alertClassMapRamps,
+    createRampStepGetter,
+    mapOutlineColor,
+    mapOutlineOpacity,
     mapOutlineWidth,
     type NrwExposedPopulationScale,
 } from '#utils/nrw/colors';
@@ -20,73 +23,96 @@ import getAdminAreaLayer from './getAdminAreaLayer';
 
 const adminAreas = createNrwAdminAreas(['SS03', 'SS04']);
 
-// The Mapbox addLayer parameter type does not narrow the paint by the layer type.
-function getFillColor(layer: MapLayer | undefined) {
-    return (layer as FillLayerSpecification | undefined)?.paint?.['fill-color'];
+function createScale(
+    alertClass: keyof typeof alertClassMapRamps,
+    exposedPopulationByPlaceCode: Map<string, number>,
+): NrwExposedPopulationScale {
+    return {
+        getRampStep: createRampStepGetter(
+            alertClassMapRamps[alertClass],
+            [...exposedPopulationByPlaceCode.values()],
+        ),
+        categories: undefined,
+        exposedPopulationByPlaceCode,
+    };
 }
 
-function getLineColor(layer: MapLayer | undefined) {
-    return (layer as LineLayerSpecification | undefined)?.paint?.['line-color'];
+// The Mapbox addLayer parameter type does not narrow the paint by the layer type.
+function getFillPaint(layer: MapLayer | undefined) {
+    return (layer as FillLayerSpecification | undefined)?.paint;
+}
+
+function getFeatureProperties(layer: MapLayer | undefined) {
+    const { source } = layer as FillLayerSpecification & { source: GeoJSONSourceSpecification };
+    return (source.data as GeoJSON.FeatureCollection).features
+        .map((feature) => feature.properties);
 }
 
 describe('getAdminAreaLayer', () => {
-    test('outlines each admin area in the colour of its fill, without transparency', () => {
+    test('colours each admin area in the ramp step of its exposed population', () => {
         // Arrange
-        const scale: NrwExposedPopulationScale = {
-            ramp: alertClassMapRamps.high,
-            breaks: [1000, 2000, 3000, 4000],
-            exposedPopulationByPlaceCode: new Map([['SS03', 1000], ['SS04', 5000]]),
-        };
+        const scale = createScale('high', new Map([['SS03', 1000], ['SS04', 5000]]));
+        const ramp = alertClassMapRamps.high;
 
         // Act
-        const [fill, outline] = getAdminAreaLayer('layer-SSD-adminAreas', adminAreas, scale);
+        const [fill] = getAdminAreaLayer('layer-SSD-adminAreas', adminAreas, scale);
 
         // Assert
         expect(fill).toMatchObject({ id: 'layer-SSD-adminAreas', type: 'fill' });
-        expect(getFillColor(fill)).toEqual([
-            'step',
-            ['coalesce', ['get', 'exposedPopulation'], 0],
-            '#fef1f2',
-            1000,
-            '#fcc6ca',
-            2000,
-            '#fa999f',
-            3000,
-            '#f5333f',
-            4000,
-            '#c01825',
+        expect(getFeatureProperties(fill)).toMatchObject([
+            {
+                placeCode: 'SS03',
+                rampColor: ramp[1].color,
+                rampOpacity: ramp[1].opacity,
+                rampHoverOpacity: ramp[1].hoverOpacity,
+            },
+            {
+                placeCode: 'SS04',
+                rampColor: ramp[3].color,
+                rampOpacity: ramp[3].opacity,
+                rampHoverOpacity: ramp[3].hoverOpacity,
+            },
         ]);
-        expect(outline).toMatchObject({
+        expect(getFillPaint(fill)).toEqual({
+            'fill-color': ['get', 'rampColor'],
+            'fill-opacity': [
+                'case',
+                ['boolean', ['feature-state', 'hover'], false],
+                ['get', 'rampHoverOpacity'],
+                ['get', 'rampOpacity'],
+            ],
+        });
+    });
+
+    test('outlines each admin area in the map shadow outline', () => {
+        // Arrange
+        const scale = createScale('high', new Map([['SS03', 1000], ['SS04', 5000]]));
+
+        // Act
+        const [, outline] = getAdminAreaLayer('layer-SSD-adminAreas', adminAreas, scale);
+
+        // Assert
+        expect(outline).toEqual({
             id: 'layer-SSD-adminAreas-outline',
             type: 'line',
             source: 'layer-SSD-adminAreas',
-            paint: { 'line-width': mapOutlineWidth },
+            paint: {
+                'line-color': mapOutlineColor,
+                'line-opacity': mapOutlineOpacity,
+                'line-width': mapOutlineWidth,
+            },
         });
-        expect(getLineColor(outline)).toEqual(getFillColor(fill));
-        expect(outline?.paint).not.toHaveProperty('line-opacity');
     });
 
-    describe('when none of the admin areas has exposed population', () => {
-        const scale: NrwExposedPopulationScale = {
-            ramp: alertClassMapRamps.low,
-            breaks: undefined,
-            exposedPopulationByPlaceCode: new Map<string, number>(),
-        };
+    test('colours the admin areas in the lightest step when none has exposed population', () => {
+        // Arrange
+        const scale = createScale('low', new Map<string, number>());
 
-        test('fills the admin areas in the flat first tint', () => {
-            // Act
-            const [fill] = getAdminAreaLayer('layer-SSD-adminAreas', adminAreas, scale);
+        // Act
+        const [fill] = getAdminAreaLayer('layer-SSD-adminAreas', adminAreas, scale);
 
-            // Assert
-            expect(getFillColor(fill)).toBe(alertClassMapRamps.low[0]);
-        });
-
-        test('outlines the admin areas in the flat first tint', () => {
-            // Act
-            const [, outline] = getAdminAreaLayer('layer-SSD-adminAreas', adminAreas, scale);
-
-            // Assert
-            expect(getLineColor(outline)).toBe(alertClassMapRamps.low[0]);
-        });
+        // Assert
+        expect(getFeatureProperties(fill).map((properties) => properties?.rampColor))
+            .toEqual([alertClassMapRamps.low[0].color, alertClassMapRamps.low[0].color]);
     });
 });

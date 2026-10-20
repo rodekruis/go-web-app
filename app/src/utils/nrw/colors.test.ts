@@ -13,10 +13,10 @@ import {
 
 import {
     alertClassMapRamps,
-    getEqualIntervalBreaks,
+    createRampStepGetter,
     getExposedPopulationScale,
     getRampCategories,
-    getRampColor,
+    getRampStepCssColor,
 } from './colors';
 
 function createArea(placeCode: string, exposed: number): NrwExposedAdminArea {
@@ -36,99 +36,134 @@ function createEvent(areas: NrwExposedAdminArea[]): NrwEvent {
     } as unknown as NrwEvent;
 }
 
-describe('getEqualIntervalBreaks', () => {
-    test('splits the range up to the maximum into five equal bands', () => {
-        // Act & Assert
-        expect(getEqualIntervalBreaks([10, 100, 40])).toEqual([20, 40, 60, 80]);
-    });
-
-    test('scales to the magnitude of the values', () => {
-        // Act & Assert
-        expect(getEqualIntervalBreaks([2500000])).toEqual([500000, 1000000, 1500000, 2000000]);
-    });
-
-    test('returns zero breaks when there are no values', () => {
-        // Act & Assert
-        expect(getEqualIntervalBreaks([])).toEqual([0, 0, 0, 0]);
-    });
-});
-
-describe('getRampColor', () => {
+describe('createRampStepGetter', () => {
     const ramp = alertClassMapRamps.high;
-    const breaks = getEqualIntervalBreaks([100]);
 
-    test.each([
-        [0, 0],
-        [19, 0],
-        [20, 1],
-        [50, 2],
-        [79, 3],
-        [100, 4],
-    ])('picks the tint of the band %i falls in, starting at the break', (value, tintIndex) => {
-        // Act & Assert
-        expect(getRampColor(ramp, breaks, value)).toBe(ramp[tintIndex]);
+    function getStepIndices(values: number[]) {
+        const getRampStep = createRampStepGetter(ramp, values);
+        return values.map((value) => ramp.indexOf(getRampStep(value)));
+    }
+
+    test('spreads fewer values than steps over the ramp, lightest to darkest', () => {
+        expect(getStepIndices([1000])).toEqual([2]);
+        expect(getStepIndices([1000, 10])).toEqual([3, 1]);
+        expect(getStepIndices([10, 1000, 100])).toEqual([0, 4, 2]);
+        expect(getStepIndices([10, 20, 30, 40])).toEqual([0, 2, 3, 4]);
     });
 
-    test('uses the first tint for unknown values', () => {
-        // Act & Assert
-        expect(getRampColor(ramp, breaks, undefined)).toBe(ramp[0]);
+    test('uses every step for five values, ranked regardless of magnitude', () => {
+        expect(getStepIndices([1, 2, 3, 4, 2500000])).toEqual([0, 1, 2, 3, 4]);
     });
 
-    test('uses the first tint when there are no breaks', () => {
-        // Act & Assert
-        expect(getRampColor(ramp, getEqualIntervalBreaks([]), 0)).toBe(ramp[0]);
+    test('splits more values than steps into classes of equal count by rank', () => {
+        expect(getStepIndices([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+            .toEqual([0, 0, 1, 1, 2, 2, 3, 3, 4, 4]);
+    });
+
+    test('gives equal values the same step', () => {
+        expect(getStepIndices([500, 500])).toEqual([2, 2]);
+    });
+
+    test('counts equal values per area, in the step of their first rank', () => {
+        expect(getStepIndices([2553, 1833, 559, 252, 148, 130, 63, 55, 55, 32]))
+            .toEqual([4, 4, 3, 3, 2, 2, 1, 0, 0, 0]);
+    });
+
+    test('keeps fewer distinct values than steps spread out, however many areas', () => {
+        expect(getStepIndices([10, 10, 10, 10, 20])).toEqual([1, 1, 1, 1, 3]);
+    });
+
+    test('uses the lightest step for unknown values', () => {
+        expect(createRampStepGetter(ramp, [100])(undefined)).toBe(ramp[0]);
+        expect(createRampStepGetter(ramp, [])(100)).toBe(ramp[0]);
     });
 });
 
 describe('getRampCategories', () => {
-    test('pairs each tint with its band, open-ended at both ends', () => {
-        // Arrange
-        const ramp = alertClassMapRamps.high;
+    const ramp = alertClassMapRamps.high;
 
+    function getBands(values: number[]) {
+        return getRampCategories(ramp, values).map(({ from, to }) => [from, to]);
+    }
+
+    test('pairs each step with its colour', () => {
         // Act & Assert
-        expect(getRampCategories(ramp, [200, 400, 600, 800])).toEqual([
-            { color: ramp[0], from: undefined, to: 200 },
-            { color: ramp[1], from: 200, to: 400 },
-            { color: ramp[2], from: 400, to: 600 },
-            { color: ramp[3], from: 600, to: 800 },
-            { color: ramp[4], from: 800, to: undefined },
+        expect(getRampCategories(ramp, [1, 2, 3, 4, 5]).map(({ color }) => color))
+            .toEqual(ramp.map(getRampStepCssColor));
+    });
+
+    test('bands each step from its lowest value, open-ended at both ends', () => {
+        // Act & Assert
+        expect(getBands([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toEqual([
+            [undefined, 3],
+            [3, 5],
+            [5, 7],
+            [7, 9],
+            [9, undefined],
+        ]);
+    });
+
+    test('extends the bands of the nearest steps to the steps without values', () => {
+        // Act & Assert
+        expect(getBands([1000, 10])).toEqual([
+            [undefined, 10],
+            [10, 505],
+            [505, 1000],
+            [1000, 1495],
+            [1495, undefined],
+        ]);
+    });
+
+    test('spreads the bands by half the value around a single value', () => {
+        // Act & Assert
+        expect(getBands([1000])).toEqual([
+            [undefined, 500],
+            [500, 1000],
+            [1000, 1500],
+            [1500, 2000],
+            [2000, undefined],
         ]);
     });
 });
 
 describe('getExposedPopulationScale', () => {
     const event = createEvent([createArea('SS01', 1000), createArea('SS02', 250)]);
+    const ramp = alertClassMapRamps.high;
 
-    test('uses the ramp of the alert class', () => {
-        // Act & Assert
-        expect(getExposedPopulationScale(event, createNrwAdminAreas(['SS01', 'SS02']))).toEqual({
-            ramp: alertClassMapRamps.high,
-            breaks: [200, 400, 600, 800],
-            exposedPopulationByPlaceCode: new Map([['SS01', 1000], ['SS02', 250]]),
-        });
+    test('ranks the admin areas in the ramp of the alert class', () => {
+        // Act
+        const scale = getExposedPopulationScale(event, createNrwAdminAreas(['SS01', 'SS02']));
+
+        // Assert
+        expect(scale.getRampStep(1000)).toBe(ramp[3]);
+        expect(scale.getRampStep(250)).toBe(ramp[1]);
+        expect(scale.categories).toEqual(getRampCategories(ramp, [1000, 250]));
+        expect(scale.exposedPopulationByPlaceCode).toEqual(new Map([['SS01', 1000], ['SS02', 250]]));
     });
 
-    test('scales to the admin areas on the map only', () => {
-        // Act & Assert
-        expect(getExposedPopulationScale(event, createNrwAdminAreas(['SS02']))).toMatchObject({
-            breaks: [50, 100, 150, 200],
-        });
+    test('ranks the admin areas on the map only', () => {
+        // Act
+        const scale = getExposedPopulationScale(event, createNrwAdminAreas(['SS02']));
+
+        // Assert
+        expect(scale.getRampStep(250)).toBe(ramp[2]);
+        expect(scale.categories).toEqual(getRampCategories(ramp, [250]));
     });
 
-    test('has no breaks when none of the areas has exposed population', () => {
+    test('has no categories when none of the areas has exposed population', () => {
         // Arrange
         const noExposure = createEvent([createArea('SS01', 0)]);
 
         // Act & Assert
         expect(getExposedPopulationScale(noExposure, createNrwAdminAreas(['SS01']))).toMatchObject({
-            breaks: undefined,
+            categories: undefined,
         });
     });
 
-    test('has no breaks when none of the exposed areas is on the map', () => {
+    test('has no categories when none of the exposed areas is on the map', () => {
         // Act & Assert
         expect(getExposedPopulationScale(event, createNrwAdminAreas(['SS99']))).toMatchObject({
-            breaks: undefined,
+            categories: undefined,
         });
     });
 });

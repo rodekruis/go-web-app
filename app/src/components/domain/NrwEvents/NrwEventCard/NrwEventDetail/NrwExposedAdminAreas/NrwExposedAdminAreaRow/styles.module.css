@@ -22,6 +22,7 @@
 
         flex-shrink: 0;
         margin: 0 calc((var(--icon-width) - var(--dot-size)) / 2);
+        border: 0.8px solid var(--nrw-color-map-shadow-outline);
         border-radius: var(--go-ui-border-radius-full);
         width: var(--dot-size);
         height: var(--dot-size);
