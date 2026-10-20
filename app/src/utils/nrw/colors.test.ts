@@ -64,6 +64,15 @@ describe('createRampStepGetter', () => {
         expect(getStepIndices([500, 500])).toEqual([2, 2]);
     });
 
+    test('counts equal values per area, in the step of their first rank', () => {
+        expect(getStepIndices([2553, 1833, 559, 252, 148, 130, 63, 55, 55, 32]))
+            .toEqual([4, 4, 3, 3, 2, 2, 1, 0, 0, 0]);
+    });
+
+    test('keeps fewer distinct values than steps spread out, however many areas', () => {
+        expect(getStepIndices([10, 10, 10, 10, 20])).toEqual([1, 1, 1, 1, 3]);
+    });
+
     test('uses the lightest step for unknown values', () => {
         expect(createRampStepGetter(ramp, [100])(undefined)).toBe(ramp[0]);
         expect(createRampStepGetter(ramp, [])(100)).toBe(ramp[0]);
@@ -73,25 +82,46 @@ describe('createRampStepGetter', () => {
 describe('getRampCategories', () => {
     const ramp = alertClassMapRamps.high;
 
-    test('spans each step from the lowest to the highest value ranked into it', () => {
+    function getBands(values: number[]) {
+        return getRampCategories(ramp, values).map(({ from, to }) => [from, to]);
+    }
+
+    test('pairs each step with its colour', () => {
         // Act & Assert
-        expect(getRampCategories(ramp, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toEqual([
-            { color: getRampStepCssColor(ramp[0]), from: 1, to: 2 },
-            { color: getRampStepCssColor(ramp[1]), from: 3, to: 4 },
-            { color: getRampStepCssColor(ramp[2]), from: 5, to: 6 },
-            { color: getRampStepCssColor(ramp[3]), from: 7, to: 8 },
-            { color: getRampStepCssColor(ramp[4]), from: 9, to: 10 },
+        expect(getRampCategories(ramp, [1, 2, 3, 4, 5]).map(({ color }) => color))
+            .toEqual(ramp.map(getRampStepCssColor));
+    });
+
+    test('bands each step from its lowest value, open-ended at both ends', () => {
+        // Act & Assert
+        expect(getBands([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toEqual([
+            [undefined, 3],
+            [3, 5],
+            [5, 7],
+            [7, 9],
+            [9, undefined],
         ]);
     });
 
-    test('leaves the steps without values unbounded', () => {
+    test('extends the bands of the nearest steps to the steps without values', () => {
         // Act & Assert
-        expect(getRampCategories(ramp, [1000, 10])).toEqual([
-            { color: getRampStepCssColor(ramp[0]), from: undefined, to: undefined },
-            { color: getRampStepCssColor(ramp[1]), from: 10, to: 10 },
-            { color: getRampStepCssColor(ramp[2]), from: undefined, to: undefined },
-            { color: getRampStepCssColor(ramp[3]), from: 1000, to: 1000 },
-            { color: getRampStepCssColor(ramp[4]), from: undefined, to: undefined },
+        expect(getBands([1000, 10])).toEqual([
+            [undefined, 10],
+            [10, 505],
+            [505, 1000],
+            [1000, 1495],
+            [1495, undefined],
+        ]);
+    });
+
+    test('spreads the bands by half the value around a single value', () => {
+        // Act & Assert
+        expect(getBands([1000])).toEqual([
+            [undefined, 500],
+            [500, 1000],
+            [1000, 1500],
+            [1500, 2000],
+            [2000, undefined],
         ]);
     });
 });

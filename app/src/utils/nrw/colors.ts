@@ -1,10 +1,14 @@
-import { isDefined } from '@togglecorp/fujs';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 
 import { getNrwExposedPopulationByPlaceCode } from '#utils/nrw/events';
 import {
     type NrwAdminAreaFeatureCollection,
     type NrwEvent,
     type NrwLegendCategory,
+    unbounded,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 type MapColorRamp = readonly [string, string, string, string, string];
@@ -57,15 +61,17 @@ const rampStepIndicesByValueCount: Record<number, readonly number[]> = {
     4: [0, 2, 3, 4],
 };
 
-// Rank the distinct values, so few values use spread-out steps and more values
-// fill all steps in classes of equal count.
+// Few distinct values use spread-out steps, and more fill all steps in classes of
+// equal area count by rank. Equal values share the step of their first rank.
 function getStepIndexByValue(stepCount: number, values: number[]): Map<number, number> {
-    const distinctValues = [...new Set(values)].sort((a, b) => a - b);
+    const sortedValues = [...values].sort((a, b) => a - b);
+    const distinctValues = [...new Set(sortedValues)];
     const stepIndices = rampStepIndicesByValueCount[distinctValues.length];
 
-    return new Map(distinctValues.map((value, rank) => [
+    return new Map(distinctValues.map((value, distinctRank) => [
         value,
-        stepIndices?.[rank] ?? Math.floor((rank * stepCount) / distinctValues.length),
+        stepIndices?.[distinctRank]
+            ?? Math.floor((sortedValues.indexOf(value) * stepCount) / sortedValues.length),
     ]));
 }
 
@@ -86,24 +92,49 @@ export function getRampStepCssColor(step: MapRampStep): string {
     return `color-mix(in srgb, ${step.color} ${step.opacity * 100}%, transparent)`;
 }
 
-// The steps of the ramp as legend entries, each spanning the values ranked into it.
+// The lowest value of each step. A step without values gets one extended linearly
+// from the two nearest steps with values, or by half the value with only one.
+function getStepLowerBounds(stepCount: number, stepIndexByValue: Map<number, number>): number[] {
+    const lowestValues: { step: number, value: number }[] = [];
+    stepIndexByValue.forEach((step, value) => {
+        if (lowestValues.at(-1)?.step !== step) {
+            lowestValues.push({ step, value });
+        }
+    });
+
+    return Array.from({ length: stepCount }, (_, step) => {
+        const [nearest, secondNearest] = [...lowestValues]
+            .sort((a, b) => Math.abs(a.step - step) - Math.abs(b.step - step));
+
+        if (isNotDefined(nearest)) {
+            return 0;
+        }
+        if (nearest.step === step) {
+            return nearest.value;
+        }
+
+        const valuePerStep = isDefined(secondNearest)
+            ? (secondNearest.value - nearest.value) / (secondNearest.step - nearest.step)
+            : nearest.value / 2;
+        return nearest.value + valuePerStep * (step - nearest.step);
+    });
+}
+
+// The steps of the ramp as legend entries, the first and last open-ended.
 export function getRampCategories(
     ramp: MapRamp,
     values: number[],
 ): NrwLegendCategory[] {
-    const stepIndexByValue = getStepIndexByValue(ramp.length, values);
+    const lowerBounds = getStepLowerBounds(
+        ramp.length,
+        getStepIndexByValue(ramp.length, values),
+    );
 
-    return ramp.map((step, index) => {
-        const stepValues = [...stepIndexByValue]
-            .filter(([, stepIndex]) => stepIndex === index)
-            .map(([value]) => value);
-
-        return {
-            color: getRampStepCssColor(step),
-            from: stepValues.at(0),
-            to: stepValues.at(-1),
-        };
-    });
+    return ramp.map((step, index) => ({
+        color: getRampStepCssColor(step),
+        from: index === 0 ? unbounded : lowerBounds[index],
+        to: index === ramp.length - 1 ? unbounded : lowerBounds[index + 1],
+    }));
 }
 
 // The colour scale of the admin areas on the map, ranked by the exposed population
