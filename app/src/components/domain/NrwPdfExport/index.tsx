@@ -14,7 +14,7 @@ import {
 } from '@ifrc-go/ui/utils';
 import { isNotDefined } from '@togglecorp/fujs';
 
-import { captureElement } from '#components/domain/NrwMap/captureNrwMapScreenCapture';
+import { captureElementClone } from '#components/domain/NrwMap/captureNrwMapScreenCapture';
 import useAlert from '#hooks/useAlert';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import NrwScreenCaptureContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenCaptureContext';
@@ -28,11 +28,12 @@ const dataFormat = 'dd MMM yyyy, hh:mm';
 
 interface Props {
     eventsPanelRef: RefObject<HTMLDivElement | null>;
+    legendBannerRef: RefObject<HTMLDivElement | null>;
     countries: CountryCodeIso3[];
 }
 
 function NrwPdfExport(props: Props) {
-    const { eventsPanelRef, countries } = props;
+    const { eventsPanelRef, legendBannerRef, countries } = props;
 
     const strings = useTranslation(i18n);
     const { takeScreenCapture } = useContext(NrwScreenCaptureContext);
@@ -50,14 +51,20 @@ function NrwPdfExport(props: Props) {
             if (!eventsElement) {
                 throw new Error('Events panel element not found');
             }
-            const [mapImage, eventsImage] = await Promise.all([
+            const legendElement = legendBannerRef.current;
+            if (!legendElement) {
+                throw new Error('Legend banner element not found');
+            }
+            const [mapImage, eventsImage, legendImage] = await Promise.all([
                 takeScreenCapture(),
-                eventsElement ? captureElement(eventsElement) : undefined,
+                captureElementClone(eventsElement),
+                captureElementClone(legendElement),
             ]);
 
             exportNrwToPdf({
                 mapImage,
                 eventsImage,
+                legendImage,
                 selectedEvent,
                 countries,
                 text: {
@@ -82,7 +89,13 @@ function NrwPdfExport(props: Props) {
         } finally {
             setExporting(false);
         }
-    }, [takeScreenCapture, eventsPanelRef, selectedEvent, countries, alert, strings]);
+    }, [takeScreenCapture,
+        eventsPanelRef,
+        legendBannerRef,
+        selectedEvent,
+        countries,
+        alert,
+        strings]);
 
     return (
         <Button

@@ -1,9 +1,13 @@
 import {
     isDefined,
+    isNotDefined,
     unique,
 } from '@togglecorp/fujs';
 
-import { getGeoJsonBounds } from '#utils/geo';
+import {
+    getGeoJsonBounds,
+    getGeoJsonPointOnFeature,
+} from '#utils/geo';
 
 import NrwLngLat from './NrwLngLat';
 import {
@@ -14,6 +18,7 @@ import {
     type Longitude,
     type LongitudeLatitudeBounds,
     type MapView,
+    type NrwAdminAreaFeature,
     type NrwAdminAreaFeatureCollection,
     type NrwAdminAreaProperties,
     type NrwEvent,
@@ -156,4 +161,15 @@ export function getFeatureCollectionBounds(
             north as Latitude,
         ),
     ] as LongitudeLatitudeBounds;
+}
+
+// A point on the admin area itself, to anchor its tooltip when the pointer is not on the map.
+export function getAdminAreaAnchor(feature: NrwAdminAreaFeature): NrwLngLat | undefined {
+    if (isNotDefined(feature.geometry)) {
+        return undefined;
+    }
+
+    const [longitude, latitude] = getGeoJsonPointOnFeature(feature);
+
+    return new NrwLngLat(longitude as Longitude, latitude as Latitude);
 }

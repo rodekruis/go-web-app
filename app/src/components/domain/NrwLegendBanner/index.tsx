@@ -1,4 +1,5 @@
-import { faCircleInfo } from '@fortawesome/pro-regular-svg-icons';
+import { type RefObject } from 'react';
+import { faCircleExclamation } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import { _cs } from '@togglecorp/fujs';
@@ -19,8 +20,9 @@ import styles from './styles.module.css';
 function NrwLegendBanner(props: {
     availableLayers: NrwLayer[];
     visibleLayers: NrwLayerName[];
+    elementRef?: RefObject<HTMLDivElement | null>;
 }) {
-    const { availableLayers, visibleLayers } = props;
+    const { availableLayers, visibleLayers, elementRef } = props;
 
     const strings = useTranslation(i18n);
 
@@ -33,15 +35,18 @@ function NrwLegendBanner(props: {
     switch (legend.state) {
         case NrwLegendState.NoEvent:
             return (
-                <div className={styles.nrwLegendBannerContent}>
+                <div ref={elementRef} className={styles.nrwLegendBannerContent}>
                     <NrwMarkerLegend />
                 </div>
             );
         case NrwLegendState.NoLayers:
             return (
-                <div className={_cs(styles.nrwLegendBannerContent, styles.message)}>
+                <div
+                    ref={elementRef}
+                    className={_cs(styles.nrwLegendBannerContent, styles.message)}
+                >
                     <FontAwesomeIcon
-                        icon={faCircleInfo}
+                        icon={faCircleExclamation}
                         className={styles.messageIcon}
                     />
                     {strings.nrwLegendBannerNoLayersMessage}
@@ -49,7 +54,7 @@ function NrwLegendBanner(props: {
             );
         case NrwLegendState.Items:
             return (
-                <div className={styles.nrwLegendBannerContent}>
+                <div ref={elementRef} className={styles.nrwLegendBannerContent}>
                     {legend.items.map((item) => (
                         <NrwLegendItem
                             key={item.layerName}

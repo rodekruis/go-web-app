@@ -5,9 +5,27 @@ import {
     type AdminLevel,
     type NrwEvent,
     type NrwExposedAdminArea,
+    type NrwForecastSource,
     type PlaceCode,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parsePlaceCode } from '#views/CountryProfileNationalRiskWatch/utils';
+
+const forecastSourceOrder: NrwForecastSource['name'][] = [
+    'glofasRiverDischarge',
+    'glofasFloodHazardMaps',
+    'worldpop',
+];
+
+function getForecastSourceRank(forecastSource: NrwForecastSource): number {
+    const rank = forecastSourceOrder.indexOf(forecastSource.name);
+    return rank === -1 ? forecastSourceOrder.length : rank;
+}
+
+export function getNrwSortedForecastSources(event: NrwEvent): NrwForecastSource[] {
+    return [...event.forecastSources].sort(
+        (a, b) => getForecastSourceRank(a) - getForecastSourceRank(b),
+    );
+}
 
 export function getNrwExposedPopulation(area: NrwExposedAdminArea): number | undefined {
     return area.exposure.find(

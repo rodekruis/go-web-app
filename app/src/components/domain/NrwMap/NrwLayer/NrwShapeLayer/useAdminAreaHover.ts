@@ -2,6 +2,7 @@ import {
     useCallback,
     useContext,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -16,20 +17,30 @@ import {
     type AdminAreaProperties,
     type Latitude,
     type Longitude,
+    type NrwAdminAreaFeatureCollection,
     type PlaceCode,
     type PlaceCodeChangeHandler,
 } from '#views/CountryProfileNationalRiskWatch/types';
-import { parseAdminAreaProperties } from '#views/CountryProfileNationalRiskWatch/utils';
+import {
+    getAdminAreaAnchor,
+    parseAdminAreaProperties,
+} from '#views/CountryProfileNationalRiskWatch/utils';
 
 import NrwMapContext from '../../NrwMapContext';
 
+// pointer: when the mouse is over the admin area on the map
+// area: when the mouse is over the admin area in the event card
+export type HoveredAdminAreaAnchor = 'pointer' | 'area';
+
 interface HoveredAdminArea extends AdminAreaProperties {
     coordinates: NrwLngLat;
+    anchor: HoveredAdminAreaAnchor;
 }
 
 function useAdminAreaHover(
     layerId: string,
     isEnabled: boolean,
+    adminAreas: NrwAdminAreaFeatureCollection | undefined,
     hoveredPlaceCode: PlaceCode | undefined,
     onHoverChange: PlaceCodeChangeHandler,
     canDrillDown: (placeCode: PlaceCode) => boolean,
@@ -80,6 +91,7 @@ function useAdminAreaHover(
                         event.lngLat.lng as Longitude,
                         event.lngLat.lat as Latitude,
                     ),
+                    anchor: 'pointer',
                 });
                 onHoverChange(properties.placeCode);
             };
@@ -116,7 +128,31 @@ function useAdminAreaHover(
         [map, layerId, isEnabled, hoveredPlaceCode],
     );
 
-    return { hoveredAdminArea, clearHover };
+    const anchoredAdminArea = useMemo<HoveredAdminArea | undefined>(
+        () => {
+            if (isDefined(hoveredAdminArea) || !isEnabled || isNotDefined(hoveredPlaceCode)) {
+                return undefined;
+            }
+
+            const feature = adminAreas?.features.find(
+                ({ properties }) => properties.placeCode === hoveredPlaceCode,
+            );
+
+            if (isNotDefined(feature)) {
+                return undefined;
+            }
+
+            const properties = parseAdminAreaProperties(feature.properties);
+            const coordinates = getAdminAreaAnchor(feature);
+
+            return properties !== null && isDefined(coordinates)
+                ? { ...properties, coordinates, anchor: 'area' }
+                : undefined;
+        },
+        [hoveredAdminArea, isEnabled, adminAreas, hoveredPlaceCode],
+    );
+
+    return { hoveredAdminArea: hoveredAdminArea ?? anchoredAdminArea, clearHover };
 }
 
 export default useAdminAreaHover;

@@ -8,6 +8,7 @@ import {
     type NrwAdminAreaFeatureCollection,
     type NrwEvent,
     type NrwLegendCategory,
+    unbounded,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 // Global classes in nrw.css that set --nrw-color-alert, -tint and -contrast.
@@ -92,7 +93,7 @@ export function getRampCategories(
     ramp: MapColorRamp,
     breaks: EqualIntervalBreaks,
 ): NrwLegendCategory[] {
-    const bounds = [undefined, ...breaks, undefined];
+    const bounds = [unbounded, ...breaks, unbounded];
 
     return ramp.map((color, index) => ({
         color,

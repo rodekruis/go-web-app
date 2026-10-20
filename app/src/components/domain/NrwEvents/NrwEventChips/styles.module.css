@@ -1,7 +1,7 @@
 .nrw-event-chips {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: var(--go-ui-spacing-2xs);
 
     .chip {
