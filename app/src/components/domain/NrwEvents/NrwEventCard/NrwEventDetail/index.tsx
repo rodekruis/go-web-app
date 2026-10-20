@@ -47,7 +47,11 @@ function NrwEventDetail(props: Props) {
     const { className, event } = props;
 
     const strings = useTranslation(i18n);
-    const { parentAdminArea, drillUp } = useContext(NrwAdminAreasContext);
+    const {
+        parentAdminArea,
+        selectedAdminArea,
+        drillUp,
+    } = useContext(NrwAdminAreasContext);
     const [
         expandedForecastSourceName,
         setExpandedForecastSourceName,
@@ -111,7 +115,7 @@ function NrwEventDetail(props: Props) {
                     <div className={styles.panelHeading}>
                         <FontAwesomeIcon className={styles.icon} icon={faMap} />
                         {strings.nrwEventDetailExposedAdminAreasHeading}
-                        {isDefined(parentAdminArea) && (
+                        {(isDefined(parentAdminArea) || isDefined(selectedAdminArea)) && (
                             <Button
                                 className={styles.backButton}
                                 name={undefined}
@@ -126,7 +130,7 @@ function NrwEventDetail(props: Props) {
                             </Button>
                         )}
                     </div>
-                    <NrwExposedAdminAreas event={event} />
+                    <NrwExposedAdminAreas />
                 </div>
                 {event.forecastSources.length > 0 && (
                     <div className={styles.panel}>

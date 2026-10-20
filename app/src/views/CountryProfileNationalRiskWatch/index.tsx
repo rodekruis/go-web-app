@@ -17,7 +17,10 @@ import NrwMap from '#components/domain/NrwMap';
 import NrwNavbar from '#components/domain/NrwNavbar';
 import NrwPdfExport from '#components/domain/NrwPdfExport';
 import Page from '#components/Page';
-import { nrwStandalone } from '#config';
+import {
+    appTitle,
+    nrwStandalone,
+} from '#config';
 
 import NrwEventsContext from './contexts/NrwEventsContext';
 import NrwScreenCaptureContext, {
@@ -49,6 +52,8 @@ export function Component() {
         handleSelectedEventIdChange,
         layersFromUrlParams,
         setLayersFromUrlParams,
+        placeCodeFromUrlParams,
+        handleUrlPlaceCodeChange,
     } = useNrwSearchParams();
 
     const nrwEventsContext = useNrwEvents({
@@ -113,7 +118,11 @@ export function Component() {
         : undefined;
 
     const content = (
-        <NrwAdminAreasProvider event={selectedEvent}>
+        <NrwAdminAreasProvider
+            event={selectedEvent}
+            urlPlaceCode={placeCodeFromUrlParams}
+            onUrlPlaceCodeChange={handleUrlPlaceCodeChange}
+        >
             <div className={styles.mapAndLegend}>
                 <ListView
                     className={styles.mapGrid}
@@ -150,7 +159,7 @@ export function Component() {
                         <NrwNavbar actions={exportButton} />
                         <Page
                             className={styles.page}
-                            title={strings.nationalRiskWatchPageTitle}
+                            title={appTitle}
                             mainSectionContainerClassName={styles.mainSectionContainer}
                             mainSectionClassName={styles.mainSection}
                         >

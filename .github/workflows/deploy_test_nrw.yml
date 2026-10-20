@@ -1,6 +1,6 @@
 # See: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
 
-name: 'Deploy [test] NRW Portal'
+name: "Deploy [test] NRW Portal"
 
 permissions:
   contents: read
@@ -17,25 +17,25 @@ on:
     branches:
       - nrw-develop
     paths:
-      - '.github/workflows/deploy_test_nrw.yml'
-      - '.github/actions/build-nrw/**'
-      - '.github/actions/get-swa-api-key/**'
-      - 'app/**'
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
-      - '!**/*.md'
+      - ".github/workflows/deploy_test_nrw.yml"
+      - ".github/actions/build-nrw/**"
+      - ".github/actions/get-swa-api-key/**"
+      - "app/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "!**/*.md"
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - nrw-develop
     paths:
-      - '.github/workflows/deploy_test_nrw.yml'
-      - '.github/actions/build-nrw/**'
-      - '.github/actions/get-swa-api-key/**'
-      - 'app/**'
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
-      - '!**/*.md'
+      - ".github/workflows/deploy_test_nrw.yml"
+      - ".github/actions/build-nrw/**"
+      - ".github/actions/get-swa-api-key/**"
+      - "app/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "!**/*.md"
 
 env:
   buildOutputDir: build
@@ -50,11 +50,11 @@ jobs:
       actions: read
       deployments: write
       id-token: write
-    environment: 'test'
+    environment: "test"
     outputs:
       preview_url: ${{ steps.deploy_to_aswa.outputs.static_web_app_url }}
     env:
-      APP_TITLE: NRW test
+      APP_TITLE: "[TEST] National Risk Watch"
       APP_ENVIRONMENT: testing
       APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.APP_MAPBOX_ACCESS_TOKEN }}
       APP_NRW_API_ENDPOINT: ${{ vars.APP_NRW_API_ENDPOINT }}
@@ -85,7 +85,6 @@ jobs:
           azureSubscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           staticWebAppName: nrw-portal-test
 
-
       # More information on Static Web App workflow configurations,
       # See: https://aka.ms/swaworkflowconfig
       - name: Deploy to Azure Static Web App
@@ -96,10 +95,10 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ steps.get-api-key.outputs.apiKey }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: 'upload'
+          action: "upload"
           config_file_location: ${{ env.buildOutputDir }}
           app_location: ${{ env.buildOutputDir }}
-          output_location: ''
+          output_location: ""
           skip_app_build: true
           skip_api_build: true
 
@@ -118,8 +117,8 @@ jobs:
       - name: Add Deployment URL to PR Description
         uses: nefrob/pr-description@v1.3.0
         with:
-          content: '${{ needs.build-and-deploy.outputs.preview_url }}?countries=MWI'
-          regex: '<!-- start deployment url -->.*?<!-- end deployment url -->'
+          content: "${{ needs.build-and-deploy.outputs.preview_url }}?countries=MWI"
+          regex: "<!-- start deployment url -->.*?<!-- end deployment url -->"
           regexFlags: ims
           appendContentOnMatchOnly: true
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -133,7 +132,7 @@ jobs:
       actions: read
       deployments: write
       id-token: write
-    environment: 'test'
+    environment: "test"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -155,4 +154,4 @@ jobs:
         with:
           app_location: ${{ env.buildOutputDir }}
           azure_static_web_apps_api_token: ${{ steps.get-api-key.outputs.apiKey }}
-          action: 'close'
+          action: "close"

@@ -18,17 +18,9 @@ import {
     sum,
 } from '@togglecorp/fujs';
 
-import {
-    alertClassMapRamps,
-    getEqualIntervalBreaks,
-    getRampColor,
-} from '#utils/nrw/colors';
-import { getNrwExposedPopulationByPlaceCode } from '#utils/nrw/events';
+import { type NrwExposedPopulationScale } from '#utils/nrw/colors';
 import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
-import {
-    type NrwAdminAreaFeatureCollection,
-    type NrwEvent,
-} from '#views/CountryProfileNationalRiskWatch/types';
+import { type NrwAdminAreaFeatureCollection } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseAdminAreaProperties } from '#views/CountryProfileNationalRiskWatch/utils';
 
 import NrwExposedAdminAreaRow from './NrwExposedAdminAreaRow';
@@ -37,46 +29,45 @@ import i18n from './i18n.json';
 import styles from './styles.module.css';
 
 // The rows of the table, most exposed first, coloured as their map polygons.
-function getExposedAdminAreaRows(adminAreas: NrwAdminAreaFeatureCollection, event: NrwEvent) {
-    const exposedPopulationByPlaceCode = getNrwExposedPopulationByPlaceCode(event);
-    const rows = adminAreas.features
+function getExposedAdminAreaRows(
+    adminAreas: NrwAdminAreaFeatureCollection,
+    scale: NrwExposedPopulationScale,
+) {
+    const { getRampStep, exposedPopulationByPlaceCode } = scale;
+
+    return adminAreas.features
         .map((feature) => parseAdminAreaProperties(feature.properties))
         .filter(isDefined)
-        .map((adminArea) => ({
-            adminArea,
-            exposedPopulation: exposedPopulationByPlaceCode.get(adminArea.placeCode),
-        }))
+        .map((adminArea) => {
+            const exposedPopulation = exposedPopulationByPlaceCode.get(adminArea.placeCode);
+            return {
+                adminArea,
+                exposedPopulation,
+                rampStep: getRampStep(exposedPopulation),
+            };
+        })
         .sort((a, b) => (b.exposedPopulation ?? 0) - (a.exposedPopulation ?? 0));
-
-    const breaks = getEqualIntervalBreaks(
-        rows.map((row) => row.exposedPopulation).filter(isDefined),
-    );
-    const ramp = alertClassMapRamps[event.alertClass];
-
-    return rows.map((row) => ({
-        ...row,
-        color: getRampColor(ramp, breaks, row.exposedPopulation),
-    }));
 }
 
 interface Props {
     className?: string;
-    event: NrwEvent;
 }
 
 function NrwExposedAdminAreas(props: Props) {
-    const { className, event } = props;
+    const { className } = props;
 
     const strings = useTranslation(i18n);
     const {
         adminLevel,
         adminLevelLabels,
         adminAreas,
+        exposedPopulationScale,
         pending,
         parentAdminArea,
+        selectedAdminArea,
         hoveredPlaceCode,
         onAdminAreaHoverChange,
-        canDrillDown,
+        hasChildren,
         drillDown,
     } = useContext(NrwAdminAreasContext);
 
@@ -84,8 +75,10 @@ function NrwExposedAdminAreas(props: Props) {
         ?? strings.nrwExposedAdminAreasFallbackLabel;
 
     const rows = useMemo(
-        () => (isDefined(adminAreas) ? getExposedAdminAreaRows(adminAreas, event) : []),
-        [adminAreas, event],
+        () => (isDefined(adminAreas) && isDefined(exposedPopulationScale)
+            ? getExposedAdminAreaRows(adminAreas, exposedPopulationScale)
+            : []),
+        [adminAreas, exposedPopulationScale],
     );
     const totalExposedPopulation = sum(rows.map((row) => row.exposedPopulation ?? 0));
 
@@ -172,14 +165,15 @@ function NrwExposedAdminAreas(props: Props) {
                     </tr>
                 </thead>
                 <tbody>
-                    {rows.map(({ adminArea, exposedPopulation, color }) => (
+                    {rows.map(({ adminArea, exposedPopulation, rampStep }) => (
                         <NrwExposedAdminAreaRow
                             key={adminArea.placeCode}
                             adminArea={adminArea}
                             exposedPopulation={exposedPopulation}
-                            color={color}
+                            rampStep={rampStep}
                             hovered={hoveredPlaceCode === adminArea.placeCode}
-                            drillable={canDrillDown(adminArea.placeCode)}
+                            selected={selectedAdminArea?.placeCode === adminArea.placeCode}
+                            drillable={hasChildren(adminArea.placeCode)}
                             disabled={pending}
                             onHoverChange={onAdminAreaHoverChange}
                             onDrillDown={drillDown}

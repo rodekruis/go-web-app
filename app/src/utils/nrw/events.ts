@@ -1,14 +1,23 @@
-import { isDefined } from '@togglecorp/fujs';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 
 import supportedLayerNames from '#utils/nrw/layers';
 import {
+    type AdminAreaProperties,
     type AdminLevel,
+    type NrwAdminAreaProperties,
     type NrwEvent,
     type NrwExposedAdminArea,
     type NrwForecastSource,
     type PlaceCode,
 } from '#views/CountryProfileNationalRiskWatch/types';
-import { parsePlaceCode } from '#views/CountryProfileNationalRiskWatch/utils';
+import {
+    maxQueryableAdminLevel,
+    parsePlaceCode,
+    placeCodeLevelKeys,
+} from '#views/CountryProfileNationalRiskWatch/utils';
 
 const forecastSourceOrder: NrwForecastSource['name'][] = [
     'glofasRiverDischarge',
@@ -77,5 +86,59 @@ export function getNrwInitialAdminLevel(event: NrwEvent): AdminLevel {
 export function getNrwExposedPlaceCodes(event: NrwEvent, adminLevel: AdminLevel): PlaceCode[] {
     return getExposedAdminAreas(event, adminLevel)
         .map((area) => parsePlaceCode(area.placeCode))
+        .filter(isDefined);
+}
+
+// The exposed admin area of the event with the given place code, at any admin level.
+export function getExposedAdminArea(
+    event: NrwEvent,
+    placeCode: PlaceCode,
+): AdminAreaProperties | undefined {
+    const match = Object.entries(event.exposedAdminAreas)
+        .flatMap(([adminLevel, areas]) => areas.map((area) => ({ adminLevel, area })))
+        .find(({ area }) => area.placeCode === placeCode);
+
+    if (isNotDefined(match)) {
+        return undefined;
+    }
+
+    return {
+        adminLevel: Number(match.adminLevel) as AdminLevel,
+        placeCode,
+        name: match.area.name,
+    };
+}
+
+// Whether the event can be drilled into below the given admin level: from the initial
+// level down, the next level must have exposed admin areas and be fetchable by parent.
+export function canNrwDrillBelow(event: NrwEvent, adminLevel: AdminLevel): boolean {
+    const nextAdminLevel = (adminLevel + 1) as AdminLevel;
+
+    return adminLevel >= getNrwInitialAdminLevel(event)
+        && nextAdminLevel <= maxQueryableAdminLevel
+        && getNrwExposedAdminLevels(event).includes(nextAdminLevel);
+}
+
+// The admin areas drilled through to show the given admin area, from the initial admin
+// level down to its parent, read from its parent place codes and named by the event.
+export function getNrwDrillPath(
+    event: NrwEvent,
+    initialAdminLevel: AdminLevel,
+    adminArea: NrwAdminAreaProperties,
+): AdminAreaProperties[] {
+    return placeCodeLevelKeys
+        .slice(initialAdminLevel, adminArea.adminLevel)
+        .map((placeCodeLevelKey, index) => {
+            const placeCode = parsePlaceCode(adminArea[placeCodeLevelKey]);
+            if (placeCode === null) {
+                return undefined;
+            }
+
+            return {
+                adminLevel: (initialAdminLevel + index) as AdminLevel,
+                placeCode,
+                name: getExposedAdminArea(event, placeCode)?.name ?? placeCode,
+            };
+        })
         .filter(isDefined);
 }

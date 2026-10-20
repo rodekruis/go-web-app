@@ -20,39 +20,136 @@ export const alertClassNames: Record<NrwEvent['alertClass'], string> = {
 
 type MapColorRamp = readonly [string, string, string, string, string];
 
-// The design defines "Map <colour> 65%", ordered from the lightest (10) to the
-// darkest (90) tint. Mapbox paint expressions need literal colours, so these
-// mirror the tokens in nrw.css.
-export const alertClassMapRamps: Record<NrwEvent['alertClass'], MapColorRamp> = {
-    low: ['#fff9ea', '#ffedbc', '#ffdf8a', '#ffc635', '#d99a00'],
-    medium: ['#fff5ea', '#ffd3aa', '#ffb066', '#ff6e00', '#c24e00'],
-    high: ['#fef1f2', '#fcc6ca', '#fa999f', '#f5333f', '#c01825'],
+export interface MapRampStep {
+    color: string;
+    opacity: number;
+    hoverOpacity: number;
+}
+
+type MapRamp = readonly [MapRampStep, MapRampStep, MapRampStep, MapRampStep, MapRampStep];
+
+// The design defines five steps per alert colour, from the lightest (10) to the darkest (90).
+export const alertClassMapRamps: Record<NrwEvent['alertClass'], MapRamp> = {
+    low: [
+        { color: '#ffb900', opacity: 0.15, hoverOpacity: 0.3 },
+        { color: '#ffba00', opacity: 0.3, hoverOpacity: 0.45 },
+        { color: '#ffb900', opacity: 0.5, hoverOpacity: 0.6 },
+        { color: '#ffb700', opacity: 0.7, hoverOpacity: 0.8 },
+        { color: '#d9a900', opacity: 0.8, hoverOpacity: 0.9 },
+    ],
+    medium: [
+        { color: '#ff7900', opacity: 0.15, hoverOpacity: 0.25 },
+        { color: '#ff7b00', opacity: 0.3, hoverOpacity: 0.4 },
+        { color: '#ff7b00', opacity: 0.45, hoverOpacity: 0.55 },
+        { color: '#ff6e00', opacity: 0.6, hoverOpacity: 0.7 },
+        { color: '#c24e00', opacity: 0.8, hoverOpacity: 0.9 },
+    ],
+    high: [
+        { color: '#f4000b', opacity: 0.15, hoverOpacity: 0.3 },
+        { color: '#f20012', opacity: 0.3, hoverOpacity: 0.45 },
+        { color: '#f3000f', opacity: 0.45, hoverOpacity: 0.55 },
+        { color: '#f3000f', opacity: 0.6, hoverOpacity: 0.7 },
+        { color: '#b9000e', opacity: 0.75, hoverOpacity: 0.85 },
+    ],
 };
 
 export const floodDepthMapRamp: MapColorRamp = ['#cbddf2', '#9ebadc', '#6e96c5', '#467abc', '#3163a0'];
 
-export const mapFillOpacity = 0.65;
-export const mapFillHoverOpacity = 0.8;
-export const mapOutlineWidth = 2;
+// Mapbox paint needs literal values, so these mirror --nrw-color-map-shadow-outline in nrw.css.
+export const mapOutlineColor = '#323232';
+export const mapOutlineOpacity = 0.2;
+export const mapOutlineWidth = 0.8;
 
-export type EqualIntervalBreaks = [number, number, number, number];
+// Ramp step indices used for fewer distinct values than steps, lightest to darkest.
+const rampStepIndicesByValueCount: Record<number, readonly number[]> = {
+    1: [2],
+    2: [1, 3],
+    3: [0, 2, 4],
+    4: [0, 2, 3, 4],
+};
 
-// Split 0..max into five equal bands, one per ramp tint, so the scale fits any
-// magnitude (hundreds or millions) with the same method for every hazard and country.
-// Returns the four lower bounds of the bands above the first.
-export function getEqualIntervalBreaks(values: number[]): EqualIntervalBreaks {
-    const max = Math.max(0, ...values);
-    const bandWidth = max / 5;
+// Few distinct values use spread-out steps, and more fill all steps in classes of
+// equal area count by rank. Equal values share the step of their first rank.
+function getStepIndexByValue(stepCount: number, values: number[]): Map<number, number> {
+    const sortedValues = [...values].sort((a, b) => a - b);
+    const distinctValues = [...new Set(sortedValues)];
+    const stepIndices = rampStepIndicesByValueCount[distinctValues.length];
 
-    return [bandWidth, 2 * bandWidth, 3 * bandWidth, 4 * bandWidth];
+    return new Map(distinctValues.map((value, distinctRank) => [
+        value,
+        stepIndices?.[distinctRank]
+            ?? Math.floor((sortedValues.indexOf(value) * stepCount) / sortedValues.length),
+    ]));
 }
 
-// The breaks of the choropleth of the admin areas on the map, scaled to the
-// exposed population of those areas only. Shared by the fill layer and the legend.
+// Unknown values get the lightest step.
+export function createRampStepGetter(
+    ramp: MapRamp,
+    values: number[],
+): (value: number | undefined) => MapRampStep {
+    const stepByValue = new Map(
+        [...getStepIndexByValue(ramp.length, values)]
+            .map(([value, stepIndex]) => [value, ramp[stepIndex]]),
+    );
+
+    return (value) => (isDefined(value) ? stepByValue.get(value) : undefined) ?? ramp[0];
+}
+
+export function getRampStepCssColor(step: MapRampStep): string {
+    return `color-mix(in srgb, ${step.color} ${step.opacity * 100}%, transparent)`;
+}
+
+// The lowest value of each step. A step without values gets one extended linearly
+// from the two nearest steps with values, or by half the value with only one.
+function getStepLowerBounds(stepCount: number, stepIndexByValue: Map<number, number>): number[] {
+    const lowestValues: { step: number, value: number }[] = [];
+    stepIndexByValue.forEach((step, value) => {
+        if (lowestValues.at(-1)?.step !== step) {
+            lowestValues.push({ step, value });
+        }
+    });
+
+    return Array.from({ length: stepCount }, (_, step) => {
+        const [nearest, secondNearest] = [...lowestValues]
+            .sort((a, b) => Math.abs(a.step - step) - Math.abs(b.step - step));
+
+        if (isNotDefined(nearest)) {
+            return 0;
+        }
+        if (nearest.step === step) {
+            return nearest.value;
+        }
+
+        const valuePerStep = isDefined(secondNearest)
+            ? (secondNearest.value - nearest.value) / (secondNearest.step - nearest.step)
+            : nearest.value / 2;
+        return nearest.value + valuePerStep * (step - nearest.step);
+    });
+}
+
+// The steps of the ramp as legend entries, the first and last open-ended.
+export function getRampCategories(
+    ramp: MapRamp,
+    values: number[],
+): NrwLegendCategory[] {
+    const lowerBounds = getStepLowerBounds(
+        ramp.length,
+        getStepIndexByValue(ramp.length, values),
+    );
+
+    return ramp.map((step, index) => ({
+        color: getRampStepCssColor(step),
+        from: index === 0 ? unbounded : lowerBounds[index],
+        to: index === ramp.length - 1 ? unbounded : lowerBounds[index + 1],
+    }));
+}
+
+// The colour scale of the admin areas on the map, ranked by the exposed population
+// of those areas only. Shared by the fill layer, the admin area list and the legend.
 export interface NrwExposedPopulationScale {
-    ramp: MapColorRamp;
+    getRampStep: (value: number | undefined) => MapRampStep;
     // Undefined when none of the areas has exposed population, so the map draws a flat fill.
-    breaks: EqualIntervalBreaks | undefined;
+    categories: NrwLegendCategory[] | undefined;
     exposedPopulationByPlaceCode: Map<string, number>;
 }
 
@@ -61,43 +158,15 @@ export function getExposedPopulationScale(
     adminAreas: NrwAdminAreaFeatureCollection,
 ): NrwExposedPopulationScale {
     const exposedPopulationByPlaceCode = getNrwExposedPopulationByPlaceCode(event);
-    const breaks = getEqualIntervalBreaks(
-        adminAreas.features
-            .map((feature) => exposedPopulationByPlaceCode.get(feature.properties.placeCode))
-            .filter(isDefined),
-    );
+    const values = adminAreas.features
+        .map((feature) => exposedPopulationByPlaceCode.get(feature.properties.placeCode))
+        .filter(isDefined);
+    const ramp = alertClassMapRamps[event.alertClass];
 
-    const hasExposedPopulation = breaks[0] > 0;
+    const hasExposedPopulation = values.some((value) => value > 0);
     return {
-        ramp: alertClassMapRamps[event.alertClass],
-        breaks: hasExposedPopulation ? breaks : undefined,
+        getRampStep: createRampStepGetter(ramp, values),
+        categories: hasExposedPopulation ? getRampCategories(ramp, values) : undefined,
         exposedPopulationByPlaceCode,
     };
-}
-
-// The ramp tint of a value, in the band it falls in. A band starts at its break,
-// like a Mapbox step expression, and a set without values shares the first tint.
-export function getRampColor(
-    ramp: MapColorRamp,
-    breaks: EqualIntervalBreaks,
-    value: number | undefined,
-): string {
-    if (breaks[0] <= 0 || isNotDefined(value)) return ramp[0];
-
-    const bandIndex = breaks.filter((lowerBound) => value >= lowerBound).length;
-    return ramp[bandIndex] ?? ramp[0];
-}
-
-// The bands of the ramp as legend entries, the first and last open-ended.
-export function getRampCategories(
-    ramp: MapColorRamp,
-    breaks: EqualIntervalBreaks,
-): NrwLegendCategory[] {
-    const bounds = [unbounded, ...breaks, unbounded];
-
-    return ramp.map((color, index) => ({
-        color,
-        from: bounds[index],
-        to: bounds[index + 1],
-    }));
 }

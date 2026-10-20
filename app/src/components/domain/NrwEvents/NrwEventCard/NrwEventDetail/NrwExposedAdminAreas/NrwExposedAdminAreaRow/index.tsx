@@ -9,6 +9,10 @@ import { _cs } from '@togglecorp/fujs';
 
 import useHoverChange from '#hooks/useHoverChange';
 import {
+    getRampStepCssColor,
+    type MapRampStep,
+} from '#utils/nrw/colors';
+import {
     type AdminAreaDrillDownHandler,
     type AdminAreaProperties,
     type PlaceCodeChangeHandler,
@@ -19,8 +23,9 @@ import styles from './styles.module.css';
 interface Props {
     adminArea: AdminAreaProperties;
     exposedPopulation: number | undefined;
-    color: string;
+    rampStep: MapRampStep;
     hovered: boolean;
+    selected: boolean;
     drillable: boolean;
     disabled: boolean;
     onHoverChange: PlaceCodeChangeHandler;
@@ -31,8 +36,9 @@ function NrwExposedAdminAreaRow(props: Props) {
     const {
         adminArea,
         exposedPopulation,
-        color,
+        rampStep,
         hovered,
+        selected,
         drillable,
         disabled,
         onHoverChange,
@@ -49,19 +55,20 @@ function NrwExposedAdminAreaRow(props: Props) {
             className={_cs(
                 styles.nrwExposedAdminAreaRow,
                 hovered && styles.hovered,
-                drillable && styles.drillable,
+                selected && styles.selected,
             )}
+            aria-current={selected ? 'location' : undefined}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            onClick={drillable && !disabled ? () => onDrillDown(adminArea) : undefined}
+            onClick={!selected && !disabled ? () => onDrillDown(adminArea) : undefined}
         >
             <td>
                 <span className={styles.adminArea}>
                     <span
                         className={styles.colorDot}
-                        style={{ backgroundColor: color }}
+                        style={{ backgroundColor: getRampStepCssColor(rampStep) }}
                     />
-                    {drillable ? (
+                    {!selected ? (
                         <RawButton
                             className={styles.adminAreaName}
                             name={undefined}

@@ -15,6 +15,8 @@ import {
 import rampI18n from '#components/domain/NrwLegendItem/NrwLegendRamp/i18n.json';
 import {
     alertClassMapRamps,
+    createRampStepGetter,
+    getRampStepCssColor,
     type NrwExposedPopulationScale,
 } from '#utils/nrw/colors';
 import createNrwLayer from '#utils/testing/createNrwLayer';
@@ -37,9 +39,16 @@ const availableLayers = [
 ];
 
 const event = { eventId: 1, alertClass: 'high' } as unknown as NrwEvent;
+const ramp = alertClassMapRamps.high;
 const exposedPopulationScale: NrwExposedPopulationScale = {
-    ramp: alertClassMapRamps.high,
-    breaks: [200, 400, 600, 800],
+    getRampStep: createRampStepGetter(ramp, []),
+    categories: [
+        { color: getRampStepCssColor(ramp[0]), from: undefined, to: 200 },
+        { color: getRampStepCssColor(ramp[1]), from: 200, to: 400 },
+        { color: getRampStepCssColor(ramp[2]), from: 400, to: 600 },
+        { color: getRampStepCssColor(ramp[3]), from: 600, to: 800 },
+        { color: getRampStepCssColor(ramp[4]), from: 800, to: undefined },
+    ],
     exposedPopulationByPlaceCode: new Map(),
 };
 
