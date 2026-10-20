@@ -74,6 +74,7 @@ function getAdminAreasRequest(
     urlAdminArea: AdminAreaProperties | undefined,
     drill: Drill,
 ): { request: AdminAreasRequest; lookup?: boolean } {
+    // A request for the exposed admin areas of a level under one parent.
     const level = (adminLevel: AdminLevel, parentPlaceCode: PlaceCode | undefined) => ({
         adminLevel,
         parentPlaceCode,
@@ -87,6 +88,7 @@ function getAdminAreasRequest(
     }
 
     const { adminLevel, placeCode } = urlAdminArea;
+    // The admin area in the url is drilled into, unless it has no exposed children.
     if (canNrwDrillBelow(event, adminLevel) && !drill.childlessPlaceCodes.includes(placeCode)) {
         return { request: level((adminLevel + 1) as AdminLevel, placeCode) };
     }
@@ -97,6 +99,7 @@ function getAdminAreasRequest(
     )) {
         return { request: drill.shown.request };
     }
+    // The initial level is fetched without a parent.
     if (adminLevel === initialAdminLevel) {
         return { request: level(initialAdminLevel, undefined) };
     }
