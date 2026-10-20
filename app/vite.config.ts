@@ -5,6 +5,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import webfontDownload from 'vite-plugin-webfont-dl';
 import reactSwc from '@vitejs/plugin-react-swc';
 import { execSync } from 'child_process';
+import { existsSync } from 'fs';
 import { visualizer } from 'rollup-plugin-visualizer';
 import checker from 'vite-plugin-checker';
 import { compression } from 'vite-plugin-compression2';
@@ -20,6 +21,9 @@ const commitHash = execSync('git rev-parse --short HEAD').toString();
 export default defineConfig(({ mode }) => {
     const isProd = mode === 'production';
     const env = loadEnv(mode, process.cwd(), '')
+    const nrwFaviconPath = `/nrw-favicons/${env.APP_ENVIRONMENT}.svg`;
+    const useNrwFavicon = env.APP_NRW_STANDALONE === 'true'
+        && existsSync(new URL(`./public${nrwFaviconPath}`, import.meta.url));
 
     return {
         define: {
@@ -56,7 +60,15 @@ export default defineConfig(({ mode }) => {
                 hotjar: isDefined(env.APP_HOTJAR_ID) ? ({
                     id: Number(env.APP_HOTJAR_ID),
                 }) : undefined,
-            })
+            }),
+            {
+                name: 'nrw-environment-favicon',
+                transformIndexHtml: (html) => (
+                    useNrwFavicon
+                        ? html.replace('/go-icon.svg', nrwFaviconPath)
+                        : html
+                ),
+            },
         ],
         css: {
             devSourcemap: isProd,

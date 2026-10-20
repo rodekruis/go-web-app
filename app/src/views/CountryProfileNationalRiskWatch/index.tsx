@@ -17,7 +17,10 @@ import NrwMap from '#components/domain/NrwMap';
 import NrwNavbar from '#components/domain/NrwNavbar';
 import NrwPdfExport from '#components/domain/NrwPdfExport';
 import Page from '#components/Page';
-import { nrwStandalone } from '#config';
+import {
+    appTitle,
+    nrwStandalone,
+} from '#config';
 
 import NrwEventsContext from './contexts/NrwEventsContext';
 import NrwScreenCaptureContext, {
@@ -156,7 +159,7 @@ export function Component() {
                         <NrwNavbar actions={exportButton} />
                         <Page
                             className={styles.page}
-                            title={strings.nationalRiskWatchPageTitle}
+                            title={appTitle}
                             mainSectionContainerClassName={styles.mainSectionContainer}
                             mainSectionClassName={styles.mainSection}
                         >
