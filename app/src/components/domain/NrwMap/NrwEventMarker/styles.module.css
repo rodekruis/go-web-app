@@ -52,13 +52,32 @@
         pointer-events: none;
     }
 
+    &.flip-right .popup {
+        right: 0;
+        left: auto;
+        transform: none;
+    }
+
+    &.flip-left .popup {
+        left: 0;
+        transform: none;
+    }
+
+    &.flip-y .popup {
+        top: calc(120% + 9px);
+        bottom: auto;
+    }
+
     &.hovered {
         .event-marker-inner {
             transform: scale(1.2);
         }
 
         .event-marker-graphic {
-            filter: drop-shadow(0 0 14px color-mix(in srgb, var(--nrw-color-alert) 40%, transparent));
+            filter: drop-shadow(
+                0 0 14px
+                    color-mix(in srgb, var(--nrw-color-alert) 40%, transparent)
+            );
         }
 
         .popup {

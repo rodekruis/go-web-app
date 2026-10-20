@@ -140,6 +140,7 @@ function NrwMap(props: {
                     >
                         <NrwEventMarker
                             event={event}
+                            coordinates={coordinates}
                             hovered={event.eventId === hoveredEventId}
                             onHoverChange={onEventHoverChange}
                             onSelect={onEventSelect}
