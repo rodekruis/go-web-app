@@ -49,6 +49,13 @@ function getExposedAdminAreas(event: NrwEvent, adminLevel: number): NrwExposedAd
     return event.exposedAdminAreas[String(adminLevel)] ?? [];
 }
 
+// The place codes of every exposed admin area of the event, at all admin levels.
+export function getNrwAllExposedPlaceCodes(event: NrwEvent): Set<NrwExposedAdminArea['placeCode']> {
+    return new Set(
+        Object.values(event.exposedAdminAreas).flat().map(({ placeCode }) => placeCode),
+    );
+}
+
 // The sub-national admin levels that have exposed admin areas, least granular first.
 export function getNrwExposedAdminLevels(event: NrwEvent): AdminLevel[] {
     return Object.keys(event.exposedAdminAreas)
