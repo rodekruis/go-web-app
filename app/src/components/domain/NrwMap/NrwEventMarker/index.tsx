@@ -16,6 +16,7 @@ import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
 import NrwMapContext from '../NrwMapContext';
 import {
+    popupFlipLeftThreshold,
     popupFlipRightThreshold,
     popupFlipTopThreshold,
 } from '../popupFlipThresholds';
@@ -42,13 +43,16 @@ export default function NrwEventMarker(props: Props) {
     const { map } = useContext(NrwMapContext);
 
     // The popup sits above the marker by default. Flip it below when close to
-    // the top edge, and to the left when close to the right edge.
-    let flipX = false;
+    // the top edge, to the left when close to the right edge, and to the right
+    // when close to the left edge.
+    let flipRight = false;
+    let flipLeft = false;
     let flipY = false;
     if (isDefined(map)) {
         const canvas = map.getCanvas();
         const point = map.project([coordinates.lng, coordinates.lat]);
-        flipX = point.x > canvas.clientWidth - popupFlipRightThreshold;
+        flipRight = point.x > canvas.clientWidth - popupFlipRightThreshold;
+        flipLeft = point.x < popupFlipLeftThreshold;
         flipY = point.y < popupFlipTopThreshold;
     }
 
@@ -58,7 +62,8 @@ export default function NrwEventMarker(props: Props) {
                 styles.eventMarker,
                 alertClassNames[event.alertClass],
                 hovered && styles.hovered,
-                flipX && styles.flipX,
+                flipRight && styles.flipRight,
+                flipLeft && styles.flipLeft,
                 flipY && styles.flipY,
             )}
             onMouseEnter={handleMouseEnter}
