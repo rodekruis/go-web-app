@@ -38,21 +38,9 @@
     .alert-marker {
         flex-shrink: 0;
         border-radius: 50%;
-        background-color: var(--color-alert);
+        background-color: var(--nrw-color-alert);
         inline-size: var(--marker-size);
         height: var(--marker-size);
-
-        &.alert-low {
-            --color-alert: var(--nrw-color-alert-low);
-        }
-
-        &.alert-medium {
-            --color-alert: var(--nrw-color-alert-medium);
-        }
-
-        &.alert-high {
-            --color-alert: var(--nrw-color-alert-high);
-        }
     }
 
     .hazard-marker {

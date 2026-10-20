@@ -15,19 +15,9 @@
             --padding: var(--go-ui-spacing-5xs) var(--go-ui-spacing-xs);
         }
 
-        &.alert-class-low {
-            --color-background: var(--nrw-color-alert-low);
-            --color-text: var(--go-ui-color-gray-90);
-        }
-
-        &.alert-class-medium {
-            --color-background: var(--nrw-color-alert-medium);
-            --color-text: var(--go-ui-color-white);
-        }
-
-        &.alert-class-high {
-            --color-background: var(--nrw-color-alert-high);
-            --color-text: var(--go-ui-color-white);
+        &.alert-class-chip {
+            --color-background: var(--nrw-color-alert);
+            --color-text: var(--nrw-color-alert-contrast);
         }
 
         &.event-status-chip {
