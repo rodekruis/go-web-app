@@ -14,7 +14,7 @@ import {
     createAdminAreaProperties,
 } from '#utils/testing/nrwAdminAreaTesting';
 import NrwMapTestHost from '#utils/testing/NrwMapTestHost';
-import { type PlaceCode } from '#views/CountryProfileNationalRiskWatch/types';
+import { type AdminAreaProperties } from '#views/CountryProfileNationalRiskWatch/types';
 
 import useAdminAreaClick from './useAdminAreaClick';
 
@@ -22,7 +22,7 @@ const drillableProperties = createAdminAreaProperties('SSD.1', 1);
 
 function ClickLayer(props: {
     isEnabled: boolean;
-    canDrillDown: (placeCode: PlaceCode) => boolean;
+    canDrillDown: (adminArea: AdminAreaProperties) => boolean;
     onClick: (adminArea: unknown) => void;
 }) {
     const { isEnabled, canDrillDown, onClick } = props;
@@ -34,7 +34,7 @@ function ClickLayer(props: {
 
 function setup(options: {
     isEnabled?: boolean;
-    canDrillDown: (placeCode: PlaceCode) => boolean;
+    canDrillDown: (adminArea: AdminAreaProperties) => boolean;
 }) {
     const { isEnabled = true, canDrillDown } = options;
 
@@ -51,7 +51,7 @@ function setup(options: {
         </NrwMapTestHost>,
     );
 
-    function rerenderClickLayer(newCanDrillDown: (placeCode: PlaceCode) => boolean) {
+    function rerenderClickLayer(newCanDrillDown: (adminArea: AdminAreaProperties) => boolean) {
         rerender(
             <NrwMapTestHost map={fake.map}>
                 <ClickLayer
@@ -95,16 +95,16 @@ describe('useAdminAreaClick', () => {
         expect(onClick).not.toHaveBeenCalled();
     });
 
-    test('reports a click beside the admin areas', () => {
+    test('ignores a click beside the admin areas', () => {
         // Arrange
-        const { fake, onClick } = setup({ canDrillDown: () => false });
+        const { fake, onClick } = setup({ canDrillDown: () => true });
         fake.setRenderedFeatures([]);
 
         // Act
         fake.simulateEvent('click', { point: { x: 1, y: 1 } });
 
         // Assert
-        expect(onClick).toHaveBeenCalledWith(null);
+        expect(onClick).not.toHaveBeenCalled();
     });
 
     test('does not register a listener when disabled', () => {

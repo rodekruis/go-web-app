@@ -179,7 +179,7 @@ function NrwExposedAdminAreas(props: Props) {
                             exposedPopulation={exposedPopulation}
                             color={color}
                             hovered={hoveredPlaceCode === adminArea.placeCode}
-                            drillable={canDrillDown(adminArea.placeCode)}
+                            drillable={canDrillDown(adminArea)}
                             disabled={pending}
                             onHoverChange={onAdminAreaHoverChange}
                             onDrillDown={drillDown}

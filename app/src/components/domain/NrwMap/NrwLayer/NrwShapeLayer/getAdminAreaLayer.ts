@@ -4,6 +4,7 @@ import { type ExpressionSpecification } from 'mapbox-gl-v3';
 import {
     mapFillHoverOpacity,
     mapFillOpacity,
+    type MapFlatStyle,
     mapOutlineWidth,
     type NrwExposedPopulationScale,
 } from '#utils/nrw/colors';
@@ -78,6 +79,38 @@ function getAdminAreaLayer(
                 // The outline keeps the default full opacity, where the fill is translucent.
                 'line-color': fillColorSpecification,
                 'line-width': mapOutlineWidth,
+            },
+        },
+    ];
+}
+
+// Build a layer of admin areas in one flat style, around the ones drilled into.
+export function getFlatAdminAreaLayer(
+    id: string,
+    adminAreas: NrwAdminAreaFeatureCollection,
+    style: MapFlatStyle,
+): MapLayer[] {
+    return [
+        {
+            id,
+            type: 'fill',
+            source: {
+                type: 'geojson',
+                data: adminAreas as unknown as GeoJSON.FeatureCollection,
+                promoteId: 'placeCode',
+            },
+            paint: {
+                'fill-color': style.fillColor,
+                'fill-opacity': ['case', isHovered, style.fillHoverOpacity, style.fillOpacity],
+            },
+        },
+        {
+            id: `${id}-outline`,
+            type: 'line',
+            source: id,
+            paint: {
+                'line-color': style.outlineColor,
+                'line-width': style.outlineWidth,
             },
         },
     ];

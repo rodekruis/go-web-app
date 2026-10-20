@@ -19,6 +19,7 @@ import {
 } from '#utils/testing/nrwAdminAreaTesting';
 import NrwMapTestHost from '#utils/testing/NrwMapTestHost';
 import {
+    type AdminAreaProperties,
     type NrwAdminAreaFeatureCollection,
     type PlaceCode,
 } from '#views/CountryProfileNationalRiskWatch/types';
@@ -38,7 +39,7 @@ const adminAreas = {
 function HoverLayer(props: {
     isEnabled: boolean;
     hoveredPlaceCode: PlaceCode | undefined;
-    canDrillDown: (placeCode: PlaceCode) => boolean;
+    canDrillDown: (adminArea: AdminAreaProperties) => boolean;
     onHoverChange: (placeCode: PlaceCode | undefined) => void;
 }) {
     const {
@@ -71,7 +72,7 @@ function HoverLayer(props: {
 function setup(options: {
     isEnabled?: boolean;
     hoveredPlaceCode?: PlaceCode;
-    canDrillDown: (placeCode: PlaceCode) => boolean;
+    canDrillDown: (adminArea: AdminAreaProperties) => boolean;
 }) {
     const { isEnabled = true, hoveredPlaceCode, canDrillDown } = options;
 
@@ -97,7 +98,7 @@ function setup(options: {
         });
     }
 
-    function rerenderHoverLayer(newCanDrillDown: (placeCode: PlaceCode) => boolean) {
+    function rerenderHoverLayer(newCanDrillDown: (adminArea: AdminAreaProperties) => boolean) {
         rerender(
             <NrwMapTestHost map={fake.map}>
                 <HoverLayer

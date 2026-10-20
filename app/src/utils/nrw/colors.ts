@@ -35,6 +35,23 @@ export const mapFillOpacity = 0.65;
 export const mapFillHoverOpacity = 0.8;
 export const mapOutlineWidth = 2;
 
+export interface MapFlatStyle {
+    fillColor: string;
+    fillOpacity: number;
+    fillHoverOpacity: number;
+    outlineColor: string;
+    outlineWidth: number;
+}
+
+// Grey 40 with the map shadow outline.
+export const mapUnselectedStyle: MapFlatStyle = {
+    fillColor: '#c6c6c6',
+    fillOpacity: 0.5,
+    fillHoverOpacity: 0.8,
+    outlineColor: 'rgba(50, 50, 50, 0.2)',
+    outlineWidth: 2,
+};
+
 export type EqualIntervalBreaks = [number, number, number, number];
 
 // Split 0..max into five equal bands, one per ramp tint, so the scale fits any
