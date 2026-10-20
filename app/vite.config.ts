@@ -56,7 +56,15 @@ export default defineConfig(({ mode }) => {
                 hotjar: isDefined(env.APP_HOTJAR_ID) ? ({
                     id: Number(env.APP_HOTJAR_ID),
                 }) : undefined,
-            })
+            }),
+            {
+                name: 'nrw-environment-favicon',
+                transformIndexHtml: (html) => (
+                    env.APP_NRW_STANDALONE === 'true'
+                        ? html.replace('/go-icon.svg', `/nrw-favicons/${env.APP_ENVIRONMENT}.svg`)
+                        : html
+                ),
+            },
         ],
         css: {
             devSourcemap: isProd,

@@ -1,13 +1,12 @@
 # See: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
 
-name: 'Deploy [staging] NRW Portal'
+name: "Deploy [staging] NRW Portal"
 
 permissions:
   contents: read
   actions: read
   deployments: write
   id-token: write
-
 
 on:
   workflow_dispatch:
@@ -21,9 +20,9 @@ jobs:
   build-and-deploy:
     name: Build and Deploy Job (Staging)
     runs-on: ubuntu-latest
-    environment: 'staging'
+    environment: "staging"
     env:
-      APP_TITLE: NRW staging
+      APP_TITLE: "[STAGING] National Risk Watch"
       APP_ENVIRONMENT: staging
       APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.APP_MAPBOX_ACCESS_TOKEN }}
       APP_NRW_API_ENDPOINT: ${{ vars.APP_NRW_API_ENDPOINT }}
@@ -54,7 +53,6 @@ jobs:
           azureSubscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           staticWebAppName: nrw-portal-staging
 
-
       # More information on Static Web App workflow configurations,
       # See: https://aka.ms/swaworkflowconfig
       - name: Deploy to Azure Static Web App
@@ -63,10 +61,10 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ steps.get-api-key.outputs.apiKey }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: 'upload'
+          action: "upload"
           config_file_location: ${{ env.buildOutputDir }}
           app_location: ${{ env.buildOutputDir }}
-          output_location: ''
+          output_location: ""
           skip_app_build: true
           skip_api_build: true
 
