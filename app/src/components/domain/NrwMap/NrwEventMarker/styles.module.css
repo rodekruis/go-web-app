@@ -52,6 +52,17 @@
         pointer-events: none;
     }
 
+    &.flip-x .popup {
+        right: 0;
+        left: auto;
+        transform: none;
+    }
+
+    &.flip-y .popup {
+        top: calc(120% + 9px);
+        bottom: auto;
+    }
+
     &.hovered {
         .event-marker-inner {
             transform: scale(1.2);

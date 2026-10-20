@@ -52,7 +52,7 @@ function useNrwMapMarker(
             marker.remove();
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [map, element]);
+    }, [map, element, placement.anchor, placement.offset]);
 
     useEffect(() => {
         markerRef.current?.setLngLat([lng, lat]);
