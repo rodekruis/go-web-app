@@ -74,9 +74,10 @@ function NrwExposedAdminAreas(props: Props) {
         adminAreas,
         pending,
         parentAdminArea,
+        selectedAdminArea,
         hoveredPlaceCode,
         onAdminAreaHoverChange,
-        canDrillDown,
+        hasChildren,
         drillDown,
     } = useContext(NrwAdminAreasContext);
 
@@ -179,7 +180,8 @@ function NrwExposedAdminAreas(props: Props) {
                             exposedPopulation={exposedPopulation}
                             color={color}
                             hovered={hoveredPlaceCode === adminArea.placeCode}
-                            drillable={canDrillDown(adminArea.placeCode)}
+                            selected={selectedAdminArea?.placeCode === adminArea.placeCode}
+                            drillable={hasChildren(adminArea.placeCode)}
                             disabled={pending}
                             onHoverChange={onAdminAreaHoverChange}
                             onDrillDown={drillDown}

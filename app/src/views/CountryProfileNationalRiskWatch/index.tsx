@@ -49,6 +49,8 @@ export function Component() {
         handleSelectedEventIdChange,
         layersFromUrlParams,
         setLayersFromUrlParams,
+        placeCodeFromUrlParams,
+        handleUrlPlaceCodeChange,
     } = useNrwSearchParams();
 
     const nrwEventsContext = useNrwEvents({
@@ -113,7 +115,11 @@ export function Component() {
         : undefined;
 
     const content = (
-        <NrwAdminAreasProvider event={selectedEvent}>
+        <NrwAdminAreasProvider
+            event={selectedEvent}
+            urlPlaceCode={placeCodeFromUrlParams}
+            onUrlPlaceCodeChange={handleUrlPlaceCodeChange}
+        >
             <div className={styles.mapAndLegend}>
                 <ListView
                     className={styles.mapGrid}

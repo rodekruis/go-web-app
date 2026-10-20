@@ -21,6 +21,7 @@ interface Props {
     exposedPopulation: number | undefined;
     color: string;
     hovered: boolean;
+    selected: boolean;
     drillable: boolean;
     disabled: boolean;
     onHoverChange: PlaceCodeChangeHandler;
@@ -33,6 +34,7 @@ function NrwExposedAdminAreaRow(props: Props) {
         exposedPopulation,
         color,
         hovered,
+        selected,
         drillable,
         disabled,
         onHoverChange,
@@ -49,11 +51,12 @@ function NrwExposedAdminAreaRow(props: Props) {
             className={_cs(
                 styles.nrwExposedAdminAreaRow,
                 hovered && styles.hovered,
-                drillable && styles.drillable,
+                selected && styles.selected,
             )}
+            aria-current={selected ? 'location' : undefined}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            onClick={drillable && !disabled ? () => onDrillDown(adminArea) : undefined}
+            onClick={!selected && !disabled ? () => onDrillDown(adminArea) : undefined}
         >
             <td>
                 <span className={styles.adminArea}>
@@ -61,7 +64,7 @@ function NrwExposedAdminAreaRow(props: Props) {
                         className={styles.colorDot}
                         style={{ backgroundColor: color }}
                     />
-                    {drillable ? (
+                    {!selected ? (
                         <RawButton
                             className={styles.adminAreaName}
                             name={undefined}

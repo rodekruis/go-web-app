@@ -19,10 +19,15 @@ import {
     type NrwEventHazardType,
     type NrwEventSelectHandler,
     type NrwLayerName,
+    type PlaceCode,
+    type PlaceCodeChangeHandler,
     type UrlParameter,
     type Zoom,
 } from '../types';
-import { parseCountryCode } from '../utils';
+import {
+    parseCountryCode,
+    parsePlaceCode,
+} from '../utils';
 
 function sanitizeFloatInRange(
     value: UrlParameter,
@@ -66,6 +71,10 @@ function parseEventIdUrlParameter(value: UrlParameter) {
 }
 
 const serializeEventIdUrlParameter = (eventId: NrwEvent['eventId'] | undefined) => eventId;
+
+function parsePlaceCodeUrlParameter(value: UrlParameter): PlaceCode | undefined {
+    return parsePlaceCode(value) ?? undefined;
+}
 
 // Parse comma-separated ISO_A3 country codes from a URL search parameter.
 // Returns an empty array if there are no valid codes.
@@ -146,6 +155,11 @@ function useNrwSearchParams() {
         parseLayersUrlParameter,
         serializeLayersUrlParameter,
     );
+    const [placeCodeFromUrlParams] = useUrlSearchState(
+        'placeCode',
+        parsePlaceCodeUrlParameter,
+        () => '',
+    );
 
     // For embedded, get the country from the route.
     // These are hooks, so they can't be placed in a conditional block.
@@ -202,9 +216,24 @@ function useNrwSearchParams() {
                 params.delete('z');
                 params.delete('lat');
                 params.delete('lon');
+                params.delete('placeCode');
             });
         },
         [selectedEventId, setSearchParams],
+    );
+
+    // The drill starts again at the top when the admin area is cleared.
+    const handleUrlPlaceCodeChange: PlaceCodeChangeHandler = useCallback(
+        (placeCode) => {
+            setSearchParams((params) => {
+                if (isDefined(placeCode)) {
+                    params.set('placeCode', placeCode);
+                } else {
+                    params.delete('placeCode');
+                }
+            });
+        },
+        [setSearchParams],
     );
 
     return {
@@ -217,6 +246,8 @@ function useNrwSearchParams() {
         handleSelectedEventIdChange,
         layersFromUrlParams,
         setLayersFromUrlParams,
+        placeCodeFromUrlParams,
+        handleUrlPlaceCodeChange,
     };
 }
 
