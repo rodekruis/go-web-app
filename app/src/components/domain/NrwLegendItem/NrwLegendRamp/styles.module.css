@@ -22,7 +22,7 @@
     .ramp-swatches {
         display: flex;
         position: relative;
-        border-radius: 2px;
+        border-radius: 4px;
         overflow: hidden;
 
         /* outline drawn over the swatches so each stays a full 16px */
