@@ -15,6 +15,7 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import {
+    formatNrwEventDate,
     getExposedAdminArea,
     getNrwDrillPath,
     getNrwExposedAdminLevels,
@@ -54,6 +55,20 @@ function createForecastSource(name: NrwForecastSource['name']): NrwForecastSourc
 function getForecastSourceNames(forecastSources: NrwForecastSource[]): NrwForecastSource['name'][] {
     return forecastSources.map(({ name }) => name);
 }
+
+describe('formatNrwEventDate', () => {
+    test('writes the month as a word so the day and the month cannot be swapped', () => {
+        // Arrange: a local date keeps the day stable in every time zone
+        const startAt = new Date(2026, 3, 3, 12).toISOString();
+
+        // Act & Assert
+        expect(formatNrwEventDate(startAt)).toBe('03 Apr 2026');
+    });
+
+    test('is empty for a value that is not a date', () => {
+        expect(formatNrwEventDate('unknown')).toBe('');
+    });
+});
 
 describe('getNrwSortedForecastSources', () => {
     test('puts river discharge first, then flood hazard maps, then population', () => {

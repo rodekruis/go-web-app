@@ -14,7 +14,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import {
-    formatDate,
     getNumberOfDays,
     resolveToString,
 } from '@ifrc-go/ui/utils';
@@ -23,7 +22,10 @@ import {
     isDefined,
 } from '@togglecorp/fujs';
 
-import { getNrwSortedForecastSources } from '#utils/nrw/events';
+import {
+    formatNrwEventDate,
+    getNrwSortedForecastSources,
+} from '#utils/nrw/events';
 import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
 import {
     type NrwEvent,
@@ -35,8 +37,6 @@ import NrwExposedAdminAreas from './NrwExposedAdminAreas';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
-
-const detailDateFormat = 'dd-MM-yyyy';
 
 interface Props {
     className?: string;
@@ -66,7 +66,7 @@ function NrwEventDetail(props: Props) {
     const now = new Date();
     const startAt = new Date(event.startAt);
     const isUpcoming = startAt.getTime() > now.getTime();
-    const startDate = formatDate(event.startAt, detailDateFormat) ?? '';
+    const startDate = formatNrwEventDate(event.startAt);
 
     function getRelativeStart() {
         const daysUntilStart = getNumberOfDays(now, startAt);
@@ -155,8 +155,8 @@ function NrwEventDetail(props: Props) {
                 {resolveToString(
                     strings.nrwEventDetailTimestamps,
                     {
-                        created: formatDate(event.firstIssuedAt, detailDateFormat) ?? '',
-                        updated: formatDate(event.lastUpdatedAt, detailDateFormat) ?? '',
+                        created: formatNrwEventDate(event.firstIssuedAt),
+                        updated: formatNrwEventDate(event.lastUpdatedAt),
                     },
                 )}
             </div>
