@@ -17,28 +17,13 @@
         padding: var(--go-ui-spacing-md);
     }
 
-    .chip-row {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: var(--go-ui-spacing-3xs);
-    }
-
-    .chips button > * {
-        position: relative;
-        z-index: 1;
-    }
-
-    .toggle-button {
-        position: static;
-        line-height: 1;
-    }
-
-    /* make the card clickable */
-    &:not(.expanded) .toggle-button::after {
+    .open-button {
         position: absolute;
         inset: 0;
-        content: '';
+    }
+
+    .chips button {
+        position: relative;
     }
 
     .detail {

@@ -4,6 +4,8 @@ import {
     useContext,
     useMemo,
 } from 'react';
+import { faChevronLeft } from '@fortawesome/pro-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     Container,
     List,
@@ -51,13 +53,6 @@ function NrwEvents(props: Props) {
         [selectedEvent, events],
     );
 
-    const handleToggle = useCallback(
-        (eventId: NrwEvent['eventId']) => {
-            onEventSelect(eventId === selectedEvent?.eventId ? undefined : eventId);
-        },
-        [selectedEvent, onEventSelect],
-    );
-
     const handleShowAllEvents = useCallback(
         () => {
             onEventSelect(undefined);
@@ -70,21 +65,18 @@ function NrwEvents(props: Props) {
             event,
             expanded: event.eventId === selectedEvent?.eventId,
             hovered: event.eventId === hoveredEventId,
-            onToggle: handleToggle,
+            onSelect: onEventSelect,
             onHoverChange: onEventHoverChange,
         }),
-        [selectedEvent, hoveredEventId, handleToggle, onEventHoverChange],
+        [selectedEvent, hoveredEventId, onEventSelect, onEventHoverChange],
     );
 
-    const heading = (
-        <RawButton
-            className={styles.heading}
-            name={undefined}
-            onClick={handleShowAllEvents}
-            title={strings.nrwEventsShowAllEvents}
-        >
+    const headingContent = (
+        <>
             <span className={styles.headingLabel}>
-                {strings.nrwEventsHeading}
+                {isDefined(selectedEvent)
+                    ? strings.nrwEventsAllEvents
+                    : strings.nrwEventsHeading}
             </span>
             {isDefined(events) && (
                 <NumberOutput
@@ -92,7 +84,22 @@ function NrwEvents(props: Props) {
                     value={events.length}
                 />
             )}
+        </>
+    );
+
+    const heading = isDefined(selectedEvent) ? (
+        <RawButton
+            className={styles.heading}
+            name={undefined}
+            onClick={handleShowAllEvents}
+        >
+            <FontAwesomeIcon className={styles.backIcon} icon={faChevronLeft} />
+            {headingContent}
         </RawButton>
+    ) : (
+        <div className={styles.heading}>
+            {headingContent}
+        </div>
     );
 
     return (
