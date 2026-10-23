@@ -1,12 +1,10 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Heading } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
-import {
-    formatDate,
-    resolveToString,
-} from '@ifrc-go/ui/utils';
+import { resolveToString } from '@ifrc-go/ui/utils';
 import { _cs } from '@togglecorp/fujs';
 
+import { formatNrwEventDate } from '#utils/nrw/events';
 import hazardIcons from '#utils/nrw/hazardIcons';
 import {
     type NrwEvent,
@@ -15,8 +13,6 @@ import {
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
-
-const eventDateFormat = 'dd MMM yyyy';
 
 // Pick NrwEvent props used in the NrwEventName component
 export type NrwEventNameEvent = Pick<NrwEvent, 'eventLabel' | 'hazardType' | 'startAt'>;
@@ -41,7 +37,7 @@ function NrwEventName(props: Props) {
 
     const hazard = hazardLabels[event.hazardType];
     const { eventLabel: label } = event;
-    const date = formatDate(event.startAt, eventDateFormat) ?? '';
+    const date = formatNrwEventDate(event.startAt);
 
     if (stacked) {
         return (
