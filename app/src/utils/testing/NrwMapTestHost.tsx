@@ -3,7 +3,7 @@ import {
     useMemo,
 } from 'react';
 
-import NrwMapContext from '#components/domain/NrwMap/NrwMapContext';
+import NrwMapContext from '#components/domain/NrwMap/NrwMapMapbox/NrwMapContext';
 
 import { type FakeNrwMap } from './nrwAdminAreaTesting';
 

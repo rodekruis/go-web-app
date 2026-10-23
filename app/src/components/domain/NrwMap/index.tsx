@@ -21,13 +21,13 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
+import NrwEventMarker from './NrwMapMapbox/NrwEventMarker';
+import NrwLayer from './NrwMapMapbox/NrwLayer';
+import NrwMapContainer from './NrwMapMapbox/NrwMapContainer';
+import NrwMarker from './NrwMapMapbox/NrwMarker';
 import NrwAdminAreaBreadcrumbs from './NrwAdminAreaBreadcrumbs';
-import NrwEventMarker from './NrwEventMarker';
-import NrwLayer from './NrwLayer';
 import NrwLayerPanel from './NrwLayerPanel';
-import NrwMapContainer from './NrwMapContainer';
 import NrwMapLegend from './NrwMapLegend';
-import NrwMarker from './NrwMarker';
 
 const supportedLayers: NrwLayerName[] = Object.values(supportedLayerNames);
 
