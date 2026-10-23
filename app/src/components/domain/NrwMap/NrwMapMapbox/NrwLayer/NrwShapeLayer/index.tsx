@@ -16,13 +16,13 @@ import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import { type AdminAreaProperties } from '#views/CountryProfileNationalRiskWatch/types';
 import { getFeatureCollectionBounds } from '#views/CountryProfileNationalRiskWatch/utils';
 
-import NrwMapContext from '../../NrwMapContext';
-import NrwMarker from '../../NrwMarker';
-import { type NrwMarkerPlacement } from '../../NrwMarker/useNrwMapMarker';
 import {
     popupFlipRightThreshold,
     popupFlipTopThreshold,
-} from '../../popupFlipThresholds';
+} from '../../../popupFlipThresholds';
+import NrwMapContext from '../../NrwMapContext';
+import NrwMarker from '../../NrwMarker';
+import { type NrwMarkerPlacement } from '../../NrwMarker/useNrwMapMarker';
 import useNrwMapFitBounds from '../../useNrwMapFitBounds';
 import useNrwMapLayers from '../useNrwMapLayers';
 import getAdminAreaLayer from './getAdminAreaLayer';
