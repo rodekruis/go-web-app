@@ -135,7 +135,11 @@ function NrwEventDetail(props: Props) {
                 {event.forecastSources.length > 0 && (
                     <div className={styles.panel}>
                         <div className={styles.panelHeading}>
-                            <FontAwesomeIcon className={styles.icon} icon={faDatabase} />
+                            <FontAwesomeIcon
+                                className={styles.icon}
+                                icon={faDatabase}
+                                widthAuto
+                            />
                             {strings.nrwEventDetailDataSourcesHeading}
                         </div>
                         <div>
