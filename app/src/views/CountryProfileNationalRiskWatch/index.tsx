@@ -16,6 +16,7 @@ import NrwEvents from '#components/domain/NrwEvents';
 import NrwLegendBanner from '#components/domain/NrwLegendBanner';
 import NrwMap from '#components/domain/NrwMap';
 import NrwNavbar from '#components/domain/NrwNavbar';
+import NrwNoticeBanner from '#components/domain/NrwNoticeBanner';
 import NrwPdfExport from '#components/domain/NrwPdfExport';
 import Page from '#components/Page';
 import {
@@ -32,6 +33,7 @@ import useNrwEvents from './hooks/useNrwEvents';
 import useNrwLayers from './hooks/useNrwLayers';
 import useNrwMapView from './hooks/useNrwMapView';
 import useNrwSearchParams from './hooks/useNrwSearchParams';
+import useNrwSupportedCountries from './hooks/useNrwSupportedCountries';
 import NrwAdminAreasProvider from './NrwAdminAreasProvider';
 import { getEventCountries } from './utils';
 
@@ -48,6 +50,7 @@ export function Component() {
         latitudeFromUrlParams,
         longitudeFromUrlParams,
         urlCountries,
+        rawCountriesFromUrlParams,
         handleMapViewChange,
         selectedEventId,
         handleSelectedEventIdChange,
@@ -71,6 +74,16 @@ export function Component() {
 
     const eventCountries = getEventCountries(events ?? []);
     const countries = urlCountries?.length ? urlCountries : eventCountries;
+
+    const { supportedCountries } = useNrwSupportedCountries();
+
+    // Embedded mode guarantees a single supported country.
+    const hasUnsupportedCountries = nrwStandalone
+        && isDefined(supportedCountries)
+        && rawCountriesFromUrlParams.some(
+            // casting is necessary to use `includes`.
+            (code) => !supportedCountries.includes(code as typeof supportedCountries[number]),
+        );
 
     const mapCountries = isDefined(selectedEvent)
         ? undefined // NrwShapeLayer will handle the map zoom when an event is selected.
@@ -166,6 +179,12 @@ export function Component() {
                 {nrwStandalone ? (
                     <div className={styles.countryProfileNrwStandalone}>
                         <NrwNavbar actions={exportButton}>
+                            {hasUnsupportedCountries && (
+                                <NrwNoticeBanner
+                                    key={rawCountriesFromUrlParams.join(',')}
+                                    message={strings.nrwUnsupportedCountriesMessage}
+                                />
+                            )}
                             {eventNotFound && (
                                 <NrwEventNotFoundBanner key={selectedEventId} />
                             )}
