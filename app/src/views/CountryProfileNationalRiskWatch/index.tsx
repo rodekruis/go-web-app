@@ -60,8 +60,10 @@ export function Component() {
         handleUrlPlaceCodeChange,
     } = useNrwSearchParams();
 
+    const hasOnlyInvalidCountryCodes = rawCountriesFromUrlParams.length > 0
+        && !urlCountries?.length;
     const nrwEventsContext = useNrwEvents({
-        countries: urlCountries,
+        countries: hasOnlyInvalidCountryCodes ? undefined : urlCountries,
         selectedEventId,
         onSelectedEventIdChange: handleSelectedEventIdChange,
     });
