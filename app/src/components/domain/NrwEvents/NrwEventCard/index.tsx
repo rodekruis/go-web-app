@@ -1,8 +1,4 @@
-import {
-    faAnglesRight,
-    faXmark,
-} from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useId } from 'react';
 import { RawButton } from '@ifrc-go/ui';
 import { _cs } from '@togglecorp/fujs';
 
@@ -21,7 +17,7 @@ interface Props {
     event: NrwEvent;
     expanded: boolean;
     hovered: boolean;
-    onToggle: (eventId: NrwEvent['eventId']) => void;
+    onSelect: (eventId: NrwEvent['eventId']) => void;
     onHoverChange: (eventId: NrwEvent['eventId'] | undefined) => void;
 }
 
@@ -31,11 +27,12 @@ function NrwEventCard(props: Props) {
         event,
         expanded,
         hovered,
-        onToggle,
+        onSelect,
         onHoverChange,
     } = props;
 
     const { handleMouseEnter, handleMouseLeave } = useHoverChange(event.eventId, onHoverChange);
+    const headerId = useId();
 
     return (
         <div
@@ -49,18 +46,16 @@ function NrwEventCard(props: Props) {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            <div className={styles.header}>
-                <div className={styles.chipRow}>
-                    <NrwEventChips className={styles.chips} event={event} />
+            <div id={headerId} className={styles.header}>
+                {!expanded && (
                     <RawButton
-                        className={styles.toggleButton}
+                        className={styles.openButton}
                         name={event.eventId}
-                        onClick={onToggle}
-                        aria-expanded={expanded}
-                    >
-                        <FontAwesomeIcon icon={expanded ? faXmark : faAnglesRight} />
-                    </RawButton>
-                </div>
+                        onClick={onSelect}
+                        aria-labelledby={headerId}
+                    />
+                )}
+                <NrwEventChips className={styles.chips} event={event} />
                 <NrwEventName event={event} />
             </div>
             {expanded && (
