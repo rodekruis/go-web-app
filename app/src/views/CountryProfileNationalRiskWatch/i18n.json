@@ -1,6 +1,7 @@
 {
     "namespace": "countryProfileNationalRiskWatch",
     "strings": {
-        "nationalRiskWatchHeading": "National Risk Watch"
+        "nationalRiskWatchHeading": "National Risk Watch",
+        "nrwUnsupportedCountriesMessage": "One or more countries are not supported by NRW"
     }
 }

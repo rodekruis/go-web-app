@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import {
     useNavigate,
     useParams,
+    useSearchParams,
 } from 'react-router-dom';
 import { isDefined } from '@togglecorp/fujs';
 
@@ -89,6 +90,20 @@ function parseCountriesUrlParameter(value: UrlParameter) {
         .filter(isDefined);
 }
 
+// Raw country code tokens from the URL, normalized for comparison.
+// Includes codes that failed ISO_A3 validation, so callers can detect
+// unsupported values instead of silently dropping them.
+function parseRawCountriesUrlParameter(value: UrlParameter): string[] {
+    if (!value || value.trim() === '') {
+        return [];
+    }
+
+    return value
+        .split(',')
+        .map((token) => token.trim().toUpperCase())
+        .filter((token) => token !== '');
+}
+
 // Convert ISO_A3 country codes to a comma-separated string for the search params.
 // Returns undefined when there are no codes so that the search param is removed.
 function serializeCountriesUrlParameter(countryCodes: CountryCodeIso3[]) {
@@ -145,6 +160,8 @@ function useNrwSearchParams() {
         parseCountriesUrlParameter,
         serializeCountriesUrlParameter,
     );
+    const [searchParams] = useSearchParams();
+    const rawCountriesFromUrlParams = parseRawCountriesUrlParameter(searchParams.get('countries'));
     const [selectedEventId] = useUrlSearchState(
         'event',
         parseEventIdUrlParameter,
@@ -241,6 +258,7 @@ function useNrwSearchParams() {
         latitudeFromUrlParams,
         longitudeFromUrlParams,
         urlCountries,
+        rawCountriesFromUrlParams,
         handleMapViewChange,
         selectedEventId,
         handleSelectedEventIdChange,
