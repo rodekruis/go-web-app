@@ -129,7 +129,9 @@ export function Component() {
             urlPlaceCode={placeCodeFromUrlParams}
             onUrlPlaceCodeChange={handleUrlPlaceCodeChange}
         >
-            {!nrwStandalone && eventNotFound && <NrwEventNotFoundBanner />}
+            {!nrwStandalone && eventNotFound && (
+                <NrwEventNotFoundBanner key={selectedEventId} />
+            )}
             <div className={styles.mapAndLegend}>
                 <ListView
                     className={styles.mapGrid}
@@ -164,7 +166,9 @@ export function Component() {
                 {nrwStandalone ? (
                     <div className={styles.countryProfileNrwStandalone}>
                         <NrwNavbar actions={exportButton}>
-                            {eventNotFound && <NrwEventNotFoundBanner />}
+                            {eventNotFound && (
+                                <NrwEventNotFoundBanner key={selectedEventId} />
+                            )}
                         </NrwNavbar>
                         <Page
                             className={styles.page}
