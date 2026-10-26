@@ -1,3 +1,4 @@
+import { formatDate } from '@ifrc-go/ui/utils';
 import {
     isDefined,
     isNotDefined,
@@ -24,6 +25,13 @@ const forecastSourceOrder: NrwForecastSource['name'][] = [
     'glofasFloodHazardMaps',
     'worldpop',
 ];
+
+// Shared by the event name and the event detail so the dates of one event always match
+const eventDateFormat = 'dd MMM yyyy';
+
+export function formatNrwEventDate(value: string): string {
+    return formatDate(value, eventDateFormat) ?? '';
+}
 
 function getForecastSourceRank(forecastSource: NrwForecastSource): number {
     const rank = forecastSourceOrder.indexOf(forecastSource.name);
