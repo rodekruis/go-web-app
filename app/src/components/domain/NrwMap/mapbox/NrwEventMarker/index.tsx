@@ -14,12 +14,12 @@ import hazardIcons from '#utils/nrw/hazardIcons';
 import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import { type NrwEvent } from '#views/CountryProfileNationalRiskWatch/types';
 
-import NrwMapContext from '../NrwMapContext';
 import {
     popupFlipLeftThreshold,
     popupFlipRightThreshold,
     popupFlipTopThreshold,
-} from '../popupFlipThresholds';
+} from '../../popupFlipThresholds';
+import NrwMapContext from '../NrwMapContext';
 
 import styles from './styles.module.css';
 

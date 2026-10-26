@@ -14,7 +14,7 @@ import {
 } from '@ifrc-go/ui/utils';
 import { isNotDefined } from '@togglecorp/fujs';
 
-import { captureElementClone } from '#components/domain/NrwMap/captureNrwMapScreenCapture';
+import { captureElementClone } from '#components/domain/NrwMap/mapbox/captureNrwMapScreenCapture';
 import useAlert from '#hooks/useAlert';
 import NrwEventsContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwEventsContext';
 import NrwScreenCaptureContext from '#views/CountryProfileNationalRiskWatch/contexts/NrwScreenCaptureContext';
