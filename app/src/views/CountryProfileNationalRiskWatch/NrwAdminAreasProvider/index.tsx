@@ -27,7 +27,12 @@ import {
     type PlaceCode,
     type PlaceCodeChangeHandler,
 } from '../types';
-import { parseCountryCode } from '../utils';
+import {
+    type AdminAreasSelection,
+    getAdminAreasOfSelectionsQuery,
+    parseCountryCode,
+    placeCodeLevelKeys,
+} from '../utils';
 import NrwAdminAreasContext, { type NrwAdminAreasContextProps } from './NrwAdminAreasContext';
 
 interface AdminAreasRequest {
@@ -112,6 +117,44 @@ function getAdminAreasRequest(
         request: { adminLevel, parentPlaceCode: undefined, placeCodes: [placeCode] },
         lookup: true,
     };
+}
+
+// The exposed admin areas on each level of the drill path, under the parent on the path.
+function getUnselectedAdminAreasSelections(
+    event: NrwEvent | undefined,
+    path: AdminAreaProperties[],
+): AdminAreasSelection[] {
+    if (isNotDefined(event)) {
+        return [];
+    }
+
+    return path.map(({ adminLevel }, index) => ({
+        adminLevel,
+        parentPlaceCode: path[index - 1]?.placeCode,
+        placeCodes: getNrwExposedPlaceCodes(event, adminLevel),
+    }));
+}
+
+// The admin areas beside the drill path. The response can be for an earlier path,
+// so only the admin areas under the current path are kept.
+function getUnselectedAdminAreas(
+    adminAreas: NrwAdminAreaFeatureCollection | undefined,
+    path: AdminAreaProperties[],
+    initialAdminLevel: AdminLevel,
+): NrwAdminAreaFeatureCollection | undefined {
+    const features = (adminAreas?.features ?? []).filter(({ properties }) => {
+        const pathIndex = properties.adminLevel - initialAdminLevel;
+        const pathAdminArea = path[pathIndex];
+        const parentAdminArea = path[pathIndex - 1];
+        const parentPlaceCodeKey = placeCodeLevelKeys[properties.adminLevel - 1];
+
+        return isDefined(pathAdminArea)
+            && properties.placeCode !== pathAdminArea.placeCode
+            && (isNotDefined(parentAdminArea) || (isDefined(parentPlaceCodeKey)
+                && properties[parentPlaceCodeKey] === parentAdminArea.placeCode));
+    });
+
+    return features.length > 0 ? { type: 'FeatureCollection', features } : undefined;
 }
 
 function NrwAdminAreasProvider(props: {
@@ -221,6 +264,27 @@ function NrwAdminAreasProvider(props: {
         },
     });
 
+    const shownPath = drill.shown.path;
+    const unselectedAdminAreasSelections = getUnselectedAdminAreasSelections(event, shownPath);
+    const { response: unselectedAdminAreasResponse } = useNrwRequest({
+        url: '/admin-areas',
+        apiType: 'nrw',
+        skip: countryCodeIso3 === null || unselectedAdminAreasSelections.length === 0,
+        query: getAdminAreasOfSelectionsQuery(
+            countryCodeIso3 === null ? [] : [countryCodeIso3],
+            unselectedAdminAreasSelections,
+        ),
+        preserveResponse: true,
+    });
+    const unselectedAdminAreas = useMemo(
+        () => getUnselectedAdminAreas(
+            unselectedAdminAreasResponse,
+            shownPath,
+            initialAdminLevel,
+        ),
+        [unselectedAdminAreasResponse, shownPath, initialAdminLevel],
+    );
+
     const [hoveredPlaceCode, setHoveredPlaceCode] = useState<PlaceCode>();
 
     const shownAdminAreas = drill.shown.adminAreas;
@@ -255,6 +319,7 @@ function NrwAdminAreasProvider(props: {
                 adminLevel,
                 adminLevelLabels,
                 adminAreas: shown.adminAreas,
+                unselectedAdminAreas,
                 exposedPopulationScale,
                 pending,
                 drillPath: isDefined(selectedAdminArea)
@@ -282,6 +347,7 @@ function NrwAdminAreasProvider(props: {
         [
             event,
             drill,
+            unselectedAdminAreas,
             exposedPopulationScale,
             selectedAdminArea,
             shownPlaceCode,

@@ -60,6 +60,25 @@ export const mapOutlineColor = '#323232';
 export const mapOutlineOpacity = 0.2;
 export const mapOutlineWidth = 0.8;
 
+export interface MapFlatStyle {
+    fillColor: string;
+    fillOpacity: number;
+    fillHoverOpacity: number;
+    outlineColor: string;
+    outlineOpacity: number;
+    outlineWidth: number;
+}
+
+// Grey 40 with the map shadow outline.
+export const mapUnselectedStyle: MapFlatStyle = {
+    fillColor: '#c6c6c6',
+    fillOpacity: 0.5,
+    fillHoverOpacity: 0.8,
+    outlineColor: mapOutlineColor,
+    outlineOpacity: mapOutlineOpacity,
+    outlineWidth: 2,
+};
+
 // Ramp step indices used for fewer distinct values than steps, lightest to darkest.
 const rampStepIndicesByValueCount: Record<number, readonly number[]> = {
     1: [2],

@@ -13,6 +13,7 @@ import {
 } from './types';
 import {
     getAdminAreaAnchor,
+    getAdminAreasOfSelectionsQuery,
     getAdminAreasQuery,
     getEventCountries,
     maxQueryableAdminLevel,
@@ -107,6 +108,20 @@ describe('getAdminAreasQuery', () => {
     test('simplifies admin level 0 only', () => {
         expect(getAdminAreasQuery(countries, 0 as AdminLevel).transform).toBe('simplify,0.05');
         expect(getAdminAreasQuery(countries, 1 as AdminLevel).transform).toBeUndefined();
+    });
+});
+
+describe('getAdminAreasOfSelectionsQuery', () => {
+    test('fetches the admin areas of any of the selections, in the countries', () => {
+        const query = getAdminAreasOfSelectionsQuery(['SSD' as CountryCodeIso3], [
+            { adminLevel: 1 as AdminLevel, placeCodes: ['SS03', 'SS04'] as PlaceCode[] },
+            { adminLevel: 2 as AdminLevel, parentPlaceCode: 'SS03' as PlaceCode },
+        ]);
+
+        expect(query.filter).toBe(
+            "(countryCodeIso3='SSD') AND ((adminLevel=1 AND placeCode IN ('SS03','SS04'))"
+            + " OR (adminLevel=2 AND placeCodeLevel1='SS03'))",
+        );
     });
 });
 
