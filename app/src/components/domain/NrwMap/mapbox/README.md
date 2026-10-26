@@ -1,4 +1,4 @@
-# NrwMapMapbox
+# mapbox
 
 Boundary between NRW map code that knows about Mapbox and code that does not.
 

@@ -21,10 +21,10 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseCountryCode } from '#views/CountryProfileNationalRiskWatch/utils';
 
-import NrwEventMarker from './NrwMapMapbox/NrwEventMarker';
-import NrwLayer from './NrwMapMapbox/NrwLayer';
-import NrwMapContainer from './NrwMapMapbox/NrwMapContainer';
-import NrwMarker from './NrwMapMapbox/NrwMarker';
+import NrwEventMarker from './mapbox/NrwEventMarker';
+import NrwLayer from './mapbox/NrwLayer';
+import NrwMapContainer from './mapbox/NrwMapContainer';
+import NrwMarker from './mapbox/NrwMarker';
 import NrwAdminAreaBreadcrumbs from './NrwAdminAreaBreadcrumbs';
 import NrwLayerPanel from './NrwLayerPanel';
 import NrwMapLegend from './NrwMapLegend';
