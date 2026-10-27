@@ -80,6 +80,7 @@ export function Component() {
 
     const { supportedCountries, pending: supportedCountriesPending } = useNrwSupportedCountries();
 
+    // invalid: not a valid ISO3 code OR not supported by NRW.
     let numberOfInvalidCountries = 0;
 
     // In embedded mode we assume a single valid country.
@@ -92,7 +93,6 @@ export function Component() {
         }
     }
 
-    // invalid: not a valid ISO3 code OR not supported by NRW.
     const singleInvalidCountry = rawCountriesFromUrlParams.length === 1
         && numberOfInvalidCountries === 1;
     const multipleCountriesWithAnInvalidOne = rawCountriesFromUrlParams.length > 1
