@@ -13,6 +13,7 @@ import { isDefined } from '@togglecorp/fujs';
 
 import NrwEventNotFoundBanner from '#components/domain/NrwEventNotFoundBanner';
 import NrwEvents from '#components/domain/NrwEvents';
+import NrwInvalidCountryError from '#components/domain/NrwInvalidCountryError';
 import NrwLegendBanner from '#components/domain/NrwLegendBanner';
 import NrwMap from '#components/domain/NrwMap';
 import NrwNavbar from '#components/domain/NrwNavbar';
@@ -75,15 +76,25 @@ export function Component() {
     const eventCountries = getEventCountries(events ?? []);
     const countries = urlCountries?.length ? urlCountries : eventCountries;
 
-    const { supportedCountries } = useNrwSupportedCountries();
+    const { supportedCountries, pending: supportedCountriesPending } = useNrwSupportedCountries();
 
-    // Embedded mode guarantees a single supported country.
-    const hasUnsupportedCountries = nrwStandalone
-        && isDefined(supportedCountries)
-        && rawCountriesFromUrlParams.some(
-            // casting is necessary to use `includes`.
-            (code) => !supportedCountries.includes(code as typeof supportedCountries[number]),
-        );
+    let numberOfInvalidCountries = 0;
+
+    // In embedded mode we assume a single valid country.
+    if (nrwStandalone) {
+        if (!supportedCountriesPending && isDefined(supportedCountries)) {
+            numberOfInvalidCountries = rawCountriesFromUrlParams.filter(
+                // casting is necessary to use `includes`.
+                (code) => !supportedCountries.includes(code as typeof supportedCountries[number]),
+            ).length;
+        }
+    }
+
+    // invalid: not a valid ISO3 code OR not supported by NRW.
+    const singleInvalidCountry = rawCountriesFromUrlParams.length === 1
+        && numberOfInvalidCountries === 1;
+    const multipleCountriesWithAnInvalidOne = rawCountriesFromUrlParams.length > 1
+        && numberOfInvalidCountries >= 1;
 
     const mapCountries = isDefined(selectedEvent)
         ? undefined // NrwShapeLayer will handle the map zoom when an event is selected.
@@ -136,7 +147,9 @@ export function Component() {
         )
         : undefined;
 
-    const content = (
+    const content = singleInvalidCountry ? (
+        <NrwInvalidCountryError />
+    ) : (
         <NrwAdminAreasProvider
             event={selectedEvent}
             urlPlaceCode={placeCodeFromUrlParams}
@@ -179,7 +192,7 @@ export function Component() {
                 {nrwStandalone ? (
                     <div className={styles.countryProfileNrwStandalone}>
                         <NrwNavbar actions={exportButton}>
-                            {hasUnsupportedCountries && (
+                            {multipleCountriesWithAnInvalidOne && (
                                 <NrwNoticeBanner
                                     key={rawCountriesFromUrlParams.join(',')}
                                     message={strings.nrwUnsupportedCountriesMessage}
