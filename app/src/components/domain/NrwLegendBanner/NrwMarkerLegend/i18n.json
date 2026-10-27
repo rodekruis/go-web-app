@@ -2,12 +2,10 @@
     "namespace": "nrwLegendBanner",
     "strings": {
         "nrwMarkerLegendAlertLevelLabel": "Alert level:",
-        "nrwMarkerLegendAlertLow": "Low Warning",
-        "nrwMarkerLegendAlertMedium": "Medium Warning",
-        "nrwMarkerLegendAlertHigh": "High Warning",
+        "nrwMarkerLegendAlertLow": "Low",
+        "nrwMarkerLegendAlertMedium": "Medium",
+        "nrwMarkerLegendAlertHigh": "High",
         "nrwMarkerLegendEventTypeLabel": "Event type:",
-        "nrwMarkerLegendHazardFloods": "Floods",
-        "nrwMarkerLegendHazardDrought": "Drought",
-        "nrwMarkerLegendHazardCyclone": "Cyclone"
+        "nrwMarkerLegendHazardFloods": "Floods"
     }
 }
