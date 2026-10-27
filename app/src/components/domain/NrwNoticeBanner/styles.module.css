@@ -24,7 +24,7 @@
         gap: var(--go-ui-spacing-sm);
     }
 
-    .info-icon {
+    .warning-icon {
         inline-size: 1em;
         block-size: 1em;
         flex-shrink: 0;
