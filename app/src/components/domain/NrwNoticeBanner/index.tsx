@@ -30,7 +30,7 @@ function NrwNoticeBanner(props: Props) {
         >
             <div className={styles.content}>
                 <span className={styles.message}>
-                    <ErrorWarningLineIcon className={styles.infoIcon} />
+                    <ErrorWarningLineIcon className={styles.warningIcon} />
                     {message}
                 </span>
                 <Button

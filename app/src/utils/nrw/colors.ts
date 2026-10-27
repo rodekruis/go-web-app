@@ -53,12 +53,45 @@ export const alertClassMapRamps: Record<NrwEvent['alertClass'], MapRamp> = {
     ],
 };
 
+// These colours and labels mirror the backend's FLOOD_DEPTH_CONFIG palette and outer thresholds.
 export const floodDepthMapRamp: MapColorRamp = ['#cbddf2', '#9ebadc', '#6e96c5', '#467abc', '#3163a0'];
+export const floodDepthMapLabels = {
+    low: '<0.25 m',
+    high: '>2.5 m',
+} as const;
 
 // Mapbox paint needs literal values, so these mirror --nrw-color-map-shadow-outline in nrw.css.
 export const mapOutlineColor = '#323232';
 export const mapOutlineOpacity = 0.2;
 export const mapOutlineWidth = 0.8;
+
+export interface MapFlatStyle {
+    fillColor: string;
+    fillOpacity: number;
+    fillHoverOpacity: number;
+    outlineColor: string;
+    outlineOpacity: number;
+    outlineWidth: number;
+}
+
+// Grey 40 with the map shadow outline.
+export const mapUnselectedStyle: MapFlatStyle = {
+    fillColor: '#c6c6c6',
+    fillOpacity: 0.5,
+    fillHoverOpacity: 0.8,
+    outlineColor: mapOutlineColor,
+    outlineOpacity: mapOutlineOpacity,
+    outlineWidth: 2,
+};
+
+export const mapUnexposedStyle: MapFlatStyle = {
+    fillColor: '#ffffff',
+    fillOpacity: 0.4,
+    fillHoverOpacity: 0.6,
+    outlineColor: '#4d4d4d',
+    outlineOpacity: 0.25,
+    outlineWidth: 0.8,
+};
 
 // Ramp step indices used for fewer distinct values than steps, lightest to darkest.
 const rampStepIndicesByValueCount: Record<number, readonly number[]> = {

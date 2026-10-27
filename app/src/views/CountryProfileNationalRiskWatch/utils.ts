@@ -12,6 +12,7 @@ import {
 import NrwLngLat from './NrwLngLat';
 import {
     type AdminAreaProperties,
+    type AdminAreasRequest,
     type AdminLevel,
     type CountryCodeIso3,
     type Latitude,
@@ -72,19 +73,20 @@ export const placeCodeLevelKeys = [
 // as the parent must have a place code property.
 export const maxQueryableAdminLevel = placeCodeLevelKeys.length as AdminLevel;
 
-// Build the pg_featureserv-style filter for the given admin level
-// of the given countries. Country codes and place codes are already
-// validated, so it's safe to interpolate them into the filter string.
-function getCountryAdminLevelFilter(
-    countryCodes: CountryCodeIso3[],
-    adminLevel: AdminLevel,
-    parentPlaceCode: PlaceCode | undefined,
-    placeCodes: PlaceCode[] | undefined,
-) {
-    const countryFilter = countryCodes
+// Build the pg_featureserv-style filters for the given countries and admin levels.
+// Country codes and place codes are already validated, so it's safe to interpolate
+// them into the filter string.
+function getCountryFilter(countryCodes: CountryCodeIso3[]) {
+    return countryCodes
         .map((countryCode) => `countryCodeIso3='${countryCode}'`)
         .join(' OR ');
+}
 
+function getAdminLevelFilter(
+    adminLevel: AdminLevel,
+    parentPlaceCode?: PlaceCode,
+    placeCodes?: PlaceCode[],
+) {
     const parentPlaceCodeKey = placeCodeLevelKeys[adminLevel - 1];
     const parentFilter = isDefined(parentPlaceCode) && isDefined(parentPlaceCodeKey)
         ? ` AND ${parentPlaceCodeKey}='${parentPlaceCode}'`
@@ -94,7 +96,7 @@ function getCountryAdminLevelFilter(
         ? ` AND placeCode IN (${placeCodes.map((placeCode) => `'${placeCode}'`).join(',')})`
         : '';
 
-    return `(${countryFilter}) AND adminLevel=${adminLevel}${parentFilter}${placeCodesFilter}`;
+    return `adminLevel=${adminLevel}${parentFilter}${placeCodesFilter}`;
 }
 
 // Build the query to fetch country admin areas.
@@ -104,10 +106,30 @@ export function getAdminAreasQuery(
     parentPlaceCode?: PlaceCode,
     placeCodes?: PlaceCode[],
 ) {
+    const countryFilter = getCountryFilter(countryCodes);
+    const adminLevelFilter = getAdminLevelFilter(adminLevel, parentPlaceCode, placeCodes);
+
     return {
-        filter: getCountryAdminLevelFilter(countryCodes, adminLevel, parentPlaceCode, placeCodes),
+        filter: `(${countryFilter}) AND ${adminLevelFilter}`,
         limit: 10000,
         transform: adminLevel === 0 ? 'simplify,0.05' : undefined,
+    };
+}
+
+// Build the query to fetch the admin areas of several requests at once.
+export function getAdminAreasOfRequestsQuery(
+    countryCodes: CountryCodeIso3[],
+    requests: AdminAreasRequest[],
+) {
+    const requestsFilter = requests
+        .map(({ adminLevel, parentPlaceCode, placeCodes }) => (
+            `(${getAdminLevelFilter(adminLevel, parentPlaceCode, placeCodes)})`
+        ))
+        .join(' OR ');
+
+    return {
+        filter: `(${getCountryFilter(countryCodes)}) AND (${requestsFilter})`,
+        limit: 10000,
     };
 }
 

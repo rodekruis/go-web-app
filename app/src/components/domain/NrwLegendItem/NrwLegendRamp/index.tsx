@@ -21,7 +21,9 @@ function NrwLegendRamp(props: {
                 {`${item.label}:`}
             </div>
             <div className={styles.ramp}>
-                <span className={styles.rampLabel}>{strings.nrwLegendRampLow}</span>
+                <span className={styles.rampLabel}>
+                    {item.lowLabel ?? strings.nrwLegendRampLow}
+                </span>
                 <div className={styles.rampSwatches}>
                     {item.colors.map((color) => (
                         <div
@@ -31,7 +33,9 @@ function NrwLegendRamp(props: {
                         />
                     ))}
                 </div>
-                <span className={styles.rampLabel}>{strings.nrwLegendRampHigh}</span>
+                <span className={styles.rampLabel}>
+                    {item.highLabel ?? strings.nrwLegendRampHigh}
+                </span>
             </div>
         </div>
     );
