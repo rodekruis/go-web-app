@@ -37,6 +37,10 @@ The broad steps are:
 
 The CI workflow needs the environment variable `FONTAWESOME_API_KEY`.
 
+## Flood depth legend
+
+The flood depth legend colours and endpoint labels are defined in `app/src/utils/nrw/colors.ts`. They duplicate the backend's `FLOOD_DEPTH_CONFIG` in `services/api-service/src/utils/raster-colorization.helper.ts` in the IBF repo. Keep them aligned when changing raster styling; the legend currently shows `<0.25 m` and `>2.5 m`. The API does not provide these values.
+
 ## Updating NRW API types
 
 Do this when the NRW backend API changes.

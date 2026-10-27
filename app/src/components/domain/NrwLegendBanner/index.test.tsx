@@ -12,7 +12,6 @@ import {
     test,
 } from 'vitest';
 
-import rampI18n from '#components/domain/NrwLegendItem/NrwLegendRamp/i18n.json';
 import {
     alertClassMapRamps,
     createRampStepGetter,
@@ -110,7 +109,8 @@ describe('NrwLegendBanner', () => {
 
         // Assert
         screen.getByText('Flood depth:');
-        screen.getByText(rampI18n.strings.nrwLegendRampLow);
+        screen.getByText('<0.25 m');
+        screen.getByText('>2.5 m');
     });
 
     test('shows the visible exposed population layer of the event as categories', () => {
@@ -157,7 +157,7 @@ describe('NrwLegendBanner', () => {
         // Assert
         const { strings } = markerI18n;
         screen.getByText(strings.nrwMarkerLegendEventTypeLabel);
-        screen.getByText(strings.nrwMarkerLegendHazardCyclone);
+        screen.getByText(strings.nrwMarkerLegendHazardFloods);
     });
 
     test('asks to turn on layers', () => {

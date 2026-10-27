@@ -55,6 +55,14 @@ export interface AdminAreaProperties {
     name: NrwAdminAreaProperties['nameEn'];
 }
 
+// The admin areas to fetch: on an admin level, optionally under one parent, and limited to
+// the given place codes, if any.
+export interface AdminAreasRequest {
+    adminLevel: AdminLevel;
+    parentPlaceCode: PlaceCode | undefined;
+    placeCodes: PlaceCode[] | undefined;
+}
+
 // eslint-disable-next-line max-len
 export type MapViewChangeHandler = (newZoom: Zoom, newLatitude: Latitude, newLongitude: Longitude) => void;
 
@@ -115,6 +123,8 @@ interface NrwLegendItemBase {
 export type NrwLegendItem = NrwLegendItemBase & ({
     type: NrwLegendType.Gradient;
     colors: readonly string[];
+    lowLabel?: string;
+    highLabel?: string;
 } | {
     type: NrwLegendType.Categories;
     categories: NrwLegendCategory[];

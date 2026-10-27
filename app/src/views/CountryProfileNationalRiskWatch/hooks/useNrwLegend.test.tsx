@@ -185,6 +185,8 @@ describe('useNrwLegend', () => {
                         type: NrwLegendType.Gradient,
                         label: 'Flood depth',
                         colors: floodDepthMapRamp,
+                        lowLabel: '<0.25 m',
+                        highLabel: '>2.5 m',
                     },
                     {},
                 ],

@@ -24,8 +24,6 @@ function NrwMarkerLegend() {
     };
     const hazardTypeLabels: Partial<Record<NrwEventHazardType, string>> = {
         floods: strings.nrwMarkerLegendHazardFloods,
-        drought: strings.nrwMarkerLegendHazardDrought,
-        tropicalCyclone: strings.nrwMarkerLegendHazardCyclone,
     };
     const supportedHazardTypes = Object.keys(hazardTypeLabels) as NrwEventHazardType[];
 

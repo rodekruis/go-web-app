@@ -14,8 +14,19 @@
     /* Let the pointer keep hovering the admin area under the tooltip. */
     pointer-events: none;
 
+    .heading {
+        display: flex;
+        gap: var(--go-ui-spacing-2xs);
+        align-items: baseline;
+    }
+
     .name {
         font-weight: var(--go-ui-font-weight-semibold);
+    }
+
+    .admin-level {
+        color: var(--go-ui-color-text-light);
+        font-size: var(--go-ui-font-size-sm);
     }
 
     /* NumberOutput renders a block, so lay the label and value out in a row. */
