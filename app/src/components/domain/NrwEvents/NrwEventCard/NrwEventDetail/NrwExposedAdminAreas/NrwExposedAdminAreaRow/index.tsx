@@ -26,7 +26,6 @@ interface Props {
     rampStep: MapRampStep;
     hovered: boolean;
     selected: boolean;
-    drillable: boolean;
     disabled: boolean;
     onHoverChange: PlaceCodeChangeHandler;
     onDrillDown: AdminAreaDrillDownHandler;
@@ -39,7 +38,6 @@ function NrwExposedAdminAreaRow(props: Props) {
         rampStep,
         hovered,
         selected,
-        drillable,
         disabled,
         onHoverChange,
         onDrillDown,
@@ -91,7 +89,7 @@ function NrwExposedAdminAreaRow(props: Props) {
                     />
                     <FontAwesomeIcon
                         className={styles.hoverIcon}
-                        icon={drillable ? faChevronRight : faLocationCrosshairs}
+                        icon={selected ? faLocationCrosshairs : faChevronRight}
                     />
                 </span>
             </td>

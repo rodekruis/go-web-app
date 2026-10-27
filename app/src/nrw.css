@@ -10,6 +10,9 @@
 
     --nrw-color-alert-trigger: #c01825;
 
+    --nrw-color-forecast-median: #3163a0;
+    --nrw-color-forecast-range: #cbddf2;
+
     --nrw-color-map-shadow-outline: color-mix(in srgb, var(--go-ui-color-gray-90) 20%, transparent);
 
     --nrw-height-map: var(--go-ui-height-map-md);

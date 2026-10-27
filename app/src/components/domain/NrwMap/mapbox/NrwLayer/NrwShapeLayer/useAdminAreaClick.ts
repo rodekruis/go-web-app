@@ -3,25 +3,28 @@ import {
     useEffect,
     useRef,
 } from 'react';
-import { isNotDefined } from '@togglecorp/fujs';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 import { type MapMouseEvent } from 'mapbox-gl-v3';
 
 import {
-    type AdminAreaProperties,
+    type AdminAreaDrillDownHandler,
     type PlaceCode,
 } from '#views/CountryProfileNationalRiskWatch/types';
 import { parseAdminAreaProperties } from '#views/CountryProfileNationalRiskWatch/utils';
 
 import NrwMapContext from '../../NrwMapContext';
 
-// Report the admin area clicked in the layer, or null for a click beside them.
-// Clicks on admin areas that cannot be drilled into are not reported, so the
-// map behaves as if there is no click handler there.
+// Report the topmost admin area clicked in the layers. Clicks beside the admin areas and on
+// admin areas that cannot be drilled into are not reported, so the map behaves as
+// if there is no click handler there.
 function useAdminAreaClick(
-    layerId: string,
+    layerIds: string[],
     isEnabled: boolean,
     canDrillDown: (placeCode: PlaceCode) => boolean,
-    onClick: (adminArea: AdminAreaProperties | null) => void,
+    onClick: AdminAreaDrillDownHandler,
 ) {
     const { map } = useContext(NrwMapContext);
 
@@ -42,14 +45,17 @@ function useAdminAreaClick(
             }
 
             const handleClick = (event: MapMouseEvent) => {
-                if (isNotDefined(map.getLayer(layerId))) {
+                const shownLayerIds = layerIds.filter(
+                    (layerId) => isDefined(map.getLayer(layerId)),
+                );
+                if (shownLayerIds.length === 0) {
                     return;
                 }
 
-                const [feature] = map.queryRenderedFeatures(event.point, { layers: [layerId] });
+                const [feature] = map.queryRenderedFeatures(event.point, { layers: shownLayerIds });
                 const adminArea = parseAdminAreaProperties(feature?.properties);
 
-                if (adminArea !== null && !canDrillDownRef.current(adminArea.placeCode)) {
+                if (adminArea === null || !canDrillDownRef.current(adminArea.placeCode)) {
                     // A click that cannot drill down, e.g. on the selected area, does nothing.
                     return;
                 }
@@ -63,7 +69,7 @@ function useAdminAreaClick(
                 map.off('click', handleClick);
             };
         },
-        [map, layerId, isEnabled, onClick],
+        [map, layerIds, isEnabled, onClick],
     );
 }
 

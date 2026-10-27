@@ -67,7 +67,6 @@ function NrwExposedAdminAreas(props: Props) {
         selectedAdminArea,
         hoveredPlaceCode,
         onAdminAreaHoverChange,
-        hasChildren,
         drillDown,
     } = useContext(NrwAdminAreasContext);
 
@@ -173,7 +172,6 @@ function NrwExposedAdminAreas(props: Props) {
                             rampStep={rampStep}
                             hovered={hoveredPlaceCode === adminArea.placeCode}
                             selected={selectedAdminArea?.placeCode === adminArea.placeCode}
-                            drillable={hasChildren(adminArea.placeCode)}
                             disabled={pending}
                             onHoverChange={onAdminAreaHoverChange}
                             onDrillDown={drillDown}

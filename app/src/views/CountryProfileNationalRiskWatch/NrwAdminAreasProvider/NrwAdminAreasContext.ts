@@ -12,12 +12,16 @@ import {
     type PlaceCode,
     type PlaceCodeChangeHandler,
 } from '../types';
+import { minAdminLevel } from '../utils';
 
 export interface NrwAdminAreasContextProps {
     initialAdminLevel: AdminLevel;
     adminLevel: AdminLevel;
     adminLevelLabels: NrwAdminLevelLabels | undefined;
     adminAreas: NrwAdminAreaFeatureCollection | undefined;
+    selectedAdminAreas: NrwAdminAreaFeatureCollection | undefined;
+    unselectedAdminAreas: NrwAdminAreaFeatureCollection | undefined;
+    unexposedAdminAreas: NrwAdminAreaFeatureCollection | undefined;
     exposedPopulationScale: NrwExposedPopulationScale | undefined;
     pending: boolean;
     drillPath: AdminAreaProperties[];
@@ -25,18 +29,21 @@ export interface NrwAdminAreasContextProps {
     selectedAdminArea: AdminAreaProperties | undefined;
     hoveredPlaceCode: PlaceCode | undefined;
     onAdminAreaHoverChange: PlaceCodeChangeHandler;
+    isExposed: (placeCode: PlaceCode) => boolean;
     canDrillDown: (placeCode: PlaceCode) => boolean;
-    hasChildren: (placeCode: PlaceCode) => boolean;
     drillDown: AdminAreaDrillDownHandler;
     drillUp: () => void;
     drillUpTo: AdminLevelDrillHandler;
 }
 
 const NrwAdminAreasContext = createContext<NrwAdminAreasContextProps>({
-    initialAdminLevel: 1 as AdminLevel,
-    adminLevel: 1 as AdminLevel,
+    initialAdminLevel: minAdminLevel,
+    adminLevel: minAdminLevel,
     adminLevelLabels: undefined,
     adminAreas: undefined,
+    selectedAdminAreas: undefined,
+    unselectedAdminAreas: undefined,
+    unexposedAdminAreas: undefined,
     exposedPopulationScale: undefined,
     pending: false,
     drillPath: [],
@@ -47,8 +54,8 @@ const NrwAdminAreasContext = createContext<NrwAdminAreasContextProps>({
         // eslint-disable-next-line no-console
         console.warn('NrwAdminAreasContext::onAdminAreaHoverChange called before it was initialized');
     },
+    isExposed: () => false,
     canDrillDown: () => false,
-    hasChildren: () => false,
     drillDown: () => {
         // eslint-disable-next-line no-console
         console.warn('NrwAdminAreasContext::drillDown called before it was initialized');

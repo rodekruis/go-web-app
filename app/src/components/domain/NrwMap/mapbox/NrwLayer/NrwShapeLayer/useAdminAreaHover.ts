@@ -38,7 +38,7 @@ interface HoveredAdminArea extends AdminAreaProperties {
 }
 
 function useAdminAreaHover(
-    layerId: string,
+    layerIds: string[],
     isEnabled: boolean,
     adminAreas: NrwAdminAreaFeatureCollection | undefined,
     hoveredPlaceCode: PlaceCode | undefined,
@@ -96,36 +96,48 @@ function useAdminAreaHover(
                 onHoverChange(properties.placeCode);
             };
 
-            map.on('mousemove', layerId, handleMouseMove);
-            map.on('mouseleave', layerId, clearHover);
+            map.on('mousemove', layerIds, handleMouseMove);
+            map.on('mouseleave', layerIds, clearHover);
 
             return () => {
-                map.off('mousemove', layerId, handleMouseMove);
-                map.off('mouseleave', layerId, clearHover);
+                map.off('mousemove', layerIds, handleMouseMove);
+                map.off('mouseleave', layerIds, clearHover);
                 clearHover();
             };
         },
-        [map, layerId, isEnabled, clearHover, onHoverChange],
+        [map, layerIds, isEnabled, clearHover, onHoverChange],
     );
 
     // Features are keyed by place code.
     useEffect(
         () => {
-            if (isNotDefined(map) || !isEnabled || isNotDefined(map.getSource(layerId))) {
+            if (isNotDefined(map) || !isEnabled) {
                 return undefined;
             }
 
+            const sourceIds = layerIds.filter((layerId) => isDefined(map.getSource(layerId)));
+
             if (isDefined(hoveredPlaceCode)) {
-                map.setFeatureState({ source: layerId, id: hoveredPlaceCode }, { hover: true });
+                sourceIds.forEach((sourceId) => {
+                    map.setFeatureState(
+                        { source: sourceId, id: hoveredPlaceCode },
+                        { hover: true },
+                    );
+                });
             }
 
             return () => {
-                if (isDefined(map.style) && isDefined(map.getSource(layerId))) {
-                    map.removeFeatureState({ source: layerId });
+                if (isNotDefined(map.style)) {
+                    return;
                 }
+                sourceIds.forEach((sourceId) => {
+                    if (isDefined(map.getSource(sourceId))) {
+                        map.removeFeatureState({ source: sourceId });
+                    }
+                });
             };
         },
-        [map, layerId, isEnabled, hoveredPlaceCode],
+        [map, layerIds, isEnabled, hoveredPlaceCode],
     );
 
     const anchoredAdminArea = useMemo<HoveredAdminArea | undefined>(

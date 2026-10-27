@@ -44,13 +44,14 @@
 
     &:hover,
     &.hovered {
-        background-color: var(--go-ui-color-gray-20);
         font-weight: var(--go-ui-font-weight-semibold);
     }
 
     &:hover,
     &.hovered,
     &.selected {
+        background-color: var(--go-ui-color-gray-20);
+
         .hover-icon {
             visibility: visible;
         }

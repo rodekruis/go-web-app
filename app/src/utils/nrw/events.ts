@@ -16,6 +16,7 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 import {
     maxQueryableAdminLevel,
+    minAdminLevel,
     parsePlaceCode,
     placeCodeLevelKeys,
 } from '#views/CountryProfileNationalRiskWatch/utils';
@@ -66,12 +67,19 @@ function getExposedAdminAreas(event: NrwEvent, adminLevel: number): NrwExposedAd
     return event.exposedAdminAreas[String(adminLevel)] ?? [];
 }
 
-// The sub-national admin levels that have exposed admin areas, least granular first.
+// The place codes of every exposed admin area of the event, at all admin levels.
+export function getNrwAllExposedPlaceCodes(event: NrwEvent): Set<NrwExposedAdminArea['placeCode']> {
+    return new Set(
+        Object.values(event.exposedAdminAreas).flat().map(({ placeCode }) => placeCode),
+    );
+}
+
+// The admin levels that can be shown and have exposed admin areas, least granular first.
 export function getNrwExposedAdminLevels(event: NrwEvent): AdminLevel[] {
     return Object.keys(event.exposedAdminAreas)
         .map(Number)
         .filter((adminLevel) => (
-            adminLevel > 0 && getExposedAdminAreas(event, adminLevel).length > 0
+            adminLevel >= minAdminLevel && getExposedAdminAreas(event, adminLevel).length > 0
         ))
         .sort((a, b) => a - b) as AdminLevel[];
 }
@@ -87,7 +95,7 @@ export function getNrwInitialAdminLevel(event: NrwEvent): AdminLevel {
 
     const highestAdminLevel = exposedAdminLevels.at(-1);
 
-    return splitAdminLevel ?? highestAdminLevel ?? (1 as AdminLevel);
+    return splitAdminLevel ?? highestAdminLevel ?? minAdminLevel;
 }
 
 // The valid place codes of the exposed admin areas at the given admin level.

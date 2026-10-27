@@ -55,6 +55,14 @@ export interface AdminAreaProperties {
     name: NrwAdminAreaProperties['nameEn'];
 }
 
+// The admin areas to fetch: on an admin level, optionally under one parent, and limited to
+// the given place codes, if any.
+export interface AdminAreasRequest {
+    adminLevel: AdminLevel;
+    parentPlaceCode: PlaceCode | undefined;
+    placeCodes: PlaceCode[] | undefined;
+}
+
 // eslint-disable-next-line max-len
 export type MapViewChangeHandler = (newZoom: Zoom, newLatitude: Latitude, newLongitude: Longitude) => void;
 
@@ -77,6 +85,11 @@ export type NrwEventSelectHandler = (
 ) => void;
 export type NrwExposedAdminArea = NrwEvent['exposedAdminAreas'][string][number];
 export type NrwForecastSource = NrwEvent['forecastSources'][number];
+export type NrwFloodsDetails = NonNullable<NrwEvent['hazardTypeDetails']['floods']>;
+export type NrwReturnPeriodThreshold = NrwFloodsDetails['returnPeriodThresholds'][number];
+export type NrwSeverityThreshold = NrwReturnPeriodThreshold & {
+    severityClass: NonNullable<NrwReturnPeriodThreshold['severityClass']>;
+};
 
 export type NrwCountry = NrwApiResponse<'/countries'>[number];
 export type NrwAdminLevelLabels = NonNullable<NrwCountry['adminLevelLabels']>;
@@ -115,6 +128,8 @@ interface NrwLegendItemBase {
 export type NrwLegendItem = NrwLegendItemBase & ({
     type: NrwLegendType.Gradient;
     colors: readonly string[];
+    lowLabel?: string;
+    highLabel?: string;
 } | {
     type: NrwLegendType.Categories;
     categories: NrwLegendCategory[];

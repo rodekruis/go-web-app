@@ -16,6 +16,7 @@
     }
 
     .ramp-label {
+        white-space: nowrap;
         color: var(--go-ui-color-gray-70);
     }
 

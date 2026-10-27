@@ -13,9 +13,11 @@ import {
 
 import createFakeMapboxMap from '#utils/testing/createFakeMapboxMap';
 import {
+    addAdminAreaLayer,
     adminAreaLayerId,
     createAdminAreaFeature,
     createAdminAreaProperties,
+    unselectedAdminAreaLayerId,
 } from '#utils/testing/nrwAdminAreaTesting';
 import NrwMapTestHost from '#utils/testing/NrwMapTestHost';
 import {
@@ -24,6 +26,8 @@ import {
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import useAdminAreaHover from './useAdminAreaHover';
+
+const adminAreaLayerIds = [adminAreaLayerId];
 
 // One square admin area around (31, 7), as returned by /admin-areas.
 const adminAreas = {
@@ -36,12 +40,14 @@ const adminAreas = {
 } as unknown as NrwAdminAreaFeatureCollection;
 
 function HoverLayer(props: {
+    layerIds: string[];
     isEnabled: boolean;
     hoveredPlaceCode: PlaceCode | undefined;
     canDrillDown: (placeCode: PlaceCode) => boolean;
     onHoverChange: (placeCode: PlaceCode | undefined) => void;
 }) {
     const {
+        layerIds,
         isEnabled,
         hoveredPlaceCode,
         canDrillDown,
@@ -49,7 +55,7 @@ function HoverLayer(props: {
     } = props;
 
     const { hoveredAdminArea } = useAdminAreaHover(
-        adminAreaLayerId,
+        layerIds,
         isEnabled,
         adminAreas,
         hoveredPlaceCode,
@@ -69,17 +75,27 @@ function HoverLayer(props: {
 }
 
 function setup(options: {
+    layerIds?: string[];
+    layersOnMap?: string[];
     isEnabled?: boolean;
     hoveredPlaceCode?: PlaceCode;
     canDrillDown: (placeCode: PlaceCode) => boolean;
 }) {
-    const { isEnabled = true, hoveredPlaceCode, canDrillDown } = options;
+    const {
+        layerIds = adminAreaLayerIds,
+        layersOnMap = [],
+        isEnabled = true,
+        hoveredPlaceCode,
+        canDrillDown,
+    } = options;
 
     const fake = createFakeMapboxMap();
+    layersOnMap.forEach((layerId) => addAdminAreaLayer(fake, layerId));
     const onHoverChange = vi.fn();
-    const { rerender } = render(
+    const { rerender, unmount } = render(
         <NrwMapTestHost map={fake.map}>
             <HoverLayer
+                layerIds={layerIds}
                 isEnabled={isEnabled}
                 hoveredPlaceCode={hoveredPlaceCode}
                 canDrillDown={canDrillDown}
@@ -88,12 +104,12 @@ function setup(options: {
         </NrwMapTestHost>,
     );
 
-    function hoverOver(properties: unknown) {
+    function hoverOver(properties: unknown, layerId = adminAreaLayerId) {
         act(() => {
             fake.simulateEvent('mousemove', {
                 features: [createAdminAreaFeature(properties)],
                 lngLat: { lng: 31.3, lat: 6.8 },
-            }, adminAreaLayerId);
+            }, layerId);
         });
     }
 
@@ -101,6 +117,7 @@ function setup(options: {
         rerender(
             <NrwMapTestHost map={fake.map}>
                 <HoverLayer
+                    layerIds={layerIds}
                     isEnabled={isEnabled}
                     hoveredPlaceCode={hoveredPlaceCode}
                     canDrillDown={newCanDrillDown}
@@ -115,10 +132,45 @@ function setup(options: {
         onHoverChange,
         hoverOver,
         rerenderHoverLayer,
+        unmount,
     };
 }
 
 describe('useAdminAreaHover', () => {
+    test('reports the hover over any of the layers', () => {
+        // Arrange
+        const { onHoverChange, hoverOver } = setup({
+            layerIds: [adminAreaLayerId, unselectedAdminAreaLayerId],
+            canDrillDown: () => true,
+        });
+
+        // Act
+        hoverOver(createAdminAreaProperties('SSD.2', 1), unselectedAdminAreaLayerId);
+
+        // Assert
+        expect(onHoverChange).toHaveBeenCalledWith('SSD.2');
+    });
+
+    test('highlights the hovered admin area in the source of each layer on the map', () => {
+        // Arrange & Act
+        const { fake, unmount } = setup({
+            layerIds: [adminAreaLayerId, unselectedAdminAreaLayerId],
+            layersOnMap: [adminAreaLayerId, unselectedAdminAreaLayerId],
+            hoveredPlaceCode: 'SSD.1' as PlaceCode,
+            canDrillDown: () => true,
+        });
+
+        // Assert
+        expect(fake.getFeatureState(adminAreaLayerId, 'SSD.1')).toEqual({ hover: true });
+        expect(fake.getFeatureState(unselectedAdminAreaLayerId, 'SSD.1')).toEqual({ hover: true });
+
+        // Act
+        unmount();
+
+        // Assert
+        expect(fake.getFeatureState(adminAreaLayerId, 'SSD.1')).toBeUndefined();
+        expect(fake.getFeatureState(unselectedAdminAreaLayerId, 'SSD.1')).toBeUndefined();
+    });
     test('shows the pointer cursor over an admin area that can be drilled into', () => {
         // Arrange
         const { fake, hoverOver } = setup({ canDrillDown: () => true });

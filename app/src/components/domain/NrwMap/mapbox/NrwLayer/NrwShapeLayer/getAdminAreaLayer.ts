@@ -10,7 +10,7 @@ import { type NrwAdminAreaFeatureCollection } from '#views/CountryProfileNationa
 
 import { type MapLayer } from '../useNrwMapLayers';
 
-const isHovered: ExpressionSpecification = ['boolean', ['feature-state', 'hover'], false];
+export const isHovered: ExpressionSpecification = ['boolean', ['feature-state', 'hover'], false];
 
 // Build the choropleth layer of the admin areas, coloured by their exposed population
 // in the ramp of the given alert class. A Mapbox fill layer only draws a hairline

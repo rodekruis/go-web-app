@@ -12,6 +12,7 @@ import {
     adminAreaLayerId,
     createAdminAreaFeature,
     createAdminAreaProperties,
+    unselectedAdminAreaLayerId,
 } from '#utils/testing/nrwAdminAreaTesting';
 import NrwMapTestHost from '#utils/testing/NrwMapTestHost';
 import { type PlaceCode } from '#views/CountryProfileNationalRiskWatch/types';
@@ -19,24 +20,32 @@ import { type PlaceCode } from '#views/CountryProfileNationalRiskWatch/types';
 import useAdminAreaClick from './useAdminAreaClick';
 
 const drillableProperties = createAdminAreaProperties('SSD.1', 1);
+const adminAreaLayerIds = [adminAreaLayerId];
 
 function ClickLayer(props: {
+    layerIds: string[];
     isEnabled: boolean;
     canDrillDown: (placeCode: PlaceCode) => boolean;
     onClick: (adminArea: unknown) => void;
 }) {
-    const { isEnabled, canDrillDown, onClick } = props;
+    const {
+        layerIds,
+        isEnabled,
+        canDrillDown,
+        onClick,
+    } = props;
 
-    useAdminAreaClick(adminAreaLayerId, isEnabled, canDrillDown, onClick);
+    useAdminAreaClick(layerIds, isEnabled, canDrillDown, onClick);
 
     return null;
 }
 
 function setup(options: {
+    layerIds?: string[];
     isEnabled?: boolean;
     canDrillDown: (placeCode: PlaceCode) => boolean;
 }) {
-    const { isEnabled = true, canDrillDown } = options;
+    const { layerIds = adminAreaLayerIds, isEnabled = true, canDrillDown } = options;
 
     const fake = createFakeMapboxMap();
     addAdminAreaLayer(fake);
@@ -44,6 +53,7 @@ function setup(options: {
     const { rerender } = render(
         <NrwMapTestHost map={fake.map}>
             <ClickLayer
+                layerIds={layerIds}
                 isEnabled={isEnabled}
                 canDrillDown={canDrillDown}
                 onClick={onClick}
@@ -55,6 +65,7 @@ function setup(options: {
         rerender(
             <NrwMapTestHost map={fake.map}>
                 <ClickLayer
+                    layerIds={layerIds}
                     isEnabled={isEnabled}
                     canDrillDown={newCanDrillDown}
                     onClick={onClick}
@@ -67,6 +78,54 @@ function setup(options: {
 }
 
 describe('useAdminAreaClick', () => {
+    test('reports the topmost admin area under the pointer', () => {
+        // Arrange
+        const { fake, onClick } = setup({ canDrillDown: () => true });
+        fake.setRenderedFeatures([
+            createAdminAreaFeature(drillableProperties),
+            createAdminAreaFeature(createAdminAreaProperties('SSD.2', 1)),
+        ]);
+
+        // Act
+        fake.simulateEvent('click', { point: { x: 1, y: 1 } });
+
+        // Assert
+        expect(onClick).toHaveBeenCalledOnce();
+        expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ placeCode: 'SSD.1' }));
+    });
+
+    test('queries only the layers on the map', () => {
+        // Arrange
+        const { fake } = setup({
+            layerIds: [adminAreaLayerId, unselectedAdminAreaLayerId],
+            canDrillDown: () => true,
+        });
+        const queryRenderedFeatures = vi.spyOn(fake.map, 'queryRenderedFeatures');
+
+        // Act
+        fake.simulateEvent('click', { point: { x: 1, y: 1 } });
+
+        // Assert
+        expect(queryRenderedFeatures).toHaveBeenCalledWith(
+            { x: 1, y: 1 },
+            { layers: [adminAreaLayerId] },
+        );
+    });
+
+    test('ignores a click when none of the layers is on the map', () => {
+        // Arrange
+        const { fake, onClick } = setup({
+            layerIds: [unselectedAdminAreaLayerId],
+            canDrillDown: () => true,
+        });
+        fake.setRenderedFeatures([createAdminAreaFeature(drillableProperties)]);
+
+        // Act
+        fake.simulateEvent('click', { point: { x: 1, y: 1 } });
+
+        // Assert
+        expect(onClick).not.toHaveBeenCalled();
+    });
     test('reports a click on an admin area that can be drilled into', () => {
         // Arrange
         const { fake, onClick } = setup({ canDrillDown: () => true });
@@ -95,16 +154,16 @@ describe('useAdminAreaClick', () => {
         expect(onClick).not.toHaveBeenCalled();
     });
 
-    test('reports a click beside the admin areas', () => {
+    test('ignores a click beside the admin areas', () => {
         // Arrange
-        const { fake, onClick } = setup({ canDrillDown: () => false });
+        const { fake, onClick } = setup({ canDrillDown: () => true });
         fake.setRenderedFeatures([]);
 
         // Act
         fake.simulateEvent('click', { point: { x: 1, y: 1 } });
 
         // Assert
-        expect(onClick).toHaveBeenCalledWith(null);
+        expect(onClick).not.toHaveBeenCalled();
     });
 
     test('does not register a listener when disabled', () => {

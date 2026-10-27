@@ -8,6 +8,7 @@ import {
 } from '@togglecorp/fujs';
 
 import {
+    floodDepthMapLabels,
     floodDepthMapRamp,
     type NrwExposedPopulationScale,
 } from '#utils/nrw/colors';
@@ -54,6 +55,8 @@ const nrwLegendEntries: NrwLegendEntry[] = [
             layerName: layer.name,
             label: layer.label,
             colors: floodDepthMapRamp,
+            lowLabel: floodDepthMapLabels.low,
+            highLabel: floodDepthMapLabels.high,
         }),
     },
     {

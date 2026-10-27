@@ -1,0 +1,8 @@
+{
+    "namespace": "nrwEvents",
+    "strings": {
+        "nrwFloodsEventDetailsLabel": "River discharge forecast:",
+        "nrwFloodsEventDetailsReturnPeriod": "{returnPeriod} year return period",
+        "nrwFloodsEventDetailsNoReturnPeriod": "Below return period thresholds"
+    }
+}
