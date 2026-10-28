@@ -17,6 +17,7 @@ import {
 import {
     formatNrwEventDate,
     getExposedAdminArea,
+    getNrwAllExposedPlaceCodes,
     getNrwDrillPath,
     getNrwExposedAdminLevels,
     getNrwExposedPlaceCodes,
@@ -135,6 +136,17 @@ describe('getNrwExposedPopulation', () => {
         };
 
         expect(getNrwExposedPopulation(area)).toBeUndefined();
+    });
+});
+
+describe('getNrwAllExposedPlaceCodes', () => {
+    test('collects the place codes of every admin level', () => {
+        const event = createEvent({
+            1: [createArea('ET02', 'Afar', 40000)],
+            2: [createArea('ET0201', 'Awsi Rasu', 30000), createArea('ET0202', 'Kilbet Rasu', 10000)],
+        });
+
+        expect(getNrwAllExposedPlaceCodes(event)).toEqual(new Set(['ET02', 'ET0201', 'ET0202']));
     });
 });
 

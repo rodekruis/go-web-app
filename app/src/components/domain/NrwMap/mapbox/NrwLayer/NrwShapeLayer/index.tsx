@@ -11,7 +11,10 @@ import {
 } from '@togglecorp/fujs';
 import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
-import { mapUnselectedStyle } from '#utils/nrw/colors';
+import {
+    mapUnexposedStyle,
+    mapUnselectedStyle,
+} from '#utils/nrw/colors';
 import NrwAdminAreasContext from '#views/CountryProfileNationalRiskWatch/NrwAdminAreasProvider/NrwAdminAreasContext';
 import type NrwLngLat from '#views/CountryProfileNationalRiskWatch/NrwLngLat';
 import { type AdminAreaProperties } from '#views/CountryProfileNationalRiskWatch/types';
@@ -77,6 +80,7 @@ function NrwShapeLayer(props: {
     const {
         adminAreas,
         unselectedAdminAreas,
+        unexposedAdminAreas,
         exposedPopulationScale,
         adminLevelLabels,
         pending,
@@ -90,6 +94,7 @@ function NrwShapeLayer(props: {
 
     const strings = useTranslation(i18n);
     const unselectedId = `${id}-unselected`;
+    const unexposedId = `${id}-unexposed`;
 
     // Fit the map to the admin areas of the level drilled into.
     const bounds = useMemo(
@@ -98,33 +103,50 @@ function NrwShapeLayer(props: {
     );
     useNrwMapFitBounds(bounds);
 
-    // The unselected admin areas never overlap each other or the selected ones
-    // (see getUnselectedAdminAreas), so a click or hover hits one admin area,
+    // The unselected and unexposed admin areas never overlap each other or the selected ones
+    // (see getAdminAreasBesidePath), so a click or hover hits one admin area,
     // whatever the feature order.
-    // The unselected admin areas go first, so the selected outlines stay on top on shared borders.
+    // The unexposed, then the unselected admin areas go first, so the outlines of the
+    // clickable admin areas stay on top on shared borders.
     const mapLayers = useMemo(
         () => {
             if (isNotDefined(adminAreas) || isNotDefined(exposedPopulationScale)) {
                 return undefined;
             }
 
+            const unexposedMapLayers = isDefined(unexposedAdminAreas)
+                ? getFlatAdminAreaLayer(unexposedId, unexposedAdminAreas, mapUnexposedStyle)
+                : [];
             const unselectedMapLayers = isDefined(unselectedAdminAreas)
                 ? getFlatAdminAreaLayer(unselectedId, unselectedAdminAreas, mapUnselectedStyle)
                 : [];
             const selectedMapLayers = getAdminAreaLayer(id, adminAreas, exposedPopulationScale);
 
-            return [...unselectedMapLayers, ...selectedMapLayers];
+            return [...unexposedMapLayers, ...unselectedMapLayers, ...selectedMapLayers];
         },
-        [id, unselectedId, adminAreas, unselectedAdminAreas, exposedPopulationScale],
+        [
+            id,
+            unselectedId,
+            unexposedId,
+            adminAreas,
+            unselectedAdminAreas,
+            unexposedAdminAreas,
+            exposedPopulationScale,
+        ],
     );
     useNrwMapLayers(mapLayers, isVisible, layerAnchorId);
 
     const isInteractive = isDefined(mapLayers) && isVisible;
     // Only the layers on the map, kept stable so the hover and click listeners don't re-register.
     const hasUnselectedAdminAreas = isDefined(unselectedAdminAreas);
+    const hasUnexposedAdminAreas = isDefined(unexposedAdminAreas);
     const interactiveLayerIds = useMemo(
-        () => (hasUnselectedAdminAreas ? [id, unselectedId] : [id]),
-        [id, unselectedId, hasUnselectedAdminAreas],
+        () => [
+            id,
+            ...(hasUnselectedAdminAreas ? [unselectedId] : []),
+            ...(hasUnexposedAdminAreas ? [unexposedId] : []),
+        ],
+        [id, unselectedId, unexposedId, hasUnselectedAdminAreas, hasUnexposedAdminAreas],
     );
 
     const { hoveredAdminArea, clearHover } = useAdminAreaHover(
@@ -154,6 +176,14 @@ function NrwShapeLayer(props: {
     // The grey admin areas can be of several levels, so the tooltip names the level.
     const adminLevelLabel = adminLevelLabels?.[hoveredAdminArea.adminLevel]?.singular;
 
+    // An unexposed admin area has no exposed population, unlike an unknown one.
+    const isUnexposed = unexposedAdminAreas?.features.some(
+        ({ properties }) => properties.placeCode === hoveredAdminArea.placeCode,
+    ) ?? false;
+    const exposedPopulation = isUnexposed
+        ? 0
+        : exposedPopulationScale?.exposedPopulationByPlaceCode.get(hoveredAdminArea.placeCode);
+
     return (
         <NrwMarker
             key={hoveredAdminArea.anchor}
@@ -176,9 +206,7 @@ function NrwShapeLayer(props: {
                 <div className={styles.exposedPopulation}>
                     {strings.nrwShapeLayerExposedPopulationLabel}
                     <NumberOutput
-                        value={exposedPopulationScale?.exposedPopulationByPlaceCode.get(
-                            hoveredAdminArea.placeCode,
-                        )}
+                        value={exposedPopulation}
                         invalidText="--"
                     />
                 </div>

@@ -160,6 +160,9 @@ function createFakeMapboxMap(): FakeMapboxMap {
         queryRenderedFeatures() {
             return renderedFeatures;
         },
+        fitBounds() {
+            calls.push('fitBounds');
+        },
         getCanvas() {
             return canvas;
         },
