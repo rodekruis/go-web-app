@@ -79,6 +79,15 @@ export const mapUnselectedStyle: MapFlatStyle = {
     outlineWidth: 2,
 };
 
+export const mapUnexposedStyle: MapFlatStyle = {
+    fillColor: '#ffffff',
+    fillOpacity: 0.4,
+    fillHoverOpacity: 0.6,
+    outlineColor: '#4d4d4d',
+    outlineOpacity: 0.25,
+    outlineWidth: 0.8,
+};
+
 // Ramp step indices used for fewer distinct values than steps, lightest to darkest.
 const rampStepIndicesByValueCount: Record<number, readonly number[]> = {
     1: [2],

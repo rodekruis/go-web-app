@@ -55,11 +55,12 @@ export interface AdminAreaProperties {
     name: NrwAdminAreaProperties['nameEn'];
 }
 
-// The admin areas to fetch: the given place codes on an admin level, optionally under one parent.
+// The admin areas to fetch: on an admin level, optionally under one parent, and limited to
+// the given place codes, if any.
 export interface AdminAreasRequest {
     adminLevel: AdminLevel;
     parentPlaceCode: PlaceCode | undefined;
-    placeCodes: PlaceCode[];
+    placeCodes: PlaceCode[] | undefined;
 }
 
 // eslint-disable-next-line max-len

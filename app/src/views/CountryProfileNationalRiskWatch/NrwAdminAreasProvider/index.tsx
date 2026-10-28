@@ -12,6 +12,7 @@ import { getExposedPopulationScale } from '#utils/nrw/colors';
 import {
     canNrwDrillBelow,
     getExposedAdminArea,
+    getNrwAllExposedPlaceCodes,
     getNrwDrillPath,
     getNrwExposedPlaceCodes,
     getNrwInitialAdminLevel,
@@ -23,6 +24,7 @@ import {
     type AdminAreaProperties,
     type AdminAreasRequest,
     type AdminLevel,
+    type NrwAdminAreaFeature,
     type NrwAdminAreaFeatureCollection,
     type NrwEvent,
     type PlaceCode,
@@ -35,12 +37,43 @@ import {
 } from '../utils';
 import NrwAdminAreasContext, { type NrwAdminAreasContextProps } from './NrwAdminAreasContext';
 
+function isSamePlaceCodes(placeCodes: PlaceCode[] | undefined, other: PlaceCode[] | undefined) {
+    if (isNotDefined(placeCodes) || isNotDefined(other)) {
+        return placeCodes === other;
+    }
+    return placeCodes.length === other.length
+        && placeCodes.every((placeCode, index) => placeCode === other[index]);
+}
+
 function isSameAdminAreasRequest(request: AdminAreasRequest, other: AdminAreasRequest | undefined) {
     return isDefined(other)
         && request.adminLevel === other.adminLevel
         && request.parentPlaceCode === other.parentPlaceCode
-        && request.placeCodes.length === other.placeCodes.length
-        && request.placeCodes.every((placeCode, index) => placeCode === other.placeCodes[index]);
+        && isSamePlaceCodes(request.placeCodes, other.placeCodes);
+}
+
+function getAdminLevelRequest(
+    event: NrwEvent | undefined,
+    adminLevel: AdminLevel,
+    parentPlaceCode: PlaceCode | undefined,
+): AdminAreasRequest {
+    // The initial level has no parent: only its exposed admin areas, so none show as unexposed.
+    if (isNotDefined(parentPlaceCode)) {
+        return {
+            adminLevel,
+            parentPlaceCode,
+            placeCodes: isDefined(event) ? getNrwExposedPlaceCodes(event, adminLevel) : [],
+        };
+    }
+
+    // Below it: all children of the parent, so the unexposed ones show as well.
+    return { adminLevel, parentPlaceCode, placeCodes: undefined };
+}
+
+function getFeatureCollection(
+    features: NrwAdminAreaFeature[],
+): NrwAdminAreaFeatureCollection | undefined {
+    return features.length > 0 ? { type: 'FeatureCollection', features } : undefined;
 }
 
 interface Drill {
@@ -73,12 +106,9 @@ function getAdminAreasRequest(
     urlAdminArea: AdminAreaProperties | undefined,
     drill: Drill,
 ): { request: AdminAreasRequest; lookup?: boolean } {
-    // A request for the exposed admin areas of a level under one parent.
-    const level = (adminLevel: AdminLevel, parentPlaceCode: PlaceCode | undefined) => ({
-        adminLevel,
-        parentPlaceCode,
-        placeCodes: isDefined(event) ? getNrwExposedPlaceCodes(event, adminLevel) : [],
-    });
+    const level = (adminLevel: AdminLevel, parentPlaceCode: PlaceCode | undefined) => (
+        getAdminLevelRequest(event, adminLevel, parentPlaceCode)
+    );
 
     // The levels above the initial level are never shown.
     if (isNotDefined(event) || isNotDefined(urlAdminArea)
@@ -113,7 +143,7 @@ function getAdminAreasRequest(
     };
 }
 
-// The exposed admin areas on each level of the drill path, under the parent on the path.
+// The admin areas on each level of the drill path, under the parent on the path.
 function getUnselectedAdminAreasRequests(
     event: NrwEvent | undefined,
     path: AdminAreaProperties[],
@@ -122,23 +152,21 @@ function getUnselectedAdminAreasRequests(
         return [];
     }
 
-    return path.map(({ adminLevel }, index) => ({
-        adminLevel,
-        parentPlaceCode: path[index - 1]?.placeCode,
-        placeCodes: getNrwExposedPlaceCodes(event, adminLevel),
-    }));
+    return path.map(({ adminLevel }, index) => (
+        getAdminLevelRequest(event, adminLevel, path[index - 1]?.placeCode)
+    ));
 }
 
 // The admin areas beside the drill path: on each level, the siblings of the path admin area,
 // without the path admin area itself. So the levels never overlap: the siblings on a level lie
 // outside its path admin area, and the deeper levels and the selected admin areas lie inside it.
 // The response can be for an earlier path, so only the admin areas under the current path are kept.
-function getUnselectedAdminAreas(
+function getAdminAreasBesidePath(
     adminAreas: NrwAdminAreaFeatureCollection | undefined,
     path: AdminAreaProperties[],
     initialAdminLevel: AdminLevel,
-): NrwAdminAreaFeatureCollection | undefined {
-    const features = (adminAreas?.features ?? []).filter(({ properties }) => {
+): NrwAdminAreaFeature[] {
+    return (adminAreas?.features ?? []).filter(({ properties }) => {
         const pathIndex = properties.adminLevel - initialAdminLevel;
         const pathAdminArea = path[pathIndex];
         const parentAdminArea = path[pathIndex - 1];
@@ -149,8 +177,6 @@ function getUnselectedAdminAreas(
             && (isNotDefined(parentAdminArea) || (isDefined(parentPlaceCodeKey)
                 && properties[parentPlaceCodeKey] === parentAdminArea.placeCode));
     });
-
-    return features.length > 0 ? { type: 'FeatureCollection', features } : undefined;
 }
 
 function NrwAdminAreasProvider(props: {
@@ -187,6 +213,11 @@ function NrwAdminAreasProvider(props: {
     const initialAdminLevel = isDefined(event) ? getNrwInitialAdminLevel(event) : 1 as AdminLevel;
     const adminLevel = (initialAdminLevel + drill.shown.path.length) as AdminLevel;
 
+    const allExposedPlaceCodes = useMemo(
+        () => (isDefined(event) ? getNrwAllExposedPlaceCodes(event) : new Set<string>()),
+        [event],
+    );
+
     const urlAdminArea = useMemo(
         () => (isDefined(event) && isDefined(urlPlaceCode)
             ? getExposedAdminArea(event, urlPlaceCode)
@@ -196,7 +227,7 @@ function NrwAdminAreasProvider(props: {
 
     const { request, lookup } = getAdminAreasRequest(event, initialAdminLevel, urlAdminArea, drill);
     const shownAgain = isSameAdminAreasRequest(request, drill.shown.request);
-    const skip = request.placeCodes.length === 0 || shownAgain;
+    const skip = request.placeCodes?.length === 0 || shownAgain;
 
     // The admin area in the url is selected when it is on the level shown again, not its parent.
     const selectedAdminArea = shownAgain && urlAdminArea?.adminLevel === request.adminLevel
@@ -220,7 +251,8 @@ function NrwAdminAreasProvider(props: {
             const [adminArea] = adminAreas.features;
 
             if (lookup) {
-                if (isNotDefined(adminArea)) {
+                const [lookedUpPlaceCode] = request.placeCodes ?? [];
+                if (isNotDefined(adminArea) || isNotDefined(lookedUpPlaceCode)) {
                     onUrlPlaceCodeChange(shownPlaceCode);
                     return;
                 }
@@ -231,18 +263,22 @@ function NrwAdminAreasProvider(props: {
                 ).at(-1)?.placeCode;
                 setDrill((previous) => ({
                     ...previous,
-                    lookedUp: { placeCode: request.placeCodes[0] as PlaceCode, parentPlaceCode },
+                    lookedUp: { placeCode: lookedUpPlaceCode, parentPlaceCode },
                 }));
                 return;
             }
 
-            if (isDefined(adminArea)) {
-                const path = getNrwDrillPath(event, initialAdminLevel, adminArea.properties);
+            const exposedAdminArea = adminAreas.features.find(
+                ({ properties }) => allExposedPlaceCodes.has(properties.placeCode),
+            );
+            if (isDefined(exposedAdminArea)) {
+                const path = getNrwDrillPath(event, initialAdminLevel, exposedAdminArea.properties);
                 setDrill((previous) => ({ ...previous, shown: { request, path, adminAreas } }));
                 return;
             }
 
-            // An admin area without children is the deepest level: remember it, so it is selected.
+            // An admin area without exposed children is the deepest level: remember it,
+            // so it is selected.
             const { parentPlaceCode } = request;
             if (isDefined(parentPlaceCode) && parentPlaceCode === urlAdminArea?.placeCode) {
                 setDrill((previous) => ({
@@ -272,23 +308,45 @@ function NrwAdminAreasProvider(props: {
         ),
         preserveResponse: true,
     });
-    const unselectedAdminAreas = useMemo(
-        () => getUnselectedAdminAreas(
+
+    const shownLevelAdminAreas = drill.shown.adminAreas;
+    const { exposedAdminAreas, unselectedAdminAreas, unexposedAdminAreas } = useMemo(
+        () => {
+            const isExposed = ({ properties }: NrwAdminAreaFeature) => (
+                allExposedPlaceCodes.has(properties.placeCode)
+            );
+            const shownLevelFeatures = shownLevelAdminAreas?.features ?? [];
+            const besidePathFeatures = getAdminAreasBesidePath(
+                unselectedAdminAreasResponse,
+                shownPath,
+                initialAdminLevel,
+            );
+
+            return {
+                exposedAdminAreas: getFeatureCollection(shownLevelFeatures.filter(isExposed)),
+                unselectedAdminAreas: getFeatureCollection(besidePathFeatures.filter(isExposed)),
+                unexposedAdminAreas: getFeatureCollection(
+                    [...besidePathFeatures, ...shownLevelFeatures]
+                        .filter((feature) => !isExposed(feature)),
+                ),
+            };
+        },
+        [
+            allExposedPlaceCodes,
+            shownLevelAdminAreas,
             unselectedAdminAreasResponse,
             shownPath,
             initialAdminLevel,
-        ),
-        [unselectedAdminAreasResponse, shownPath, initialAdminLevel],
+        ],
     );
 
     const [hoveredPlaceCode, setHoveredPlaceCode] = useState<PlaceCode>();
 
-    const shownAdminAreas = drill.shown.adminAreas;
     const exposedPopulationScale = useMemo(
-        () => (isDefined(event) && isDefined(shownAdminAreas)
-            ? getExposedPopulationScale(event, shownAdminAreas)
+        () => (isDefined(event) && isDefined(exposedAdminAreas)
+            ? getExposedPopulationScale(event, exposedAdminAreas)
             : undefined),
-        [event, shownAdminAreas],
+        [event, exposedAdminAreas],
     );
 
     const value = useMemo<NrwAdminAreasContextProps>(
@@ -296,7 +354,8 @@ function NrwAdminAreasProvider(props: {
             const { shown, childlessPlaceCodes } = drill;
 
             function canDrillDown(placeCode: PlaceCode) {
-                return placeCode !== selectedAdminArea?.placeCode;
+                return placeCode !== selectedAdminArea?.placeCode
+                    && allExposedPlaceCodes.has(placeCode);
             }
 
             function hasChildren(placeCode: PlaceCode) {
@@ -314,8 +373,9 @@ function NrwAdminAreasProvider(props: {
                 initialAdminLevel,
                 adminLevel,
                 adminLevelLabels,
-                adminAreas: shown.adminAreas,
+                adminAreas: exposedAdminAreas,
                 unselectedAdminAreas,
+                unexposedAdminAreas,
                 exposedPopulationScale,
                 pending,
                 drillPath: isDefined(selectedAdminArea)
@@ -343,7 +403,10 @@ function NrwAdminAreasProvider(props: {
         [
             event,
             drill,
+            allExposedPlaceCodes,
+            exposedAdminAreas,
             unselectedAdminAreas,
+            unexposedAdminAreas,
             exposedPopulationScale,
             selectedAdminArea,
             shownPlaceCode,
