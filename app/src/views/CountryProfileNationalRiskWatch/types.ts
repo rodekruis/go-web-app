@@ -122,6 +122,8 @@ interface NrwLegendItemBase {
 export type NrwLegendItem = NrwLegendItemBase & ({
     type: NrwLegendType.Gradient;
     colors: readonly string[];
+    lowLabel?: string;
+    highLabel?: string;
 } | {
     type: NrwLegendType.Categories;
     categories: NrwLegendCategory[];

@@ -53,7 +53,12 @@ export const alertClassMapRamps: Record<NrwEvent['alertClass'], MapRamp> = {
     ],
 };
 
+// These colours and labels mirror the backend's FLOOD_DEPTH_CONFIG palette and outer thresholds.
 export const floodDepthMapRamp: MapColorRamp = ['#cbddf2', '#9ebadc', '#6e96c5', '#467abc', '#3163a0'];
+export const floodDepthMapLabels = {
+    low: '<0.25 m',
+    high: '>2.5 m',
+} as const;
 
 // Mapbox paint needs literal values, so these mirror --nrw-color-map-shadow-outline in nrw.css.
 export const mapOutlineColor = '#323232';
