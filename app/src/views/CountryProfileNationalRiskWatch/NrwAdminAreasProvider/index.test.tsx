@@ -48,6 +48,11 @@ let adminAreasRequest: AdminAreasRequest | undefined;
 // when it is no longer skipped.
 let fetches: string[] = [];
 
+// The request for the admin areas beside the drill path has no callbacks;
+// it answers with the response the test sets.
+let unselectedAdminAreasRequest: AdminAreasRequest | undefined;
+let unselectedAdminAreasResponse: NrwAdminAreaFeatureCollection | undefined;
+
 function requestedFilter() {
     if (!adminAreasRequest || adminAreasRequest.skip) {
         return undefined;
@@ -55,8 +60,19 @@ function requestedFilter() {
     return adminAreasRequest.query?.filter;
 }
 
+function requestedUnselectedFilter() {
+    if (!unselectedAdminAreasRequest || unselectedAdminAreasRequest.skip) {
+        return undefined;
+    }
+    return unselectedAdminAreasRequest.query?.filter;
+}
+
 vi.mock('#utils/restRequest', () => ({
     useNrwRequest: (request: AdminAreasRequest) => {
+        if (request.url === '/admin-areas' && !request.onSuccess) {
+            unselectedAdminAreasRequest = request;
+            return { response: unselectedAdminAreasResponse, pending: false, error: undefined };
+        }
         if (request.url === '/admin-areas') {
             const filter = request.skip ? undefined : request.query?.filter;
             if (filter !== undefined && filter !== requestedFilter()) {
@@ -181,6 +197,13 @@ const states = adminAreasBelow();
 const jongleiCounties = adminAreasBelow(jonglei);
 const borSouthPayams = adminAreasBelow(jonglei, borSouth);
 
+function combined(...collections: NrwAdminAreaFeatureCollection[]) {
+    return {
+        type: 'FeatureCollection',
+        features: collections.flatMap(({ features }) => features),
+    } as NrwAdminAreaFeatureCollection;
+}
+
 let root: Root | undefined;
 let container: HTMLDivElement | undefined;
 let latest: NrwAdminAreasContextProps | undefined;
@@ -222,6 +245,12 @@ function adminAreas() {
         throw new Error('NrwAdminAreasProvider has not rendered');
     }
     return latest;
+}
+
+function unselectedPlaceCodes() {
+    return adminAreas().unselectedAdminAreas?.features.map(
+        ({ properties }) => properties.placeCode,
+    );
 }
 
 async function render(renderedEvent: NrwEvent | undefined) {
@@ -298,7 +327,69 @@ afterEach(async () => {
     latest = undefined;
     url = undefined;
     adminAreasRequest = undefined;
+    unselectedAdminAreasRequest = undefined;
+    unselectedAdminAreasResponse = undefined;
     fetches = [];
+});
+
+test('requests the exposed admin areas beside the drill path, also for a link', async () => {
+    expect(requestedUnselectedFilter()).toBeUndefined();
+
+    await openUrl('SS0303');
+    await answer(borSouthPayams);
+
+    expect(adminAreas().drillPath).toEqual([jonglei, borSouth]);
+    expect(requestedUnselectedFilter()).toBe(
+        "(countryCodeIso3='SSD') AND ((adminLevel=1 AND placeCode IN ('SS03','SS04'))"
+        + " OR (adminLevel=2 AND placeCodeLevel1='SS03' AND placeCode IN ('SS0303','SS0401')))",
+    );
+});
+
+test('shows only the admin areas beside the drill path as unselected', async () => {
+    // Arrange: Awerial lies in Lakes, so it is not beside the path through Jonglei,
+    // and the payams are on the shown level.
+    unselectedAdminAreasResponse = combined(
+        states,
+        jongleiCounties,
+        adminAreasBelow(lakes),
+        borSouthPayams,
+    );
+
+    // Act
+    await drillDown(jonglei);
+    await answer(jongleiCounties);
+    await drillDown(borSouth);
+    await answer(borSouthPayams);
+
+    // Assert
+    expect(unselectedPlaceCodes()).toEqual(['SS04']);
+
+    // Act
+    await drillUpTo(1);
+    await answer(states);
+
+    // Assert
+    expect(adminAreas().unselectedAdminAreas).toBeUndefined();
+});
+
+test('drills sideways and up into an unselected admin area', async () => {
+    // Arrange
+    unselectedAdminAreasResponse = states;
+    await drillDown(jonglei);
+    await answer(jongleiCounties);
+    await drillDown(borSouth);
+    await answer(borSouthPayams);
+    expect(adminAreas().canDrillDown(lakes.placeCode)).toBe(true);
+
+    // Act
+    await drillDown(lakes);
+    await answer(adminAreasBelow(lakes));
+
+    // Assert
+    expect(url?.placeCode).toBe('SS04');
+    expect(adminAreas().adminLevel).toBe(2);
+    expect(adminAreas().drillPath).toEqual([lakes]);
+    expect(unselectedPlaceCodes()).toEqual(['SS03']);
 });
 
 test('opens at the first level with several exposed areas', () => {
