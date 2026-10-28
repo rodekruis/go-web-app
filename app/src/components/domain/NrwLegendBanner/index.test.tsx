@@ -157,7 +157,7 @@ describe('NrwLegendBanner', () => {
         // Assert
         const { strings } = markerI18n;
         screen.getByText(strings.nrwMarkerLegendEventTypeLabel);
-        screen.getByText(strings.nrwMarkerLegendHazardCyclone);
+        screen.getByText(strings.nrwMarkerLegendHazardFloods);
     });
 
     test('asks to turn on layers', () => {

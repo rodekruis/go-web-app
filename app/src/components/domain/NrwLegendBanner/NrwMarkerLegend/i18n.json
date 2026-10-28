@@ -6,8 +6,6 @@
         "nrwMarkerLegendAlertMedium": "Medium",
         "nrwMarkerLegendAlertHigh": "High",
         "nrwMarkerLegendEventTypeLabel": "Event type:",
-        "nrwMarkerLegendHazardFloods": "Floods",
-        "nrwMarkerLegendHazardDrought": "Drought",
-        "nrwMarkerLegendHazardCyclone": "Cyclone"
+        "nrwMarkerLegendHazardFloods": "Floods"
     }
 }
