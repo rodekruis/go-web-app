@@ -16,14 +16,13 @@ import {
     vi,
 } from 'vitest';
 
-import supportedLayerNames from '#utils/nrw/layers';
+import { createExposedArea } from '#utils/testing/nrwAdminAreaTesting';
 
 import {
     type AdminAreaProperties,
     type AdminLevel,
     type NrwAdminAreaFeatureCollection,
     type NrwEvent,
-    type NrwExposedAdminArea,
     type PlaceCode,
     type PlaceCodeChangeHandler,
 } from '../types';
@@ -84,25 +83,16 @@ vi.mock('#utils/restRequest', () => ({
     },
 }));
 
-function createArea(placeCode: string, name: string): NrwExposedAdminArea {
-    return {
-        placeCode,
-        name,
-        adminLevel: placeCode.length - 2,
-        exposure: [{ layerName: supportedLayerNames.exposedPopulation, total: null, exposed: 1 }],
-    };
-}
-
 // Two states, each with counties, one of which has payams.
 const event = {
     eventId: 8,
     countryCodeIso3: 'SSD',
     alertClass: 'high',
     exposedAdminAreas: {
-        0: [createArea('SS', 'South Sudan')],
-        1: [createArea('SS03', 'Jonglei'), createArea('SS04', 'Lakes')],
-        2: [createArea('SS0303', 'Bor South'), createArea('SS0401', 'Awerial')],
-        3: [createArea('SS030301', 'Bor'), createArea('SS030302', 'Kolnyang')],
+        0: [createExposedArea('SS', 'South Sudan')],
+        1: [createExposedArea('SS03', 'Jonglei'), createExposedArea('SS04', 'Lakes')],
+        2: [createExposedArea('SS0303', 'Bor South'), createExposedArea('SS0401', 'Awerial')],
+        3: [createExposedArea('SS030301', 'Bor'), createExposedArea('SS030302', 'Kolnyang')],
     },
 } as unknown as NrwEvent;
 
@@ -142,10 +132,10 @@ const eventSplitAtCounties = {
     ...event,
     eventId: 9,
     exposedAdminAreas: {
-        0: [createArea('SS', 'South Sudan')],
-        1: [createArea('SS03', 'Jonglei')],
-        2: [createArea('SS0303', 'Bor South'), createArea('SS0304', 'Twic East')],
-        3: [createArea('SS030301', 'Bor')],
+        0: [createExposedArea('SS', 'South Sudan')],
+        1: [createExposedArea('SS03', 'Jonglei')],
+        2: [createExposedArea('SS0303', 'Bor South'), createExposedArea('SS0304', 'Twic East')],
+        3: [createExposedArea('SS030301', 'Bor')],
     },
 } as unknown as NrwEvent;
 
@@ -419,6 +409,21 @@ test('drills sideways and up into an unselected admin area', async () => {
     expect(adminAreas().adminLevel).toBe(2);
     expect(adminAreas().drillPath).toEqual([lakes]);
     expect(unselectedPlaceCodes()).toEqual(['SS03']);
+});
+
+test('keeps the shown admin areas when the admin areas beside the drill path load', async () => {
+    // Arrange: a link to an admin area.
+    await openUrl('SS0303');
+    await answer(borSouthPayams);
+    const shownAdminAreas = adminAreas().adminAreas;
+
+    // Act
+    unselectedAdminAreasResponse = combined(states, jongleiCounties);
+    await render(event);
+
+    // Assert: the map fits to them, so a new object would undo the map view of the link.
+    expect(unselectedPlaceCodes()).toEqual(['SS04']);
+    expect(adminAreas().adminAreas).toBe(shownAdminAreas);
 });
 
 test('shows the unexposed admin areas apart, on the shown level and beside the drill path', async () => {

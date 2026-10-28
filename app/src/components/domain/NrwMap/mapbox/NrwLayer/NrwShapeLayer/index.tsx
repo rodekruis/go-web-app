@@ -176,6 +176,14 @@ function NrwShapeLayer(props: {
     // The grey admin areas can be of several levels, so the tooltip names the level.
     const adminLevelLabel = adminLevelLabels?.[hoveredAdminArea.adminLevel]?.singular;
 
+    // An unexposed admin area has no exposed population, unlike an unknown one.
+    const isUnexposed = unexposedAdminAreas?.features.some(
+        ({ properties }) => properties.placeCode === hoveredAdminArea.placeCode,
+    ) ?? false;
+    const exposedPopulation = isUnexposed
+        ? 0
+        : exposedPopulationScale?.exposedPopulationByPlaceCode.get(hoveredAdminArea.placeCode);
+
     return (
         <NrwMarker
             key={hoveredAdminArea.anchor}
@@ -198,10 +206,8 @@ function NrwShapeLayer(props: {
                 <div className={styles.exposedPopulation}>
                     {strings.nrwShapeLayerExposedPopulationLabel}
                     <NumberOutput
-                        // Unexposed admin areas have no exposed population.
-                        value={exposedPopulationScale?.exposedPopulationByPlaceCode.get(
-                            hoveredAdminArea.placeCode,
-                        ) ?? 0}
+                        value={exposedPopulation}
+                        invalidText="--"
                     />
                 </div>
             </div>

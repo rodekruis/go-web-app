@@ -76,6 +76,10 @@ function getFeatureCollection(
     return features.length > 0 ? { type: 'FeatureCollection', features } : undefined;
 }
 
+function isExposed(exposedPlaceCodes: Set<string>, { properties }: NrwAdminAreaFeature) {
+    return exposedPlaceCodes.has(properties.placeCode);
+}
+
 interface Drill {
     eventId: NrwEvent['eventId'] | undefined;
     shown: {
@@ -310,11 +314,16 @@ function NrwAdminAreasProvider(props: {
     });
 
     const shownLevelAdminAreas = drill.shown.adminAreas;
-    const { exposedAdminAreas, unselectedAdminAreas, unexposedAdminAreas } = useMemo(
+    // Apart from the admin areas beside the drill path, as the map fits to these: a new object
+    // when those load would undo the map view of a link.
+    const exposedAdminAreas = useMemo(
+        () => getFeatureCollection((shownLevelAdminAreas?.features ?? []).filter(
+            (feature) => isExposed(allExposedPlaceCodes, feature),
+        )),
+        [allExposedPlaceCodes, shownLevelAdminAreas],
+    );
+    const { unselectedAdminAreas, unexposedAdminAreas } = useMemo(
         () => {
-            const isExposed = ({ properties }: NrwAdminAreaFeature) => (
-                allExposedPlaceCodes.has(properties.placeCode)
-            );
             const shownLevelFeatures = shownLevelAdminAreas?.features ?? [];
             const besidePathFeatures = getAdminAreasBesidePath(
                 unselectedAdminAreasResponse,
@@ -323,11 +332,12 @@ function NrwAdminAreasProvider(props: {
             );
 
             return {
-                exposedAdminAreas: getFeatureCollection(shownLevelFeatures.filter(isExposed)),
-                unselectedAdminAreas: getFeatureCollection(besidePathFeatures.filter(isExposed)),
+                unselectedAdminAreas: getFeatureCollection(besidePathFeatures.filter(
+                    (feature) => isExposed(allExposedPlaceCodes, feature),
+                )),
                 unexposedAdminAreas: getFeatureCollection(
                     [...besidePathFeatures, ...shownLevelFeatures]
-                        .filter((feature) => !isExposed(feature)),
+                        .filter((feature) => !isExposed(allExposedPlaceCodes, feature)),
                 ),
             };
         },
