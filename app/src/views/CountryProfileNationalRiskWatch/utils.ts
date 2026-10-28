@@ -12,6 +12,7 @@ import {
 import NrwLngLat from './NrwLngLat';
 import {
     type AdminAreaProperties,
+    type AdminAreasRequest,
     type AdminLevel,
     type CountryCodeIso3,
     type Latitude,
@@ -72,13 +73,6 @@ export const placeCodeLevelKeys = [
 // as the parent must have a place code property.
 export const maxQueryableAdminLevel = placeCodeLevelKeys.length as AdminLevel;
 
-// An admin level to fetch, optionally under one parent and limited to some place codes.
-export interface AdminAreasSelection {
-    adminLevel: AdminLevel;
-    parentPlaceCode?: PlaceCode;
-    placeCodes?: PlaceCode[];
-}
-
 // Build the pg_featureserv-style filters for the given countries and admin levels.
 // Country codes and place codes are already validated, so it's safe to interpolate
 // them into the filter string.
@@ -88,7 +82,11 @@ function getCountryFilter(countryCodes: CountryCodeIso3[]) {
         .join(' OR ');
 }
 
-function getAdminLevelFilter({ adminLevel, parentPlaceCode, placeCodes }: AdminAreasSelection) {
+function getAdminLevelFilter(
+    adminLevel: AdminLevel,
+    parentPlaceCode?: PlaceCode,
+    placeCodes?: PlaceCode[],
+) {
     const parentPlaceCodeKey = placeCodeLevelKeys[adminLevel - 1];
     const parentFilter = isDefined(parentPlaceCode) && isDefined(parentPlaceCodeKey)
         ? ` AND ${parentPlaceCodeKey}='${parentPlaceCode}'`
@@ -109,7 +107,7 @@ export function getAdminAreasQuery(
     placeCodes?: PlaceCode[],
 ) {
     const countryFilter = getCountryFilter(countryCodes);
-    const adminLevelFilter = getAdminLevelFilter({ adminLevel, parentPlaceCode, placeCodes });
+    const adminLevelFilter = getAdminLevelFilter(adminLevel, parentPlaceCode, placeCodes);
 
     return {
         filter: `(${countryFilter}) AND ${adminLevelFilter}`,
@@ -118,17 +116,19 @@ export function getAdminAreasQuery(
     };
 }
 
-// Build the query to fetch the admin areas of several selections at once.
-export function getAdminAreasOfSelectionsQuery(
+// Build the query to fetch the admin areas of several requests at once.
+export function getAdminAreasOfRequestsQuery(
     countryCodes: CountryCodeIso3[],
-    selections: AdminAreasSelection[],
+    requests: AdminAreasRequest[],
 ) {
-    const selectionsFilter = selections
-        .map((selection) => `(${getAdminLevelFilter(selection)})`)
+    const requestsFilter = requests
+        .map(({ adminLevel, parentPlaceCode, placeCodes }) => (
+            `(${getAdminLevelFilter(adminLevel, parentPlaceCode, placeCodes)})`
+        ))
         .join(' OR ');
 
     return {
-        filter: `(${getCountryFilter(countryCodes)}) AND (${selectionsFilter})`,
+        filter: `(${getCountryFilter(countryCodes)}) AND (${requestsFilter})`,
         limit: 10000,
     };
 }

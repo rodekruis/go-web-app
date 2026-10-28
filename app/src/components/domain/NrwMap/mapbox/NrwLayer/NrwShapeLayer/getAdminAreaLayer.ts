@@ -1,7 +1,6 @@
 import { type ExpressionSpecification } from 'mapbox-gl-v3';
 
 import {
-    type MapFlatStyle,
     mapOutlineColor,
     mapOutlineOpacity,
     mapOutlineWidth,
@@ -11,7 +10,7 @@ import { type NrwAdminAreaFeatureCollection } from '#views/CountryProfileNationa
 
 import { type MapLayer } from '../useNrwMapLayers';
 
-const isHovered: ExpressionSpecification = ['boolean', ['feature-state', 'hover'], false];
+export const isHovered: ExpressionSpecification = ['boolean', ['feature-state', 'hover'], false];
 
 // Build the choropleth layer of the admin areas, coloured by their exposed population
 // in the ramp of the given alert class. A Mapbox fill layer only draws a hairline
@@ -71,39 +70,6 @@ function getAdminAreaLayer(
                 'line-color': mapOutlineColor,
                 'line-opacity': mapOutlineOpacity,
                 'line-width': mapOutlineWidth,
-            },
-        },
-    ];
-}
-
-// Build a layer of admin areas all in the same given style, unlike the choropleth above.
-export function getFlatAdminAreaLayer(
-    id: string,
-    adminAreas: NrwAdminAreaFeatureCollection,
-    style: MapFlatStyle,
-): MapLayer[] {
-    return [
-        {
-            id,
-            type: 'fill',
-            source: {
-                type: 'geojson',
-                data: adminAreas as unknown as GeoJSON.FeatureCollection,
-                promoteId: 'placeCode',
-            },
-            paint: {
-                'fill-color': style.fillColor,
-                'fill-opacity': ['case', isHovered, style.fillHoverOpacity, style.fillOpacity],
-            },
-        },
-        {
-            id: `${id}-outline`,
-            type: 'line',
-            source: id,
-            paint: {
-                'line-color': style.outlineColor,
-                'line-opacity': style.outlineOpacity,
-                'line-width': style.outlineWidth,
             },
         },
     ];

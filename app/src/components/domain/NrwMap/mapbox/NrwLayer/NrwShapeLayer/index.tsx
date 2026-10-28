@@ -26,7 +26,8 @@ import NrwMarker from '../../NrwMarker';
 import { type NrwMarkerPlacement } from '../../NrwMarker/useNrwMapMarker';
 import useNrwMapFitBounds from '../../useNrwMapFitBounds';
 import useNrwMapLayers from '../useNrwMapLayers';
-import getAdminAreaLayer, { getFlatAdminAreaLayer } from './getAdminAreaLayer';
+import getAdminAreaLayer from './getAdminAreaLayer';
+import getFlatAdminAreaLayer from './getFlatAdminAreaLayer';
 import useAdminAreaClick from './useAdminAreaClick';
 import useAdminAreaHover, { type HoveredAdminAreaAnchor } from './useAdminAreaHover';
 
@@ -97,6 +98,9 @@ function NrwShapeLayer(props: {
     );
     useNrwMapFitBounds(bounds);
 
+    // The unselected admin areas never overlap each other or the selected ones
+    // (see getUnselectedAdminAreas), so a click or hover hits one admin area,
+    // whatever the feature order.
     // The unselected admin areas go first, so the selected outlines stay on top on shared borders.
     const mapLayers = useMemo(
         () => {

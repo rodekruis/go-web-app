@@ -21,6 +21,7 @@ import { useNrwRequest } from '#utils/restRequest';
 import useNrwAdminAreas from '../hooks/useNrwAdminAreas';
 import {
     type AdminAreaProperties,
+    type AdminAreasRequest,
     type AdminLevel,
     type NrwAdminAreaFeatureCollection,
     type NrwEvent,
@@ -28,18 +29,11 @@ import {
     type PlaceCodeChangeHandler,
 } from '../types';
 import {
-    type AdminAreasSelection,
-    getAdminAreasOfSelectionsQuery,
+    getAdminAreasOfRequestsQuery,
     parseCountryCode,
     placeCodeLevelKeys,
 } from '../utils';
 import NrwAdminAreasContext, { type NrwAdminAreasContextProps } from './NrwAdminAreasContext';
-
-interface AdminAreasRequest {
-    adminLevel: AdminLevel;
-    parentPlaceCode: PlaceCode | undefined;
-    placeCodes: PlaceCode[];
-}
 
 function isSameAdminAreasRequest(request: AdminAreasRequest, other: AdminAreasRequest | undefined) {
     return isDefined(other)
@@ -120,10 +114,10 @@ function getAdminAreasRequest(
 }
 
 // The exposed admin areas on each level of the drill path, under the parent on the path.
-function getUnselectedAdminAreasSelections(
+function getUnselectedAdminAreasRequests(
     event: NrwEvent | undefined,
     path: AdminAreaProperties[],
-): AdminAreasSelection[] {
+): AdminAreasRequest[] {
     if (isNotDefined(event)) {
         return [];
     }
@@ -135,8 +129,10 @@ function getUnselectedAdminAreasSelections(
     }));
 }
 
-// The admin areas beside the drill path. The response can be for an earlier path,
-// so only the admin areas under the current path are kept.
+// The admin areas beside the drill path: on each level, the siblings of the path admin area,
+// without the path admin area itself. So the levels never overlap: the siblings on a level lie
+// outside its path admin area, and the deeper levels and the selected admin areas lie inside it.
+// The response can be for an earlier path, so only the admin areas under the current path are kept.
 function getUnselectedAdminAreas(
     adminAreas: NrwAdminAreaFeatureCollection | undefined,
     path: AdminAreaProperties[],
@@ -265,14 +261,14 @@ function NrwAdminAreasProvider(props: {
     });
 
     const shownPath = drill.shown.path;
-    const unselectedAdminAreasSelections = getUnselectedAdminAreasSelections(event, shownPath);
+    const unselectedAdminAreasRequests = getUnselectedAdminAreasRequests(event, shownPath);
     const { response: unselectedAdminAreasResponse } = useNrwRequest({
         url: '/admin-areas',
         apiType: 'nrw',
-        skip: countryCodeIso3 === null || unselectedAdminAreasSelections.length === 0,
-        query: getAdminAreasOfSelectionsQuery(
+        skip: countryCodeIso3 === null || unselectedAdminAreasRequests.length === 0,
+        query: getAdminAreasOfRequestsQuery(
             countryCodeIso3 === null ? [] : [countryCodeIso3],
-            unselectedAdminAreasSelections,
+            unselectedAdminAreasRequests,
         ),
         preserveResponse: true,
     });

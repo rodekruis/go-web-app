@@ -55,6 +55,13 @@ export interface AdminAreaProperties {
     name: NrwAdminAreaProperties['nameEn'];
 }
 
+// The admin areas to fetch: the given place codes on an admin level, optionally under one parent.
+export interface AdminAreasRequest {
+    adminLevel: AdminLevel;
+    parentPlaceCode: PlaceCode | undefined;
+    placeCodes: PlaceCode[];
+}
+
 // eslint-disable-next-line max-len
 export type MapViewChangeHandler = (newZoom: Zoom, newLatitude: Latitude, newLongitude: Longitude) => void;
 

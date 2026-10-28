@@ -13,7 +13,7 @@ import {
 } from './types';
 import {
     getAdminAreaAnchor,
-    getAdminAreasOfSelectionsQuery,
+    getAdminAreasOfRequestsQuery,
     getAdminAreasQuery,
     getEventCountries,
     maxQueryableAdminLevel,
@@ -111,16 +111,24 @@ describe('getAdminAreasQuery', () => {
     });
 });
 
-describe('getAdminAreasOfSelectionsQuery', () => {
-    test('fetches the admin areas of any of the selections, in the countries', () => {
-        const query = getAdminAreasOfSelectionsQuery(['SSD' as CountryCodeIso3], [
-            { adminLevel: 1 as AdminLevel, placeCodes: ['SS03', 'SS04'] as PlaceCode[] },
-            { adminLevel: 2 as AdminLevel, parentPlaceCode: 'SS03' as PlaceCode },
+describe('getAdminAreasOfRequestsQuery', () => {
+    test('fetches the admin areas of any of the requests, in the countries', () => {
+        const query = getAdminAreasOfRequestsQuery(['SSD' as CountryCodeIso3], [
+            {
+                adminLevel: 1 as AdminLevel,
+                parentPlaceCode: undefined,
+                placeCodes: ['SS03', 'SS04'] as PlaceCode[],
+            },
+            {
+                adminLevel: 2 as AdminLevel,
+                parentPlaceCode: 'SS03' as PlaceCode,
+                placeCodes: ['SS0301'] as PlaceCode[],
+            },
         ]);
 
         expect(query.filter).toBe(
             "(countryCodeIso3='SSD') AND ((adminLevel=1 AND placeCode IN ('SS03','SS04'))"
-            + " OR (adminLevel=2 AND placeCodeLevel1='SS03'))",
+            + " OR (adminLevel=2 AND placeCodeLevel1='SS03' AND placeCode IN ('SS0301')))",
         );
     });
 });
