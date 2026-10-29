@@ -1,0 +1,7 @@
+{
+    "namespace": "nrwInvalidCountryError",
+    "strings": {
+        "nrwInvalidCountryTitle": "Something went wrong",
+        "nrwInvalidCountryDescription": "This country is invalid"
+    }
+}
