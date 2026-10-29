@@ -16,6 +16,7 @@ import {
     getAdminAreasOfRequestsQuery,
     getAdminAreasQuery,
     getEventCountries,
+    getUnsupportedCountryErrors,
     maxQueryableAdminLevel,
     parseAdminAreaProperties,
 } from './utils';
@@ -216,5 +217,172 @@ describe('getAdminAreaAnchor', () => {
 
     test('has no anchor for a feature without geometry', () => {
         expect(getAdminAreaAnchor(createFeature(null))).toBeUndefined();
+    });
+});
+
+describe('getUnsupportedCountryErrors', () => {
+    const supportedCountries = ['MWI', 'KEN', 'PHL'] as CountryCodeIso3[];
+
+    describe('standalone mode', () => {
+        test('shows nothing while the supported countries are pending', () => {
+            // Act
+            const result = getUnsupportedCountryErrors({
+                standalone: true,
+                supportedCountries: undefined,
+                urlCountries: undefined,
+                rawCountriesFromUrlParams: ['XXX'],
+            });
+
+            // Assert
+            expect(result).toEqual({
+                showUnsupportedCountriesNotice: false,
+                showUnsupportedCountriesFullpageError: false,
+            });
+        });
+
+        test('shows nothing when there are no countries', () => {
+            // Act
+            const result = getUnsupportedCountryErrors({
+                standalone: true,
+                supportedCountries,
+                urlCountries: undefined,
+                rawCountriesFromUrlParams: [],
+            });
+
+            // Assert
+            expect(result).toEqual({
+                showUnsupportedCountriesNotice: false,
+                showUnsupportedCountriesFullpageError: false,
+            });
+        });
+
+        test('shows the fullpage error for a single invalid country in the URL', () => {
+            // Act
+            const result = getUnsupportedCountryErrors({
+                standalone: true,
+                supportedCountries,
+                urlCountries: undefined,
+                rawCountriesFromUrlParams: ['XXX'],
+            });
+
+            // Assert
+            expect(result).toEqual({
+                showUnsupportedCountriesNotice: false,
+                showUnsupportedCountriesFullpageError: true,
+            });
+        });
+
+        test('shows nothing for a single supported country in the URL', () => {
+            // Act
+            const result = getUnsupportedCountryErrors({
+                standalone: true,
+                supportedCountries,
+                urlCountries: ['MWI' as CountryCodeIso3],
+                rawCountriesFromUrlParams: ['MWI'],
+            });
+
+            // Assert
+            expect(result).toEqual({
+                showUnsupportedCountriesNotice: false,
+                showUnsupportedCountriesFullpageError: false,
+            });
+        });
+
+        test('shows the notice for multiple URL countries with an invalid one', () => {
+            // Act
+            const result = getUnsupportedCountryErrors({
+                standalone: true,
+                supportedCountries,
+                urlCountries: ['MWI', 'KEN'] as CountryCodeIso3[],
+                rawCountriesFromUrlParams: ['MWI', 'KEN', 'XXX'],
+            });
+
+            // Assert
+            expect(result).toEqual({
+                showUnsupportedCountriesNotice: true,
+                showUnsupportedCountriesFullpageError: false,
+            });
+        });
+
+        test('shows the notice when all of multiple URL countries are invalid', () => {
+            // Act
+            const result = getUnsupportedCountryErrors({
+                standalone: true,
+                supportedCountries,
+                urlCountries: undefined,
+                rawCountriesFromUrlParams: ['XXX', 'YYY'],
+            });
+
+            // Assert
+            expect(result).toEqual({
+                showUnsupportedCountriesNotice: true,
+                showUnsupportedCountriesFullpageError: false,
+            });
+        });
+
+        test('shows nothing for multiple supported URL countries', () => {
+            // Act
+            const result = getUnsupportedCountryErrors({
+                standalone: true,
+                supportedCountries,
+                urlCountries: ['MWI', 'KEN'] as CountryCodeIso3[],
+                rawCountriesFromUrlParams: ['MWI', 'KEN'],
+            });
+
+            // Assert
+            expect(result).toEqual({
+                showUnsupportedCountriesNotice: false,
+                showUnsupportedCountriesFullpageError: false,
+            });
+        });
+    });
+
+    describe('embedded mode', () => {
+        test('shows nothing while the supported countries are pending', () => {
+            // Act
+            const result = getUnsupportedCountryErrors({
+                standalone: false,
+                supportedCountries: undefined,
+                urlCountries: undefined,
+                rawCountriesFromUrlParams: ['XXX'],
+            });
+
+            // Assert
+            expect(result).toEqual({
+                showUnsupportedCountriesNotice: false,
+                showUnsupportedCountriesFullpageError: false,
+            });
+        });
+        test('shows the fullpage error for an unsupported routing country', () => {
+            // Act
+            const result = getUnsupportedCountryErrors({
+                standalone: false,
+                supportedCountries,
+                urlCountries: ['XXX' as CountryCodeIso3],
+                rawCountriesFromUrlParams: [],
+            });
+
+            // Assert
+            expect(result).toEqual({
+                showUnsupportedCountriesNotice: false,
+                showUnsupportedCountriesFullpageError: true,
+            });
+        });
+
+        test('shows nothing for a supported routing country', () => {
+            // Act
+            const result = getUnsupportedCountryErrors({
+                standalone: false,
+                supportedCountries,
+                urlCountries: ['MWI' as CountryCodeIso3],
+                rawCountriesFromUrlParams: [],
+            });
+
+            // Assert
+            expect(result).toEqual({
+                showUnsupportedCountriesNotice: false,
+                showUnsupportedCountriesFullpageError: false,
+            });
+        });
     });
 });
