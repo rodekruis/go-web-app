@@ -12,6 +12,7 @@ import {
     type PlaceCode,
     type PlaceCodeChangeHandler,
 } from '../types';
+import { minAdminLevel } from '../utils';
 
 export interface NrwAdminAreasContextProps {
     initialAdminLevel: AdminLevel;
@@ -35,8 +36,8 @@ export interface NrwAdminAreasContextProps {
 }
 
 const NrwAdminAreasContext = createContext<NrwAdminAreasContextProps>({
-    initialAdminLevel: 1 as AdminLevel,
-    adminLevel: 1 as AdminLevel,
+    initialAdminLevel: minAdminLevel,
+    adminLevel: minAdminLevel,
     adminLevelLabels: undefined,
     adminAreas: undefined,
     unselectedAdminAreas: undefined,

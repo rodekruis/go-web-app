@@ -73,6 +73,9 @@ export const placeCodeLevelKeys = [
 // as the parent must have a place code property.
 export const maxQueryableAdminLevel = placeCodeLevelKeys.length as AdminLevel;
 
+// The least granular admin level shown: the country and admin level 1 are skipped.
+export const minAdminLevel = 2 as AdminLevel;
+
 // Build the pg_featureserv-style filters for the given countries and admin levels.
 // Country codes and place codes are already validated, so it's safe to interpolate
 // them into the filter string.

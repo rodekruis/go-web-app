@@ -32,6 +32,7 @@ import {
 } from '../types';
 import {
     getAdminAreasOfRequestsQuery,
+    minAdminLevel,
     parseCountryCode,
     placeCodeLevelKeys,
 } from '../utils';
@@ -214,7 +215,7 @@ function NrwAdminAreasProvider(props: {
 
     // Only the exposed admin levels of the event can be drilled into, starting
     // at the level where the exposure splits into several areas.
-    const initialAdminLevel = isDefined(event) ? getNrwInitialAdminLevel(event) : 1 as AdminLevel;
+    const initialAdminLevel = isDefined(event) ? getNrwInitialAdminLevel(event) : minAdminLevel;
     const adminLevel = (initialAdminLevel + drill.shown.path.length) as AdminLevel;
 
     const allExposedPlaceCodes = useMemo(
