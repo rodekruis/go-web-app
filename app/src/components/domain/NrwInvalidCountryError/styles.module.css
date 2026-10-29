@@ -1,0 +1,32 @@
+.nrw-invalid-country-error {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
+    background-color: var(--go-ui-color-background);
+    gap: var(--go-ui-spacing-md);
+    min-height: 0;
+
+    .icon-circle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: var(--go-ui-color-element-background);
+        padding: var(--go-ui-spacing-lg);
+    }
+
+    .icon {
+        inline-size: var(--go-ui-font-size-3xl);
+        block-size: var(--go-ui-font-size-3xl);
+        color: var(--go-ui-color-gray-70);
+    }
+
+    .title,
+    .description {
+        text-align: center;
+        font-size: var(--go-ui-font-size-xl);
+        font-weight: var(--go-ui-font-weight-semibold);
+    }
+}
