@@ -35,6 +35,78 @@ export function parseCountryCode(value: string | undefined): CountryCodeIso3 | n
     return countryRegex.test(cleaned) ? (cleaned as CountryCodeIso3) : null;
 }
 
+// Can both be false, never both true.
+type UnsupportedCountryErrors =
+    | { showUnsupportedCountriesNotice: true, showUnsupportedCountriesFullpageError: false }
+    | { showUnsupportedCountriesNotice: false, showUnsupportedCountriesFullpageError: true }
+    | { showUnsupportedCountriesNotice: false, showUnsupportedCountriesFullpageError: false };
+
+export function getUnsupportedCountryErrors(
+    {
+        standalone,
+        supportedCountries,
+        urlCountries,
+        rawCountriesFromUrlParams,
+    }: {
+        standalone: boolean,
+        supportedCountries: CountryCodeIso3[] | undefined,
+        urlCountries: CountryCodeIso3[] | undefined,
+        rawCountriesFromUrlParams: string[],
+    },
+): UnsupportedCountryErrors {
+    const noErrors: UnsupportedCountryErrors = {
+        showUnsupportedCountriesNotice: false,
+        showUnsupportedCountriesFullpageError: false,
+    };
+
+    // While pending (or failed) `supportedCountries` is undefined, and we
+    // assume all countries are supported so no error flashes early.
+    if (isNotDefined(supportedCountries)) {
+        return noErrors;
+    }
+
+    // Embedded mode has a single routing country. It is either supported or
+    // unsupported, so the notice for multiple countries never applies.
+    if (!standalone) {
+        const routingCountry = urlCountries?.[0];
+        const routingCountrySupported = isDefined(routingCountry)
+            && supportedCountries.includes(routingCountry);
+
+        return routingCountrySupported
+            ? noErrors
+            : {
+                showUnsupportedCountriesFullpageError: true,
+                showUnsupportedCountriesNotice: false,
+            };
+    }
+
+    // We only need to consider standalone mode now.
+
+    const numCountries = rawCountriesFromUrlParams.length;
+
+    if (numCountries === 0) {
+        return noErrors;
+    }
+
+    const numSupportedCountries = rawCountriesFromUrlParams.filter(
+        // casting is necessary to use `includes`.
+        (code) => supportedCountries.includes(code as CountryCodeIso3),
+    ).length;
+    const numInvalidCountries = numCountries - numSupportedCountries;
+
+    if (numCountries === 1) {
+        return {
+            showUnsupportedCountriesFullpageError: numInvalidCountries === 1,
+            showUnsupportedCountriesNotice: false,
+        };
+    }
+
+    return {
+        showUnsupportedCountriesFullpageError: false,
+        showUnsupportedCountriesNotice: numInvalidCountries >= 1,
+    };
+}
+
 // The countries that have events, deduplicated and sorted.
 export function getEventCountries(events: NrwEvent[]): CountryCodeIso3[] {
     const countryCodes = events
