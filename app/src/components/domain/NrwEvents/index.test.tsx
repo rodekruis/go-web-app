@@ -44,6 +44,7 @@ function renderNrwEvents(selectedEvent: NrwEvent | undefined) {
         pending: false,
         errored: false,
         selectedEvent,
+        eventNotFound: false,
         hoveredEventId: undefined,
         onEventSelect,
         onEventHoverChange: vi.fn(),

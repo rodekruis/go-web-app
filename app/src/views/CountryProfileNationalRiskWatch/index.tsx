@@ -11,6 +11,7 @@ import {
 import { useTranslation } from '@ifrc-go/ui/hooks';
 import { isDefined } from '@togglecorp/fujs';
 
+import NrwEventNotFoundBanner from '#components/domain/NrwEventNotFoundBanner';
 import NrwEvents from '#components/domain/NrwEvents';
 import NrwLegendBanner from '#components/domain/NrwLegendBanner';
 import NrwMap from '#components/domain/NrwMap';
@@ -61,7 +62,12 @@ export function Component() {
         selectedEventId,
         onSelectedEventIdChange: handleSelectedEventIdChange,
     });
-    const { events, pending: eventsPending, selectedEvent } = nrwEventsContext;
+    const {
+        events,
+        pending: eventsPending,
+        selectedEvent,
+        eventNotFound,
+    } = nrwEventsContext;
 
     const eventCountries = getEventCountries(events ?? []);
     const countries = urlCountries?.length ? urlCountries : eventCountries;
@@ -123,6 +129,9 @@ export function Component() {
             urlPlaceCode={placeCodeFromUrlParams}
             onUrlPlaceCodeChange={handleUrlPlaceCodeChange}
         >
+            {!nrwStandalone && eventNotFound && (
+                <NrwEventNotFoundBanner key={selectedEventId} />
+            )}
             <div className={styles.mapAndLegend}>
                 <ListView
                     className={styles.mapGrid}
@@ -156,7 +165,11 @@ export function Component() {
             <NrwScreenCaptureContext.Provider value={nrwScreenCaptureContext}>
                 {nrwStandalone ? (
                     <div className={styles.countryProfileNrwStandalone}>
-                        <NrwNavbar actions={exportButton} />
+                        <NrwNavbar actions={exportButton}>
+                            {eventNotFound && (
+                                <NrwEventNotFoundBanner key={selectedEventId} />
+                            )}
+                        </NrwNavbar>
                         <Page
                             className={styles.page}
                             title={appTitle}
