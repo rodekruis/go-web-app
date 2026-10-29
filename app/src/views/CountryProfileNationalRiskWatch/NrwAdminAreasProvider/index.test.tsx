@@ -569,16 +569,6 @@ test('drills into another admin area while one is selected', async () => {
     expect(adminAreas().drillPath).toEqual([awerial]);
 });
 
-test('drills down only into exposed admin levels', async () => {
-    await drillDown(borSouth);
-    await answer(borSouthPayams);
-    await drillDown(bor);
-    await answer(borBomas);
-
-    expect(adminAreas().adminLevel).toBe(4);
-    expect(adminAreas().hasChildren('SS03030101' as PlaceCode)).toBe(false);
-});
-
 test('does not drill up from the top, so admin level 1 is never shown', async () => {
     const shown = adminAreas();
 
@@ -874,7 +864,6 @@ test('opens at the admin area in the url without children, selected', async () =
     expect(url?.placeCode).toBe('SS0303');
     expect(requestedFilter()).toContain('adminLevel=2 AND placeCode IN');
     expect(adminAreas().adminLevel).toBe(2);
-    expect(adminAreas().hasChildren(borSouth.placeCode)).toBe(false);
     expect(adminAreas().selectedAdminArea).toBeUndefined();
 
     // Act

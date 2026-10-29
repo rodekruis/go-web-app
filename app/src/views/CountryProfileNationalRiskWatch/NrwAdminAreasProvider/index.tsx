@@ -362,17 +362,11 @@ function NrwAdminAreasProvider(props: {
 
     const value = useMemo<NrwAdminAreasContextProps>(
         () => {
-            const { shown, childlessPlaceCodes } = drill;
+            const { shown } = drill;
 
             function canDrillDown(placeCode: PlaceCode) {
                 return placeCode !== selectedAdminArea?.placeCode
                     && allExposedPlaceCodes.has(placeCode);
-            }
-
-            function hasChildren(placeCode: PlaceCode) {
-                return isDefined(event)
-                    && canNrwDrillBelow(event, adminLevel)
-                    && !childlessPlaceCodes.includes(placeCode);
             }
 
             function drillUpTo(targetAdminLevel: AdminLevel) {
@@ -397,7 +391,6 @@ function NrwAdminAreasProvider(props: {
                 hoveredPlaceCode,
                 onAdminAreaHoverChange: setHoveredPlaceCode,
                 canDrillDown,
-                hasChildren,
                 drillDown: (adminArea) => {
                     onUrlPlaceCodeChange(adminArea.placeCode);
                 },
@@ -412,7 +405,6 @@ function NrwAdminAreasProvider(props: {
             };
         },
         [
-            event,
             drill,
             allExposedPlaceCodes,
             exposedAdminAreas,
