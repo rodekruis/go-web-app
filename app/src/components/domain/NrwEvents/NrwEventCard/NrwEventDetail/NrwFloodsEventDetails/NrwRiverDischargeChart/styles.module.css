@@ -1,0 +1,150 @@
+.nrw-river-discharge-chart {
+    display: flex;
+    flex-direction: column;
+    gap: var(--go-ui-spacing-md);
+
+    .plot {
+        position: relative;
+        padding: 0 var(--go-ui-spacing-lg);
+    }
+
+    .chart {
+        display: block;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+        font-size: var(--go-ui-font-size-sm);
+
+        text {
+            fill: var(--go-ui-color-text-light);
+        }
+    }
+
+    .axis-title,
+    .marked-tick {
+        font-weight: var(--go-ui-font-weight-semibold);
+    }
+
+    .threshold {
+        line {
+            stroke: var(--nrw-color-alert);
+            stroke-width: 1;
+            stroke-dasharray: 4 3;
+        }
+
+        .return-period {
+            text-transform: uppercase;
+            font-size: 10px;
+            font-weight: var(--go-ui-font-weight-semibold);
+            fill: var(--nrw-color-alert);
+        }
+
+        &.single-threshold {
+            --nrw-color-alert: var(--go-ui-color-gray-90);
+        }
+
+        &.without-severity {
+            --nrw-color-alert: var(--go-ui-color-gray-60);
+        }
+    }
+
+    .range {
+        fill: var(--nrw-color-forecast-range);
+        fill-opacity: 0.65;
+    }
+
+    .median {
+        fill: none;
+        stroke: var(--nrw-color-forecast-median);
+        stroke-width: 3;
+        stroke-linejoin: round;
+    }
+
+    .current {
+        fill: var(--go-ui-color-white);
+        stroke: var(--nrw-color-forecast-median);
+        stroke-width: 2;
+    }
+
+    .marker {
+        fill: var(--nrw-color-alert);
+        stroke: var(--go-ui-color-white);
+        stroke-width: 2;
+    }
+
+    .tag {
+        position: absolute;
+        transform: translate(-50%, calc(-100% - var(--go-ui-spacing-3xs)));
+        border-radius: 8px;
+        background-color: var(--go-ui-color-background);
+        padding: 0 var(--go-ui-spacing-2xs);
+        text-transform: uppercase;
+        line-height: 1.5;
+        white-space: nowrap;
+        color: var(--go-ui-color-text);
+        font-size: 10px;
+        font-weight: var(--go-ui-font-weight-semibold);
+        pointer-events: none;
+
+        &.below {
+            transform: translate(-50%, var(--go-ui-spacing-3xs));
+        }
+    }
+
+    .legend {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+        gap: var(--go-ui-spacing-2xs);
+    }
+
+    .legend-items {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--go-ui-spacing-lg);
+        color: var(--go-ui-color-text-light);
+    }
+
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--go-ui-spacing-2xs);
+    }
+
+    .legend-label {
+        display: inline-flex;
+        align-items: flex-start;
+        gap: var(--go-ui-spacing-5xs);
+    }
+
+    .median-swatch {
+        border-radius: var(--go-ui-border-radius-sm);
+        background-color: var(--nrw-color-forecast-median);
+        width: 20px;
+        height: 3px;
+    }
+
+    .range-swatch {
+        opacity: 0.65;
+        border-radius: var(--go-ui-border-radius-sm);
+        background-color: var(--nrw-color-forecast-range);
+        width: 20px;
+        height: 12px;
+    }
+
+    .range-info {
+        display: inline-flex;
+        font-size: 12px;
+
+        &:hover {
+            color: var(--go-ui-color-dark-blue-30);
+        }
+    }
+}
+
+.range-info-tooltip {
+    max-width: 16rem;
+    font-size: var(--go-ui-font-size-sm);
+}

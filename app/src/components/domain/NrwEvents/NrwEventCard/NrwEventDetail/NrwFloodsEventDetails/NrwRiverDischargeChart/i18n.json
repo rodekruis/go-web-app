@@ -1,0 +1,19 @@
+{
+    "namespace": "nrwEvents",
+    "strings": {
+        "nrwRiverDischargeChartLabel": "River discharge forecast chart",
+        "nrwRiverDischargeChartUnit": "m³/s",
+        "nrwRiverDischargeChartReturnPeriodAxis": "Return period",
+        "nrwRiverDischargeChartReturnPeriod": "{returnPeriod} yr",
+        "nrwRiverDischargeChartDateAxis": "Date",
+        "nrwRiverDischargeChartStartTag": "Start",
+        "nrwRiverDischargeChartLowThresholdTag": "Low threshold",
+        "nrwRiverDischargeChartMediumThresholdTag": "Medium threshold",
+        "nrwRiverDischargeChartHighThresholdTag": "High threshold",
+        "nrwRiverDischargeChartSingleThresholdTag": "Threshold reached",
+        "nrwRiverDischargeChartMedianLegend": "Median forecast",
+        "nrwRiverDischargeChartRangeLegend": "Forecast range",
+        "nrwRiverDischargeChartRangeDescription": "The range of likely forecast scenarios.",
+        "nrwRiverDischargeChartProbability": "{probability}% probability of exceeding the {returnPeriod} year return period"
+    }
+}

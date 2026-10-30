@@ -85,6 +85,8 @@ export type NrwEventSelectHandler = (
 ) => void;
 export type NrwExposedAdminArea = NrwEvent['exposedAdminAreas'][string][number];
 export type NrwForecastSource = NrwEvent['forecastSources'][number];
+export type NrwFloodsDetails = NonNullable<NrwEvent['hazardTypeDetails']['floods']>;
+export type NrwReturnPeriodThreshold = NrwFloodsDetails['returnPeriodThresholds'][number];
 
 export type NrwCountry = NrwApiResponse<'/countries'>[number];
 export type NrwAdminLevelLabels = NonNullable<NrwCountry['adminLevelLabels']>;

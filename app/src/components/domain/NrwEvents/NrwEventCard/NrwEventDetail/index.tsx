@@ -34,6 +34,7 @@ import {
 
 import NrwDataSource from './NrwDataSource';
 import NrwExposedAdminAreas from './NrwExposedAdminAreas';
+import NrwFloodsEventDetails from './NrwFloodsEventDetails';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
@@ -132,6 +133,13 @@ function NrwEventDetail(props: Props) {
                     </div>
                     <NrwExposedAdminAreas />
                 </div>
+                {event.hazardType === 'floods' && isDefined(event.hazardTypeDetails.floods) && (
+                    <NrwFloodsEventDetails
+                        floodsDetails={event.hazardTypeDetails.floods}
+                        alertClass={event.alertClass}
+                        startAt={event.startAt}
+                    />
+                )}
                 {event.forecastSources.length > 0 && (
                     <div className={styles.panel}>
                         <div className={styles.panelHeading}>
