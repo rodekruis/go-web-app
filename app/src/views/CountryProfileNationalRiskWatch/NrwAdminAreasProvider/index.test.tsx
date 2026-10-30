@@ -281,6 +281,12 @@ function adminAreas() {
     return latest;
 }
 
+function selectedPlaceCodes() {
+    return adminAreas().selectedAdminAreas?.features.map(
+        ({ properties }) => properties.placeCode,
+    );
+}
+
 function unselectedPlaceCodes() {
     return adminAreas().unselectedAdminAreas?.features.map(
         ({ properties }) => properties.placeCode,
@@ -733,6 +739,51 @@ test('selects an admin area at the deepest level', async () => {
     expect(adminAreas().adminLevel).toBe(4);
     expect(adminAreas().drillPath).toEqual([borSouth, bor, langbar]);
     expect(adminAreas().parentAdminArea).toEqual(bor);
+});
+
+test('selects the admin area at the deepest level alone on the map, beside its siblings', async () => {
+    // Arrange: one boma is unexposed.
+    unselectedAdminAreasResponse = combined(counties, borSouthPayams);
+    await drillDown(borSouth);
+    await answer(borSouthPayams);
+    await drillDown(bor);
+    await answer(combined(borBomas, unexposedAdminAreaBelow('SS03030103', jonglei, borSouth, bor)));
+    const shownAdminAreas = adminAreas().adminAreas;
+    expect(adminAreas().selectedAdminAreas).toBe(shownAdminAreas);
+    expect(unexposedPlaceCodes()).toEqual(['SS03030103']);
+
+    // Act
+    await drillDown(langbar);
+
+    // Assert: its siblings, exposed or not, join the admin areas beside the drill path, while
+    // the shown level stays for the list and the legend.
+    expect(selectedPlaceCodes()).toEqual(['SS03030101']);
+    expect(unselectedPlaceCodes()).toEqual(['SS0401', 'SS030302', 'SS03030102', 'SS03030103']);
+    expect(unexposedPlaceCodes()).toBeUndefined();
+    expect(adminAreas().adminAreas).toBe(shownAdminAreas);
+
+    // Act
+    await drillUp();
+
+    // Assert
+    expect(adminAreas().selectedAdminAreas).toBe(shownAdminAreas);
+    expect(unselectedPlaceCodes()).toEqual(['SS0401', 'SS030302']);
+    expect(unexposedPlaceCodes()).toEqual(['SS03030103']);
+});
+
+test('selects the shown level on the map when the server does not know the selected admin area', async () => {
+    // Arrange: Awerial has no children, so its level is requested, and loads without it.
+    await openUrl('SS0401');
+    await answer(noAdminAreas);
+
+    // Act
+    await answer(lookedUpAdminArea(borSouth));
+
+    // Assert
+    expect(adminAreas().selectedAdminArea).toEqual(awerial);
+    expect(adminAreas().selectedAdminAreas).toBe(adminAreas().adminAreas);
+    expect(selectedPlaceCodes()).toEqual(['SS0303']);
+    expect(unselectedPlaceCodes()).toBeUndefined();
 });
 
 test('moves the selection to another admin area at the deepest level', async () => {

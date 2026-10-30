@@ -19,6 +19,7 @@ export interface NrwAdminAreasContextProps {
     adminLevel: AdminLevel;
     adminLevelLabels: NrwAdminLevelLabels | undefined;
     adminAreas: NrwAdminAreaFeatureCollection | undefined;
+    selectedAdminAreas: NrwAdminAreaFeatureCollection | undefined;
     unselectedAdminAreas: NrwAdminAreaFeatureCollection | undefined;
     unexposedAdminAreas: NrwAdminAreaFeatureCollection | undefined;
     exposedPopulationScale: NrwExposedPopulationScale | undefined;
@@ -40,6 +41,7 @@ const NrwAdminAreasContext = createContext<NrwAdminAreasContextProps>({
     adminLevel: minAdminLevel,
     adminLevelLabels: undefined,
     adminAreas: undefined,
+    selectedAdminAreas: undefined,
     unselectedAdminAreas: undefined,
     unexposedAdminAreas: undefined,
     exposedPopulationScale: undefined,

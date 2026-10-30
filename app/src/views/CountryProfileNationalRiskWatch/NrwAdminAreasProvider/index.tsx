@@ -323,6 +323,19 @@ function NrwAdminAreasProvider(props: {
         )),
         [allExposedPlaceCodes, shownLevelAdminAreas],
     );
+    // The admin area selected at the deepest level.
+    const selectedFeature = useMemo(
+        () => exposedAdminAreas?.features.find(
+            ({ properties }) => properties.placeCode === selectedAdminArea?.placeCode,
+        ),
+        [exposedAdminAreas, selectedAdminArea],
+    );
+    const selectedAdminAreas = useMemo(
+        () => (isDefined(selectedFeature)
+            ? getFeatureCollection([selectedFeature])
+            : exposedAdminAreas),
+        [exposedAdminAreas, selectedFeature],
+    );
     const { unselectedAdminAreas, unexposedAdminAreas } = useMemo(
         () => {
             const shownLevelFeatures = shownLevelAdminAreas?.features ?? [];
@@ -331,19 +344,30 @@ function NrwAdminAreasProvider(props: {
                 shownPath,
                 initialAdminLevel,
             );
+            // The siblings of the selected admin area lie beside the drill path as well.
+            const siblingFeatures = isDefined(selectedFeature)
+                ? shownLevelFeatures.filter(({ properties }) => (
+                    properties.placeCode !== selectedFeature.properties.placeCode
+                ))
+                : [];
 
-            // Beside the drill path, exposed or not, all admin areas show as unselected:
-            // only on the shown level are the unexposed ones set apart.
+            // Beside the drill path, exposed or not, all admin areas show as unselected: only
+            // on the shown level, without a selection, are the unexposed ones set apart.
             return {
-                unselectedAdminAreas: getFeatureCollection(besidePathFeatures),
-                unexposedAdminAreas: getFeatureCollection(shownLevelFeatures.filter(
-                    (feature) => !isExposed(allExposedPlaceCodes, feature),
-                )),
+                unselectedAdminAreas: getFeatureCollection(
+                    [...besidePathFeatures, ...siblingFeatures],
+                ),
+                unexposedAdminAreas: isDefined(selectedFeature)
+                    ? undefined
+                    : getFeatureCollection(shownLevelFeatures.filter(
+                        (feature) => !isExposed(allExposedPlaceCodes, feature),
+                    )),
             };
         },
         [
             allExposedPlaceCodes,
             shownLevelAdminAreas,
+            selectedFeature,
             unselectedAdminAreasResponse,
             shownPath,
             initialAdminLevel,
@@ -378,6 +402,7 @@ function NrwAdminAreasProvider(props: {
                 adminLevel,
                 adminLevelLabels,
                 adminAreas: exposedAdminAreas,
+                selectedAdminAreas,
                 unselectedAdminAreas,
                 unexposedAdminAreas,
                 exposedPopulationScale,
@@ -408,6 +433,7 @@ function NrwAdminAreasProvider(props: {
             drill,
             allExposedPlaceCodes,
             exposedAdminAreas,
+            selectedAdminAreas,
             unselectedAdminAreas,
             unexposedAdminAreas,
             exposedPopulationScale,
