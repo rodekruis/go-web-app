@@ -86,6 +86,7 @@ function NrwShapeLayer(props: {
         pending,
         hoveredPlaceCode,
         onAdminAreaHoverChange,
+        isExposed,
         canDrillDown,
         drillDown,
     } = useContext(NrwAdminAreasContext);
@@ -176,13 +177,11 @@ function NrwShapeLayer(props: {
     // The grey admin areas can be of several levels, so the tooltip names the level.
     const adminLevelLabel = adminLevelLabels?.[hoveredAdminArea.adminLevel]?.singular;
 
-    // An unexposed admin area has no exposed population, unlike an unknown one.
-    const isUnexposed = unexposedAdminAreas?.features.some(
-        ({ properties }) => properties.placeCode === hoveredAdminArea.placeCode,
-    ) ?? false;
-    const exposedPopulation = isUnexposed
-        ? 0
-        : exposedPopulationScale?.exposedPopulationByPlaceCode.get(hoveredAdminArea.placeCode);
+    // An unexposed admin area, on the shown level or beside the drill path, has no exposed
+    // population, unlike an exposed one with an unknown population.
+    const exposedPopulation = isExposed(hoveredAdminArea.placeCode)
+        ? exposedPopulationScale?.exposedPopulationByPlaceCode.get(hoveredAdminArea.placeCode)
+        : 0;
 
     return (
         <NrwMarker
