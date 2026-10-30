@@ -12,6 +12,7 @@ import {
     type PlaceCode,
     type PlaceCodeChangeHandler,
 } from '../types';
+import { minAdminLevel } from '../utils';
 
 export interface NrwAdminAreasContextProps {
     initialAdminLevel: AdminLevel;
@@ -28,15 +29,14 @@ export interface NrwAdminAreasContextProps {
     hoveredPlaceCode: PlaceCode | undefined;
     onAdminAreaHoverChange: PlaceCodeChangeHandler;
     canDrillDown: (placeCode: PlaceCode) => boolean;
-    hasChildren: (placeCode: PlaceCode) => boolean;
     drillDown: AdminAreaDrillDownHandler;
     drillUp: () => void;
     drillUpTo: AdminLevelDrillHandler;
 }
 
 const NrwAdminAreasContext = createContext<NrwAdminAreasContextProps>({
-    initialAdminLevel: 1 as AdminLevel,
-    adminLevel: 1 as AdminLevel,
+    initialAdminLevel: minAdminLevel,
+    adminLevel: minAdminLevel,
     adminLevelLabels: undefined,
     adminAreas: undefined,
     unselectedAdminAreas: undefined,
@@ -52,7 +52,6 @@ const NrwAdminAreasContext = createContext<NrwAdminAreasContextProps>({
         console.warn('NrwAdminAreasContext::onAdminAreaHoverChange called before it was initialized');
     },
     canDrillDown: () => false,
-    hasChildren: () => false,
     drillDown: () => {
         // eslint-disable-next-line no-console
         console.warn('NrwAdminAreasContext::drillDown called before it was initialized');

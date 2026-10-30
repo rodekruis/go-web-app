@@ -176,15 +176,16 @@ describe('getNrwExposedPopulationByPlaceCode', () => {
 });
 
 describe('getNrwExposedAdminLevels', () => {
-    test('lists the sub-national admin levels with exposed areas, least granular first', () => {
+    test('lists the admin levels with exposed areas from the minimum down, least granular first', () => {
         const event = createEvent({
-            2: [createArea('ET0201', 'Awsi Rasu', 30000)],
+            3: [createArea('ET020101', 'Asayita Town', 30000)],
             0: [createArea('ET', 'Ethiopia', 61800)],
             1: [createArea('ET02', 'Afar', 40000)],
-            3: [],
+            2: [createArea('ET0201', 'Awsi Rasu', 30000)],
+            4: [],
         });
 
-        expect(getNrwExposedAdminLevels(event)).toEqual([1, 2]);
+        expect(getNrwExposedAdminLevels(event)).toEqual([2, 3]);
     });
 });
 
@@ -192,11 +193,22 @@ describe('getNrwInitialAdminLevel', () => {
     test('opens at the least granular level with more than one exposed area', () => {
         const event = createEvent({
             0: [createArea('SS', 'South Sudan', 300000)],
+            1: [createArea('SS03', 'Jonglei', 300000)],
+            2: [createArea('SS0301', 'Akobo', 250000), createArea('SS0303', 'Bor South', 50000)],
+            3: [createArea('SS030101', 'Alali', 250000), createArea('SS030301', 'Anyidi', 50000)],
+        });
+
+        expect(getNrwInitialAdminLevel(event)).toBe(2);
+    });
+
+    test('skips admin level 1, also when it splits the exposure', () => {
+        const event = createEvent({
+            0: [createArea('SS', 'South Sudan', 300000)],
             1: [createArea('SS03', 'Jonglei', 250000), createArea('SS04', 'Unity', 50000)],
             2: [createArea('SS0301', 'Akobo', 250000), createArea('SS0401', 'Abiemnhom', 50000)],
         });
 
-        expect(getNrwInitialAdminLevel(event)).toBe(1);
+        expect(getNrwInitialAdminLevel(event)).toBe(2);
     });
 
     test('skips the levels with a single exposed area', () => {
@@ -219,9 +231,10 @@ describe('getNrwInitialAdminLevel', () => {
         expect(getNrwInitialAdminLevel(event)).toBe(3);
     });
 
-    test('opens one level below the country without exposed sub-national areas', () => {
-        expect(getNrwInitialAdminLevel(createEvent({}))).toBe(1);
-        expect(getNrwInitialAdminLevel(createEvent({ 0: [createArea('MW', 'Malawi', 1)] }))).toBe(1);
+    test('opens at the minimum admin level without exposed areas on it or below', () => {
+        expect(getNrwInitialAdminLevel(createEvent({}))).toBe(2);
+        expect(getNrwInitialAdminLevel(createEvent({ 0: [createArea('MW', 'Malawi', 1)] }))).toBe(2);
+        expect(getNrwInitialAdminLevel(createEvent({ 1: [createArea('MW2', 'Central', 1)] }))).toBe(2);
     });
 });
 

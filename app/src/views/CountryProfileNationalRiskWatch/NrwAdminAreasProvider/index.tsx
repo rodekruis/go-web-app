@@ -32,6 +32,7 @@ import {
 } from '../types';
 import {
     getAdminAreasOfRequestsQuery,
+    minAdminLevel,
     parseCountryCode,
     placeCodeLevelKeys,
 } from '../utils';
@@ -214,7 +215,7 @@ function NrwAdminAreasProvider(props: {
 
     // Only the exposed admin levels of the event can be drilled into, starting
     // at the level where the exposure splits into several areas.
-    const initialAdminLevel = isDefined(event) ? getNrwInitialAdminLevel(event) : 1 as AdminLevel;
+    const initialAdminLevel = isDefined(event) ? getNrwInitialAdminLevel(event) : minAdminLevel;
     const adminLevel = (initialAdminLevel + drill.shown.path.length) as AdminLevel;
 
     const allExposedPlaceCodes = useMemo(
@@ -361,17 +362,11 @@ function NrwAdminAreasProvider(props: {
 
     const value = useMemo<NrwAdminAreasContextProps>(
         () => {
-            const { shown, childlessPlaceCodes } = drill;
+            const { shown } = drill;
 
             function canDrillDown(placeCode: PlaceCode) {
                 return placeCode !== selectedAdminArea?.placeCode
                     && allExposedPlaceCodes.has(placeCode);
-            }
-
-            function hasChildren(placeCode: PlaceCode) {
-                return isDefined(event)
-                    && canNrwDrillBelow(event, adminLevel)
-                    && !childlessPlaceCodes.includes(placeCode);
             }
 
             function drillUpTo(targetAdminLevel: AdminLevel) {
@@ -396,7 +391,6 @@ function NrwAdminAreasProvider(props: {
                 hoveredPlaceCode,
                 onAdminAreaHoverChange: setHoveredPlaceCode,
                 canDrillDown,
-                hasChildren,
                 drillDown: (adminArea) => {
                     onUrlPlaceCodeChange(adminArea.placeCode);
                 },
@@ -411,7 +405,6 @@ function NrwAdminAreasProvider(props: {
             };
         },
         [
-            event,
             drill,
             allExposedPlaceCodes,
             exposedAdminAreas,
