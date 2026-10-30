@@ -64,10 +64,11 @@ function getAxisLabelWidth(
     );
 }
 
-// Short day.month label for the date axis, e.g. 19.3
+// Short day.month label for the date axis, e.g. 19.3. The forecast days are UTC calendar
+// days, so they are labelled in UTC, or they would shift a day in other time zones.
 function formatTickDate(value: string): string {
     const date = new Date(value);
-    return `${date.getDate()}.${date.getMonth() + 1}`;
+    return `${date.getUTCDate()}.${date.getUTCMonth() + 1}`;
 }
 
 interface Marker {

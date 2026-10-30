@@ -111,6 +111,24 @@ describe('NrwFloodsEventDetails', () => {
         expect(screen.getByText('90% probability of exceeding the 10 year return period')).toBeInTheDocument();
     });
 
+    test('labels the dates by their UTC calendar day, as the pipeline forecast days are', () => {
+        // Arrange: forecast days from midnight UTC, which is the previous day west of UTC
+        const floodsDetails = createFloodsDetails({
+            timeSeries: createFloodsDetails().alertDetails.timeSeries.map((entry, index) => ({
+                ...entry,
+                start: new Date(Date.UTC(2026, 9, 26 + index)).toISOString(),
+                end: new Date(Date.UTC(2026, 9, 26 + index, 23, 59, 59)).toISOString(),
+            })),
+        });
+
+        // Act
+        fireEvent.click(renderForecast(floodsDetails));
+
+        // Assert
+        expect(screen.getByText('26.10')).toBeInTheDocument();
+        expect(screen.queryByText('25.10')).toBeNull();
+    });
+
     test('marks a single threshold without an alert class', () => {
         // Arrange
         const floodsDetails = createFloodsDetails();
