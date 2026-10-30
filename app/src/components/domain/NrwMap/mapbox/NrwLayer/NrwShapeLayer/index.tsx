@@ -79,6 +79,7 @@ function NrwShapeLayer(props: {
 
     const {
         adminAreas,
+        selectedAdminAreas,
         unselectedAdminAreas,
         unexposedAdminAreas,
         exposedPopulationScale,
@@ -97,10 +98,12 @@ function NrwShapeLayer(props: {
     const unselectedId = `${id}-unselected`;
     const unexposedId = `${id}-unexposed`;
 
-    // Fit the map to the admin areas of the level drilled into.
+    // Fit the map to the admin areas of the level drilled into, or to the selected admin area.
     const bounds = useMemo(
-        () => (isDefined(adminAreas) ? getFeatureCollectionBounds(adminAreas) : undefined),
-        [adminAreas],
+        () => (isDefined(selectedAdminAreas)
+            ? getFeatureCollectionBounds(selectedAdminAreas)
+            : undefined),
+        [selectedAdminAreas],
     );
     useNrwMapFitBounds(bounds);
 
@@ -111,7 +114,7 @@ function NrwShapeLayer(props: {
     // clickable admin areas stay on top on shared borders.
     const mapLayers = useMemo(
         () => {
-            if (isNotDefined(adminAreas) || isNotDefined(exposedPopulationScale)) {
+            if (isNotDefined(selectedAdminAreas) || isNotDefined(exposedPopulationScale)) {
                 return undefined;
             }
 
@@ -121,7 +124,11 @@ function NrwShapeLayer(props: {
             const unselectedMapLayers = isDefined(unselectedAdminAreas)
                 ? getFlatAdminAreaLayer(unselectedId, unselectedAdminAreas, mapUnselectedStyle)
                 : [];
-            const selectedMapLayers = getAdminAreaLayer(id, adminAreas, exposedPopulationScale);
+            const selectedMapLayers = getAdminAreaLayer(
+                id,
+                selectedAdminAreas,
+                exposedPopulationScale,
+            );
 
             return [...unexposedMapLayers, ...unselectedMapLayers, ...selectedMapLayers];
         },
@@ -129,7 +136,7 @@ function NrwShapeLayer(props: {
             id,
             unselectedId,
             unexposedId,
-            adminAreas,
+            selectedAdminAreas,
             unselectedAdminAreas,
             unexposedAdminAreas,
             exposedPopulationScale,
