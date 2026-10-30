@@ -332,14 +332,13 @@ function NrwAdminAreasProvider(props: {
                 initialAdminLevel,
             );
 
+            // Beside the drill path, exposed or not, all admin areas show as unselected:
+            // only on the shown level are the unexposed ones set apart.
             return {
-                unselectedAdminAreas: getFeatureCollection(besidePathFeatures.filter(
-                    (feature) => isExposed(allExposedPlaceCodes, feature),
+                unselectedAdminAreas: getFeatureCollection(besidePathFeatures),
+                unexposedAdminAreas: getFeatureCollection(shownLevelFeatures.filter(
+                    (feature) => !isExposed(allExposedPlaceCodes, feature),
                 )),
-                unexposedAdminAreas: getFeatureCollection(
-                    [...besidePathFeatures, ...shownLevelFeatures]
-                        .filter((feature) => !isExposed(allExposedPlaceCodes, feature)),
-                ),
             };
         },
         [
@@ -390,6 +389,7 @@ function NrwAdminAreasProvider(props: {
                 selectedAdminArea,
                 hoveredPlaceCode,
                 onAdminAreaHoverChange: setHoveredPlaceCode,
+                isExposed: (placeCode) => allExposedPlaceCodes.has(placeCode),
                 canDrillDown,
                 drillDown: (adminArea) => {
                     onUrlPlaceCodeChange(adminArea.placeCode);

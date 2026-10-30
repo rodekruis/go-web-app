@@ -447,7 +447,7 @@ test('keeps the shown admin areas when the admin areas beside the drill path loa
     expect(adminAreas().adminAreas).toBe(shownAdminAreas);
 });
 
-test('shows the unexposed admin areas apart, on the shown level and beside the drill path', async () => {
+test('shows the unexposed admin areas apart on the shown level, and as unselected beside the drill path', async () => {
     // Arrange
     unselectedAdminAreasResponse = combined(counties, borSouthPayams, makuach);
 
@@ -465,8 +465,10 @@ test('shows the unexposed admin areas apart, on the shown level and beside the d
     await answer(combined(borBomas, unexposedAdminAreaBelow('SS03030103', jonglei, borSouth, bor)));
 
     // Assert
-    expect(unselectedPlaceCodes()).toEqual(['SS0401', 'SS030302']);
-    expect(unexposedPlaceCodes()).toEqual(['SS030303', 'SS03030103']);
+    expect(unselectedPlaceCodes()).toEqual(['SS0401', 'SS030302', 'SS030303']);
+    expect(unexposedPlaceCodes()).toEqual(['SS03030103']);
+    expect(adminAreas().isExposed('SS030302' as PlaceCode)).toBe(true);
+    expect(adminAreas().isExposed('SS030303' as PlaceCode)).toBe(false);
 });
 
 test('selects an admin area with only unexposed children, as the finest level', async () => {
