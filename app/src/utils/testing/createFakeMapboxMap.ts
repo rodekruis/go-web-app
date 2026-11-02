@@ -5,6 +5,7 @@ import {
 import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 type LayerSpecification = Parameters<MapboxMap['addLayer']>[0];
+type FitBounds = Parameters<MapboxMap['fitBounds']>[0];
 
 // The source a layer uses. Mapbox registers an inline source under the id of its layer.
 function getSourceId(layer: LayerSpecification) {
@@ -33,6 +34,7 @@ function resolveListener(
 interface FakeMapboxMap {
     map: MapboxMap;
     calls: string[];
+    fitBoundsCalls: FitBounds[];
     canvas: { style: { cursor: string } };
     getLayerSpecification: (id: string) => LayerSpecification | undefined;
     getVisibility: (id: string) => string | undefined;
@@ -49,6 +51,7 @@ function createFakeMapboxMap(): FakeMapboxMap {
     const listeners = new Map<string, Set<FakeEventHandler>>();
     const canvas = { style: { cursor: '' } };
     const calls: string[] = [];
+    const fitBoundsCalls: FitBounds[] = [];
     let renderedFeatures: unknown[] = [];
     let style: object | undefined = {};
 
@@ -160,8 +163,9 @@ function createFakeMapboxMap(): FakeMapboxMap {
         queryRenderedFeatures() {
             return renderedFeatures;
         },
-        fitBounds() {
+        fitBounds(bounds: FitBounds) {
             calls.push('fitBounds');
+            fitBoundsCalls.push(bounds);
         },
         getCanvas() {
             return canvas;
@@ -172,6 +176,7 @@ function createFakeMapboxMap(): FakeMapboxMap {
         // Only the methods above are implemented.
         map: fakeMap as unknown as MapboxMap,
         calls,
+        fitBoundsCalls,
         canvas,
         getLayerSpecification: (id) => layers.get(id),
         getVisibility: (id) => visibilities.get(id),

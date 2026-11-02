@@ -7,6 +7,10 @@ import {
     noOp,
 } from '@togglecorp/fujs';
 import {
+    type FillLayerSpecification,
+    type GeoJSONSourceSpecification,
+} from 'mapbox-gl-v3';
+import {
     afterEach,
     describe,
     expect,
@@ -73,6 +77,8 @@ const borSouthPayams = createAdminAreas(
     createSquareAdminAreaFeature('SS030301', 31, 6),
     createSquareAdminAreaFeature('SS030302', 32, 6),
 );
+const borSouthBounds = [{ lng: 31, lat: 6 }, { lng: 33, lat: 7 }];
+const payamBounds = [{ lng: 31, lat: 6 }, { lng: 32, lat: 7 }];
 const besidePath = createAdminAreas(
     createSquareAdminAreaFeature('SS03', 30, 5),
     createSquareAdminAreaFeature('SS04', 28, 5),
@@ -80,19 +86,23 @@ const besidePath = createAdminAreas(
     createSquareAdminAreaFeature('SS0304', 33, 6),
 );
 
+const layerId = 'layer-SSD-exposedPopulation';
+const unselectedLayerId = `${layerId}-unselected`;
+
 function setup(preserveInitialView: boolean) {
     const fake = createFakeMapboxMap();
+    let urlPlaceCode = 'SS0303' as PlaceCode;
 
     // A new element each time, so React renders it again.
     const renderLink = () => (
         <NrwMapTestHost map={fake.map} preserveInitialView={preserveInitialView}>
             <NrwAdminAreasProvider
                 event={event}
-                urlPlaceCode={'SS0303' as PlaceCode}
+                urlPlaceCode={urlPlaceCode}
                 onUrlPlaceCodeChange={noOp}
             >
                 <NrwShapeLayer
-                    id="layer-SSD-exposedPopulation"
+                    id={layerId}
                     isVisible
                     layerAnchorId="anchor-exposedPopulation"
                 />
@@ -112,11 +122,36 @@ function setup(preserveInitialView: boolean) {
         rerender(renderLink());
     }
 
+    // Open an admin area through the url, as a click on it does.
+    function openUrl(placeCode: string) {
+        urlPlaceCode = placeCode as PlaceCode;
+        rerender(renderLink());
+    }
+
     function fitCount() {
         return fake.calls.filter((call) => call === 'fitBounds').length;
     }
 
-    return { answerShownLevel, answerBesidePath, fitCount };
+    function lastFitBounds() {
+        return fake.fitBoundsCalls.at(-1);
+    }
+
+    // The place codes of the admin areas drawn in the layer, or undefined without the layer.
+    function drawnPlaceCodes(id: string) {
+        const layer = fake.getLayerSpecification(id) as
+            (FillLayerSpecification & { source: GeoJSONSourceSpecification }) | undefined;
+        return (layer?.source.data as GeoJSON.FeatureCollection | undefined)?.features
+            .map((feature) => feature.properties?.placeCode);
+    }
+
+    return {
+        answerShownLevel,
+        answerBesidePath,
+        openUrl,
+        fitCount,
+        lastFitBounds,
+        drawnPlaceCodes,
+    };
 }
 
 afterEach(() => {
@@ -147,5 +182,55 @@ describe('NrwShapeLayer', () => {
 
         // Assert
         expect(fitCount()).toBe(1);
+    });
+
+    test('draws and fits the selected admin area alone, and its level again once cleared', () => {
+        // Arrange
+        const {
+            answerShownLevel,
+            openUrl,
+            fitCount,
+            lastFitBounds,
+            drawnPlaceCodes,
+        } = setup(false);
+        answerShownLevel(borSouthPayams);
+        expect(lastFitBounds()).toEqual(borSouthBounds);
+
+        // Act
+        openUrl('SS030301');
+
+        // Assert: its sibling is drawn as unselected.
+        expect(drawnPlaceCodes(layerId)).toEqual(['SS030301']);
+        expect(drawnPlaceCodes(unselectedLayerId)).toEqual(['SS030302']);
+        expect(fitCount()).toBe(2);
+        expect(lastFitBounds()).toEqual(payamBounds);
+
+        // Act: the Back button clears the selection.
+        openUrl('SS0303');
+
+        // Assert
+        expect(drawnPlaceCodes(layerId)).toEqual(['SS030301', 'SS030302']);
+        expect(drawnPlaceCodes(unselectedLayerId)).toBeUndefined();
+        expect(fitCount()).toBe(3);
+        expect(lastFitBounds()).toEqual(borSouthBounds);
+    });
+
+    test('keeps the map view when the admin areas beside the drill path load with a selection', () => {
+        // Arrange
+        const {
+            answerShownLevel,
+            answerBesidePath,
+            openUrl,
+            fitCount,
+        } = setup(false);
+        answerShownLevel(borSouthPayams);
+        openUrl('SS030301');
+        expect(fitCount()).toBe(2);
+
+        // Act
+        answerBesidePath(besidePath);
+
+        // Assert
+        expect(fitCount()).toBe(2);
     });
 });
