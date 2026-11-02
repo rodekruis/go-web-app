@@ -3,7 +3,7 @@
 A system that forecasts Early Warning alerts, disseminates notifications, and visualizes exposure information to support decision making, following the country advisory. It has:
 
 - A front-end, which is being developed in (a fork of) this repo. It can be rendered as standalone, or embedded within the IFRC GO navigation structure.
-- And `data pipelines` (producing forecasts) and `back-end services` (ingesting and processing forecast data via API and publishing this - alongside seed data - via APIs) which are developed in a [separate repo](https://github.com/rodekruis/IBF/blob/main).
+- And `data pipelines` (producing forecasts) and `back-end services` (ingesting and processing forecast data via API and publishing this - alongside seed data - via APIs) which are developed in a [separate repo](https://github.com/rodekruis/NRW/blob/main).
 
 ## Getting started
 
@@ -22,7 +22,7 @@ The broad steps are:
 
 ### Start
 
-1. Launch the [NRW backend services](https://github.com/rodekruis/IBF/blob/main/services) and populate the DB. See [README](https://github.com/rodekruis/IBF/blob/main/README.md)
+1. Launch the [NRW backend services](https://github.com/rodekruis/NRW/blob/main/services) and populate the DB. See [README](https://github.com/rodekruis/NRW/blob/main/README.md)
 2. Generate TypeScript types for talking to the various backends:
 3. Check out all submodules: `git submodule update --init --recursive`
 4. In `app/` run `pnpm initialize:type`
@@ -39,12 +39,12 @@ The CI workflow needs the environment variable `FONTAWESOME_API_KEY`.
 
 ## Flood depth legend
 
-The flood depth legend colours and endpoint labels are defined in `app/src/utils/nrw/colors.ts`. They duplicate the backend's `FLOOD_DEPTH_CONFIG` in `services/api-service/src/utils/raster-colorization.helper.ts` in the IBF repo. Keep them aligned when changing raster styling; the legend currently shows `<0.25 m` and `>2.5 m`. The API does not provide these values.
+The flood depth legend colours and endpoint labels are defined in `app/src/utils/nrw/colors.ts`. They duplicate the backend's `FLOOD_DEPTH_CONFIG` in `services/api-service/src/utils/raster-colorization.helper.ts` in the NRW repo. Keep them aligned when changing raster styling; the legend currently shows `<0.25 m` and `>2.5 m`. The API does not provide these values.
 
 ## Updating NRW API types
 
 Do this when the NRW backend API changes.
 
-1. Copy the new OpenAPI schema from `services/api-service/nrw.openapi-schema.json` in the IBF backend repo to `app/schemas/nrw.openapi-schema.json`
+1. Copy the new OpenAPI schema from `services/api-service/nrw.openapi-schema.json` in the NRW backend repo to `app/schemas/nrw.openapi-schema.json`
 2. From `/app/`, run `pnpm generate:type:nrw`
 3. Commit the updated schema. The generated types are gitignored; CI generates them from the schema with `pnpm generate:type`
