@@ -12,40 +12,33 @@ import {
 import { alertClassNames } from '#utils/nrw/colors';
 import {
     formatNrwDischarge,
+    getNrwForecastMarkers,
     getNrwReachedSeverityThreshold,
     getNrwThresholdAlertClass,
-    getNrwThresholdReachedIndex,
-    getNrwTimeSeriesIndex,
+    type NrwForecastMarker,
 } from '#utils/nrw/floods';
 import {
     type NrwEvent,
     type NrwFloodsDetails,
-    type NrwReturnPeriodThreshold,
+    type NrwSeverityThreshold,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import i18n from './i18n.json';
 import styles from './styles.module.css';
 
-// The chart is drawn in a fixed coordinate space and scales with the card width.
-// Labels are positioned without measuring the rendered text: widths are estimated from
-// per-character widths, tuned against Poppins at the chart's font sizes. A different font
-// or very wide characters (e.g. in a translation) can make them a few units off.
+// Fixed chart units, scaled to the card width; label widths are estimated for Poppins.
 const chartWidth = 346;
 const chartHeight = 140;
 const headerBaseline = 12;
-// Fixed room for the return period labels on the right, sized for labels up to "10 YR".
-// Wider ones, like "100 YR", would touch the end of the threshold lines.
+// Room for return period labels up to "10 YR".
 const plotRight = chartWidth - 32;
-// The values span the plot from top to bottom. The margins below are fixed in chart units:
-// the plot starts just below the axis titles (with room for a point's radius), and ends
-// with room for a point above the dates.
+// Room for the axis titles above and the dates below, each plus a point radius.
 const plotTop = 24;
 const plotBottom = 116;
 const xAxisBaseline = plotBottom + 20;
 const pointRadius = 3;
 
-// The plot starts right after the widest label on its left: a threshold value or the
-// date axis title. Estimated per-character widths of the 12px axis labels:
+// Estimated per-character widths of the 12px axis labels.
 const axisCharacterWidth = 6.5;
 const axisTitleCharacterWidth = 7.2;
 const axisPunctuationWidth = 3;
@@ -64,23 +57,22 @@ function getAxisLabelWidth(
     );
 }
 
-// Short day.month label for the date axis, e.g. 19.3. The forecast days are UTC calendar
-// days, so they are labelled in UTC, or they would shift a day in other time zones.
+// Forecast days are UTC calendar days, so they are labelled in UTC.
 function formatTickDate(value: string): string {
     const date = new Date(value);
     return `${date.getUTCDate()}.${date.getUTCMonth() + 1}`;
 }
 
-interface Marker {
-    key: string;
-    label: string;
-    position: number;
-    value: number;
+function formatMarkerDate(value: string): string {
+    return new Date(value).toLocaleDateString(
+        undefined,
+        { day: 'numeric', month: 'long', timeZone: 'UTC' },
+    );
 }
 
-// Estimated tag size in chart units (10px uppercase label plus padding). Only used to
-// decide whether two tags overlap, so a small error just moves a tag below its marker
-// a bit early or late.
+type Marker = NrwForecastMarker & { label: string };
+
+// Estimated tag size in chart units, only used to detect overlapping tags.
 const tagCharacterWidth = 6.5;
 const tagPaddingWidth = 15;
 const tagHeight = 15;
@@ -135,9 +127,7 @@ function NrwRiverDischargeChart(props: Props) {
         ...thresholdValues.map((value) => getAxisLabelWidth(formatNrwDischarge(value))),
     ) + axisLabelGap;
 
-    // The dates span the plot from edge to edge, evenly spaced, with each data point above
-    // the centre of its date: the first date starts at the left edge, the last ends at the
-    // right edge. The threshold lines span the full plot.
+    // The first and last date labels end at the plot edges.
     const firstDateHalfWidth = getAxisLabelWidth(formatTickDate(firstEntry.start)) / 2;
     const lastDateHalfWidth = getAxisLabelWidth(
         formatTickDate(timeSeries.at(-1)?.start ?? firstEntry.start),
@@ -162,70 +152,48 @@ function NrwRiverDischargeChart(props: Props) {
         .reverse();
     const rangePath = `M${[...rangeUpperPoints, ...rangeLowerPoints].join(' L')} Z`;
 
-    const markers: Marker[] = [];
-
-    // Markers sit on the median of the forecast day they fall on. They only mark moments
-    // that happen during the forecast: whatever is already the case on its first day,
-    // like a started event or a reached threshold, gets no marker.
     const reachedSeverityThreshold = getNrwReachedSeverityThreshold(floodsDetails);
-    const thresholdReachedIndex = isDefined(reachedSeverityThreshold)
-        ? getNrwThresholdReachedIndex(timeSeries, reachedSeverityThreshold.thresholdValue)
-        : undefined;
-    const thresholdReachedEntry = isDefined(thresholdReachedIndex)
-        ? timeSeries[thresholdReachedIndex]
-        : undefined;
-
-    // The start gives way to the threshold reached on the same day.
-    const startIndex = getNrwTimeSeriesIndex(timeSeries, startAt);
-    const startEntry = isDefined(startIndex) && startIndex > 0
-        ? timeSeries[startIndex]
-        : undefined;
-    if (isDefined(startIndex) && isDefined(startEntry) && startIndex !== thresholdReachedIndex) {
-        markers.push({
-            key: 'start',
-            label: strings.nrwRiverDischargeChartStartTag,
-            position: startIndex,
-            value: startEntry.median,
-        });
-    }
-
-    if (
-        isDefined(thresholdReachedIndex)
-        && isDefined(thresholdReachedEntry)
-        && isDefined(reachedSeverityThreshold)
-    ) {
-        const thresholdTags: Record<
-            NonNullable<NrwReturnPeriodThreshold['severityClass']>,
-            string
-        > = {
-            low: strings.nrwRiverDischargeChartLowThresholdTag,
-            medium: strings.nrwRiverDischargeChartMediumThresholdTag,
-            high: strings.nrwRiverDischargeChartHighThresholdTag,
-            singleThreshold: strings.nrwRiverDischargeChartSingleThresholdTag,
-        };
-
-        markers.push({
-            key: 'thresholdReached',
-            label: isDefined(reachedSeverityThreshold.severityClass)
-                ? thresholdTags[reachedSeverityThreshold.severityClass]
-                : strings.nrwRiverDischargeChartSingleThresholdTag,
-            position: thresholdReachedIndex,
-            value: thresholdReachedEntry.median,
-        });
-    }
+    const thresholdTags: Record<NrwSeverityThreshold['severityClass'], string> = {
+        low: strings.nrwRiverDischargeChartLowThresholdTag,
+        medium: strings.nrwRiverDischargeChartMediumThresholdTag,
+        high: strings.nrwRiverDischargeChartHighThresholdTag,
+        singleThreshold: strings.nrwRiverDischargeChartSingleThresholdTag,
+    };
+    const markers: Marker[] = getNrwForecastMarkers(
+        timeSeries,
+        startAt,
+        reachedSeverityThreshold,
+    ).map((marker) => ({
+        ...marker,
+        label: marker.key === 'start'
+            ? strings.nrwRiverDischargeChartStartTag
+            : thresholdTags[marker.severityClass],
+    }));
 
     // The days on which a marker falls are emphasized on the date axis.
-    const markedIndices = markers.map(({ position }) => position);
+    const markedIndices = markers.map(({ index }) => index);
 
-    // Tags sit above their marker. When two tags would overlap, the tag of the lower
-    // marker moves below it instead.
+    const chartLabel = [
+        strings.nrwRiverDischargeChartLabel,
+        ...markers.flatMap(({ label, index }) => {
+            const entry = timeSeries[index];
+            return isDefined(entry)
+                ? [resolveToString(
+                    strings.nrwRiverDischargeChartMarkerDescription,
+                    { tag: label, date: formatMarkerDate(entry.start) },
+                )]
+                : [];
+        }),
+    ].join('. ');
+
+    // When two tags overlap, the tag of the lower marker moves below it.
     function getMarkerKeyWithTagBelow(): Marker['key'] | undefined {
         const [firstMarker, secondMarker] = markers;
         if (isNotDefined(firstMarker) || isNotDefined(secondMarker)) {
             return undefined;
         }
 
-        const tagsOverlap = Math.abs(getX(firstMarker.position) - getX(secondMarker.position))
+        const tagsOverlap = Math.abs(getX(firstMarker.index) - getX(secondMarker.index))
                 < (getTagWidth(firstMarker.label) + getTagWidth(secondMarker.label)) / 2
             && Math.abs(getY(firstMarker.value) - getY(secondMarker.value)) < tagHeight;
         if (!tagsOverlap) {
@@ -249,7 +217,7 @@ function NrwRiverDischargeChart(props: Props) {
                     className={styles.chart}
                     viewBox={`0 0 ${chartWidth} ${chartHeight}`}
                     role="img"
-                    aria-label={strings.nrwRiverDischargeChartLabel}
+                    aria-label={chartLabel}
                 >
                     <text
                         className={styles.axisTitle}
@@ -318,11 +286,11 @@ function NrwRiverDischargeChart(props: Props) {
                         cy={getY(firstEntry.median)}
                         r={pointRadius}
                     />
-                    {markers.map(({ key, position, value }) => (
+                    {markers.map(({ key, index, value }) => (
                         <circle
                             key={key}
                             className={styles.marker}
-                            cx={getX(position)}
+                            cx={getX(index)}
                             cy={getY(value)}
                             r={pointRadius}
                         />
@@ -352,14 +320,15 @@ function NrwRiverDischargeChart(props: Props) {
                 {markers.map(({
                     key,
                     label,
-                    position,
+                    index,
                     value,
                 }) => (
                     <span
                         key={key}
                         className={_cs(styles.tag, key === markerKeyWithTagBelow && styles.below)}
+                        aria-hidden
                         style={{
-                            left: `${(getX(position) / chartWidth) * 100}%`,
+                            left: `${(getX(index) / chartWidth) * 100}%`,
                             top: `${(getY(value) / chartHeight) * 100}%`,
                         }}
                     >

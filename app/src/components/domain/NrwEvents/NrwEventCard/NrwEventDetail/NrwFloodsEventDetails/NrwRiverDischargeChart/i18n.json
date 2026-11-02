@@ -2,6 +2,7 @@
     "namespace": "nrwEvents",
     "strings": {
         "nrwRiverDischargeChartLabel": "River discharge forecast chart",
+        "nrwRiverDischargeChartMarkerDescription": "{tag} on {date}",
         "nrwRiverDischargeChartUnit": "m³/s",
         "nrwRiverDischargeChartReturnPeriodAxis": "Return period",
         "nrwRiverDischargeChartReturnPeriod": "{returnPeriod} yr",

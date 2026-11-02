@@ -8,44 +8,44 @@ import {
     type NrwEvent,
     type NrwFloodsDetails,
     type NrwReturnPeriodThreshold,
+    type NrwSeverityThreshold,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
-// The configured severity thresholds. The API classifies every threshold by the highest
-// severity level it reaches, so higher return periods that the peak reaches get the class
-// of the level below them. The configured level of each class is its lowest threshold.
+function isNrwSeverityThreshold(
+    threshold: NrwReturnPeriodThreshold,
+): threshold is NrwSeverityThreshold {
+    return isDefined(threshold.severityClass);
+}
+
+// The API gives reached higher return periods the class of the level below them,
+// so the configured level of each severity class is its lowest threshold.
 function getNrwSeverityThresholds(
     returnPeriodThresholds: NrwReturnPeriodThreshold[],
-): NrwReturnPeriodThreshold[] {
+): NrwSeverityThreshold[] {
     const lowestBySeverityClass = new Map<
-        NonNullable<NrwReturnPeriodThreshold['severityClass']>,
-        NrwReturnPeriodThreshold
+        NrwSeverityThreshold['severityClass'],
+        NrwSeverityThreshold
     >();
 
-    returnPeriodThresholds.forEach((threshold) => {
-        const { severityClass } = threshold;
-        if (isNotDefined(severityClass)) {
-            return;
-        }
-
-        const lowest = lowestBySeverityClass.get(severityClass);
+    returnPeriodThresholds.filter(isNrwSeverityThreshold).forEach((threshold) => {
+        const lowest = lowestBySeverityClass.get(threshold.severityClass);
         if (isNotDefined(lowest) || threshold.returnPeriod < lowest.returnPeriod) {
-            lowestBySeverityClass.set(severityClass, threshold);
+            lowestBySeverityClass.set(threshold.severityClass, threshold);
         }
     });
 
     return [...lowestBySeverityClass.values()];
 }
 
-// The highest severity threshold reached by the forecasted (median) peak.
 // The probability of exceedance refers to this threshold.
 export function getNrwReachedSeverityThreshold(
     floodsDetails: NrwFloodsDetails,
-): NrwReturnPeriodThreshold | undefined {
+): NrwSeverityThreshold | undefined {
     const { returnPeriodThresholds, alertDetails: { peakValue } } = floodsDetails;
 
     return getNrwSeverityThresholds(returnPeriodThresholds)
         .filter((threshold) => threshold.thresholdValue <= peakValue)
-        .reduce<NrwReturnPeriodThreshold | undefined>(
+        .reduce<NrwSeverityThreshold | undefined>(
             (highest, threshold) => (
                 isDefined(highest) && highest.returnPeriod >= threshold.returnPeriod
                     ? highest
@@ -57,34 +57,80 @@ export function getNrwReachedSeverityThreshold(
 
 type NrwTimeSeries = NrwFloodsDetails['alertDetails']['timeSeries'];
 
-// The index of the time series entry (day) that contains the given date.
-// Undefined for a date outside of the time series.
+function getUtcDay(date: string): string {
+    return new Date(date).toISOString().slice(0, 10);
+}
+
+// Days are matched by UTC calendar date, like the date axis labels.
 export function getNrwTimeSeriesIndex(
     timeSeries: NrwTimeSeries,
     date: string,
 ): number | undefined {
-    const time = new Date(date).getTime();
+    const day = getUtcDay(date);
 
-    const index = timeSeries.findIndex(({ start, end }) => (
-        new Date(start).getTime() <= time && time < new Date(end).getTime()
-    ));
+    const index = timeSeries.findIndex(({ start }) => getUtcDay(start) === day);
 
     return index === -1 ? undefined : index;
 }
 
-// The index of the first time series entry (day) whose median reaches the given value.
-// Undefined when the median already reaches it on the first day, or never does.
 export function getNrwThresholdReachedIndex(
     timeSeries: NrwTimeSeries,
     value: number,
 ): number | undefined {
     const index = timeSeries.findIndex(({ median }) => median >= value);
 
-    return index > 0 ? index : undefined;
+    return index === -1 ? undefined : index;
 }
 
-// The alert class to colour a threshold with. A single threshold, which is not tied to
-// an alert class, and a threshold without severity class get none.
+export type NrwForecastMarker = {
+    index: number;
+    value: number;
+} & (
+    | { key: 'start' }
+    | { key: 'thresholdReached'; severityClass: NrwSeverityThreshold['severityClass'] }
+);
+
+// Only moments during the forecast are marked, not what is the case on its first day.
+export function getNrwForecastMarkers(
+    timeSeries: NrwTimeSeries,
+    startAt: string,
+    reachedSeverityThreshold: NrwSeverityThreshold | undefined,
+): NrwForecastMarker[] {
+    function getMedianDuringForecast(index: number | undefined): number | undefined {
+        return isDefined(index) && index > 0 ? timeSeries[index]?.median : undefined;
+    }
+
+    const markers: NrwForecastMarker[] = [];
+
+    const thresholdReachedIndex = isDefined(reachedSeverityThreshold)
+        ? getNrwThresholdReachedIndex(timeSeries, reachedSeverityThreshold.thresholdValue)
+        : undefined;
+
+    // The start gives way to the threshold reached on the same day.
+    const startIndex = getNrwTimeSeriesIndex(timeSeries, startAt);
+    const startValue = getMedianDuringForecast(startIndex);
+    if (isDefined(startIndex) && isDefined(startValue) && startIndex !== thresholdReachedIndex) {
+        markers.push({ key: 'start', index: startIndex, value: startValue });
+    }
+
+    const thresholdReachedValue = getMedianDuringForecast(thresholdReachedIndex);
+    if (
+        isDefined(reachedSeverityThreshold)
+        && isDefined(thresholdReachedIndex)
+        && isDefined(thresholdReachedValue)
+    ) {
+        markers.push({
+            key: 'thresholdReached',
+            index: thresholdReachedIndex,
+            value: thresholdReachedValue,
+            severityClass: reachedSeverityThreshold.severityClass,
+        });
+    }
+
+    return markers;
+}
+
+// A single threshold is not tied to an alert class.
 export function getNrwThresholdAlertClass(
     threshold: NrwReturnPeriodThreshold,
 ): NrwEvent['alertClass'] | undefined {

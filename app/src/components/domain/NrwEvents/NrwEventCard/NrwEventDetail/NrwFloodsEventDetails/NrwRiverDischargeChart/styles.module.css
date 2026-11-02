@@ -5,7 +5,7 @@
 
     .plot {
         position: relative;
-        padding: 0 var(--go-ui-spacing-lg);
+        margin: 0 var(--go-ui-spacing-lg);
     }
 
     .chart {

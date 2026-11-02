@@ -82,7 +82,7 @@ describe('NrwFloodsEventDetails', () => {
         // Assert: collapsed
         expect(toggle).toHaveTextContent('River discharge forecast:5 year return period');
         expect(toggle).toHaveAttribute('aria-expanded', 'false');
-        expect(screen.queryByRole('img', { name: 'River discharge forecast chart' })).toBeNull();
+        expect(screen.queryByRole('img', { name: /^River discharge forecast chart/ })).toBeNull();
 
         // Act
         fireEvent.click(toggle);
@@ -90,7 +90,9 @@ describe('NrwFloodsEventDetails', () => {
         // Assert: expanded
         expect(toggle).toHaveAttribute('aria-expanded', 'true');
         expect(screen.getByText('G1045 - Tendaho')).toBeInTheDocument();
-        expect(screen.getByRole('img', { name: 'River discharge forecast chart' })).toBeInTheDocument();
+        expect(screen.getByRole('img', {
+            name: /^River discharge forecast chart\. Start on .+\. Medium threshold on .+$/,
+        })).toBeInTheDocument();
         expect(screen.getByText('Start')).toBeInTheDocument();
         expect(screen.getByText('Medium threshold')).toBeInTheDocument();
         expect(screen.getByText('28.10')).toBeInTheDocument();

@@ -7,10 +7,12 @@ import {
 import {
     type NrwFloodsDetails,
     type NrwReturnPeriodThreshold,
+    type NrwSeverityThreshold,
 } from '#views/CountryProfileNationalRiskWatch/types';
 
 import {
     formatNrwDischarge,
+    getNrwForecastMarkers,
     getNrwReachedSeverityThreshold,
     getNrwThresholdAlertClass,
     getNrwThresholdReachedIndex,
@@ -144,6 +146,20 @@ describe('getNrwTimeSeriesIndex', () => {
         expect(getNrwTimeSeriesIndex(timeSeries, '2026-10-19T09:00:00.000Z')).toBeUndefined();
         expect(getNrwTimeSeriesIndex(timeSeries, '2026-10-23T09:00:00.000Z')).toBeUndefined();
     });
+
+    test('includes the last second of a UTC day that ends at 23:59:59', () => {
+        // Arrange: forecast days as the pipeline delivers them
+        const utcDays = [20, 21].map((day) => ({
+            start: `2026-10-${day}T00:00:00Z`,
+            end: `2026-10-${day}T23:59:59Z`,
+            median: 1000,
+            low: 900,
+            high: 1100,
+        }));
+
+        // Act & Assert
+        expect(getNrwTimeSeriesIndex(utcDays, '2026-10-20T23:59:59.500Z')).toBe(0);
+    });
 });
 
 describe('getNrwThresholdReachedIndex', () => {
@@ -154,12 +170,55 @@ describe('getNrwThresholdReachedIndex', () => {
         expect(getNrwThresholdReachedIndex(timeSeries, 1200)).toBe(1);
     });
 
-    test('is undefined when the median reaches the value on the first day', () => {
-        expect(getNrwThresholdReachedIndex(timeSeries, 1000)).toBeUndefined();
+    test('includes the first day', () => {
+        expect(getNrwThresholdReachedIndex(timeSeries, 1000)).toBe(0);
     });
 
     test('is undefined when the median never reaches the value', () => {
         expect(getNrwThresholdReachedIndex(timeSeries, 1500)).toBeUndefined();
+    });
+});
+
+describe('getNrwForecastMarkers', () => {
+    const { timeSeries } = createAlertDetails([1000, 1200, 1400, 1300], '');
+    const mediumThreshold: NrwSeverityThreshold = {
+        returnPeriod: 5,
+        thresholdValue: 1300,
+        severityClass: 'medium',
+    };
+    const thresholdReachedMarker = {
+        key: 'thresholdReached',
+        index: 2,
+        value: 1400,
+        severityClass: 'medium',
+    };
+
+    test('marks the start and the threshold reached during the forecast', () => {
+        expect(getNrwForecastMarkers(timeSeries, '2026-10-21T12:00:00.000Z', mediumThreshold))
+            .toEqual([{ key: 'start', index: 1, value: 1200 }, thresholdReachedMarker]);
+    });
+
+    test('only marks the threshold reached when the start falls on the same day', () => {
+        expect(getNrwForecastMarkers(timeSeries, '2026-10-22T12:00:00.000Z', mediumThreshold))
+            .toEqual([thresholdReachedMarker]);
+    });
+
+    test('leaves out what is already the case on the first day', () => {
+        // Arrange: the event starts and the median reaches the threshold on the first day
+        const lowThreshold: NrwSeverityThreshold = {
+            returnPeriod: 2,
+            thresholdValue: 1000,
+            severityClass: 'low',
+        };
+
+        // Act & Assert
+        expect(getNrwForecastMarkers(timeSeries, '2026-10-20T12:00:00.000Z', lowThreshold))
+            .toEqual([]);
+    });
+
+    test('leaves out a start outside the forecast and an unreached threshold', () => {
+        expect(getNrwForecastMarkers(timeSeries, '2026-10-10T12:00:00.000Z', undefined))
+            .toEqual([]);
     });
 });
 
@@ -180,10 +239,10 @@ describe('getNrwThresholdAlertClass', () => {
 
 describe('formatNrwDischarge', () => {
     test('rounds large values to whole numbers', () => {
-        expect(formatNrwDischarge(1346.2225)).toBe('1,346');
+        expect(formatNrwDischarge(1346.2225)).toBe((1346).toLocaleString());
     });
 
     test('keeps one decimal for small values', () => {
-        expect(formatNrwDischarge(2.17)).toBe('2.2');
+        expect(formatNrwDischarge(2.17)).toBe((2.2).toLocaleString());
     });
 });
