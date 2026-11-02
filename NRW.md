@@ -3,7 +3,7 @@
 A system that forecasts Early Warning alerts, disseminates notifications, and visualizes exposure information to support decision making, following the country advisory. It has:
 
 - A front-end, which is being developed in (a fork of) this repo. It can be rendered as standalone, or embedded within the IFRC GO navigation structure.
-- And `data pipelines` (producing forecasts) and `back-end services` (ingesting and processing forecast data via API and publishing this - alongside seed data - via APIs) which are developed in a [separate repo](https://github.com/rodekruis/IBF/blob/main).
+- And `data pipelines` (producing forecasts) and `back-end services` (ingesting and processing forecast data via API and publishing this - alongside seed data - via APIs) which are developed in a [separate repo](https://github.com/rodekruis/NRW/blob/main).
 
 ## Getting started
 
@@ -22,7 +22,7 @@ The broad steps are:
 
 ### Start
 
-1. Launch the [NRW backend services](https://github.com/rodekruis/IBF/blob/main/services) and populate the DB. See [README](https://github.com/rodekruis/IBF/blob/main/README.md)
+1. Launch the [NRW backend services](https://github.com/rodekruis/NRW/blob/main/services) and populate the DB. See [README](https://github.com/rodekruis/NRW/blob/main/README.md)
 2. Generate TypeScript types for talking to the various backends:
 3. Check out all submodules: `git submodule update --init --recursive`
 4. In `app/` run `pnpm initialize:type`
