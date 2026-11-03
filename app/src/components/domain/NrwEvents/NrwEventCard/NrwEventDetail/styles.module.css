@@ -48,6 +48,10 @@
 
     .back-button {
         margin-left: auto;
+
+        &.hidden {
+            visibility: hidden;
+        }
     }
 
     .timestamps {

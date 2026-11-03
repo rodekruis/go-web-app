@@ -67,6 +67,7 @@ function NrwEventDetail(props: Props) {
     const startAt = new Date(event.startAt);
     const isUpcoming = startAt.getTime() > now.getTime();
     const startDate = formatNrwEventDate(event.startAt);
+    const canDrillUp = isDefined(parentAdminArea) || isDefined(selectedAdminArea);
 
     function getRelativeStart() {
         const daysUntilStart = getNumberOfDays(now, startAt);
@@ -115,20 +116,24 @@ function NrwEventDetail(props: Props) {
                     <div className={styles.panelHeading}>
                         <FontAwesomeIcon className={styles.icon} icon={faMap} />
                         {strings.nrwEventDetailExposedAdminAreasHeading}
-                        {(isDefined(parentAdminArea) || isDefined(selectedAdminArea)) && (
-                            <Button
-                                className={styles.backButton}
-                                name={undefined}
-                                colorVariant="text"
-                                textSize="md"
-                                spacingOffset={-2}
-                                before={<FontAwesomeIcon icon={faChevronLeft} />}
-                                onClick={drillUp}
-                                data-nrw-capture-exclude
-                            >
-                                {strings.nrwEventDetailBackButton}
-                            </Button>
-                        )}
+                        {/* Always rendered, so the heading keeps its height when it shows */}
+                        <Button
+                            className={_cs(
+                                styles.backButton,
+                                !canDrillUp && styles.hidden,
+                            )}
+                            name={undefined}
+                            colorVariant="text"
+                            textSize="md"
+                            spacingOffset={-2}
+                            before={<FontAwesomeIcon icon={faChevronLeft} />}
+                            onClick={drillUp}
+                            disabled={!canDrillUp}
+                            aria-hidden={!canDrillUp}
+                            data-nrw-capture-exclude
+                        >
+                            {strings.nrwEventDetailBackButton}
+                        </Button>
                     </div>
                     <NrwExposedAdminAreas />
                 </div>
