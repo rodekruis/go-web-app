@@ -25,6 +25,7 @@ const events = [
         eventStatus: 'ongoing',
         forecastSources: [],
         exposedAdminAreas: [],
+        hazardTypeDetails: {},
     },
     {
         eventId: 2,
@@ -34,6 +35,7 @@ const events = [
         eventStatus: 'ended',
         forecastSources: [],
         exposedAdminAreas: [],
+        hazardTypeDetails: {},
     },
 ] as unknown as NrwEvent[];
 
