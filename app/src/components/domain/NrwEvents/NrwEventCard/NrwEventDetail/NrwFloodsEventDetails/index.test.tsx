@@ -113,22 +113,22 @@ describe('NrwFloodsEventDetails', () => {
         expect(screen.getByText('90% probability of exceeding the 10 year return period')).toBeInTheDocument();
     });
 
-    test('labels the dates by their UTC calendar day, as the pipeline forecast days are', () => {
-        // Arrange: forecast days from midnight UTC, which is the previous day west of UTC
-        const floodsDetails = createFloodsDetails({
-            timeSeries: createFloodsDetails().alertDetails.timeSeries.map((entry, index) => ({
-                ...entry,
-                start: new Date(Date.UTC(2026, 9, 26 + index)).toISOString(),
-                end: new Date(Date.UTC(2026, 9, 26 + index, 23, 59, 59)).toISOString(),
-            })),
-        });
+    test('labels the start day like the event start date in the card, in any time zone', () => {
+        // Arrange: forecast days from midnight UTC
+        const timeSeries = createFloodsDetails().alertDetails.timeSeries.map((entry, index) => ({
+            ...entry,
+            start: new Date(Date.UTC(2026, 9, 26 + index)).toISOString(),
+            end: new Date(Date.UTC(2026, 9, 26 + index, 23, 59, 59)).toISOString(),
+        }));
+        const startAt = timeSeries[2]?.start ?? '';
+        const startDate = new Date(startAt);
 
         // Act
-        fireEvent.click(renderForecast(floodsDetails));
+        fireEvent.click(renderForecast(createFloodsDetails({ timeSeries }), startAt));
 
-        // Assert
-        expect(screen.getByText('26.10')).toBeInTheDocument();
-        expect(screen.queryByText('25.10')).toBeNull();
+        // Assert: same local day as the card's start date
+        expect(screen.getByText(`${startDate.getDate()}.${startDate.getMonth() + 1}`))
+            .toHaveClass(/markedTick/);
     });
 
     test('marks a single threshold without an alert class', () => {

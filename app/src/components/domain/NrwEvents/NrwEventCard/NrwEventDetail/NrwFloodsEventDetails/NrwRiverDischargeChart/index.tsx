@@ -57,16 +57,15 @@ function getAxisLabelWidth(
     );
 }
 
-// Forecast days are UTC calendar days, so they are labelled in UTC.
 function formatTickDate(value: string): string {
     const date = new Date(value);
-    return `${date.getUTCDate()}.${date.getUTCMonth() + 1}`;
+    return `${date.getDate()}.${date.getMonth() + 1}`;
 }
 
 function formatMarkerDate(value: string): string {
     return new Date(value).toLocaleDateString(
         undefined,
-        { day: 'numeric', month: 'long', timeZone: 'UTC' },
+        { day: 'numeric', month: 'long' },
     );
 }
 
