@@ -10,6 +10,7 @@ export interface NrwEventsContextProps {
     pending: boolean;
     errored: boolean;
     selectedEvent: NrwEvent | undefined;
+    eventNotFound: boolean;
     hoveredEventId: NrwEvent['eventId'] | undefined;
     onEventSelect: NrwEventIdChangeHandler;
     onEventHoverChange: NrwEventIdChangeHandler;
@@ -20,6 +21,7 @@ const NrwEventsContext = createContext<NrwEventsContextProps>({
     pending: false,
     errored: false,
     selectedEvent: undefined,
+    eventNotFound: false,
     hoveredEventId: undefined,
     onEventSelect: () => {
         // eslint-disable-next-line no-console

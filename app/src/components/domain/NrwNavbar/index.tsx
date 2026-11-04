@@ -14,10 +14,11 @@ import styles from './styles.module.css';
 interface Props {
     className?: string;
     actions?: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 function NrwNavbar(props: Props) {
-    const { className, actions } = props;
+    const { className, actions, children } = props;
 
     const strings = useTranslation(i18n);
 
@@ -34,6 +35,7 @@ function NrwNavbar(props: Props) {
                             {strings.nrwNavbarTitle}
                         </Heading>
                     </div>
+                    {children}
                     <div className={styles.userActions}>
                         {actions}
                     </div>

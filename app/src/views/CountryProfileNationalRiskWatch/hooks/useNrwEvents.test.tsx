@@ -23,12 +23,12 @@ vi.mock('#utils/restRequest', () => ({ useNrwRequest: vi.fn() }));
 const floodEvent = { eventId: 9, hazardType: 'floods' } as NrwEvent;
 const droughtEvent = { eventId: 11, hazardType: 'drought' } as NrwEvent;
 
-function renderNrwEvents() {
+function renderNrwEvents(selectedEventId?: NrwEvent['eventId']) {
     const onSelectedEventIdChange = vi.fn();
 
     const { result } = renderHook(() => useNrwEvents({
         countries: ['ETH' as CountryCodeIso3],
-        selectedEventId: undefined,
+        selectedEventId,
         onSelectedEventIdChange,
     }));
 
@@ -81,5 +81,45 @@ describe('useNrwEvents', () => {
 
         // Assert
         expect(onSelectedEventIdChange.mock.calls).toEqual([[42, undefined]]);
+    });
+
+    describe('eventNotFound', () => {
+        test('is true when the selected event is not in the list', () => {
+            // Arrange
+            const { result } = renderNrwEvents(42);
+
+            // Act & Assert
+            expect(result.current.eventNotFound).toBe(true);
+        });
+
+        test('is false when no event is selected', () => {
+            // Arrange
+            const { result } = renderNrwEvents();
+
+            // Act & Assert
+            expect(result.current.eventNotFound).toBe(false);
+        });
+
+        test('is false when the selected event exists', () => {
+            // Arrange
+            const { result } = renderNrwEvents(9);
+
+            // Act & Assert
+            expect(result.current.eventNotFound).toBe(false);
+        });
+
+        test('is false while events are pending', () => {
+            // Arrange
+            vi.mocked(useNrwRequest).mockReturnValue({
+                response: undefined,
+                pending: true,
+                error: undefined,
+            } as unknown as ReturnType<typeof useNrwRequest>);
+
+            const { result } = renderNrwEvents(42);
+
+            // Act & Assert
+            expect(result.current.eventNotFound).toBe(false);
+        });
     });
 });
