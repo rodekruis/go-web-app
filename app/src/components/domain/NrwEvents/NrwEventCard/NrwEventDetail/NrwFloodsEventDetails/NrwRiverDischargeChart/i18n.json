@@ -14,7 +14,7 @@
         "nrwRiverDischargeChartSingleThresholdTag": "Threshold reached",
         "nrwRiverDischargeChartMedianLegend": "Median forecast",
         "nrwRiverDischargeChartRangeLegend": "Forecast range",
-        "nrwRiverDischargeChartRangeDescription": "The range of likely forecast scenarios.",
+        "nrwRiverDischargeChartRangeDescription": "The range of likely forecast scenarios",
         "nrwRiverDischargeChartProbability": "{probability}% probability of exceeding the {returnPeriod} year return period"
     }
 }

@@ -181,11 +181,17 @@ describe('getNrwThresholdReachedIndex', () => {
 
 describe('getNrwForecastMarkers', () => {
     const { timeSeries } = createAlertDetails([1000, 1200, 1400, 1300], '');
+    const lowThreshold: NrwSeverityThreshold = {
+        returnPeriod: 2,
+        thresholdValue: 1100,
+        severityClass: 'low',
+    };
     const mediumThreshold: NrwSeverityThreshold = {
         returnPeriod: 5,
         thresholdValue: 1300,
         severityClass: 'medium',
     };
+    const thresholds = [mediumThreshold, lowThreshold];
     const thresholdReachedMarker = {
         key: 'thresholdReached',
         index: 2,
@@ -194,30 +200,50 @@ describe('getNrwForecastMarkers', () => {
     };
 
     test('marks the start and the threshold reached during the forecast', () => {
-        expect(getNrwForecastMarkers(timeSeries, '2026-10-21T12:00:00.000Z', mediumThreshold))
-            .toEqual([{ key: 'start', index: 1, value: 1200 }, thresholdReachedMarker]);
+        expect(getNrwForecastMarkers(
+            timeSeries,
+            '2026-10-21T12:00:00.000Z',
+            mediumThreshold,
+            thresholds,
+        )).toEqual([
+            {
+                key: 'start',
+                index: 1,
+                value: 1200,
+                severityClass: 'low',
+            },
+            thresholdReachedMarker,
+        ]);
     });
 
     test('only marks the threshold reached when the start falls on the same day', () => {
-        expect(getNrwForecastMarkers(timeSeries, '2026-10-22T12:00:00.000Z', mediumThreshold))
-            .toEqual([thresholdReachedMarker]);
+        expect(getNrwForecastMarkers(
+            timeSeries,
+            '2026-10-22T12:00:00.000Z',
+            mediumThreshold,
+            thresholds,
+        )).toEqual([thresholdReachedMarker]);
     });
 
     test('leaves out what is already the case on the first day', () => {
         // Arrange: the event starts and the median reaches the threshold on the first day
-        const lowThreshold: NrwSeverityThreshold = {
+        const firstDayThreshold: NrwSeverityThreshold = {
             returnPeriod: 2,
             thresholdValue: 1000,
             severityClass: 'low',
         };
 
         // Act & Assert
-        expect(getNrwForecastMarkers(timeSeries, '2026-10-20T12:00:00.000Z', lowThreshold))
-            .toEqual([]);
+        expect(getNrwForecastMarkers(
+            timeSeries,
+            '2026-10-20T12:00:00.000Z',
+            firstDayThreshold,
+            [firstDayThreshold],
+        )).toEqual([]);
     });
 
     test('leaves out a start outside the forecast and an unreached threshold', () => {
-        expect(getNrwForecastMarkers(timeSeries, '2026-10-10T12:00:00.000Z', undefined))
+        expect(getNrwForecastMarkers(timeSeries, '2026-10-10T12:00:00.000Z', undefined, []))
             .toEqual([]);
     });
 });
