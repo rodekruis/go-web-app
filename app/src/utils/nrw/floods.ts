@@ -88,7 +88,12 @@ export type NrwForecastMarker = {
     value: number;
 } & (
     | { key: 'start'; severityClass: NrwSeverityThreshold['severityClass'] | undefined }
-    | { key: 'thresholdReached'; severityClass: NrwSeverityThreshold['severityClass'] }
+    | {
+        key: 'thresholdReached';
+        severityClass: NrwSeverityThreshold['severityClass'];
+        // The event also starts on this day.
+        withStart: boolean;
+    }
 );
 
 // The lowest configured severity threshold, at which an event starts.
@@ -124,7 +129,7 @@ export function getNrwForecastMarkers(
         ? getNrwThresholdReachedIndex(timeSeries, reachedSeverityThreshold.thresholdValue)
         : undefined;
 
-    // The start gives way to the threshold reached on the same day.
+    // On the same day, the start joins the threshold reached in one marker.
     const startIndex = getNrwTimeSeriesIndex(timeSeries, startAt);
     const startValue = getMedianDuringForecast(startIndex);
     if (isDefined(startIndex) && isDefined(startValue) && startIndex !== thresholdReachedIndex) {
@@ -147,6 +152,7 @@ export function getNrwForecastMarkers(
             index: thresholdReachedIndex,
             value: thresholdReachedValue,
             severityClass: reachedSeverityThreshold.severityClass,
+            withStart: startIndex === thresholdReachedIndex,
         });
     }
 

@@ -197,6 +197,7 @@ describe('getNrwForecastMarkers', () => {
         index: 2,
         value: 1400,
         severityClass: 'medium',
+        withStart: false,
     };
 
     test('marks the start and the threshold reached during the forecast', () => {
@@ -216,13 +217,13 @@ describe('getNrwForecastMarkers', () => {
         ]);
     });
 
-    test('only marks the threshold reached when the start falls on the same day', () => {
+    test('joins the start into the threshold reached on the same day', () => {
         expect(getNrwForecastMarkers(
             timeSeries,
             '2026-10-22T12:00:00.000Z',
             mediumThreshold,
             thresholds,
-        )).toEqual([thresholdReachedMarker]);
+        )).toEqual([{ ...thresholdReachedMarker, withStart: true }]);
     });
 
     test('leaves out what is already the case on the first day', () => {

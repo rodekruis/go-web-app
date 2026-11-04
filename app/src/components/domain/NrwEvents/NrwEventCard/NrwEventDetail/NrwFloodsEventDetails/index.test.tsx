@@ -145,7 +145,7 @@ describe('NrwFloodsEventDetails', () => {
         expect(screen.getByText('Threshold reached')).toBeInTheDocument();
     });
 
-    test('only marks the threshold reached when the event starts on that day', () => {
+    test('shows one tag for the start and the threshold reached on the same day', () => {
         // Arrange: the median reaches the 5 year threshold on 30 Oct
         const toggle = renderForecast(createFloodsDetails(), '2026-10-30T12:00:00.000Z');
 
@@ -153,8 +153,9 @@ describe('NrwFloodsEventDetails', () => {
         fireEvent.click(toggle);
 
         // Assert
-        expect(screen.getByText('Medium threshold')).toBeInTheDocument();
+        expect(screen.getByText('Start + Medium threshold')).toBeInTheDocument();
         expect(screen.queryByText('Start')).toBeNull();
+        expect(screen.queryByText('Medium threshold')).toBeNull();
     });
 
     test('does not mark a start on the first forecast day', () => {

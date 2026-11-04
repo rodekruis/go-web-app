@@ -143,12 +143,22 @@ function NrwRiverDischargeChart(props: Props) {
         startAt,
         reachedSeverityThreshold,
         returnPeriodThresholds,
-    ).map((marker) => ({
-        ...marker,
-        label: marker.key === 'start'
-            ? strings.nrwRiverDischargeChartStartTag
-            : thresholdTags[marker.severityClass],
-    }));
+    ).map((marker) => {
+        if (marker.key === 'start') {
+            return { ...marker, label: strings.nrwRiverDischargeChartStartTag };
+        }
+
+        const thresholdTag = thresholdTags[marker.severityClass];
+        return {
+            ...marker,
+            label: marker.withStart
+                ? resolveToString(
+                    strings.nrwRiverDischargeChartStartAndThresholdTag,
+                    { start: strings.nrwRiverDischargeChartStartTag, threshold: thresholdTag },
+                )
+                : thresholdTag,
+        };
+    });
 
     // The days on which a marker falls are emphasized on the date axis.
     const markedIndices = markers.map(({ index }) => index);
