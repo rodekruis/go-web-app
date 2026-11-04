@@ -25,6 +25,10 @@
         font-weight: var(--go-ui-font-weight-semibold);
     }
 
+    .date-tick {
+        font-size: 10px;
+    }
+
     .threshold {
         line {
             stroke: var(--nrw-color-alert);
@@ -70,6 +74,10 @@
         fill: var(--nrw-color-alert);
         stroke: var(--go-ui-color-white);
         stroke-width: 2;
+
+        &.single-threshold {
+            fill: var(--go-ui-color-gray-90);
+        }
     }
 
     .tag {
@@ -144,7 +152,14 @@
     }
 }
 
-.range-info-tooltip {
-    max-width: 16rem;
+/* Doubled to outrank GO's Popup styles, also when it opens upwards. */
+.range-info-tooltip.range-info-tooltip {
+    border-radius: var(--go-ui-border-radius-md);
+    box-shadow: var(--go-ui-box-shadow-md);
+    white-space: nowrap;
     font-size: var(--go-ui-font-size-sm);
+
+    > div {
+        padding: var(--go-ui-spacing-xs);
+    }
 }
