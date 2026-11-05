@@ -87,7 +87,7 @@ export function Component() {
         showUnsupportedCountriesNotice,
         showUnsupportedCountriesFullpageError,
     } = getUnsupportedCountryErrors({
-        standalone: nrwStandalone,
+        standalone: nrwStandalone ?? false,
         supportedCountries,
         urlCountries,
         rawCountriesFromUrlParams,
