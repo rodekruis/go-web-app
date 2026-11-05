@@ -6,7 +6,8 @@
     justify-content: center;
     background-color: var(--go-ui-color-background);
     gap: var(--go-ui-spacing-md);
-    min-height: 0;
+    padding: var(--go-ui-spacing-2xl);
+    min-height: 20rem;
 
     .icon-circle {
         display: flex;
