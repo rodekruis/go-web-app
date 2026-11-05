@@ -65,8 +65,8 @@ export function Component() {
     } = useNrwSearchParams();
 
     const nrwEventsContext = useNrwEvents({
-        // urlCountries _can_ contain invalid countries but we ignore that
-        // possibility because it introduces complexity.
+        // urlCountries _can_ contain invalid countries. useNrwEvents handles
+        // that gracefully, filtering them out here is more complex so we don't.
         countries: urlCountries,
         selectedEventId,
         onSelectedEventIdChange: handleSelectedEventIdChange,
