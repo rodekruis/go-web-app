@@ -82,28 +82,29 @@ export function getUnsupportedCountryErrors(
 
     // We only need to consider standalone mode now.
 
-    const numCountries = rawCountriesFromUrlParams.length;
+    const numRawCountriesFromUrl = rawCountriesFromUrlParams.length;
 
-    if (numCountries === 0) {
+    if (numRawCountriesFromUrl === 0) {
         return noErrors;
     }
 
-    const numSupportedCountries = rawCountriesFromUrlParams.filter(
-        // casting is necessary to use `includes`.
-        (code) => supportedCountries.includes(code as CountryCodeIso3),
+    const numInvalidCountries = rawCountriesFromUrlParams.filter(
+        (code) => !supportedCountries.includes(code as CountryCodeIso3),
     ).length;
-    const numInvalidCountries = numCountries - numSupportedCountries;
 
-    if (numCountries === 1) {
+    if (numInvalidCountries === 0) {
+        return noErrors;
+    }
+
+    if (numRawCountriesFromUrl === 1) {
         return {
-            showUnsupportedCountriesFullpageError: numInvalidCountries === 1,
+            showUnsupportedCountriesFullpageError: true,
             showUnsupportedCountriesNotice: false,
         };
     }
-
     return {
         showUnsupportedCountriesFullpageError: false,
-        showUnsupportedCountriesNotice: numInvalidCountries >= 1,
+        showUnsupportedCountriesNotice: true,
     };
 }
 
