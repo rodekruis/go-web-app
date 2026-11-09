@@ -46,11 +46,13 @@ export function getUnsupportedCountryErrors(
         standalone,
         supportedCountries,
         urlCountries,
+        routingCountryPending = false,
         rawCountriesFromUrlParams,
     }: {
         standalone: boolean,
         supportedCountries: CountryCodeIso3[] | undefined,
         urlCountries: CountryCodeIso3[] | undefined,
+        routingCountryPending?: boolean,
         rawCountriesFromUrlParams: string[],
     },
 ): UnsupportedCountryErrors {
@@ -59,9 +61,9 @@ export function getUnsupportedCountryErrors(
         showUnsupportedCountriesFullpageError: false,
     };
 
-    // While pending (or failed) `supportedCountries` is undefined, and we
-    // assume all countries are supported so no error flashes early.
-    if (isNotDefined(supportedCountries)) {
+    // While either of these are pending we can't determine whether there are
+    // errors so to prevent error flashes we return noErrors.
+    if (isNotDefined(supportedCountries) || routingCountryPending) {
         return noErrors;
     }
 
