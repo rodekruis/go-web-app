@@ -4,7 +4,37 @@ import {
     test,
 } from 'vitest';
 
-import { spreadNrwLabelPositions } from './chart';
+import {
+    getNrwTagCenter,
+    getNrwTagWidth,
+    spreadNrwLabelPositions,
+} from './chart';
+
+describe('getNrwTagCenter', () => {
+    const bounds = { min: 50, max: 300 };
+    const label = 'Start High threshold';
+    const halfWidth = getNrwTagWidth(label) / 2;
+
+    test('centres the tag on its marker when it fits', () => {
+        expect(getNrwTagCenter(175, label, bounds)).toBe(175);
+    });
+
+    test('moves the tag inwards to end at the right bound', () => {
+        // Arrange: a marker near the right edge, like a peak on the last forecast days
+        const center = getNrwTagCenter(290, label, bounds);
+
+        // Assert
+        expect(center + halfWidth).toBe(bounds.max);
+    });
+
+    test('moves the tag inwards to start at the left bound', () => {
+        // Arrange: a marker near the left edge, like a start on the second forecast day
+        const center = getNrwTagCenter(60, label, bounds);
+
+        // Assert
+        expect(center - halfWidth).toBe(bounds.min);
+    });
+});
 
 describe('spreadNrwLabelPositions', () => {
     const bounds = { min: 0, max: 100 };
@@ -42,5 +72,13 @@ describe('spreadNrwLabelPositions', () => {
         expect(spread[1]! - spread[0]!).toBeGreaterThanOrEqual(12);
         expect(spread[2]! - spread[1]!).toBeGreaterThanOrEqual(12);
         expect(spread[0]).toBeGreaterThanOrEqual(0);
+    });
+
+    test('keeps the bottom bound when a group is moved back onto the label above it', () => {
+        // Arrange: the bottom group moves up, onto the label above it
+        const spread = spreadNrwLabelPositions([78, 98, 100], 12, bounds);
+
+        // Assert: the label above moves up instead of the group passing the bottom bound
+        expect(spread).toEqual([76, 88, 100]);
     });
 });

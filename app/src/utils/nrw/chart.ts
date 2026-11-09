@@ -29,6 +29,16 @@ export function getNrwTagWidth(label: string | undefined): number {
     return (label?.length ?? 0) * tagCharacterWidth + tagPaddingWidth;
 }
 
+// A tag centres on its marker, but moves inwards to stay within the bounds.
+export function getNrwTagCenter(
+    markerPosition: number,
+    label: string | undefined,
+    bounds: { min: number; max: number },
+): number {
+    const halfWidth = getNrwTagWidth(label) / 2;
+    return Math.min(Math.max(markerPosition, bounds.min + halfWidth), bounds.max - halfWidth);
+}
+
 // Local time, like the other event card dates; the event start is always a forecast day start.
 export function formatNrwTickDate(value: string): string {
     const date = new Date(value);
@@ -100,9 +110,8 @@ export function spreadNrwLabelPositions(
     });
     [...sortedIndices].reverse().forEach((index, reverseRank) => {
         const below = sortedIndices[sortedIndices.length - reverseRank];
-        if (isDefined(below)) {
-            spread[index] = Math.min(spread[index] ?? 0, (spread[below] ?? 0) - gap);
-        }
+        const maximum = isDefined(below) ? (spread[below] ?? 0) - gap : bounds.max;
+        spread[index] = Math.min(spread[index] ?? 0, maximum);
     });
 
     return spread;

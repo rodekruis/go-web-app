@@ -153,7 +153,7 @@ describe('NrwFloodsEventDetails', () => {
         fireEvent.click(toggle);
 
         // Assert
-        expect(screen.getByText('Start + Medium threshold')).toBeInTheDocument();
+        expect(screen.getByText('Start Medium threshold')).toBeInTheDocument();
         expect(screen.queryByText('Start')).toBeNull();
         expect(screen.queryByText('Medium threshold')).toBeNull();
     });

@@ -13,6 +13,7 @@ import {
     formatNrwMarkerDate,
     formatNrwTickDate,
     getNrwAxisLabelWidth,
+    getNrwTagCenter,
     getNrwTagWidth,
     nrwAxisTitleCharacterWidth,
     nrwTagHeight,
@@ -176,6 +177,13 @@ function NrwRiverDischargeChart(props: Props) {
         }),
     ].join('. ');
 
+    // Tags centre above their marker, but stay within the plot, clear of the axis labels.
+    const getTagX = (index: number, label: string) => getNrwTagCenter(
+        getX(index),
+        label,
+        { min: plotLeft, max: plotRight },
+    );
+
     // When two tags overlap, the tag of the lower marker moves below it.
     function getMarkerKeyWithTagBelow(): Marker['key'] | undefined {
         const [firstMarker, secondMarker] = markers;
@@ -183,8 +191,10 @@ function NrwRiverDischargeChart(props: Props) {
             return undefined;
         }
 
-        const tagsOverlap = Math.abs(getX(firstMarker.index) - getX(secondMarker.index))
-                < (getNrwTagWidth(firstMarker.label) + getNrwTagWidth(secondMarker.label)) / 2
+        const tagsOverlap = Math.abs(
+            getTagX(firstMarker.index, firstMarker.label)
+            - getTagX(secondMarker.index, secondMarker.label),
+        ) < (getNrwTagWidth(firstMarker.label) + getNrwTagWidth(secondMarker.label)) / 2
             && Math.abs(getY(firstMarker.value) - getY(secondMarker.value)) < nrwTagHeight;
         if (!tagsOverlap) {
             return undefined;
@@ -331,7 +341,7 @@ function NrwRiverDischargeChart(props: Props) {
                         className={_cs(styles.tag, key === markerKeyWithTagBelow && styles.below)}
                         aria-hidden
                         style={{
-                            left: `${(getX(index) / chartWidth) * 100}%`,
+                            left: `${(getTagX(index, label) / chartWidth) * 100}%`,
                             top: `${(getY(value) / chartHeight) * 100}%`,
                         }}
                     >

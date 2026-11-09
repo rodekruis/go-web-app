@@ -29,6 +29,10 @@
         font-size: 10px;
     }
 
+    .single-threshold {
+        --nrw-color-alert: var(--go-ui-color-gray-90);
+    }
+
     .threshold {
         line {
             stroke: var(--nrw-color-alert);
@@ -41,10 +45,6 @@
             font-size: 10px;
             font-weight: var(--go-ui-font-weight-semibold);
             fill: var(--nrw-color-alert);
-        }
-
-        &.single-threshold {
-            --nrw-color-alert: var(--go-ui-color-gray-90);
         }
 
         &.without-severity {
@@ -74,10 +74,6 @@
         fill: var(--nrw-color-alert);
         stroke: var(--go-ui-color-white);
         stroke-width: 2;
-
-        &.single-threshold {
-            fill: var(--go-ui-color-gray-90);
-        }
     }
 
     .tag {
