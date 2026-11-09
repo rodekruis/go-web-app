@@ -37,6 +37,7 @@ function NrwNoticeBanner(props: Props) {
                     className={styles.closeButton}
                     name={undefined}
                     styleVariant="action"
+                    withoutPadding
                     onClick={() => setDismissed(true)}
                     title={strings.nrwNoticeDismiss}
                 >

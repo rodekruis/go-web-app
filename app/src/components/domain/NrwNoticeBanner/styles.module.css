@@ -10,9 +10,10 @@
         align-items: center;
         justify-content: space-between;
         inline-size: 32rem;
+        block-size: 2.5rem;
         border-radius: var(--go-ui-border-radius-md);
         background-color: var(--go-ui-color-negative);
-        padding: var(--go-ui-spacing-2xs) var(--go-ui-spacing-md);
+        padding: 0 var(--go-ui-spacing-md);
         line-height: var(--go-ui-line-height-md);
         color: var(--go-ui-color-text-on-dark);
         gap: var(--go-ui-spacing-sm);
@@ -32,7 +33,7 @@
 
     .close-button {
         color: inherit;
-        font-size: 1.25rem;
+        font-size: 2.5rem;
     }
 
     @media print {
