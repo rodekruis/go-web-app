@@ -353,6 +353,24 @@ describe('getUnsupportedCountryErrors', () => {
                 showUnsupportedCountriesFullpageError: false,
             });
         });
+
+        test('shows nothing while the routing country is pending', () => {
+            // Act
+            const result = getUnsupportedCountryErrors({
+                standalone: false,
+                supportedCountries,
+                urlCountries: undefined,
+                routingCountryPending: true,
+                rawCountriesFromUrlParams: [],
+            });
+
+            // Assert
+            expect(result).toEqual({
+                showUnsupportedCountriesNotice: false,
+                showUnsupportedCountriesFullpageError: false,
+            });
+        });
+
         test('shows the fullpage error for an unsupported routing country', () => {
             // Act
             const result = getUnsupportedCountryErrors({

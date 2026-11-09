@@ -54,6 +54,7 @@ export function Component() {
         latitudeFromUrlParams,
         longitudeFromUrlParams,
         urlCountries,
+        routingCountryPending,
         rawCountriesFromUrlParams,
         handleMapViewChange,
         selectedEventId,
@@ -90,6 +91,7 @@ export function Component() {
         standalone: nrwStandalone ?? false,
         supportedCountries,
         urlCountries,
+        routingCountryPending,
         rawCountriesFromUrlParams,
     });
 

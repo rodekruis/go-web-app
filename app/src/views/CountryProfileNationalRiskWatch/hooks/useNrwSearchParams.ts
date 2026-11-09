@@ -1,12 +1,19 @@
-import { useCallback } from 'react';
+import {
+    useCallback,
+    useContext,
+} from 'react';
 import {
     useNavigate,
     useParams,
     useSearchParams,
 } from 'react-router-dom';
-import { isDefined } from '@togglecorp/fujs';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 
 import { nrwStandalone } from '#config';
+import DomainContext from '#contexts/domain';
 import useCountry from '#hooks/domain/useCountry';
 import useUrlSearchState from '#hooks/useUrlSearchState';
 import supportedLayerNames from '#utils/nrw/layers';
@@ -187,6 +194,11 @@ function useNrwSearchParams() {
     const countriesFromRouting = isDefined(countryCodeFromRouting)
         ? [countryCodeFromRouting]
         : undefined;
+    // The routing country comes from the GO country list, which may still be
+    // loading. Without this the country would look unsupported in the meantime.
+    const { countries: domainCountries, countriesPending } = useContext(DomainContext);
+    const routingCountryPending = !nrwStandalone
+        && (countriesPending === true || isNotDefined(domainCountries));
 
     // The country codes specified in the URL.
     // Handle both standalone and embedded modes (from search params or from routing).
@@ -258,6 +270,7 @@ function useNrwSearchParams() {
         latitudeFromUrlParams,
         longitudeFromUrlParams,
         urlCountries,
+        routingCountryPending,
         rawCountriesFromUrlParams,
         handleMapViewChange,
         selectedEventId,
