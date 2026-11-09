@@ -13,8 +13,8 @@
         border-radius: var(--go-ui-border-radius-md);
         background-color: var(--go-ui-color-negative);
         padding: var(--go-ui-spacing-2xs) var(--go-ui-spacing-md);
+        line-height: var(--go-ui-line-height-md);
         color: var(--go-ui-color-text-on-dark);
-        font-weight: var(--go-ui-font-weight-medium);
         gap: var(--go-ui-spacing-sm);
     }
 
