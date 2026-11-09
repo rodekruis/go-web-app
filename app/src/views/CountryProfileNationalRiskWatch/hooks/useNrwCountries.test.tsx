@@ -9,11 +9,11 @@ import {
 
 import { useNrwRequest } from '#utils/restRequest';
 
-import useNrwSupportedCountries from './useNrwSupportedCountries';
+import useNrwCountries from './useNrwCountries';
 
 vi.mock('#utils/restRequest', () => ({ useNrwRequest: vi.fn() }));
 
-describe('useNrwSupportedCountries', () => {
+describe('useNrwCountries', () => {
     beforeEach(() => {
         vi.mocked(useNrwRequest).mockReset().mockReturnValue({
             response: [
@@ -27,7 +27,7 @@ describe('useNrwSupportedCountries', () => {
 
     test('returns the supported country codes', () => {
         // Arrange
-        const { result } = renderHook(() => useNrwSupportedCountries());
+        const { result } = renderHook(() => useNrwCountries());
 
         // Act & Assert
         expect(result.current.supportedCountries).toEqual(['MWI', 'ETH']);
@@ -43,7 +43,7 @@ describe('useNrwSupportedCountries', () => {
         } as unknown as ReturnType<typeof useNrwRequest>);
 
         // Act
-        const { result } = renderHook(() => useNrwSupportedCountries());
+        const { result } = renderHook(() => useNrwCountries());
 
         // Assert
         expect(result.current.supportedCountries).toBeUndefined();
