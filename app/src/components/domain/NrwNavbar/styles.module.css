@@ -3,7 +3,26 @@
 
     .page-container {
         .content {
+            display: flex;
+            position: relative;
+            align-items: center;
+            padding: var(--go-ui-spacing-md);
             max-width: none;
+            min-block-size: 4.75rem;
+        }
+    }
+
+    /* Overlaid so the navbar height doesn't change when the banner is dismissed */
+    .overlay {
+        display: flex;
+        position: absolute;
+        align-items: center;
+        justify-content: center;
+        inset: 0;
+        pointer-events: none;
+
+        > * {
+            pointer-events: auto;
         }
     }
 

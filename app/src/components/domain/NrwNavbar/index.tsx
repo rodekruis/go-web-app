@@ -28,18 +28,26 @@ function NrwNavbar(props: Props) {
                 className={styles.pageContainer}
                 contentClassName={styles.content}
             >
-                <ListView withWrap withSpaceBetweenContents>
+                <ListView
+                    withFullWidth
+                    withWrap
+                    withSpaceBetweenContents
+                >
                     <div className={styles.brand}>
                         <FontAwesomeIcon icon={faBars} className={styles.icon} />
                         <Heading level={3} className={styles.heading}>
                             {strings.nrwNavbarTitle}
                         </Heading>
                     </div>
-                    {children}
                     <div className={styles.userActions}>
                         {actions}
                     </div>
                 </ListView>
+                {children && (
+                    <div className={styles.overlay}>
+                        {children}
+                    </div>
+                )}
             </PageContainer>
         </nav>
     );
