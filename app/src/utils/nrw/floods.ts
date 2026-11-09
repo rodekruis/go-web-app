@@ -82,19 +82,42 @@ export function getNrwThresholdReachedIndex(
     return index === -1 ? undefined : index;
 }
 
+// The severity class is that of the threshold the marker relates to, for its colour.
 export type NrwForecastMarker = {
     index: number;
     value: number;
 } & (
-    | { key: 'start' }
-    | { key: 'thresholdReached'; severityClass: NrwSeverityThreshold['severityClass'] }
+    | { key: 'start'; severityClass: NrwSeverityThreshold['severityClass'] | undefined }
+    | {
+        key: 'thresholdReached';
+        severityClass: NrwSeverityThreshold['severityClass'];
+        // The event also starts on this day.
+        withStart: boolean;
+    }
 );
+
+// The lowest configured severity threshold, at which an event starts.
+function getNrwLowestSeverityThreshold(
+    returnPeriodThresholds: NrwReturnPeriodThreshold[],
+): NrwSeverityThreshold | undefined {
+    return getNrwSeverityThresholds(returnPeriodThresholds).reduce<
+        NrwSeverityThreshold | undefined
+    >(
+        (lowest, threshold) => (
+            isDefined(lowest) && lowest.returnPeriod <= threshold.returnPeriod
+                ? lowest
+                : threshold
+        ),
+        undefined,
+    );
+}
 
 // Only moments during the forecast are marked, not what is the case on its first day.
 export function getNrwForecastMarkers(
     timeSeries: NrwTimeSeries,
     startAt: string,
     reachedSeverityThreshold: NrwSeverityThreshold | undefined,
+    returnPeriodThresholds: NrwReturnPeriodThreshold[],
 ): NrwForecastMarker[] {
     function getMedianDuringForecast(index: number | undefined): number | undefined {
         return isDefined(index) && index > 0 ? timeSeries[index]?.median : undefined;
@@ -106,11 +129,16 @@ export function getNrwForecastMarkers(
         ? getNrwThresholdReachedIndex(timeSeries, reachedSeverityThreshold.thresholdValue)
         : undefined;
 
-    // The start gives way to the threshold reached on the same day.
+    // On the same day, the start joins the threshold reached in one marker.
     const startIndex = getNrwTimeSeriesIndex(timeSeries, startAt);
     const startValue = getMedianDuringForecast(startIndex);
     if (isDefined(startIndex) && isDefined(startValue) && startIndex !== thresholdReachedIndex) {
-        markers.push({ key: 'start', index: startIndex, value: startValue });
+        markers.push({
+            key: 'start',
+            index: startIndex,
+            value: startValue,
+            severityClass: getNrwLowestSeverityThreshold(returnPeriodThresholds)?.severityClass,
+        });
     }
 
     const thresholdReachedValue = getMedianDuringForecast(thresholdReachedIndex);
@@ -124,6 +152,7 @@ export function getNrwForecastMarkers(
             index: thresholdReachedIndex,
             value: thresholdReachedValue,
             severityClass: reachedSeverityThreshold.severityClass,
+            withStart: startIndex === thresholdReachedIndex,
         });
     }
 
