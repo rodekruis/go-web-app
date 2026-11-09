@@ -14,10 +14,11 @@ import styles from './styles.module.css';
 interface Props {
     className?: string;
     actions?: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 function NrwNavbar(props: Props) {
-    const { className, actions } = props;
+    const { className, actions, children } = props;
 
     const strings = useTranslation(i18n);
 
@@ -27,7 +28,11 @@ function NrwNavbar(props: Props) {
                 className={styles.pageContainer}
                 contentClassName={styles.content}
             >
-                <ListView withWrap withSpaceBetweenContents>
+                <ListView
+                    withFullWidth
+                    withWrap
+                    withSpaceBetweenContents
+                >
                     <div className={styles.brand}>
                         <FontAwesomeIcon icon={faBars} className={styles.icon} />
                         <Heading level={3} className={styles.heading}>
@@ -38,6 +43,11 @@ function NrwNavbar(props: Props) {
                         {actions}
                     </div>
                 </ListView>
+                {children && (
+                    <div className={styles.overlay}>
+                        {children}
+                    </div>
+                )}
             </PageContainer>
         </nav>
     );

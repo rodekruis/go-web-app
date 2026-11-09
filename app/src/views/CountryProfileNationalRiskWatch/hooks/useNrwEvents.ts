@@ -41,6 +41,10 @@ function useNrwEvents(props: {
 
     const selectedEvent = events?.find((event) => event.eventId === selectedEventId);
 
+    const eventNotFound = !eventsPending && isDefined(events) // Only show on successful load.
+        && isDefined(selectedEventId) // When an event is selected
+        && isNotDefined(selectedEvent); // ..but it cannot be found.
+
     const [hoveredEventId, setHoveredEventId] = useState<NrwEvent['eventId'] | undefined>();
 
     const handleEventChange = useCallback(
@@ -62,6 +66,7 @@ function useNrwEvents(props: {
             pending: eventsPending,
             errored: isDefined(error),
             selectedEvent,
+            eventNotFound,
             hoveredEventId,
             onEventSelect: handleEventChange,
             onEventHoverChange: setHoveredEventId,
@@ -71,6 +76,7 @@ function useNrwEvents(props: {
             eventsPending,
             error,
             selectedEvent,
+            eventNotFound,
             hoveredEventId,
             handleEventChange,
             setHoveredEventId,

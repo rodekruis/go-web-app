@@ -1,0 +1,42 @@
+.nrw-notice-banner {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    justify-content: center;
+    margin-inline: var(--go-ui-spacing-lg);
+
+    .content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        inline-size: 32rem;
+        block-size: 2.5rem;
+        border-radius: var(--go-ui-border-radius-md);
+        background-color: var(--go-ui-color-negative);
+        padding: 0 var(--go-ui-spacing-md);
+        line-height: var(--go-ui-line-height-md);
+        color: var(--go-ui-color-text-on-dark);
+        gap: var(--go-ui-spacing-sm);
+    }
+
+    .message {
+        display: flex;
+        align-items: center;
+        gap: var(--go-ui-spacing-sm);
+    }
+
+    .warning-icon {
+        inline-size: 1.25rem;
+        block-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .close-button {
+        color: inherit;
+        font-size: 2.5rem;
+    }
+
+    @media print {
+        display: none;
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "namespace": "nrwEventNotFoundBanner",
+    "strings": {
+        "nrwEventNotFoundMessage": "Event not found"
+    }
+}
