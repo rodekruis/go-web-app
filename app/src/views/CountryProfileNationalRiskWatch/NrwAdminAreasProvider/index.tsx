@@ -1,5 +1,6 @@
 import {
     type ReactNode,
+    useContext,
     useMemo,
     useState,
 } from 'react';
@@ -19,6 +20,7 @@ import {
 } from '#utils/nrw/events';
 import { useNrwRequest } from '#utils/restRequest';
 
+import NrwCountriesContext from '../contexts/NrwCountriesContext';
 import useNrwAdminAreas from '../hooks/useNrwAdminAreas';
 import {
     type AdminAreaProperties,
@@ -199,10 +201,7 @@ function NrwAdminAreasProvider(props: {
 
     const countryCodeIso3 = parseCountryCode(event?.countryCodeIso3);
 
-    const { response: countries } = useNrwRequest({
-        url: '/countries',
-        apiType: 'nrw',
-    });
+    const { countries } = useContext(NrwCountriesContext);
     const adminLevelLabels = countries
         ?.find((country) => country.countryCodeIso3 === countryCodeIso3)
         ?.adminLevelLabels;

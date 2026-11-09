@@ -25,16 +25,17 @@ import {
     nrwStandalone,
 } from '#config';
 
+import NrwCountriesContext from './contexts/NrwCountriesContext';
 import NrwEventsContext from './contexts/NrwEventsContext';
 import NrwScreenCaptureContext, {
     type NrwScreenCaptureContextProps,
     type NrwScreenCaptureHandler,
 } from './contexts/NrwScreenCaptureContext';
+import useNrwCountries from './hooks/useNrwCountries';
 import useNrwEvents from './hooks/useNrwEvents';
 import useNrwLayers from './hooks/useNrwLayers';
 import useNrwMapView from './hooks/useNrwMapView';
 import useNrwSearchParams from './hooks/useNrwSearchParams';
-import useNrwSupportedCountries from './hooks/useNrwSupportedCountries';
 import NrwAdminAreasProvider from './NrwAdminAreasProvider';
 import {
     getEventCountries,
@@ -82,7 +83,8 @@ export function Component() {
     const eventCountries = getEventCountries(events ?? []);
     const countries = urlCountries?.length ? urlCountries : eventCountries;
 
-    const { supportedCountries } = useNrwSupportedCountries();
+    const nrwCountriesContext = useNrwCountries();
+    const { supportedCountries } = nrwCountriesContext;
 
     const {
         showUnsupportedCountriesNotice,
@@ -186,37 +188,39 @@ export function Component() {
     );
 
     return (
-        <NrwEventsContext.Provider value={nrwEventsContext}>
-            <NrwScreenCaptureContext.Provider value={nrwScreenCaptureContext}>
-                {nrwStandalone ? (
-                    <div className={styles.countryProfileNrwStandalone}>
-                        <NrwNavbar actions={exportButton}>
-                            {showUnsupportedCountriesNotice && (
-                                <NrwNoticeBanner
-                                    key={rawCountriesFromUrlParams.join(',')}
-                                    message={strings.nrwUnsupportedCountriesMessage}
-                                />
-                            )}
-                            {eventNotFound && (
-                                <NrwEventNotFoundBanner key={selectedEventId} />
-                            )}
-                        </NrwNavbar>
-                        <Page
-                            className={styles.page}
-                            title={appTitle}
-                            mainSectionContainerClassName={styles.mainSectionContainer}
-                            mainSectionClassName={styles.mainSection}
-                        >
+        <NrwCountriesContext.Provider value={nrwCountriesContext}>
+            <NrwEventsContext.Provider value={nrwEventsContext}>
+                <NrwScreenCaptureContext.Provider value={nrwScreenCaptureContext}>
+                    {nrwStandalone ? (
+                        <div className={styles.countryProfileNrwStandalone}>
+                            <NrwNavbar actions={exportButton}>
+                                {showUnsupportedCountriesNotice && (
+                                    <NrwNoticeBanner
+                                        key={rawCountriesFromUrlParams.join(',')}
+                                        message={strings.nrwUnsupportedCountriesMessage}
+                                    />
+                                )}
+                                {eventNotFound && (
+                                    <NrwEventNotFoundBanner key={selectedEventId} />
+                                )}
+                            </NrwNavbar>
+                            <Page
+                                className={styles.page}
+                                title={appTitle}
+                                mainSectionContainerClassName={styles.mainSectionContainer}
+                                mainSectionClassName={styles.mainSection}
+                            >
+                                {content}
+                            </Page>
+                        </div>
+                    ) : (
+                        <Container heading={strings.nationalRiskWatchHeading}>
                             {content}
-                        </Page>
-                    </div>
-                ) : (
-                    <Container heading={strings.nationalRiskWatchHeading}>
-                        {content}
-                    </Container>
-                )}
-            </NrwScreenCaptureContext.Provider>
-        </NrwEventsContext.Provider>
+                        </Container>
+                    )}
+                </NrwScreenCaptureContext.Provider>
+            </NrwEventsContext.Provider>
+        </NrwCountriesContext.Provider>
     );
 }
 
