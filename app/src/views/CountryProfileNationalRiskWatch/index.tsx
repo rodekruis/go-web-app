@@ -66,10 +66,15 @@ export function Component() {
         handleUrlPlaceCodeChange,
     } = useNrwSearchParams();
 
+    const nrwCountriesContext = useNrwCountries();
+    const { supportedCountries } = nrwCountriesContext;
+
+    const supportedUrlCountries = isDefined(supportedCountries) && isDefined(urlCountries)
+        ? urlCountries.filter((country) => supportedCountries.includes(country))
+        : undefined;
+
     const nrwEventsContext = useNrwEvents({
-        // urlCountries _can_ contain invalid countries. useNrwEvents handles
-        // that gracefully, filtering them out here is more complex so we don't.
-        countries: urlCountries,
+        countries: supportedUrlCountries,
         selectedEventId,
         onSelectedEventIdChange: handleSelectedEventIdChange,
     });
@@ -82,9 +87,6 @@ export function Component() {
 
     const eventCountries = getEventCountries(events ?? []);
     const countries = urlCountries?.length ? urlCountries : eventCountries;
-
-    const nrwCountriesContext = useNrwCountries();
-    const { supportedCountries } = nrwCountriesContext;
 
     const {
         showUnsupportedCountriesNotice,
