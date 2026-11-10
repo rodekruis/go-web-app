@@ -1,11 +1,19 @@
-import { useCallback } from 'react';
+import {
+    useCallback,
+    useContext,
+} from 'react';
 import {
     useNavigate,
     useParams,
+    useSearchParams,
 } from 'react-router-dom';
-import { isDefined } from '@togglecorp/fujs';
+import {
+    isDefined,
+    isNotDefined,
+} from '@togglecorp/fujs';
 
 import { nrwStandalone } from '#config';
+import DomainContext from '#contexts/domain';
 import useCountry from '#hooks/domain/useCountry';
 import useUrlSearchState from '#hooks/useUrlSearchState';
 import supportedLayerNames from '#utils/nrw/layers';
@@ -89,6 +97,20 @@ function parseCountriesUrlParameter(value: UrlParameter) {
         .filter(isDefined);
 }
 
+// Raw country code tokens from the URL, normalized for comparison.
+// Includes codes that failed ISO_A3 validation, so callers can detect
+// unsupported values instead of silently dropping them.
+function parseRawCountriesUrlParameter(value: UrlParameter): string[] {
+    if (!value || value.trim() === '') {
+        return [];
+    }
+
+    return value
+        .split(',')
+        .map((token) => token.trim().toUpperCase())
+        .filter((token) => token !== '');
+}
+
 // Convert ISO_A3 country codes to a comma-separated string for the search params.
 // Returns undefined when there are no codes so that the search param is removed.
 function serializeCountriesUrlParameter(countryCodes: CountryCodeIso3[]) {
@@ -145,6 +167,8 @@ function useNrwSearchParams() {
         parseCountriesUrlParameter,
         serializeCountriesUrlParameter,
     );
+    const [searchParams] = useSearchParams();
+    const rawCountriesFromUrlParams = parseRawCountriesUrlParameter(searchParams.get('countries'));
     const [selectedEventId] = useUrlSearchState(
         'event',
         parseEventIdUrlParameter,
@@ -170,6 +194,11 @@ function useNrwSearchParams() {
     const countriesFromRouting = isDefined(countryCodeFromRouting)
         ? [countryCodeFromRouting]
         : undefined;
+    // The routing country comes from the GO country list, which may still be
+    // loading. Without this the country would look unsupported in the meantime.
+    const { countries: domainCountries, countriesPending } = useContext(DomainContext);
+    const routingCountryPending = !nrwStandalone
+        && (countriesPending === true || isNotDefined(domainCountries));
 
     // The country codes specified in the URL.
     // Handle both standalone and embedded modes (from search params or from routing).
@@ -241,6 +270,8 @@ function useNrwSearchParams() {
         latitudeFromUrlParams,
         longitudeFromUrlParams,
         urlCountries,
+        routingCountryPending,
+        rawCountriesFromUrlParams,
         handleMapViewChange,
         selectedEventId,
         handleSelectedEventIdChange,
