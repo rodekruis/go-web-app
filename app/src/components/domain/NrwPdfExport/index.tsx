@@ -30,10 +30,16 @@ interface Props {
     eventsPanelRef: RefObject<HTMLDivElement | null>;
     legendBannerRef: RefObject<HTMLDivElement | null>;
     countries: CountryCodeIso3[];
+    disabled?: boolean;
 }
 
 function NrwPdfExport(props: Props) {
-    const { eventsPanelRef, legendBannerRef, countries } = props;
+    const {
+        eventsPanelRef,
+        legendBannerRef,
+        countries,
+        disabled = false,
+    } = props;
 
     const strings = useTranslation(i18n);
     const { takeScreenCapture } = useContext(NrwScreenCaptureContext);
@@ -103,7 +109,7 @@ function NrwPdfExport(props: Props) {
             spacing="xl"
             styleVariant="outline"
             colorVariant="secondary"
-            disabled={isNotDefined(takeScreenCapture) || exporting}
+            disabled={disabled || isNotDefined(takeScreenCapture) || exporting}
             onClick={handleClick}
             before={<FontAwesomeIcon icon={faDownToLine} />}
         >

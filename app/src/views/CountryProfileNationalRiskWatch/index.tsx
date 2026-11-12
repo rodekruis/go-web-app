@@ -79,10 +79,7 @@ export function Component() {
         onSelectedEventIdChange: handleSelectedEventIdChange,
     });
     const {
-        events,
-        pending: eventsPending,
-        selectedEvent,
-        eventNotFound,
+        events, pending: eventsPending, selectedEvent, eventNotFound,
     } = nrwEventsContext;
 
     const eventCountries = getEventCountries(events ?? []);
@@ -111,11 +108,7 @@ export function Component() {
         countriesPending: isDefined(selectedEventId) && eventsPending,
     });
 
-    const {
-        availableLayers,
-        visibleLayers,
-        handleLayerToggle,
-    } = useNrwLayers({
+    const { availableLayers, visibleLayers, handleLayerToggle } = useNrwLayers({
         visibleLayers: layersFromUrlParams,
         onVisibleLayersChange: setLayersFromUrlParams,
         selectedEvent,
@@ -140,15 +133,15 @@ export function Component() {
     const eventsPanelRef = useRef<HTMLDivElement>(null);
     const legendBannerRef = useRef<HTMLDivElement>(null);
 
-    const exportButton = countries.length > 0
-        ? (
-            <NrwPdfExport
-                eventsPanelRef={eventsPanelRef}
-                legendBannerRef={legendBannerRef}
-                countries={countries}
-            />
-        )
-        : undefined;
+    // Standalone only: embedded mode has no navbar to put the button in.
+    const exportButton = nrwStandalone ? (
+        <NrwPdfExport
+            eventsPanelRef={eventsPanelRef}
+            legendBannerRef={legendBannerRef}
+            countries={countries}
+            disabled={showUnsupportedCountriesFullpageError}
+        />
+    ) : undefined;
 
     const content = showUnsupportedCountriesFullpageError ? (
         <NrwInvalidCountryError />
@@ -158,9 +151,7 @@ export function Component() {
             urlPlaceCode={placeCodeFromUrlParams}
             onUrlPlaceCodeChange={handleUrlPlaceCodeChange}
         >
-            {!nrwStandalone && eventNotFound && (
-                <NrwEventNotFoundBanner key={selectedEventId} />
-            )}
+            {!nrwStandalone && eventNotFound && <NrwEventNotFoundBanner key={selectedEventId} />}
             <div className={styles.mapAndLegend}>
                 <ListView
                     className={styles.mapGrid}
@@ -202,9 +193,7 @@ export function Component() {
                                         message={strings.nrwUnsupportedCountriesMessage}
                                     />
                                 )}
-                                {eventNotFound && (
-                                    <NrwEventNotFoundBanner key={selectedEventId} />
-                                )}
+                                {eventNotFound && <NrwEventNotFoundBanner key={selectedEventId} />}
                             </NrwNavbar>
                             <Page
                                 className={styles.page}
@@ -216,9 +205,7 @@ export function Component() {
                             </Page>
                         </div>
                     ) : (
-                        <Container heading={strings.nationalRiskWatchHeading}>
-                            {content}
-                        </Container>
+                        <Container heading={strings.nationalRiskWatchHeading}>{content}</Container>
                     )}
                 </NrwScreenCaptureContext.Provider>
             </NrwEventsContext.Provider>
