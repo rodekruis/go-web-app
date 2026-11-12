@@ -2,7 +2,6 @@ import { faBars } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     Heading,
-    ListView,
     PageContainer,
 } from '@ifrc-go/ui';
 import { useTranslation } from '@ifrc-go/ui/hooks';
@@ -28,26 +27,18 @@ function NrwNavbar(props: Props) {
                 className={styles.pageContainer}
                 contentClassName={styles.content}
             >
-                <ListView
-                    withFullWidth
-                    withWrap
-                    withSpaceBetweenContents
-                >
-                    <div className={styles.brand}>
-                        <FontAwesomeIcon icon={faBars} className={styles.icon} />
-                        <Heading level={3} className={styles.heading}>
-                            {strings.nrwNavbarTitle}
-                        </Heading>
-                    </div>
-                    <div className={styles.userActions}>
-                        {actions}
-                    </div>
-                </ListView>
-                {children && (
-                    <div className={styles.overlay}>
-                        {children}
-                    </div>
-                )}
+                <div className={styles.brand}>
+                    <FontAwesomeIcon icon={faBars} className={styles.icon} />
+                    <Heading level={3} className={styles.heading}>
+                        {strings.nrwNavbarTitle}
+                    </Heading>
+                </div>
+                <div className={styles.notices}>
+                    {children}
+                </div>
+                <div className={styles.userActions}>
+                    {actions}
+                </div>
             </PageContainer>
         </nav>
     );
