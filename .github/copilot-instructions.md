@@ -21,7 +21,6 @@ Directories that relate to NRW:
 - Use type annotations everywhere
 - Do not include "Enum" suffix for enum names (e.g., `HazardType`, not `HazardTypeEnum`)
 - Follow existing code patterns — prioritize readability over cleverness
-- Always include Azure DevOps reference `AB#XXXXX` in commit body
 - Do not delete the following when making other changes. The user will delete them later.
   - console.log statements
   - Debug comments that are not resolved
@@ -35,6 +34,7 @@ Directories that relate to NRW:
 ## Pull requests
 
 - Use the PR template in `.github/pull_request_template.md`, keeping its headings and order
-- Remove template sections that are not relevant (e.g. "Addresses", "Depends On"), rather than filling them with "none" or placeholders
+- Always include the Azure DevOps reference `AB#XXXXX` in the "Addresses" section of the PR description (e.g. `* Issue(s): AB#XXXXX`)
+- Remove other template sections that are not relevant (e.g. "Depends On"), rather than filling them with "none" or placeholders
 - Always keep the "NRW Portal preview-deployment" block: a GitHub action replaces it
 - Do not list validation that CI already covers (tests, `lint:js`, `lint:css`, `lint:translation`, `typecheck`, `build`); only note checks CI cannot prove, such as manual browser checks
