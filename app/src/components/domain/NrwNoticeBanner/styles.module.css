@@ -4,6 +4,7 @@
     flex-grow: 1;
     justify-content: center;
     margin-inline: var(--go-ui-spacing-lg);
+    min-inline-size: 0;
 
     .content {
         display: flex;

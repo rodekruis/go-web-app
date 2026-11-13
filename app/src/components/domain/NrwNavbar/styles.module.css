@@ -3,26 +3,15 @@
 
     .page-container {
         .content {
-            display: flex;
-            position: relative;
+            /* Equal side columns keep the notices centered in the navbar.
+               When space runs out the notices shrink, not the sides. */
+            display: grid;
+            grid-template-columns: minmax(max-content, 1fr) minmax(0, auto) minmax(max-content, 1fr);
             align-items: center;
             padding: var(--go-ui-spacing-md);
             max-width: none;
+            /* Fixed minimum so the height doesn't change when a notice is dismissed */
             min-block-size: 4.75rem;
-        }
-    }
-
-    /* Overlaid so the navbar height doesn't change when the banner is dismissed */
-    .overlay {
-        display: flex;
-        position: absolute;
-        align-items: center;
-        justify-content: center;
-        inset: 0;
-        pointer-events: none;
-
-        > * {
-            pointer-events: auto;
         }
     }
 
@@ -31,9 +20,17 @@
         gap: var(--go-ui-spacing-sm);
     }
 
+    .notices {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-inline-size: 0;
+    }
+
     .user-actions {
         display: flex;
         align-items: center;
+        justify-content: flex-end;
         gap: var(--go-ui-spacing-sm);
     }
 
