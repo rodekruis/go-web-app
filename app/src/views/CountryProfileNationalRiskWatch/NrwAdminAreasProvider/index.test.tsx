@@ -453,7 +453,7 @@ test('keeps the shown admin areas when the admin areas beside the drill path loa
     expect(adminAreas().adminAreas).toBe(shownAdminAreas);
 });
 
-test('shows the unexposed admin areas apart on the shown level, and as unselected beside the drill path', async () => {
+test('shows the unexposed admin areas apart, on the shown level and beside the drill path', async () => {
     // Arrange
     unselectedAdminAreasResponse = combined(counties, borSouthPayams, makuach);
 
@@ -470,9 +470,9 @@ test('shows the unexposed admin areas apart on the shown level, and as unselecte
     await drillDown(bor);
     await answer(combined(borBomas, unexposedAdminAreaBelow('SS03030103', jonglei, borSouth, bor)));
 
-    // Assert
-    expect(unselectedPlaceCodes()).toEqual(['SS0401', 'SS030302', 'SS030303']);
-    expect(unexposedPlaceCodes()).toEqual(['SS03030103']);
+    // Assert: beside the drill path, only the exposed admin areas show as unselected.
+    expect(unselectedPlaceCodes()).toEqual(['SS0401', 'SS030302']);
+    expect(unexposedPlaceCodes()).toEqual(['SS030303', 'SS03030103']);
     expect(adminAreas().isExposed('SS030302' as PlaceCode)).toBe(true);
     expect(adminAreas().isExposed('SS030303' as PlaceCode)).toBe(false);
 });
@@ -755,11 +755,11 @@ test('selects the admin area at the deepest level alone on the map, beside its s
     // Act
     await drillDown(langbar);
 
-    // Assert: its siblings, exposed or not, join the admin areas beside the drill path, while
-    // the shown level stays for the list and the legend.
+    // Assert: its exposed siblings join the admin areas beside the drill path and the unexposed
+    // one stays apart, while the shown level stays for the list and the legend.
     expect(selectedPlaceCodes()).toEqual(['SS03030101']);
-    expect(unselectedPlaceCodes()).toEqual(['SS0401', 'SS030302', 'SS03030102', 'SS03030103']);
-    expect(unexposedPlaceCodes()).toBeUndefined();
+    expect(unselectedPlaceCodes()).toEqual(['SS0401', 'SS030302', 'SS03030102']);
+    expect(unexposedPlaceCodes()).toEqual(['SS03030103']);
     expect(adminAreas().adminAreas).toBe(shownAdminAreas);
 
     // Act

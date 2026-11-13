@@ -351,17 +351,19 @@ function NrwAdminAreasProvider(props: {
                 ))
                 : [];
 
-            // Beside the drill path, exposed or not, all admin areas show as unselected: only
-            // on the shown level, without a selection, are the unexposed ones set apart.
+            // The unexposed admin areas are set apart on every level, also beside the drill
+            // path: they cannot be drilled into, unlike the exposed ones that show as unselected.
             return {
                 unselectedAdminAreas: getFeatureCollection(
-                    [...besidePathFeatures, ...siblingFeatures],
+                    [...besidePathFeatures, ...siblingFeatures].filter(
+                        (feature) => isExposed(allExposedPlaceCodes, feature),
+                    ),
                 ),
-                unexposedAdminAreas: isDefined(selectedFeature)
-                    ? undefined
-                    : getFeatureCollection(shownLevelFeatures.filter(
+                unexposedAdminAreas: getFeatureCollection(
+                    [...besidePathFeatures, ...shownLevelFeatures].filter(
                         (feature) => !isExposed(allExposedPlaceCodes, feature),
-                    )),
+                    ),
+                ),
             };
         },
         [

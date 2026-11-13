@@ -181,7 +181,8 @@ function NrwShapeLayer(props: {
         return null;
     }
 
-    // The grey admin areas can be of several levels, so the tooltip names the level.
+    // The admin areas beside the drill path can be of several levels, so the tooltip names
+    // the level.
     const adminLevelLabel = adminLevelLabels?.[hoveredAdminArea.adminLevel]?.singular;
 
     // An unexposed admin area, on the shown level or beside the drill path, has no exposed
