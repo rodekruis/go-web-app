@@ -13,7 +13,6 @@
 
     .heading-label {
         text-transform: uppercase;
-        color: var(--go-ui-color-text-black);
     }
 
     .event-count {
