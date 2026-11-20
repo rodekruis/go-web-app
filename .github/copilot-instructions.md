@@ -30,6 +30,7 @@ Directories that relate to NRW:
 - Do not change the following files. We copy them over directly from another repo to share enum and class types:
   - `app/src/utils/nrw/shared-dtos.ts`
   - `app/src/utils/nrw/shared-enums.ts`
+- New or edited frontend features must always be checked in all render contexts: standalone mode, embedded mode, and the PDF export
 
 ## Pull requests
 
