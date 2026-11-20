@@ -9,7 +9,7 @@
     overflow-wrap: anywhere;
 
     .separator-icon {
-        font-size: var(--go-ui-font-size-xs);
+        font-size: var(--go-ui-font-size-sm);
     }
 
     .crumb-button {

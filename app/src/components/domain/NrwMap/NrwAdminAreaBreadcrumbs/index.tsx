@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { faChevronRight } from '@fortawesome/pro-regular-svg-icons';
+import { faChevronRight } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     Breadcrumbs,
