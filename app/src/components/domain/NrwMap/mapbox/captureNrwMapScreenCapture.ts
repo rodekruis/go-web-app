@@ -3,6 +3,32 @@ import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 const screenCapturePixelRatio = 2;
 
+const svgStyleProperties = [
+    'fill',
+    'fill-opacity',
+    'stroke',
+    'stroke-width',
+    'stroke-dasharray',
+    'stroke-linecap',
+    'stroke-linejoin',
+    'stroke-opacity',
+    'opacity',
+    'font-family',
+    'font-size',
+    'font-weight',
+    'text-transform',
+];
+
+// html-to-image copies SVG children without their stylesheet styles, so inline them
+function inlineSvgChildStyles(element: HTMLElement) {
+    element.querySelectorAll<SVGElement>('svg *').forEach((svgChild) => {
+        const computedStyle = window.getComputedStyle(svgChild);
+        svgStyleProperties.forEach((property) => {
+            svgChild.style.setProperty(property, computedStyle.getPropertyValue(property));
+        });
+    });
+}
+
 // Render an off-screen clone of the html element and capture that as an image
 // This prevents issues like the browser window being too narrow to show the whole element
 export function captureElementClone(element: HTMLElement) {
@@ -31,6 +57,8 @@ export function captureElementClone(element: HTMLElement) {
         host.remove();
         throw new Error('Element to capture has no size');
     }
+
+    inlineSvgChildStyles(clone);
 
     return toPng(clone, {
         cacheBust: true,
