@@ -22,7 +22,7 @@
 
         &.event-status-chip {
             --color-background: var(--go-ui-color-gray-30);
-            --color-text: var(--go-ui-color-gray-90);
+            --color-text: var(--go-ui-color-text);
         }
 
         &.trigger-chip {

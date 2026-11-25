@@ -1,7 +1,7 @@
 .nrw-event-card {
     border-radius: var(--go-ui-border-radius-md);
     background-color: var(--go-ui-color-background);
-    color: var(--go-ui-color-gray-90);
+    color: var(--go-ui-color-text);
 
     &:not(.expanded):hover,
     &:not(.expanded).hovered {

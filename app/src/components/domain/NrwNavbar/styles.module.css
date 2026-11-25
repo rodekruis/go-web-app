@@ -35,7 +35,7 @@
     }
 
     .icon {
-        color: var(--go-ui-color-gray-90);
+        color: var(--go-ui-color-text);
         font-size: var(--go-ui-font-size-xl);
     }
 

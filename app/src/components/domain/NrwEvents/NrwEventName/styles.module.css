@@ -1,7 +1,7 @@
 .nrw-event-name {
     display: flex;
     gap: var(--go-ui-spacing-2xs);
-    color: var(--go-ui-color-gray-90);
+    color: var(--go-ui-color-text);
 
     .hazard-icon {
         flex-shrink: 0;

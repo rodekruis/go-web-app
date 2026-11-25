@@ -47,7 +47,9 @@ const captionFontPx = 12 as Px;
 const attributionPaddingPx = 4 as Px;
 const dividerLineWidthPx = 1 as Px;
 
-const textPrimary = '#323232'; // go-ui-color-gray-90
+// jsPDF needs opaque literal colours, so these mirror the GO UI variables,
+// with translucent ones flattened on white.
+const textPrimary = '#333333'; // go-ui-color-text
 const textSecondary = '#6f6f6f'; // go-ui-color-gray-70
 const divider = '#c6c6c6'; // go-ui-color-gray-40
 const attributionBackground = '#f2f2f2'; // approximates Mapbox's translucent white attribution box
