@@ -95,16 +95,6 @@ function captureNrwMap(
             throw new Error('Map container has no size');
         }
 
-        // WebKit does not reliably render the WebGL canvas through html-to-image
-        // (it is embedded as an image in an SVG foreignObject), so draw the map canvas
-        // directly and only use html-to-image for the HTML overlay on top of it.
-        const overlayDataUrl = await toPng(wrapper, {
-            cacheBust: true,
-            pixelRatio: screenCapturePixelRatio,
-            filter: (node) => !excluded.has(node),
-        });
-        const overlayImage = await loadImage(overlayDataUrl);
-
         const outputCanvas = document.createElement('canvas');
         outputCanvas.width = Math.round(width * screenCapturePixelRatio);
         outputCanvas.height = Math.round(height * screenCapturePixelRatio);
@@ -114,6 +104,10 @@ function captureNrwMap(
         }
         context.scale(screenCapturePixelRatio, screenCapturePixelRatio);
 
+        // WebKit does not reliably render the WebGL canvas through html-to-image
+        // (it is embedded as an image in an SVG foreignObject), so draw the map canvas
+        // directly and only use html-to-image for the HTML overlay on top of it.
+        // Draw the map before any await, so it matches the moment the export started.
         const mapCanvasRect = mapCanvas.getBoundingClientRect();
         context.drawImage(
             mapCanvas,
@@ -122,6 +116,13 @@ function captureNrwMap(
             mapCanvasRect.width,
             mapCanvasRect.height,
         );
+
+        const overlayDataUrl = await toPng(wrapper, {
+            cacheBust: true,
+            pixelRatio: screenCapturePixelRatio,
+            filter: (node) => !excluded.has(node),
+        });
+        const overlayImage = await loadImage(overlayDataUrl);
         context.drawImage(overlayImage, 0, 0, width, height);
 
         return { dataUrl: outputCanvas.toDataURL('image/png'), aspectRatio: width / height };
