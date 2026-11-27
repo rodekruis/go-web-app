@@ -44,6 +44,7 @@ export function Component() {
 
     // Child components should not have to know about URLs.
     const {
+        isHistoryNavigation,
         zoomFromUrlParams,
         latitudeFromUrlParams,
         longitudeFromUrlParams,
@@ -76,12 +77,13 @@ export function Component() {
         ? undefined // NrwShapeLayer will handle the map zoom when an event is selected.
         : countries;
 
-    const { mapView, preserveInitialView } = useNrwMapView({
+    const { mapView, preserveMapView } = useNrwMapView({
         urlZoom: zoomFromUrlParams,
         urlLatitude: latitudeFromUrlParams,
         urlLongitude: longitudeFromUrlParams,
         countries: mapCountries,
         countriesPending: isDefined(selectedEventId) && eventsPending,
+        isHistoryNavigation,
     });
 
     const {
@@ -142,7 +144,7 @@ export function Component() {
                 >
                     <NrwMap
                         mapView={mapView}
-                        preserveInitialView={preserveInitialView}
+                        preserveMapView={preserveMapView}
                         onMapViewChange={handleMapViewChange}
                         availableLayers={availableLayers}
                         visibleLayers={visibleLayers}

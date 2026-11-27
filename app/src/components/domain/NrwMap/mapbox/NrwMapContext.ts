@@ -3,7 +3,7 @@ import { type Map as MapboxMap } from 'mapbox-gl-v3';
 
 interface NrwMapContextProps {
     map: MapboxMap | undefined;
-    preserveInitialView?: boolean;
+    preserveMapView?: boolean;
 }
 
 const NrwMapContext = createContext<NrwMapContextProps>({ map: undefined });

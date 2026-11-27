@@ -52,7 +52,7 @@ const coordinateTolerance = 0.00001;
 
 function NrwMapContainer(props: {
     mapView: MapView;
-    preserveInitialView: boolean;
+    preserveMapView: boolean;
     onMapViewChange: MapViewChangeHandler;
     breadcrumbs?: React.ReactNode;
     layerPanel?: React.ReactNode;
@@ -62,7 +62,7 @@ function NrwMapContainer(props: {
 }) {
     const {
         mapView,
-        preserveInitialView,
+        preserveMapView,
         onMapViewChange,
         breadcrumbs,
         layerPanel,
@@ -200,8 +200,8 @@ function NrwMapContainer(props: {
     }, [mapboxMap, followCenterAndZoom, center.lng, center.lat, zoom]);
 
     const mapContext = useMemo(
-        () => ({ map: mapLoadComplete ? mapboxMap : undefined, preserveInitialView }),
-        [mapboxMap, mapLoadComplete, preserveInitialView],
+        () => ({ map: mapLoadComplete ? mapboxMap : undefined, preserveMapView }),
+        [mapboxMap, mapLoadComplete, preserveMapView],
     );
 
     // Expose the map capture capability once the map is ready, so that

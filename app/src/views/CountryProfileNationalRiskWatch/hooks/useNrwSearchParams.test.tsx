@@ -215,6 +215,49 @@ describe('useNrwSearchParams', () => {
             expect(rendered.searchParams.get('lon')).toBe('34.987654');
             expect(rendered.searchParams.get('layers')).toBe('clinics');
         });
+
+        test('does not navigate for the map view already in the url, e.g. after the back button', () => {
+            // Arrange
+            const rendered = renderNrwSearchParams('/?z=5.13&lat=-13.123457&lon=34.987654');
+            const locationKey = rendered.result.current.location.key;
+
+            // Act
+            act(() => {
+                rendered.result.current.params.handleMapViewChange(
+                    5.126 as Zoom,
+                    -13.1234567 as Latitude,
+                    34.98765449 as Longitude,
+                );
+            });
+
+            // Assert
+            expect(rendered.result.current.location.key).toBe(locationKey);
+            expect(rendered.result.current.params.isHistoryNavigation).toBe(true);
+        });
+
+        test('is a history navigation for a link and the back button, not for the user navigating', () => {
+            // Arrange
+            const rendered = renderNrwSearchParams('/?event=42');
+            expect(rendered.result.current.params.isHistoryNavigation).toBe(true);
+
+            // Act
+            act(() => {
+                rendered.result.current.params.handleUrlPlaceCodeChange('MW2' as PlaceCode);
+            });
+
+            // Assert
+            expect(rendered.result.current.params.isHistoryNavigation).toBe(false);
+
+            // Act
+            act(() => {
+                window.history.back();
+            });
+
+            // Assert
+            return vi.waitFor(() => {
+                expect(rendered.result.current.params.isHistoryNavigation).toBe(true);
+            });
+        });
     });
 
     describe('selected event', () => {

@@ -1,7 +1,4 @@
-import {
-    useMemo,
-    useState,
-} from 'react';
+import { useMemo } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
 import NrwLngLat from '../NrwLngLat';
@@ -34,6 +31,8 @@ function useNrwMapView(props: {
     urlLongitude: Longitude | null;
     countries: CountryCodeIso3[] | undefined;
     countriesPending: boolean;
+    // A link was opened, or the browser back or forward button was used.
+    isHistoryNavigation: boolean;
 }) {
     const {
         urlZoom,
@@ -41,13 +40,15 @@ function useNrwMapView(props: {
         urlLongitude,
         countries,
         countriesPending,
+        isHistoryNavigation,
     } = props;
 
     // Set from the longitude/latitude search params when they are present.
     const urlMapView = getMapView(urlLatitude, urlLongitude, urlZoom ?? defaultZoom);
 
-    const [mountedWithUrlMapView] = useState(isDefined(urlMapView));
-    const preserveInitialView = mountedWithUrlMapView && isDefined(urlMapView);
+    // Keep the map view of a link or of a history entry, also once admin areas load.
+    // After the user navigates, the map fits to the admin areas again.
+    const preserveMapView = isHistoryNavigation && isDefined(urlMapView);
 
     const { adminAreas } = useNrwAdminAreas({
         countries,
@@ -75,7 +76,7 @@ function useNrwMapView(props: {
         ? { ...urlMapView, followCenterAndZoom: true }
         : countryMapView ?? defaultMapView;
 
-    return { mapView, preserveInitialView };
+    return { mapView, preserveMapView };
 }
 
 export default useNrwMapView;

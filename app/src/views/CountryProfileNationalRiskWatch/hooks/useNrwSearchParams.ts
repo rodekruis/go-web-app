@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import {
     type NavigateOptions,
     useNavigate,
+    useNavigationType,
     useParams,
 } from 'react-router-dom';
 import { isDefined } from '@togglecorp/fujs';
@@ -140,6 +141,8 @@ const pushNavigateOptions: NavigateOptions = { replace: false };
 
 function useNrwSearchParams() {
     const navigate = useNavigate();
+    // A link was opened, or the browser back or forward button was used.
+    const isHistoryNavigation = useNavigationType() === 'POP';
     // Unlikely that these URL params will have invalid values, but let's be defensive.
     const [zoomFromUrlParams] = useUrlSearchState('z', parseZoomUrlParameter, () => '');
     const [latitudeFromUrlParams] = useUrlSearchState('lat', parseMapLatitudeParameter, () => '');
@@ -198,10 +201,23 @@ function useNrwSearchParams() {
     // entry per map view would let the back button land on a view that moves on again.
     const handleMapViewChange: MapViewChangeHandler = useCallback(
         (newZoom, newLatitude, newLongitude) => {
-            setSearchParams((params) => {
-                params.set('z', roundZoomForUrl(newZoom));
-                params.set('lat', roundLatitudeOrLongitudeForUrl(newLatitude));
-                params.set('lon', roundLatitudeOrLongitudeForUrl(newLongitude));
+            const zoom = roundZoomForUrl(newZoom);
+            const latitude = roundLatitudeOrLongitudeForUrl(newLatitude);
+            const longitude = roundLatitudeOrLongitudeForUrl(newLongitude);
+
+            // The map also ends a move on the map view of the url, e.g. after the back
+            // button. Not navigating then keeps it known as a history navigation.
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('z') === zoom
+                && params.get('lat') === latitude
+                && params.get('lon') === longitude) {
+                return;
+            }
+
+            setSearchParams((newParams) => {
+                newParams.set('z', zoom);
+                newParams.set('lat', latitude);
+                newParams.set('lon', longitude);
             }, true);
         },
         [setSearchParams],
@@ -245,6 +261,7 @@ function useNrwSearchParams() {
     );
 
     return {
+        isHistoryNavigation,
         zoomFromUrlParams,
         latitudeFromUrlParams,
         longitudeFromUrlParams,

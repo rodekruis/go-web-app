@@ -34,17 +34,20 @@ function FitBounds(props: { bounds: LongitudeLatitudeBounds | undefined }) {
     return null;
 }
 
-function setup(preserveInitialView: boolean) {
+function setup(preserveMapView: boolean) {
     const fake = createFakeMapboxMap();
     const { rerender } = render(
-        <NrwMapTestHost map={fake.map} preserveInitialView={preserveInitialView}>
+        <NrwMapTestHost map={fake.map} preserveMapView={preserveMapView}>
             <FitBounds bounds={countyBounds} />
         </NrwMapTestHost>,
     );
 
-    function rerenderBounds(bounds: LongitudeLatitudeBounds) {
+    function rerenderBounds(
+        bounds: LongitudeLatitudeBounds,
+        newPreserveMapView = preserveMapView,
+    ) {
         rerender(
-            <NrwMapTestHost map={fake.map} preserveInitialView={preserveInitialView}>
+            <NrwMapTestHost map={fake.map} preserveMapView={newPreserveMapView}>
                 <FitBounds bounds={bounds} />
             </NrwMapTestHost>,
         );
@@ -66,7 +69,7 @@ describe('useNrwMapFitBounds', () => {
         expect(fitCount()).toBe(1);
     });
 
-    test('keeps the map view of a link for the first bounds', () => {
+    test('keeps the preserved map view of a link or a history entry for the first bounds', () => {
         // Act
         const { fitCount } = setup(true);
 
@@ -74,12 +77,35 @@ describe('useNrwMapFitBounds', () => {
         expect(fitCount()).toBe(0);
     });
 
-    test('fits the map to later bounds, also after the map view of a link', () => {
+    test('keeps the preserved map view for later bounds, e.g. admin areas that load after the back button', () => {
         // Arrange
         const { rerenderBounds, fitCount } = setup(true);
 
         // Act
         rerenderBounds(payamBounds);
+
+        // Assert
+        expect(fitCount()).toBe(0);
+    });
+
+    test('does not fit when the map view is no longer preserved, as the user may have panned', () => {
+        // Arrange
+        const { rerenderBounds, fitCount } = setup(true);
+
+        // Act
+        rerenderBounds(countyBounds, false);
+
+        // Assert
+        expect(fitCount()).toBe(0);
+    });
+
+    test('fits the map to later bounds once the map view is no longer preserved', () => {
+        // Arrange
+        const { rerenderBounds, fitCount } = setup(true);
+        rerenderBounds(countyBounds, false);
+
+        // Act
+        rerenderBounds(payamBounds, false);
 
         // Assert
         expect(fitCount()).toBe(1);
