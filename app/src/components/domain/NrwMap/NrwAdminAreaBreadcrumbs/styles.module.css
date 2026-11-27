@@ -17,7 +17,7 @@
 
         &:hover:not(:disabled) {
             text-decoration: underline;
-            color: var(--go-ui-color-gray-90);
+            color: var(--go-ui-color-text);
         }
 
         &:disabled {

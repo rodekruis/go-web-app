@@ -13,7 +13,7 @@
     &.message {
         align-items: center;
         gap: var(--go-ui-spacing-2xs);
-        color: var(--go-ui-color-gray-90);
+        color: var(--go-ui-color-text);
     }
 
     .message-icon {

@@ -24,7 +24,7 @@
 .nrw-alert-low {
     --nrw-color-alert: var(--nrw-color-alert-low);
     --nrw-color-alert-tint: var(--nrw-color-alert-low-tint);
-    --nrw-color-alert-contrast: var(--go-ui-color-gray-90);
+    --nrw-color-alert-contrast: var(--go-ui-color-text);
 }
 
 .nrw-alert-medium {

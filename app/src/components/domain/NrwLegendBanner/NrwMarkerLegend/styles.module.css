@@ -13,7 +13,7 @@
 
     .label {
         white-space: nowrap;
-        color: var(--go-ui-color-gray-90);
+        color: var(--go-ui-color-text);
         font-weight: var(--go-ui-font-weight-medium);
     }
 
