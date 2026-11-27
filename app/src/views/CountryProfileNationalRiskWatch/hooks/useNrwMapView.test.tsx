@@ -34,6 +34,7 @@ function renderMapView(url: {
     zoom: number | null;
     latitude: number | null;
     longitude: number | null;
+    isHistoryNavigation?: boolean;
 }) {
     return renderHook(
         (props: typeof url) => useNrwMapView({
@@ -42,6 +43,7 @@ function renderMapView(url: {
             urlLongitude: props.longitude as Longitude | null,
             countries: ['ETH' as CountryCodeIso3],
             countriesPending: false,
+            isHistoryNavigation: props.isHistoryNavigation ?? true,
         }),
         { initialProps: url },
     );
@@ -64,8 +66,10 @@ describe('useNrwMapView', () => {
         expect(result.current.mapView).toEqual({
             center: new NrwLngLat(40.473302 as Longitude, 10.897015 as Latitude),
             zoom: 9.42,
+            // So the map moves to it on the browser back and forward buttons.
+            followCenterAndZoom: true,
         });
-        expect(result.current.preserveInitialView).toBe(true);
+        expect(result.current.preserveMapView).toBe(true);
     });
 
     test('fits the map to the countries without a map view in the url', () => {
@@ -77,17 +81,44 @@ describe('useNrwMapView', () => {
             new NrwLngLat(40 as Longitude, 10 as Latitude),
             new NrwLngLat(41 as Longitude, 11 as Latitude),
         ]);
-        expect(result.current.preserveInitialView).toBe(false);
+        expect(result.current.mapView.followCenterAndZoom).toBeUndefined();
+        expect(result.current.preserveMapView).toBe(false);
     });
 
-    test('keeps only the map view the page opened with', () => {
+    test('does not keep the map view that the map wrote to the url itself', () => {
         // Arrange: the url gets a map view after the page opened without one.
         const { result, rerender } = renderMapView({ zoom: null, latitude: null, longitude: null });
 
         // Act
-        rerender({ zoom: 9.42, latitude: 10.897015, longitude: 40.473302 });
+        rerender({
+            zoom: 9.42,
+            latitude: 10.897015,
+            longitude: 40.473302,
+            isHistoryNavigation: false,
+        });
 
         // Assert
-        expect(result.current.preserveInitialView).toBe(false);
+        expect(result.current.preserveMapView).toBe(false);
+    });
+
+    test('keeps the map view of a history entry, after the back or forward button', () => {
+        // Arrange
+        const { result, rerender } = renderMapView({
+            zoom: 9.42,
+            latitude: 10.897015,
+            longitude: 40.473302,
+            isHistoryNavigation: false,
+        });
+
+        // Act
+        rerender({
+            zoom: 7.1,
+            latitude: 10.5,
+            longitude: 40.5,
+            isHistoryNavigation: true,
+        });
+
+        // Assert
+        expect(result.current.preserveMapView).toBe(true);
     });
 });

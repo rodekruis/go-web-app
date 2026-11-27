@@ -11,29 +11,30 @@ import NrwMapContext from './NrwMapContext';
 
 const defaultPaddingPixels = 20;
 
-// Fit the map to the given bounds whenever they change
-// unless there is an overriding initial view (from the deeplink)
+// Fit the map to the given bounds whenever they change,
+// unless the map view is preserved (a link, or the browser back and forward buttons).
 function useNrwMapFitBounds(bounds: LongitudeLatitudeBounds | undefined) {
-    const { map, preserveInitialView } = useContext(NrwMapContext);
-    const isFirstCall = useRef(true);
+    const { map, preserveMapView } = useContext(NrwMapContext);
+
+    // Read from a ref, so that the map view no longer being preserved does not fit by itself:
+    // that happens when the user pans the map, too.
+    const preserveMapViewRef = useRef(preserveMapView);
+    useEffect(
+        () => {
+            preserveMapViewRef.current = preserveMapView;
+        },
+        [preserveMapView],
+    );
 
     useEffect(
         () => {
-            if (isNotDefined(map) || isNotDefined(bounds)) {
+            if (isNotDefined(map) || isNotDefined(bounds) || preserveMapViewRef.current) {
                 return;
-            }
-
-            // Only check for the deeplink override on first call of this effect
-            if (isFirstCall.current) {
-                isFirstCall.current = false;
-                if (preserveInitialView) {
-                    return;
-                }
             }
 
             map.fitBounds(bounds, { padding: defaultPaddingPixels });
         },
-        [map, bounds, preserveInitialView],
+        [map, bounds],
     );
 }
 

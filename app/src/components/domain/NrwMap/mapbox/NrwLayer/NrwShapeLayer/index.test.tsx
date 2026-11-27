@@ -89,13 +89,13 @@ const besidePath = createAdminAreas(
 const layerId = 'layer-SSD-exposedPopulation';
 const unselectedLayerId = `${layerId}-unselected`;
 
-function setup(preserveInitialView: boolean) {
+function setup(preserveMapView: boolean) {
     const fake = createFakeMapboxMap();
     let urlPlaceCode = 'SS0303' as PlaceCode;
 
     // A new element each time, so React renders it again.
     const renderLink = () => (
-        <NrwMapTestHost map={fake.map} preserveInitialView={preserveInitialView}>
+        <NrwMapTestHost map={fake.map} preserveMapView={preserveMapView}>
             <NrwAdminAreasProvider
                 event={event}
                 urlPlaceCode={urlPlaceCode}

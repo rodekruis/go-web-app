@@ -10,14 +10,14 @@ import { type FakeNrwMap } from './nrwAdminAreaTesting';
 // Mirrors NrwMapContainer, which provides the map only after its style has loaded.
 function NrwMapTestHost(props: {
     map: FakeNrwMap['map'];
-    preserveInitialView?: boolean;
+    preserveMapView?: boolean;
     children: ReactNode;
 }) {
-    const { map, preserveInitialView, children } = props;
+    const { map, preserveMapView, children } = props;
 
     const mapContext = useMemo(
-        () => ({ map, preserveInitialView }),
-        [map, preserveInitialView],
+        () => ({ map, preserveMapView }),
+        [map, preserveMapView],
     );
 
     return (

@@ -56,7 +56,7 @@ function parseCentroid(centroid: unknown): NrwLngLat | undefined {
 
 function NrwMap(props: {
     mapView: MapView;
-    preserveInitialView: boolean;
+    preserveMapView: boolean;
     onMapViewChange: MapViewChangeHandler;
     availableLayers: NrwLayerType[];
     visibleLayers: NrwLayerName[];
@@ -65,7 +65,7 @@ function NrwMap(props: {
 }) {
     const {
         mapView,
-        preserveInitialView,
+        preserveMapView,
         onMapViewChange,
         availableLayers,
         visibleLayers,
@@ -109,7 +109,7 @@ function NrwMap(props: {
     return (
         <NrwMapContainer
             mapView={mapView}
-            preserveInitialView={preserveInitialView}
+            preserveMapView={preserveMapView}
             onMapViewChange={onMapViewChange}
             breadcrumbs={breadcrumbs}
             layerPanel={layerPanel}

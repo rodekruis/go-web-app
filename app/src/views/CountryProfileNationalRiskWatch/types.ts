@@ -74,6 +74,8 @@ export type MapView = {
     zoom: Zoom;
     center: NrwLngLat;
     fitBounds?: LongitudeLatitudeBounds;
+    // Move the map to the center and zoom when they change, e.g. on the browser back button.
+    followCenterAndZoom?: boolean;
 };
 
 export type NrwEvent = NrwApiResponse<'/events'>[number];
@@ -94,6 +96,11 @@ export type NrwSeverityThreshold = NrwReturnPeriodThreshold & {
 export type NrwCountry = NrwApiResponse<'/countries'>[number];
 export type NrwAdminLevelLabels = NonNullable<NrwCountry['adminLevelLabels']>;
 export type PlaceCodeChangeHandler = (placeCode: PlaceCode | undefined) => void;
+// Corrections replace the url, so the back button does not return to an invalid admin area.
+export type UrlPlaceCodeChangeHandler = (
+    placeCode: PlaceCode | undefined,
+    options?: { replace: boolean },
+) => void;
 export type AdminAreaDrillDownHandler = (adminArea: AdminAreaProperties) => void;
 export type AdminLevelDrillHandler = (adminLevel: AdminLevel) => void;
 

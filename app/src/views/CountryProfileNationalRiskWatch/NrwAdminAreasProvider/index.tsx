@@ -28,7 +28,7 @@ import {
     type NrwAdminAreaFeatureCollection,
     type NrwEvent,
     type PlaceCode,
-    type PlaceCodeChangeHandler,
+    type UrlPlaceCodeChangeHandler,
 } from '../types';
 import {
     getAdminAreasOfRequestsQuery,
@@ -187,7 +187,7 @@ function getAdminAreasBesidePath(
 function NrwAdminAreasProvider(props: {
     event: NrwEvent | undefined;
     urlPlaceCode: PlaceCode | undefined;
-    onUrlPlaceCodeChange: PlaceCodeChangeHandler;
+    onUrlPlaceCodeChange: UrlPlaceCodeChangeHandler;
     children: ReactNode;
 }) {
     const {
@@ -258,7 +258,7 @@ function NrwAdminAreasProvider(props: {
             if (lookup) {
                 const [lookedUpPlaceCode] = request.placeCodes ?? [];
                 if (isNotDefined(adminArea) || isNotDefined(lookedUpPlaceCode)) {
-                    onUrlPlaceCodeChange(shownPlaceCode);
+                    onUrlPlaceCodeChange(shownPlaceCode, { replace: true });
                     return;
                 }
                 const parentPlaceCode = getNrwDrillPath(
@@ -292,11 +292,11 @@ function NrwAdminAreasProvider(props: {
                 }));
                 return;
             }
-            onUrlPlaceCodeChange(shownPlaceCode);
+            onUrlPlaceCodeChange(shownPlaceCode, { replace: true });
         },
         onFailure: () => {
             if (!skip) {
-                onUrlPlaceCodeChange(shownPlaceCode);
+                onUrlPlaceCodeChange(shownPlaceCode, { replace: true });
             }
         },
     });
