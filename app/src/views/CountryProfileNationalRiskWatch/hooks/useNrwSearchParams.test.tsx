@@ -418,7 +418,18 @@ describe('useNrwSearchParams', () => {
 
         test('standalone: has no countries when the url names none', () => {
             // Act & Assert
-            expect(renderNrwSearchParams('/').result.current.params.urlCountries).toEqual([]);
+            const { result } = renderNrwSearchParams('/');
+            expect(result.current.params.urlCountries).toEqual([]);
+            expect(result.current.params.rawCountriesFromUrlParams).toEqual([]);
+        });
+
+        test('standalone: retains malformed country codes separately from valid codes', () => {
+            // Act
+            const { result } = renderNrwSearchParams('/?countries=US');
+
+            // Assert
+            expect(result.current.params.urlCountries).toEqual([]);
+            expect(result.current.params.rawCountriesFromUrlParams).toEqual(['US']);
         });
 
         test('embedded: takes the country of the route once it is known', () => {
