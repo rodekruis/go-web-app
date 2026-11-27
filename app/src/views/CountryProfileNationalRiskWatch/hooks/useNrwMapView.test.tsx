@@ -64,6 +64,8 @@ describe('useNrwMapView', () => {
         expect(result.current.mapView).toEqual({
             center: new NrwLngLat(40.473302 as Longitude, 10.897015 as Latitude),
             zoom: 9.42,
+            // So the map moves to it on the browser back and forward buttons.
+            followCenterAndZoom: true,
         });
         expect(result.current.preserveInitialView).toBe(true);
     });
@@ -77,6 +79,7 @@ describe('useNrwMapView', () => {
             new NrwLngLat(40 as Longitude, 10 as Latitude),
             new NrwLngLat(41 as Longitude, 11 as Latitude),
         ]);
+        expect(result.current.mapView.followCenterAndZoom).toBeUndefined();
         expect(result.current.preserveInitialView).toBe(false);
     });
 

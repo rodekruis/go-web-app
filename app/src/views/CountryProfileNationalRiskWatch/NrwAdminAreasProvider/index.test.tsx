@@ -244,6 +244,8 @@ let latest: NrwAdminAreasContextProps | undefined;
 
 // Stands in for the url, which keeps the admin area of interest.
 let url: { placeCode: PlaceCode | undefined; set: PlaceCodeChangeHandler } | undefined;
+// Whether the provider last replaced the url, so that the back button skips it.
+let replacedUrl: boolean | undefined;
 
 function Probe() {
     const value = useContext(NrwAdminAreasContext);
@@ -267,7 +269,10 @@ function Harness(props: { event: NrwEvent | undefined }) {
         <NrwAdminAreasProvider
             event={renderedEvent}
             urlPlaceCode={placeCode}
-            onUrlPlaceCodeChange={setPlaceCode}
+            onUrlPlaceCodeChange={(newPlaceCode, options) => {
+                replacedUrl = options?.replace ?? false;
+                setPlaceCode(newPlaceCode);
+            }}
         >
             <Probe />
         </NrwAdminAreasProvider>
@@ -372,6 +377,7 @@ afterEach(async () => {
     container = undefined;
     latest = undefined;
     url = undefined;
+    replacedUrl = undefined;
     adminAreasRequest = undefined;
     unselectedAdminAreasRequest = undefined;
     unselectedAdminAreasResponse = undefined;
@@ -506,6 +512,7 @@ test('shows the next level only once its admin areas have loaded', async () => {
     await answer(counties);
     await drillDown(borSouth);
     expect(url?.placeCode).toBe('SS0303');
+    expect(replacedUrl).toBe(false);
     expect(requestedFilter()).toBe(
         "(countryCodeIso3='SSD') AND adminLevel=3 AND placeCodeLevel2='SS0303'",
     );
@@ -521,6 +528,7 @@ test('shows the next level only once its admin areas have loaded', async () => {
 
     await drillUp();
     expect(url?.placeCode).toBeUndefined();
+    expect(replacedUrl).toBe(false);
     expect(requestedFilter()).toContain('adminLevel=2 AND placeCode IN');
     expect(adminAreas().adminLevel).toBe(3);
 
@@ -534,6 +542,7 @@ test('stays on the shown level when the requested admin areas do not load', asyn
     await answer(undefined);
 
     expect(url?.placeCode).toBeUndefined();
+    expect(replacedUrl).toBe(true);
     expect(requestedFilter()).toContain('adminLevel=2 AND placeCode IN');
     expect(adminAreas().adminLevel).toBe(2);
     expect(adminAreas().canDrillDown(borSouth.placeCode)).toBe(true);
@@ -988,6 +997,7 @@ test('opens at the top for an admin area in the url that the server does not kno
 
     // Assert
     expect(url?.placeCode).toBeUndefined();
+    expect(replacedUrl).toBe(true);
     expect(requestedFilter()).toContain('adminLevel=2 AND placeCode IN');
 
     // Act: or the lookup does not load.

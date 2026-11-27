@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import {
+    type NavigateOptions,
     useNavigate,
     useParams,
 } from 'react-router-dom';
@@ -20,8 +21,8 @@ import {
     type NrwEventSelectHandler,
     type NrwLayerName,
     type PlaceCode,
-    type PlaceCodeChangeHandler,
     type UrlParameter,
+    type UrlPlaceCodeChangeHandler,
     type Zoom,
 } from '../types';
 import {
@@ -134,6 +135,9 @@ const roundZoomForUrl = (zoom: Zoom) => zoom.toFixed(2).toString();
 
 const roundLatitudeOrLongitudeForUrl = (value: Latitude | Longitude) => value.toFixed(6).toString();
 
+// A module-level constant keeps the setter identity stable across renders.
+const pushNavigateOptions: NavigateOptions = { replace: false };
+
 function useNrwSearchParams() {
     const navigate = useNavigate();
     // Unlikely that these URL params will have invalid values, but let's be defensive.
@@ -154,6 +158,7 @@ function useNrwSearchParams() {
         'layers',
         parseLayersUrlParameter,
         serializeLayersUrlParameter,
+        pushNavigateOptions,
     );
     const [placeCodeFromUrlParams] = useUrlSearchState(
         'placeCode',
@@ -179,22 +184,25 @@ function useNrwSearchParams() {
         : countriesFromRouting;
 
     // Update several params in one navigation, starting from the live URL.
+    // User navigation adds a history entry, so the browser back button undoes it.
     const setSearchParams = useCallback(
-        (update: (params: URLSearchParams) => void) => {
+        (update: (params: URLSearchParams) => void, replace: boolean) => {
             const params = new URLSearchParams(window.location.search);
             update(params);
-            navigate(`?${params}`, { replace: true });
+            navigate(`?${params}`, { replace });
         },
         [navigate],
     );
 
+    // Every "moveend" writes the map view, also after a fit-bounds, so a history
+    // entry per map view would let the back button land on a view that moves on again.
     const handleMapViewChange: MapViewChangeHandler = useCallback(
         (newZoom, newLatitude, newLongitude) => {
             setSearchParams((params) => {
                 params.set('z', roundZoomForUrl(newZoom));
                 params.set('lat', roundLatitudeOrLongitudeForUrl(newLatitude));
                 params.set('lon', roundLatitudeOrLongitudeForUrl(newLongitude));
-            });
+            }, true);
         },
         [setSearchParams],
     );
@@ -217,21 +225,21 @@ function useNrwSearchParams() {
                 params.delete('lat');
                 params.delete('lon');
                 params.delete('placeCode');
-            });
+            }, false);
         },
         [selectedEventId, setSearchParams],
     );
 
     // The drill starts again at the top when the admin area is cleared.
-    const handleUrlPlaceCodeChange: PlaceCodeChangeHandler = useCallback(
-        (placeCode) => {
+    const handleUrlPlaceCodeChange: UrlPlaceCodeChangeHandler = useCallback(
+        (placeCode, options) => {
             setSearchParams((params) => {
                 if (isDefined(placeCode)) {
                     params.set('placeCode', placeCode);
                 } else {
                     params.delete('placeCode');
                 }
-            });
+            }, options?.replace ?? false);
         },
         [setSearchParams],
     );

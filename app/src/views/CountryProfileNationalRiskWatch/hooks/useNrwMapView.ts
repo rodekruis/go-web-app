@@ -69,7 +69,11 @@ function useNrwMapView(props: {
     );
 
     // MapView preference: URL > countries > default.
-    const mapView: MapView = urlMapView ?? countryMapView ?? defaultMapView;
+    // Only the map view of the URL is followed: the default view would move the
+    // map away while the bounds of a selected event are pending.
+    const mapView: MapView = isDefined(urlMapView)
+        ? { ...urlMapView, followCenterAndZoom: true }
+        : countryMapView ?? defaultMapView;
 
     return { mapView, preserveInitialView };
 }

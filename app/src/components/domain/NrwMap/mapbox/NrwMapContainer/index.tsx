@@ -46,6 +46,9 @@ import styles from './styles.module.css';
 // Get this from Mapbox Studio > Styles > Style url
 const nrwMapboxStyleUrl = 'mapbox://styles/510global/cmrls7huy001501sde6mdhzlk';
 const paddingPixels = 20;
+// Wider than the rounding of the map view that the map writes.
+const zoomTolerance = 0.01;
+const coordinateTolerance = 0.00001;
 
 function NrwMapContainer(props: {
     mapView: MapView;
@@ -68,7 +71,12 @@ function NrwMapContainer(props: {
         children,
     } = props;
 
-    const { zoom, center, fitBounds } = mapView;
+    const {
+        zoom,
+        center,
+        fitBounds,
+        followCenterAndZoom,
+    } = mapView;
 
     const [southWest, northEast] = fitBounds ?? [];
 
@@ -171,6 +179,25 @@ function NrwMapContainer(props: {
         mapboxMap.fitBounds(fitBounds, { padding: paddingPixels });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mapboxMap, southWest?.lng, southWest?.lat, northEast?.lng, northEast?.lat]);
+
+    // The map view changes after the map is created on the browser back and forward
+    // buttons. The map writes its own view too, rounded, so then it is already there.
+    useEffect(() => {
+        if (isNotDefined(mapboxMap) || !followCenterAndZoom) {
+            return;
+        }
+
+        const mapCenter = mapboxMap.getCenter();
+        const isAtView = Math.abs(mapboxMap.getZoom() - zoom) < zoomTolerance
+            && Math.abs(mapCenter.lat - center.lat) < coordinateTolerance
+            && Math.abs(mapCenter.lng - center.lng) < coordinateTolerance;
+        if (isAtView) {
+            return;
+        }
+
+        mapboxMap.jumpTo({ center, zoom });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mapboxMap, followCenterAndZoom, center.lng, center.lat, zoom]);
 
     const mapContext = useMemo(
         () => ({ map: mapLoadComplete ? mapboxMap : undefined, preserveInitialView }),
