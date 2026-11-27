@@ -68,6 +68,15 @@ export function captureElementClone(element: HTMLElement) {
         .finally(() => host.remove());
 }
 
+function loadImage(source: string) {
+    return new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error('Failed to load captured image'));
+        image.src = source;
+    });
+}
+
 // Capture handler to fetch a filtered view of the NRW map,
 // with an exclusion list of elements to ignore
 function captureNrwMap(
@@ -75,20 +84,48 @@ function captureNrwMap(
     wrapper: HTMLElement,
     excludedElements: (HTMLElement | null)[],
 ) {
-    return () => {
+    return async () => {
+        const mapCanvas = map.getCanvas();
         const mapboxControls = map.getContainer().querySelector('.mapboxgl-control-container');
-        const excluded = new Set<Node | null>([mapboxControls, ...excludedElements]);
+        const excluded = new Set<Node | null>([mapCanvas, mapboxControls, ...excludedElements]);
 
-        const { width, height } = wrapper.getBoundingClientRect();
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const { width, height } = wrapperRect;
         if (width <= 0 || height <= 0) {
             throw new Error('Map container has no size');
         }
 
-        return toPng(wrapper, {
+        const outputCanvas = document.createElement('canvas');
+        outputCanvas.width = Math.round(width * screenCapturePixelRatio);
+        outputCanvas.height = Math.round(height * screenCapturePixelRatio);
+        const context = outputCanvas.getContext('2d');
+        if (!context) {
+            throw new Error('Canvas 2D context not available');
+        }
+        context.scale(screenCapturePixelRatio, screenCapturePixelRatio);
+
+        // WebKit does not reliably render the WebGL canvas through html-to-image
+        // (it is embedded as an image in an SVG foreignObject), so draw the map canvas
+        // directly and only use html-to-image for the HTML overlay on top of it.
+        // Draw the map before any await, so it matches the moment the export started.
+        const mapCanvasRect = mapCanvas.getBoundingClientRect();
+        context.drawImage(
+            mapCanvas,
+            mapCanvasRect.left - wrapperRect.left,
+            mapCanvasRect.top - wrapperRect.top,
+            mapCanvasRect.width,
+            mapCanvasRect.height,
+        );
+
+        const overlayDataUrl = await toPng(wrapper, {
             cacheBust: true,
             pixelRatio: screenCapturePixelRatio,
             filter: (node) => !excluded.has(node),
-        }).then((dataUrl) => ({ dataUrl, aspectRatio: width / height }));
+        });
+        const overlayImage = await loadImage(overlayDataUrl);
+        context.drawImage(overlayImage, 0, 0, width, height);
+
+        return { dataUrl: outputCanvas.toDataURL('image/png'), aspectRatio: width / height };
     };
 }
 
